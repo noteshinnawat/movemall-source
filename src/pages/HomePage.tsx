@@ -376,6 +376,97 @@ export function HomePage({ onAddToCart, isWishlisted, onToggleWishlist }: HomePa
         </div>
       </section>
 
+      {/* ── Compact Flash Sale Showcase (Moved to Top Zone) ── */}
+      <section className="section container" aria-labelledby="flash-sale-heading">
+        <div className="home-flash-container">
+          {/* Flash Sale Header */}
+          <div className="home-flash-header">
+            <div className="home-flash-title-group">
+              <div className="home-flash-badge">
+                <Zap size={15} fill="#FFFFFF" />
+                <span>FLASH SALE</span>
+              </div>
+              <h2 id="flash-sale-heading" className="home-flash-heading">
+                ดีลเดือดจำกัดเวลา ลดสูงสุด 70%
+              </h2>
+              {/* Countdown Timer */}
+              <div className="home-flash-timer-wrap">
+                <span className="home-flash-timer-label">⏰ ดีลจบใน:</span>
+                <div className="home-flash-timer-digits">
+                  <span className="home-flash-digit">{String(h).padStart(2, '0')}</span>
+                  <span className="home-flash-colon">:</span>
+                  <span className="home-flash-digit">{String(m).padStart(2, '0')}</span>
+                  <span className="home-flash-colon">:</span>
+                  <span className="home-flash-digit home-flash-digit--sec">{String(s).padStart(2, '0')}</span>
+                </div>
+              </div>
+
+              <div className="home-flash-live-pulse">
+                <span className="home-flash-pulse-dot" />
+                <span>กำลังสั่งซื้อสด 18 คน</span>
+              </div>
+            </div>
+
+            <Link to="/flash-sale" className="home-flash-view-all">
+              ดูดีล Flash Sale ทั้งหมด <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          {/* Flash Sale Products Horizontal Grid */}
+          <div className="home-flash-grid">
+            {products.slice(0, 6).map((product, idx) => {
+              const discountPct = [55, 60, 48, 70, 65, 50][idx % 6];
+              const flashPrice = Math.round(product.price * (1 - discountPct / 100));
+              const soldPct = [88, 94, 76, 96, 82, 91][idx % 6];
+
+              return (
+                <div key={product.id} className="home-flash-card">
+                  {/* Image & Discount Badge */}
+                  <Link to={`/product/${product.id}`} className="home-flash-img-wrap">
+                    <img src={product.images[0]} alt={product.name} className="home-flash-img" />
+                    <span className="home-flash-tag">-{discountPct}%</span>
+                    <span className="home-flash-guarantee">👑 ถูกสุด 30 วัน</span>
+                  </Link>
+
+                  {/* Info */}
+                  <div className="home-flash-info">
+                    <Link to={`/product/${product.id}`} className="home-flash-name">
+                      {product.name}
+                    </Link>
+
+                    <div className="home-flash-price-row">
+                      <span className="home-flash-price">฿{flashPrice.toLocaleString()}</span>
+                      <span className="home-flash-orig">฿{product.price.toLocaleString()}</span>
+                    </div>
+
+                    {/* Fire Progress Bar */}
+                    <div className="home-flash-progress-wrap">
+                      <div className="home-flash-progress-bar">
+                        <div
+                          className="home-flash-progress-fill"
+                          style={{ width: `${soldPct}%` }}
+                        />
+                      </div>
+                      <span className="home-flash-progress-text">
+                        🔥 ขายแล้ว {soldPct}% {soldPct > 90 && '• ด่วน!'}
+                      </span>
+                    </div>
+
+                    {/* Add to Cart Quick Action */}
+                    <button
+                      className="home-flash-buy-btn"
+                      onClick={() => onAddToCart({ ...product, price: flashPrice })}
+                    >
+                      <Zap size={13} fill="#FFFFFF" /> สั่งซื้อด่วน
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* ── Categories (Marketplace Visual Category Grid) ── */}
       <section className="section container" aria-labelledby="categories-heading">
         {/* Marketplace Categories Master Header Banner */}
@@ -560,96 +651,7 @@ export function HomePage({ onAddToCart, isWishlisted, onToggleWishlist }: HomePa
         </div>
       </section>
 
-      {/* ── Flash Sale Section with Product Carousel & Fire Progress Bar ── */}
-      <section className="section container" aria-labelledby="flash-sale-heading">
-        <div className="home-flash-container">
-          {/* Flash Sale Header */}
-          <div className="home-flash-header">
-            <div className="home-flash-title-group">
-              <div className="home-flash-badge">
-                <Zap size={16} fill="#FFFFFF" />
-                <span>FLASH SALE</span>
-              </div>
-              <h2 id="flash-sale-heading" className="home-flash-heading">
-                ดีลเดือดจำกัดเวลา ลดสูงสุด 70%
-              </h2>
-              {/* Countdown Timer */}
-              <div className="home-flash-timer-wrap">
-                <span className="home-flash-timer-label">⏰ ดีลจบใน:</span>
-                <div className="home-flash-timer-digits">
-                  <span className="home-flash-digit">{String(h).padStart(2, '0')}</span>
-                  <span className="home-flash-colon">:</span>
-                  <span className="home-flash-digit">{String(m).padStart(2, '0')}</span>
-                  <span className="home-flash-colon">:</span>
-                  <span className="home-flash-digit home-flash-digit--sec">{String(s).padStart(2, '0')}</span>
-                </div>
-              </div>
 
-              <div className="home-flash-live-pulse">
-                <span className="home-flash-pulse-dot" />
-                <span>กำลังสั่งซื้อสด 18 คน</span>
-              </div>
-            </div>
-
-            <Link to="/flash-sale" className="home-flash-view-all">
-              ดูดีล Flash Sale ทั้งหมด <ArrowRight size={14} />
-            </Link>
-          </div>
-
-          {/* Flash Sale Products Horizontal Grid */}
-          <div className="home-flash-grid">
-            {products.slice(0, 6).map((product, idx) => {
-              const discountPct = [55, 60, 48, 70, 65, 50][idx % 6];
-              const flashPrice = Math.round(product.price * (1 - discountPct / 100));
-              const soldPct = [88, 94, 76, 96, 82, 91][idx % 6];
-
-              return (
-                <div key={product.id} className="home-flash-card">
-                  {/* Image & Discount Badge */}
-                  <Link to={`/product/${product.id}`} className="home-flash-img-wrap">
-                    <img src={product.images[0]} alt={product.name} className="home-flash-img" />
-                    <span className="home-flash-tag">-{discountPct}%</span>
-                    <span className="home-flash-guarantee">👑 ถูกสุด 30 วัน</span>
-                  </Link>
-
-                  {/* Info */}
-                  <div className="home-flash-info">
-                    <Link to={`/product/${product.id}`} className="home-flash-name">
-                      {product.name}
-                    </Link>
-
-                    <div className="home-flash-price-row">
-                      <span className="home-flash-price">฿{flashPrice.toLocaleString()}</span>
-                      <span className="home-flash-orig">฿{product.price.toLocaleString()}</span>
-                    </div>
-
-                    {/* Fire Progress Bar */}
-                    <div className="home-flash-progress-wrap">
-                      <div className="home-flash-progress-bar">
-                        <div
-                          className="home-flash-progress-fill"
-                          style={{ width: `${soldPct}%` }}
-                        />
-                      </div>
-                      <span className="home-flash-progress-text">
-                        🔥 ขายแล้ว {soldPct}% {soldPct > 90 && '• ด่วน!'}
-                      </span>
-                    </div>
-
-                    {/* Add to Cart Quick Action */}
-                    <button
-                      className="home-flash-buy-btn"
-                      onClick={() => onAddToCart({ ...product, price: flashPrice })}
-                    >
-                      <Zap size={13} fill="#FFFFFF" /> สั่งซื้อด่วน
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
 
       {/* ── Gamification Promo Banner (Lucky Spin & Coins) ── */}
       <section className="section container" aria-label="Games and Coins">
