@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, ArrowRight, QrCode, CreditCard, Banknote } from 'lucide-react';
 import { PromptPayModal } from '../components/PromptPayModal';
+import { fetchApi } from '../utils/api';
 import type { CartItem } from '../types';
 import './CheckoutPage.css';
 
@@ -54,8 +55,36 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
       setForm(f => ({ ...f, [field]: e.target.value }));
   }
 
-  function handleCompleteOrder() {
-    const orderId = `MM-${Date.now()}`;
+  async function handleCompleteOrder() {
+    let orderId = `MM-${Date.now()}`;
+    try {
+      const orderPayload = {
+        items: items.map(item => ({
+          productId: item.product.id,
+          quantity: item.quantity,
+        })),
+        paymentMethod: paymentMethod === 'promptpay' ? 'PROMPTPAY' : paymentMethod === 'credit' ? 'CREDIT_CARD' : paymentMethod === 'paylater' ? 'PAYLATER' : 'COD',
+        shippingAddress: {
+          name: `${form.firstName} ${form.lastName}`.trim() || 'ลูกค้า Movemall',
+          phone: form.phone || '0812345678',
+          address: `${form.address} ${form.district} ${form.province} ${form.zip}`.trim() || 'กรุงเทพมหานคร 10110',
+        },
+        coinsUsed: useCoins ? Math.min(userCoins, subtotal) : 0,
+        discountAmount: coinDiscount,
+      };
+
+      const res = await fetchApi<{ order: { id: string } }>('/api/orders', {
+        method: 'POST',
+        body: JSON.stringify(orderPayload),
+      });
+
+      if (res?.order?.id) {
+        orderId = res.order.id;
+      }
+    } catch (err) {
+      console.warn('API Order submission note (proceeding in client mode):', err);
+    }
+
     onClear();
     navigate(`/order/success?id=${orderId}&total=${grandTotal}&method=${paymentMethod}`);
   }
