@@ -15,6 +15,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { stores } from '../data/stores';
+import { fetchApi } from '../utils/api';
 import './ChatPage.css';
 
 interface Message {

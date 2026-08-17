@@ -82,6 +82,32 @@ import authRoutes from './routes/auth.routes.js';
 import productRoutes from './routes/product.routes.js';
 import storeRoutes from './routes/store.routes.js';
 import orderRoutes from './routes/order.routes.js';
+import chatRoutes from './routes/chat.routes.js';
+
+// ── Socket.io Live Chat Room Handlers ──
+io.on('connection', (socket) => {
+  console.log(`🔌 WebSocket Client connected: ${socket.id}`);
+
+  socket.on('join_chat', (data: { storeId: string; userId: string }) => {
+    const room = `chat:${data.storeId}:${data.userId}`;
+    socket.join(room);
+    console.log(`💬 User ${data.userId} joined chat room ${room}`);
+  });
+
+  socket.on('send_chat_message', (data: { storeId: string; userId: string; text: string; sender: 'me' | 'store' }) => {
+    const room = `chat:${data.storeId}:${data.userId}`;
+    io.to(room).emit('receive_chat_message', {
+      id: `msg-${Date.now()}`,
+      sender: data.sender,
+      text: data.text,
+      time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+    });
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`🔌 WebSocket Client disconnected: ${socket.id}`);
+  });
+});
 
 // ── Base API Info ──
 app.get('/api/info', (_req, res) => {
@@ -94,6 +120,7 @@ app.get('/api/info', (_req, res) => {
       '/api/products',
       '/api/stores',
       '/api/orders',
+      '/api/chat',
     ],
   });
 });
@@ -103,6 +130,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/stores', storeRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/chat', chatRoutes);
 
 const PORT = Number(process.env.PORT) || 4000;
 
