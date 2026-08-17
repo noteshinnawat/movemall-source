@@ -48,13 +48,8 @@
 | **หน้ารายละเอียดสินค้า (Detail)** | `/product/:id` | สเปกสินค้า, แกลเลอรีรูป, รีวิว, **ปุ่ม 🔍 ค้นหาภาพคล้ายกันด้วย AI Visual Search**, **แถบแจ้งเตือน 🔴 LIVE ร้านค้ากำลังถ่ายทอดสดพร้อมโค้ดลด 50%**, ปุ่มแชทคุยกับร้าน |
 | **ศูนย์ผู้ขาย, Open API & Movemall Ads** | `/seller` | แดชบอร์ดสถิติ, จัดการสินค้า/ออเดอร์, พิมพ์ใบปะหน้า, **แท็บ 🔌 Open API & Enterprise Security Hub (สลับ Sandbox/Live Key, IP Whitelisting, Scopes Permissions, และ Webhook HMAC-SHA256 Simulator)**, **แท็บ 🎯 Movemall Ads (ยิงโฆษณา Search/Discovery/Live, Ad Wallet, ROAS Tracker, Smart Click Shield)** |
 | **กล่องข้อความแชทสด (Chat)** | `/chat` | แชทระหว่างผู้ซื้อและร้านค้า เลือกร้านค้าอัตโนมัติตาม URL params, บอทตอบกลับอัตโนมัติใน 1.2 วินาที |
-| **ระบบชำระเงิน, พร้อมเพย์ & BNPL** | `/checkout` | **Movemall PayLater (ผ่อน 0% สูงสุด 3 เดือน วงเงิน ฿15,000)**, **แลกเหรียญ Movemall Coins ลดเงินสด**, PromptPay QR จริง 5 นาที |
-| **ศูนย์รวมเกมส์ & เหรียญ (Games)** | `/games` | วงล้อหมุนลุ้นโชค (Lucky Spin), เช็คอิน 7 วันรับ Coins, เปิดการ์ดลุ้นคูปอง (Mystery Cards) |
-| **Flash Sale Hub** | `/flash-sale` | นับเวลาถอยหลัง Real-time, แถบเลือกช่วงเวลา (12:00, 18:00, 21:00, 00:00), Progress Bar สินค้าที่ขายแล้ว |
-| **ศูนย์คูปองส่วนลด** | `/vouchers` | รวมโค้ดส่งฟรี โค้ดลดแบรนด์ โค้ดลูกค้าใหม่ และปุ่ม "เก็บโค้ดทั้งหมด" |
-| **นายหน้า & Affiliate Hub** | `/affiliate` | แดชบอร์ดรายได้ค่าคอมมิชชั่น, เครื่องมือสร้างลิงก์ป้ายยา, **เครื่องมืออัปโหลดคลิปวิดีโอป้ายยาติดตะกร้าเหลือง** |
-| **ติดตามพัสดุ & แผนที่สด** | `/tracking`, `/tracking/:orderId` | ไทม์ไลน์ 4 ขั้นตอน, แผนที่ GPS พิกัดรถส่งของเคลื่อนที่สด, ข้อมูลคนขับ & เบอร์ติดต่อ |
-| **ศูนย์ข้อมูล กฎหมาย & PDPA** | `/help`, `/privacy`, `/terms` | รวม FAQ, นโยบายความเป็นส่วนตัวตาม PDPA มาตรา 23, ข้อกำหนดการใช้งาน, แบนเนอร์ Cookie Consent |
+| **ระบบหลังบ้าน & REST API Hub** | `server/` (Port 4000) | **Express + Prisma + PostgreSQL + Redis + Socket.io (17 Endpoints): Auth, Products, Stores, Orders (Atomic Transaction), Chat, Ads, Admin, Open API, Tax, Payment (PromptPay QR/Webhook/Refund), Media (S3/R2 Presigned URLs), Live Ingest, AI Lens Search, Logistics GPS, Notifications, Payout)** |
+| **ระบบชำระเงิน, พร้อมเพย์ & BNPL** | `/checkout` | **Movemall PayLater (ผ่อน 0% สูงสุด 3 เดือน วงเงิน ฿15,000)**, **แลกเหรียญ Movemall Coins ลดเงินสด**, PromptPay QR จริง 5 นาที, เชื่อมต่อ `POST /api/orders` |
 | **PWA & Mobile Optimization** | ทั่วทั้งเว็บ | `MobileBottomNav` 5 ปุ่ม, **ปรับตำแหน่ง Pop-up ปลอดภัยไม่ชนกัน (Ticker ด้านบนซ้าย, Live PiP ด้านล่างขวา)**, ซ่อน Footer 4 คอลัมน์บนมือถือ |
 
 ---
@@ -63,10 +58,34 @@
 
 ```
 movemall-source/
-├── public/
-│   ├── favicon.svg
-│   ├── manifest.json         # PWA Manifest
-│   └── sw.js                 # PWA Service Worker
+├── server/
+│   ├── prisma/
+│   │   ├── schema.prisma     # PostgreSQL Data Models & Composite Indexes
+│   │   └── seed.ts           # Seeder สต็อกสินค้าและร้านค้าตัวอย่าง
+│   ├── src/
+│   │   ├── config/           # Database (Prisma Read/Write) & Redis Client
+│   │   ├── middleware/       # JWT Auth & Security Middlewares
+│   │   ├── routes/
+│   │   │   ├── admin.routes.ts        # สถิติภาพรวมและผู้ดูแลระบบ
+│   │   │   ├── ads.routes.ts          # Movemall Ads & Smart Click Shield
+│   │   │   ├── auth.routes.ts         # Register, Login (JWT), /me Profile
+│   │   │   ├── chat.routes.ts         # ดึงและบันทึกประวัติแชท
+│   │   │   ├── lens.routes.ts         # AI Visual Lens Search Endpoint
+│   │   │   ├── live.routes.ts         # RTMP/WebRTC Stream Keys & Active Channels
+│   │   │   ├── logistics.routes.ts    # Courier Booking, GPS Tracking Broadcast
+│   │   │   ├── media.routes.ts        # Presigned S3/R2 URLs & Video Registry
+│   │   │   ├── notification.routes.ts # Web Push Subscriptions & Broadcast
+│   │   │   ├── openapi.routes.ts      # Open API Hub & HMAC Webhooks
+│   │   │   ├── order.routes.ts        # Atomic Orders, Stock Deduct, Coin Ledger
+│   │   │   ├── payment.routes.ts      # PromptPay QR, Webhooks, Slip Verify, Refund
+│   │   │   ├── payout.routes.ts       # Creator/Seller Payout & 3% WHT
+│   │   │   ├── product.routes.ts      # Product CRUD, Search & Redis Caching
+│   │   │   ├── store.routes.ts        # Multi-Vendor Store Registry
+│   │   │   ├── tax.routes.ts          # VAT 7% & 3% Withholding Tax
+│   │   │   └── user.routes.ts         # Profile, Address, Coins, OTP Verifications
+│   │   └── app.ts                     # Express App & Socket.io Server (Port 4000)
+│   ├── docker-compose.yml
+│   └── package.json
 ├── src/
 │   ├── components/
 │   │   ├── Navbar.tsx / .css
@@ -74,17 +93,19 @@ movemall-source/
 │   │   ├── ProductCard.tsx / .css
 │   │   ├── ReviewsSection.tsx / .css
 │   │   ├── Toast.tsx / .css
-│   │   ├── LiveActivityTicker.tsx / .css    # Realtime Buyer Activity Toasts
-│   │   ├── FloatingLiveWidget.tsx / .css    # Floating PiP Live stream
-│   │   ├── MobileBottomNav.tsx / .css       # Mobile Bottom Navigation
-│   │   └── PWAInstallPrompt.tsx / .css      # Add to Home Screen Banner
+│   │   ├── LiveActivityTicker.tsx / .css
+│   │   ├── FloatingLiveWidget.tsx / .css
+│   │   ├── MobileBottomNav.tsx / .css
+│   │   └── PWAInstallPrompt.tsx / .css
 │   ├── pages/
 │   │   ├── HomePage.tsx / .css
 │   │   ├── ShopPage.tsx / .css
 │   │   ├── ProductDetailPage.tsx / .css
-│   │   ├── BrandMallPage.tsx / .css         # Official Brand Mall
-│   │   ├── LiveStreamPage.tsx / .css        # Live Stream Shopping
-│   │   ├── GamesPage.tsx / .css             # Gamification Hub
+│   │   ├── BrandMallPage.tsx / .css
+│   │   ├── LiveStreamPage.tsx / .css
+│   │   ├── VideoFeedPage.tsx / .css
+│   │   ├── VideoStudioPage.tsx / .css
+│   │   ├── GamesPage.tsx / .css
 │   │   ├── FlashSalePage.tsx / .css
 │   │   ├── VouchersPage.tsx / .css
 │   │   ├── StorePage.tsx / .css
@@ -98,49 +119,30 @@ movemall-source/
 │   │   ├── OrderSuccessPage.tsx / .css
 │   │   ├── WishlistPage.tsx / .css
 │   │   └── OrdersPage.tsx / .css
-│   ├── data/
-│   │   ├── products.ts           # Categories & active product catalogue
-│   │   ├── mockProductsData.ts   # 160 realistic products (20 per 8 categories)
-│   │   ├── brands.ts             # Famous Brands data
-│   │   ├── stores.ts             # Multi-vendor stores data
-│   │   └── reviews.ts            # Product & store reviews data
-│   ├── hooks/
-│   │   ├── useCart.ts
-│   │   ├── useWishlist.ts
-│   │   └── useToast.ts
+│   ├── utils/
+│   │   └── api.ts            # Centralized API Fetch Client (JWT Auth)
 │   ├── types/
-│   │   └── index.ts              # TypeScript interfaces (Product, Store, Cart, Review, etc.)
-│   ├── App.tsx                   # Master router & state manager
-│   ├── index.css                 # Global CSS variables & rectangular design resets
+│   │   └── index.ts          # TypeScript Definitions
+│   ├── App.tsx               # Master Router & State Manager
+│   ├── index.css
 │   └── main.tsx
 ├── package.json
-├── BACKEND_BLUEPRINT.md          # สถาปัตยกรรมและ Schema ระบบหลังบ้าน
-├── SECURITY_AND_API_GUIDE.md     # คู่มือความปลอดภัย การเข้ารหัส และ Open API
-└── AGENTS.md                     # เอกสารแนะนำและคู่มือการพัฒนาสำหรับ AI
+├── BACKEND_BLUEPRINT.md
+├── SECURITY_AND_API_GUIDE.md
+└── AGENTS.md
 ```
 
 ---
 
-## 🚀 5. ทิศทางและแผนงานในอนาคต (Future Roadmap & Next Milestones)
+## 🚀 5. สถานะระบบปัจจุบัน & แนวทางเปิดให้บริการจริง (Deployment Readiness)
 
-> 📘 **แผนพัฒนาระบบหลังบ้านและความปลอดภัยฉบับสมบูรณ์**:
-> - ดูสถาปัตยกรรม Backend & Prisma Schema ได้ที่ **[BACKEND_BLUEPRINT.md](file:///Users/Jakkatorn-msi/antigravity/movemall-source/BACKEND_BLUEPRINT.md)**
-> - ดูมาตรฐานความปลอดภัยและการเข้ารหัสข้อมูลได้ที่ **[SECURITY_AND_API_GUIDE.md](file:///Users/Jakkatorn-msi/antigravity/movemall-source/SECURITY_AND_API_GUIDE.md)**
-
-หากต้องการเริ่มพัฒนาระบบหลังบ้านจริง สามารถทำตามลำดับใน [BACKEND_BLUEPRINT.md](file:///Users/Jakkatorn-msi/antigravity/movemall-source/BACKEND_BLUEPRINT.md) ได้ทันที:
-
-1. **🔗 Database & Auth Integration (Phase 1)**:
-   - รัน Prisma ORM ด้วย `schema.prisma` บน PostgreSQL
-   - ระบบ JWT Auth + Role-Based Access Control (Buyer, Seller, Creator, Admin)
-2. **📦 Core Marketplace APIs (Phase 2)**:
-   - CRUD สินค้า, จัดการสต็อก, ตะกร้าสินค้า, และ Atomic Checkout Transaction
-3. **💳 Payment Gateway Integration (Phase 3)**:
-   - เชื่อมต่อ Omise / Stripe / GB Prime Pay เพื่อรับ Webhook การสแกน PromptPay QR Code
-4. **⚡ Real-time WebSockets & Live Services (Phase 4)**:
-   - ระบบแชทสด, คอมเมนต์ไลฟ์สตรีม, และส่งพิกัดรถขนส่ง GPS แบบเรียลไทม์
-5. **🔔 Push Notification & Service Worker (Phase 5)**:
-   - ระบบแจ้งเตือนโปรโมชั่นและสถานะออเดอร์ผ่าน Web Push API บนมือถือ
+1. **✅ Full-Stack Ready (0 TypeScript Errors)**: ทั้งฝั่ง Frontend (`Vite 8`) และ Backend (`Express + TypeScript 5.8`) ทำการ Compile ผ่าน 100%
+2. **✅ Atomic Operations & Security**: การสั่งซื้อสินค้า หักสต็อก แลกเหรียญ และคืนเงินทำงานด้วย ACID Transactions ผ่าน Prisma
+3. **🔑 สำหรับการขึ้น Production จริง**:
+   - นำ API Key จาก Gateway ชำระเงินจริง (Omise, Stripe, หรือ GB Prime Pay) ใส่ใน `server/.env`
+   - ผูก Cloudflare R2 / AWS S3 Credentials สำหรับ Bucket ไฟล์มีเดีย
+   - ใส่ VAPID Keys สำหรับ Web Push Notifications
 
 ---
 
-*อัปเดตล่าสุด: 2026-08-16 | สถานะระบบ: React 19 + TypeScript + Vite 8 (ทำงานสมบูรณ์ 0 TypeScript errors)*
+*อัปเดตล่าสุด: 2026-08-17 | สถานะระบบ: React 19 + Express 4.21 + PostgreSQL + Redis (ทำงานสมบูรณ์ 0 TypeScript errors)*
