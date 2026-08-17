@@ -732,11 +732,11 @@
 /* ── Home Flash Sale Showcase (Sleek Compact Top-Zone) ── */
 .home-flash-container {
   background: #FFFFFF;
-  border: 1.5px solid #EF4444;
+  border: 1px solid #FEE2E2;
   border-radius: var(--radius-md) !important;
-  padding: 10px 14px;
-  box-shadow: 0 2px 14px rgba(239, 68, 68, 0.12);
-  margin-bottom: var(--space-3);
+  padding: 14px 16px;
+  box-shadow: 0 2px 14px rgba(220, 38, 38, 0.08);
+  margin-bottom: var(--space-4);
   position: relative;
 }
 
@@ -745,16 +745,16 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #FEE2E2;
-  padding-bottom: 6px;
-  margin-bottom: 8px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .home-flash-title-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -850,33 +850,43 @@
 .home-flash-live-pulse {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  font-weight: 800;
-  color: #DC2626;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #991B1B;
   background: #FFF1F2;
   border: 1px solid #FFE4E6;
+  padding: 2px 8px;
   border-radius: var(--radius-md) !important;
-  padding: 2px 6px;
 }
 
 .home-flash-pulse-dot {
-  width: 5px;
-  height: 5px;
-  background: #EF4444;
+  width: 6px;
+  height: 6px;
+  background: #E11D48;
   border-radius: 50%;
-  animation: beaconPulse 1s infinite alternate;
+  position: relative;
 }
 
-@keyframes beaconPulse {
-  0% { transform: scale(0.8); opacity: 0.6; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-  100% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 6px 2px rgba(239, 68, 68, 0.8); }
+.home-flash-pulse-dot::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: #E11D48;
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: dotPulse 1.4s infinite;
+}
+
+@keyframes dotPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
 }
 
 .home-flash-right-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .home-flash-nav-controls {
@@ -886,35 +896,35 @@
 }
 
 .home-flash-arrow-btn {
-  background: #FEF2F2;
-  border: 1px solid #FECACA;
-  color: #DC2626;
   width: 26px;
   height: 26px;
   border-radius: var(--radius-md) !important;
+  border: 1px solid #E5E7EB;
+  background: #FFFFFF;
+  color: #374151;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s, transform 0.15s;
+  transition: all 0.15s ease;
+  padding: 0;
 }
 
 .home-flash-arrow-btn:hover {
-  background: #DC2626;
-  color: #FFFFFF;
+  background: #F9FAFB;
   border-color: #DC2626;
-  transform: scale(1.06);
+  color: #DC2626;
 }
 
 .home-flash-view-all {
-  font-size: 12px;
-  font-weight: 800;
-  color: #DC2626;
-  text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  transition: transform 0.15s ease;
+  font-size: 12px;
+  font-weight: 700;
+  color: #DC2626;
+  text-decoration: none;
+  transition: all 0.15s ease;
 }
 
 .home-flash-view-all:hover {
@@ -922,7 +932,7 @@
   transform: translateX(2px);
 }
 
-/* Flash Sale Products Horizontal Carousel Slider (Strict 1 Row across All Devices) */
+/* Flash Sale Products Grid (Responsive: 6 equal columns on Desktop, Smooth Touch Scroll on Mobile) */
 .home-flash-grid {
   display: flex;
   gap: 10px;
@@ -931,17 +941,29 @@
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x;
   scrollbar-width: none;
-  padding: 4px 2px 8px 2px;
+  padding: 2px 0 4px 0;
 }
 
 .home-flash-grid::-webkit-scrollbar {
   display: none;
 }
 
+@media (min-width: 1024px) {
+  .home-flash-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    overflow: visible;
+  }
+  .home-flash-nav-controls {
+    display: none;
+  }
+}
+
 .home-flash-card {
-  flex: 0 0 135px;
-  width: 135px;
-  min-width: 135px;
+  flex: 0 0 145px;
+  width: 145px;
+  min-width: 145px;
   scroll-snap-align: start;
   background: #FFFFFF;
   border: 1px solid #E5E7EB;
@@ -949,23 +971,24 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 6px;
+  padding: 8px;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   position: relative;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .home-flash-card {
-    flex: 0 0 155px;
-    width: 155px;
-    min-width: 155px;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    padding: 8px;
   }
 }
 
 .home-flash-card:hover {
   transform: translateY(-2px);
   border-color: #DC2626;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.14);
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.14);
 }
 
 .home-flash-img-wrap {
@@ -976,7 +999,7 @@
   display: block;
   overflow: hidden;
   border-radius: var(--radius-sm) !important;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .home-flash-img {
@@ -997,9 +1020,9 @@
   left: 0;
   background: #DC2626;
   color: #FFFFFF;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 900;
-  padding: 2px 5px;
+  padding: 2px 6px;
   border-bottom-right-radius: var(--radius-sm) !important;
   z-index: 2;
   box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
@@ -1012,10 +1035,10 @@
   right: 0;
   background: rgba(17, 24, 39, 0.88);
   color: #FDE047;
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 800;
   text-align: center;
-  padding: 1px 3px;
+  padding: 2px 4px;
   z-index: 2;
 }
 
@@ -1028,16 +1051,15 @@
 }
 
 .home-flash-name {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: #111827;
   text-decoration: none;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
+  line-height: 1.35;
+  white-space: nowrap;
   overflow: hidden;
-  height: 16px;
+  text-overflow: ellipsis;
+  display: block;
 }
 
 .home-flash-name:hover {
@@ -1047,18 +1069,18 @@
 .home-flash-price-row {
   display: flex;
   align-items: baseline;
-  gap: 4px;
-  margin-top: 0px;
+  gap: 6px;
+  margin: 2px 0 4px;
 }
 
 .home-flash-price {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 900;
   color: #DC2626;
 }
 
 .home-flash-orig {
-  font-size: 10px;
+  font-size: 11px;
   color: #9CA3AF;
   text-decoration: line-through;
 }
@@ -1066,14 +1088,15 @@
 /* Fire Progress Bar with Animated Lava Stream */
 .home-flash-progress-wrap {
   position: relative;
-  height: 13px;
+  height: 17px;
   background: #FEE2E2;
   border: 1px solid #FECACA;
-  border-radius: var(--radius-sm) !important;
+  border-radius: 9px !important;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 4px;
 }
 
 .home-flash-progress-bar {
@@ -1102,10 +1125,10 @@
 .home-flash-progress-text {
   position: relative;
   z-index: 2;
-  font-size: 8.5px;
+  font-size: 9.5px;
   font-weight: 900;
   color: #FFFFFF;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
   letter-spacing: 0.2px;
   user-select: none;
 }
@@ -1115,14 +1138,14 @@
   background-size: 200% 100%;
   color: #FFFFFF;
   border: none;
-  font-size: 10.5px;
+  font-size: 11.5px;
   font-weight: 800;
-  padding: 4px 6px;
+  padding: 6px 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   border-radius: var(--radius-md) !important;
   animation: buyGleam 2.8s ease infinite;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -1137,8 +1160,6 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
 }
-
-
 
 /* ── Stats Bar ── */
 .stats-bar {
