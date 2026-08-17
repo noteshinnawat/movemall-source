@@ -91,7 +91,7 @@ function AppLayout({
   return (
     <>
       <PWAInstallPrompt />
-      {!isProductDetailPage && location.pathname !== '/video' && (
+      {!isProductDetailPage && !isChatPage && location.pathname !== '/video' && (
         <Navbar
           cartCount={cart.totalItems}
           wishlistCount={wishlist.count}
@@ -571,7 +571,7 @@ function AppLayout({
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       {!isDistractionFreePage && <LiveActivityTicker />}
       {!isDistractionFreePage && <FloatingLiveWidget />}
-      {!isProductDetailPage && !isLivePage && <MobileBottomNav cartCount={cart.totalItems} />}
+      {!isProductDetailPage && !isLivePage && !isChatPage && <MobileBottomNav cartCount={cart.totalItems} />}
       {!isLivePage && !isVideoFeedPage && <BackToTopButton />}
       <CookieConsentBanner />
     </>
