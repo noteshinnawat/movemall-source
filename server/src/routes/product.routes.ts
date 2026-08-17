@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
-import { prismaRead } from '../config/database.js';
-import { getCachedOrFetch } from '../config/redis.js';
+import { prismaRead, prismaWrite } from '../config/database.js';
+import { getCachedOrFetch, invalidateCachePattern } from '../config/redis.js';
+import { authenticateJWT, AuthRequest } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
@@ -175,6 +176,125 @@ router.get('/:id', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Fetch Product Detail Error:', error);
     res.status(500).json({ error: 'Failed to fetch product detail' });
+  }
+});
+
+// ── 3. Create Product (Merchant / Brand Owner) ──
+router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const {
+      name,
+      description = '',
+      price,
+      originalPrice,
+      category,
+      brand,
+      images,
+      stock = 100,
+      badge,
+      storeId,
+    } = req.body;
+
+    if (!name || !price || !category) {
+      res.status(400).json({ error: 'Name, price, and category are required' });
+      return;
+    }
+
+    // Find store or default to first available store
+    let targetStoreId = storeId;
+    if (!targetStoreId) {
+      const defaultStore = await prismaRead.store.findFirst();
+      if (!defaultStore) {
+        res.status(400).json({ error: 'No active store found for product creation' });
+        return;
+      }
+      targetStoreId = defaultStore.id;
+    }
+
+    const store = await prismaRead.store.findUnique({ where: { id: targetStoreId } });
+    const productBadge = badge || (store?.isMall ? 'mall' : 'new');
+
+    const product = await prismaWrite.product.create({
+      data: {
+        storeId: targetStoreId,
+        name,
+        description,
+        price: parseFloat(price),
+        originalPrice: originalPrice ? parseFloat(originalPrice) : null,
+        category,
+        brand: brand || store?.name || null,
+        images: Array.isArray(images) && images.length > 0 ? images : ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80'],
+        stock: parseInt(stock, 10) || 100,
+        badge: productBadge,
+      },
+    });
+
+    await invalidateCachePattern('products:*');
+
+    res.status(201).json({
+      message: 'Product created successfully',
+      product,
+    });
+  } catch (error) {
+    console.error('Create Product Error:', error);
+    res.status(500).json({ error: 'Failed to create product' });
+  }
+});
+
+// ── 4. Update Product ──
+router.put('/:id', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
+    const { name, description, price, originalPrice, category, brand, images, stock, badge } = req.body;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (price !== undefined) updateData.price = parseFloat(price);
+    if (originalPrice !== undefined) updateData.originalPrice = originalPrice ? parseFloat(originalPrice) : null;
+    if (category !== undefined) updateData.category = category;
+    if (brand !== undefined) updateData.brand = brand;
+    if (images !== undefined) updateData.images = images;
+    if (stock !== undefined) updateData.stock = parseInt(stock, 10);
+    if (badge !== undefined) updateData.badge = badge;
+
+    const product = await prismaWrite.product.update({
+      where: { id },
+      data: updateData,
+    });
+
+    await invalidateCachePattern('products:*');
+    await invalidateCachePattern(`product:detail:${id}`);
+
+    res.json({
+      message: 'Product updated successfully',
+      product,
+    });
+  } catch (error) {
+    console.error('Update Product Error:', error);
+    res.status(500).json({ error: 'Failed to update product' });
+  }
+});
+
+// ── 5. Delete Product ──
+router.delete('/:id', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
+
+    await prismaWrite.product.delete({
+      where: { id },
+    });
+
+    await invalidateCachePattern('products:*');
+    await invalidateCachePattern(`product:detail:${id}`);
+
+    res.json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Delete Product Error:', error);
+    res.status(500).json({ error: 'Failed to delete product' });
   }
 });
 

@@ -10,6 +10,7 @@ import { stores } from '../data/stores';
 import { initialAdCampaigns, initialAdWallet } from '../data/mockAdsData';
 import { ShippingLabelModal, type ShippingLabelProps } from '../components/ShippingLabelModal';
 import type { Product, AdCampaign, AdType, AdWallet, AdKeyword } from '../types';
+import { fetchApi } from '../utils/api';
 import './SellerCenterPage.css';
 
 interface SellerCenterPageProps {
@@ -183,7 +184,7 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
     return c.type === adFilterType;
   });
 
-  function handleCreateProduct(e: React.FormEvent) {
+  async function handleCreateProduct(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !price) return;
 
@@ -204,10 +205,35 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
       rating: 5.0,
       reviewCount: 0,
       tags: [category, 'สินค้าใหม่'],
-      badge,
+      badge: currentStore.isMall ? 'mall' : badge,
     };
 
-    onAddProduct(newProd);
+    try {
+      const res = await fetchApi<{ product: Product }>('/api/products', {
+        method: 'POST',
+        body: JSON.stringify({
+          storeId: currentStore.id,
+          name: newProd.name,
+          category: newProd.category,
+          price: newProd.price,
+          originalPrice: newProd.originalPrice,
+          stock: newProd.stock,
+          description: newProd.description,
+          images: newProd.images,
+          badge: newProd.badge,
+        }),
+      });
+
+      if (res.product) {
+        onAddProduct({ ...newProd, id: res.product.id });
+      } else {
+        onAddProduct(newProd);
+      }
+    } catch (err) {
+      console.warn('API Product Creation (falling back to local state):', err);
+      onAddProduct(newProd);
+    }
+
     setName('');
     setPrice('');
     setOriginalPrice('');

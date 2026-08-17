@@ -4,6 +4,7 @@ export interface Store {
   logo: string;
   banner?: string;
   badge?: 'official' | 'preferred' | 'verified';
+  isMall?: boolean;
   rating: number;
   reviewCount: number;
   responseRate: string;
@@ -42,7 +43,7 @@ export interface Product {
   stock: number;
   description: string;
   tags: string[];
-  badge?: 'new' | 'sale' | 'hot' | 'limited';
+  badge?: 'new' | 'sale' | 'hot' | 'limited' | 'mall';
 }
 
 export interface CartItem {
