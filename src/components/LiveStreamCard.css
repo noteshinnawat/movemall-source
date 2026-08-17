@@ -121,27 +121,32 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
-/* Bottom Pinned Deal Box */
+/* Bottom Pinned Deal Box — Video First Glass Style */
 .live-stream-card-bottom {
   position: relative;
   z-index: 3;
-  padding: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .live-pinned-deal {
-  background: rgba(255, 255, 255, 0.95);
-  color: var(--text-primary);
-  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #FFFFFF;
+  padding: 6px 8px;
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
 }
 
 .live-pinned-deal-img {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   object-fit: cover;
   border-radius: var(--radius-sm);
   flex-shrink: 0;
@@ -154,50 +159,62 @@
 
 .live-pinned-tag {
   font-size: 9px;
-  font-weight: 900;
-  color: #DC2626;
+  font-weight: 800;
+  color: #FBBF24;
   text-transform: uppercase;
+  letter-spacing: 0.2px;
 }
 
 .live-pinned-name {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.live-pinned-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
 .live-pinned-price {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
-  color: #DC2626;
+  color: #EF4444;
 }
 
 .live-pinned-orig {
-  font-size: 10px;
-  color: var(--text-muted);
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.5);
   text-decoration: line-through;
-  margin-left: 4px;
 }
 
-/* Action Button */
+/* Action Button — Sleek Translucent Glass Button */
 .live-watch-now-btn {
   width: 100%;
-  background: linear-gradient(90deg, #DC2626 0%, #EF4444 100%);
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  font-size: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #FFFFFF;
+  padding: 7px 10px;
+  font-size: 11px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.2s ease;
   border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .live-watch-now-btn:hover {
-  opacity: 0.95;
+  background: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
 }

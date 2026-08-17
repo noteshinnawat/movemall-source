@@ -122,14 +122,14 @@ export function LiveStreamCard({
         <h4 className="live-stream-title">{title}</h4>
       </div>
 
-      {/* Bottom Pinned Deal */}
+      {/* Bottom Pinned Deal & Action */}
       <div className="live-stream-card-bottom">
         <div className="live-pinned-deal">
           <img src={pinnedProduct.image} alt={pinnedProduct.name} className="live-pinned-deal-img" />
           <div className="live-pinned-deal-info">
-            <div className="live-pinned-tag">📌 ปักหมุดลด {pinnedProduct.discountPct}%</div>
+            <div className="live-pinned-tag">📌 ปักหมุด -{pinnedProduct.discountPct}%</div>
             <div className="live-pinned-name">{pinnedProduct.name}</div>
-            <div>
+            <div className="live-pinned-price-row">
               <span className="live-pinned-price">฿{pinnedProduct.price.toLocaleString()}</span>
               <span className="live-pinned-orig">฿{pinnedProduct.originalPrice.toLocaleString()}</span>
             </div>
@@ -137,9 +137,9 @@ export function LiveStreamCard({
         </div>
 
         <div className="live-watch-now-btn">
-          <Play size={13} fill="white" />
-          เข้าชมไลฟ์สด & ช้อปดีลนี้
-          <ArrowRight size={13} />
+          <Play size={12} fill="white" />
+          <span>ช้อปในไลฟ์</span>
+          <ArrowRight size={12} />
         </div>
       </div>
     </Link>
