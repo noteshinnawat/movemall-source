@@ -128,6 +128,14 @@ export function HomePage({ onAddToCart, isWishlisted, onToggleWishlist }: HomePa
   });
 
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const flashGridRef = useRef<HTMLDivElement>(null);
+
+  const scrollFlashGrid = (direction: 'left' | 'right') => {
+    if (flashGridRef.current) {
+      const scrollAmount = direction === 'left' ? -300 : 300;
+      flashGridRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   // Reset pagination when tab changes
   useEffect(() => {
@@ -407,13 +415,34 @@ export function HomePage({ onAddToCart, isWishlisted, onToggleWishlist }: HomePa
               </div>
             </div>
 
-            <Link to="/flash-sale" className="home-flash-view-all">
-              ดูดีล Flash Sale ทั้งหมด <ArrowRight size={14} />
-            </Link>
+            <div className="home-flash-right-actions">
+              <div className="home-flash-nav-controls">
+                <button
+                  type="button"
+                  className="home-flash-arrow-btn"
+                  onClick={() => scrollFlashGrid('left')}
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  type="button"
+                  className="home-flash-arrow-btn"
+                  onClick={() => scrollFlashGrid('right')}
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+
+              <Link to="/flash-sale" className="home-flash-view-all">
+                ดูดีลทั้งหมด <ArrowRight size={14} />
+              </Link>
+            </div>
           </div>
 
-          {/* Flash Sale Products Horizontal Grid */}
-          <div className="home-flash-grid">
+          {/* Flash Sale Products Horizontal Grid Carousel */}
+          <div className="home-flash-grid" ref={flashGridRef}>
             {products.slice(0, 6).map((product, idx) => {
               const discountPct = [55, 60, 48, 70, 65, 50][idx % 6];
               const flashPrice = Math.round(product.price * (1 - discountPct / 100));

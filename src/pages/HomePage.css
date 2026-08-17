@@ -831,6 +831,39 @@
   100% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 6px 2px rgba(239, 68, 68, 0.8); }
 }
 
+.home-flash-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.home-flash-nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.home-flash-arrow-btn {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #DC2626;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-md) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.home-flash-arrow-btn:hover {
+  background: #DC2626;
+  color: #FFFFFF;
+  border-color: #DC2626;
+  transform: scale(1.06);
+}
+
 .home-flash-view-all {
   font-size: 12px;
   font-weight: 800;
@@ -847,14 +880,16 @@
   transform: translateX(2px);
 }
 
-/* Flash Sale Products Horizontal Grid */
+/* Flash Sale Products Horizontal Carousel Slider (Strict 1 Row across All Devices) */
 .home-flash-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
+  display: flex;
+  gap: 10px;
   overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
   scrollbar-width: none;
-  padding-bottom: 2px;
+  padding: 4px 2px 8px 2px;
 }
 
 .home-flash-grid::-webkit-scrollbar {
@@ -862,6 +897,10 @@
 }
 
 .home-flash-card {
+  flex: 0 0 135px;
+  width: 135px;
+  min-width: 135px;
+  scroll-snap-align: start;
   background: #FFFFFF;
   border: 1px solid #E5E7EB;
   border-radius: var(--radius-md) !important;
@@ -869,9 +908,16 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 6px;
-  min-width: 145px;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   position: relative;
+}
+
+@media (min-width: 768px) {
+  .home-flash-card {
+    flex: 0 0 155px;
+    width: 155px;
+    min-width: 155px;
+  }
 }
 
 .home-flash-card:hover {
@@ -1050,18 +1096,7 @@
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
 }
 
-@media (max-width: 1024px) {
-  .home-flash-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
 
-
-@media (max-width: 640px) {
-  .home-flash-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 
 /* ── Stats Bar ── */
 .stats-bar {
