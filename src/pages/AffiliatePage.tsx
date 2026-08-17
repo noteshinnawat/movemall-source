@@ -82,7 +82,7 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
         likesCount: 120,
         commentsCount: 8,
         sharesCount: 14,
-        videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-modern-smartphone-and-headphones-41274-large.mp4',
+        videoUrl: '/videos/live-streamer-1.mp4',
         coverImage: selectedProduct.images[0],
         badge: '🌟 MY BASKET',
         pinnedProduct: {

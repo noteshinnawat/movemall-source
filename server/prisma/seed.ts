@@ -256,7 +256,7 @@ async function main() {
       id: 'live-1',
       storeId: techStore.id,
       title: '🔥 มหกรรม Flash Sale ไอทีลด 70% แจกคูปองลับในไลฟ์!',
-      streamUrl: 'https://assets.mixkit.co/videos/preview/mixkit-headphones-lying-on-a-table-4171-large.mp4',
+      streamUrl: '/videos/live-streamer-1.mp4',
       coverImage: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80',
       pinnedProductId: 'el-1',
       viewersCount: 2450,

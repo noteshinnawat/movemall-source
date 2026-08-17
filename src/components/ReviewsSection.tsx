@@ -72,7 +72,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
   }
 
   function handleAddSampleVideo() {
-    setFormVideo('https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-modern-smartphone-and-headphones-41274-large.mp4');
+    setFormVideo('/videos/live-streamer-1.mp4');
   }
 
   function handleRemovePhoto(index: number) {

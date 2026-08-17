@@ -39,7 +39,7 @@ export const mockProductReviews: Record<string, ProductReview[]> = {
         'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80',
         'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=400&q=80',
       ],
-      video: 'https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-modern-smartphone-and-headphones-41274-large.mp4',
+      video: '/videos/live-streamer-1.mp4',
       verified: true,
       helpfulCount: 24,
     },
@@ -146,7 +146,7 @@ const GENERIC_REVIEW_TEMPLATES = [
     title: 'สินค้าคุณภาพดี คุ้มค่ามาก',
     comment: 'ได้รับของตรงตามปก ใช้งานได้ดีมาก บรรจุหีบห่อเรียบร้อย จัดส่งรวดเร็ว มีกันกระแทกอย่างดี แนะนำเลยครับ',
     images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80', 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=500&q=80'],
-    video: 'https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-modern-smartphone-and-headphones-41274-large.mp4',
+    video: '/videos/live-streamer-2.mp4',
     helpfulCount: 28,
   },
   {
