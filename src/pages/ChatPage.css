@@ -47,7 +47,28 @@
 .chat-sidebar__title-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
+}
+
+.chat-inbox-back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.chat-inbox-back-btn:hover {
+  background: var(--surface-hover, #F3F4F6);
+  color: var(--primary);
 }
 
 .chat-sidebar__title {
@@ -561,16 +582,30 @@
    Mobile Responsiveness (Inbox List <-> Chat View)
 ========================================================= */
 @media (max-width: 768px) {
+  /* Inbox List view on mobile: Leaves space for MobileBottomNav */
   .chat-page {
     position: fixed;
-    inset: 0;
+    top: 0;
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    left: 0;
+    right: 0;
     padding: 0;
     margin: 0;
-    height: 100vh;
+    height: auto;
     width: 100vw;
     overflow: hidden;
     background: var(--background);
-    z-index: 1000;
+    z-index: 900;
+  }
+
+  /* Active Chat Room view on mobile: Takes full screen height and hides MobileBottomNav */
+  .chat-page:has(.chat-main--show-mobile) {
+    bottom: 0 !important;
+    z-index: 1001 !important;
+  }
+
+  body:has(.chat-main--show-mobile) .mobile-bottom-nav {
+    display: none !important;
   }
 
   .chat-container {

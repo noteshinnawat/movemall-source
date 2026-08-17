@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import {
   Send,
   Store,
@@ -33,6 +33,7 @@ interface ConversationMeta {
 }
 
 export function ChatPage() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const storeParam = searchParams.get('store');
   const initialStoreId = stores.find(s => s.id === storeParam)?.id || stores[0].id;
@@ -192,6 +193,21 @@ export function ChatPage() {
         <aside className={`chat-sidebar ${mobileView === 'list' ? 'chat-sidebar--show-mobile' : ''}`}>
           <div className="chat-sidebar__header">
             <div className="chat-sidebar__title-row">
+              <button
+                type="button"
+                className="chat-inbox-back-btn"
+                onClick={() => {
+                  if (window.history.length > 1) {
+                    navigate(-1);
+                  } else {
+                    navigate('/');
+                  }
+                }}
+                aria-label="ย้อนกลับ"
+                title="ย้อนกลับ"
+              >
+                <ArrowLeft size={18} />
+              </button>
               <h1 className="chat-sidebar__title">
                 💬 กล่องข้อความแชท
                 {totalUnread > 0 && <span className="chat-badge-count">{totalUnread}</span>}
