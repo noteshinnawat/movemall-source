@@ -2,7 +2,7 @@
 
 .product-detail {
   padding-top: 16px;
-  padding-bottom: 84px;
+  padding-bottom: 96px;
   min-height: 100vh;
 }
 
@@ -1163,6 +1163,8 @@
   background: #FFFFFF;
   border-top: 1px solid var(--border);
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  padding-top: 8px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
 }
 
 .product-bottom-sticky-content {
@@ -1170,7 +1172,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  height: 64px;
+  min-height: 56px;
+  height: auto;
 }
 
 .product-sticky-left {
@@ -1302,7 +1305,7 @@
 
 /* Ensure product detail page has bottom padding for sticky bar */
 .product-detail {
-  padding-bottom: 84px;
+  padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
 }
 
 /* Responsive */
@@ -1378,11 +1381,16 @@
     height: 195px;
   }
 
-  /* Mobile Sticky Bar: Full width, prominent buttons */
+  /* Mobile Sticky Bar: Elevated with extra touch clearance from screen bottom */
+  .product-bottom-sticky-bar {
+    padding-top: 10px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+  }
   .product-bottom-sticky-content {
-    height: 60px;
+    height: auto;
+    min-height: 48px;
     gap: 8px;
-    padding: 0 10px;
+    padding: 0 12px;
   }
   .product-sticky-icon-btn {
     padding: 4px 6px;

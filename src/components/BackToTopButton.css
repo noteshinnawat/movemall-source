@@ -61,10 +61,10 @@
   }
 }
 
-/* Mobile Adjustments (Avoid overlapping bottom navigation) */
+/* Mobile Adjustments (Avoid overlapping bottom navigation & sticky bar) */
 @media (max-width: 768px) {
   .back-to-top-btn {
-    bottom: 74px;
+    bottom: calc(92px + env(safe-area-inset-bottom, 0px));
     right: 14px;
     width: 42px;
     height: 44px;
