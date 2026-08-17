@@ -2,8 +2,14 @@
 
 .product-detail {
   padding-top: 16px;
-  padding-bottom: 96px;
+  padding-bottom: 48px;
   min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .product-detail {
+    padding-bottom: 96px;
+  }
 }
 
 /* Desktop Breadcrumbs & Top Navigation Bar */
@@ -1156,18 +1162,219 @@
   font-weight: 600;
 }
 
-/* ── Shopee-Style Sticky Bottom Action Bar ── */
-.product-bottom-sticky-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 990;
+/* ── Desktop Purchase Card inside Product Info ── */
+.product-detail__desktop-purchase-card {
+  margin-top: 14px;
+  margin-bottom: 14px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.product-detail__desktop-var-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.product-detail__desktop-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  min-width: 60px;
+}
+
+.product-detail__desktop-var-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.product-detail__desktop-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
   background: #FFFFFF;
-  border-top: 1px solid var(--border);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
-  padding-top: 8px;
-  padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.product-detail__desktop-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.product-detail__desktop-chip.selected {
+  border-color: var(--primary);
+  background: rgba(37, 99, 235, 0.06);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.product-detail__desktop-qty-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.product-detail__desktop-qty-box {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+.product-detail__desktop-qty-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.product-detail__desktop-qty-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--primary);
+}
+
+.product-detail__desktop-qty-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.product-detail__desktop-qty-val {
+  min-width: 36px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.product-detail__desktop-stock-txt {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.product-detail__desktop-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.product-detail__desktop-add-cart-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1.5px solid var(--primary);
+  border-radius: 4px;
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.product-detail__desktop-add-cart-btn:hover {
+  background: rgba(37, 99, 235, 0.14);
+}
+
+.product-detail__desktop-buy-now-btn {
+  flex: 1.5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px;
+  background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+  border: none;
+  border-radius: 4px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+.product-detail__desktop-buy-now-btn:hover {
+  background: linear-gradient(135deg, #B91C1C 0%, #DC2626 100%);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.product-detail__desktop-chat-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 48px;
+  height: 44px;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+
+.product-detail__desktop-chat-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--surface-hover);
+}
+
+@media (max-width: 768px) {
+  .product-detail__desktop-purchase-card {
+    display: none !important;
+  }
+}
+
+/* ── Shopee-Style Sticky Bottom Action Bar (Mobile Only) ── */
+.product-bottom-sticky-bar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .product-bottom-sticky-bar {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 990;
+    background: #FFFFFF;
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    padding-top: 8px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+  }
 }
 
 .product-bottom-sticky-content {

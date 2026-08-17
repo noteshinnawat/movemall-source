@@ -79,7 +79,7 @@ function AppLayout({
   const isCheckoutPage = location.pathname.startsWith('/checkout');
   
   // Clean full-screen pages where floating popups and footer should be suppressed
-  const isDistractionFreePage = isChatPage || isProductDetailPage || isLivePage || isVideoFeedPage || isCheckoutPage;
+  const isDistractionFreePage = isChatPage || isLivePage || isVideoFeedPage || isCheckoutPage;
 
   const [isVisualSearchOpen, setIsVisualSearchOpen] = useState(false);
   const [visualSearchInitialImage, setVisualSearchInitialImage] = useState<string | null>(null);
@@ -92,7 +92,7 @@ function AppLayout({
   return (
     <>
       <PWAInstallPrompt />
-      {!isProductDetailPage && !isChatPage && location.pathname !== '/video' && (
+      {!isChatPage && location.pathname !== '/video' && (
         <Navbar
           cartCount={cart.totalItems}
           wishlistCount={wishlist.count}

@@ -582,6 +582,91 @@ export function ProductDetailPage({
               ))}
             </div>
 
+            {/* Desktop Actions & Quantity Controls (Visible on Desktop / Tablets) */}
+            <div className="product-detail__desktop-purchase-card">
+              {/* Color / Variant Selector */}
+              <div className="product-detail__desktop-var-group">
+                <span className="product-detail__desktop-label">ตัวเลือกสี:</span>
+                <div className="product-detail__desktop-var-chips">
+                  {colorOptions.map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={`product-detail__desktop-chip ${selectedColor === color ? 'selected' : ''}`}
+                      onClick={() => setSelectedColor(color)}
+                    >
+                      {color}
+                      {selectedColor === color && <Check size={12} />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quantity Selector */}
+              <div className="product-detail__desktop-qty-row">
+                <span className="product-detail__desktop-label">จำนวน:</span>
+                <div className="product-detail__desktop-qty-box">
+                  <button
+                    type="button"
+                    className="product-detail__desktop-qty-btn"
+                    onClick={() => setQty(q => Math.max(1, q - 1))}
+                    disabled={qty <= 1}
+                  >
+                    <Minus size={14} />
+                  </button>
+                  <span className="product-detail__desktop-qty-val">{qty}</span>
+                  <button
+                    type="button"
+                    className="product-detail__desktop-qty-btn"
+                    onClick={() => setQty(q => Math.min(product.stock, q + 1))}
+                    disabled={qty >= product.stock}
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+                <span className="product-detail__desktop-stock-txt">
+                  มีสินค้าทั้งหมด {product.stock} ชิ้น
+                </span>
+              </div>
+
+              {/* Action Buttons Row */}
+              <div className="product-detail__desktop-btn-row">
+                <button
+                  type="button"
+                  id="desktop-add-cart-btn"
+                  className="product-detail__desktop-add-cart-btn"
+                  onClick={handleAddToCart}
+                >
+                  <ShoppingBag size={18} />
+                  <span>เพิ่มลงรถเข็น</span>
+                </button>
+
+                <button
+                  type="button"
+                  id="desktop-buy-now-btn"
+                  className="product-detail__desktop-buy-now-btn"
+                  onClick={handleBuyNow}
+                >
+                  <CreditCard size={18} />
+                  <span>ซื้อสินค้าทันที ฿{totalPrice.toLocaleString()}</span>
+                </button>
+
+                {(() => {
+                  const currentStore = (product.storeId && getStoreById(product.storeId)) || stores[0];
+                  return (
+                    <Link
+                      to={`/chat?storeId=${currentStore.id}`}
+                      className="product-detail__desktop-chat-btn"
+                      title="แชทกับร้านค้า"
+                    >
+                      <MessageSquare size={18} />
+                      <span>แชท</span>
+                    </Link>
+                  );
+                })()}
+              </div>
+            </div>
+
             {/* Product Compliance & Standard Card */}
             <div className="product-detail__compliance-card">
               <div className="product-detail__compliance-header">
