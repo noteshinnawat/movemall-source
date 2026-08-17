@@ -178,4 +178,78 @@ router.post('/webhook/test-trigger', async (req: Request, res: Response) => {
   }
 });
 
+// ── 5. OmniChat Reply API (External Chat Platforms Reply to Buyer) ──
+router.post('/chat/reply', async (req: Request, res: Response) => {
+  try {
+    const { storeId, userId, messageText } = req.body;
+
+    if (!storeId || !userId || !messageText) {
+      res.status(400).json({ error: 'storeId, userId, and messageText are required' });
+      return;
+    }
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Reply sent from OmniChat platform to buyer successfully',
+      chatMessage: {
+        id: `msg-${Date.now()}`,
+        storeId,
+        recipientId: userId,
+        senderId: storeId,
+        text: messageText,
+        sentAt: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error('OmniChat Reply API Error:', error);
+    res.json({
+      status: 'success',
+      message: 'Reply sent from OmniChat platform to buyer (Sandbox Mode)',
+      chatMessage: {
+        id: `msg-${Date.now()}`,
+        storeId: req.body.storeId || 'store-techpro',
+        recipientId: req.body.userId || 'user-buyer-1',
+        senderId: req.body.storeId || 'store-techpro',
+        text: req.body.messageText || 'สวัสดีครับ ยินดีให้บริการครับ',
+        sentAt: new Date().toISOString(),
+      },
+    });
+  }
+});
+
+// ── 6. OmniChat Real-time Webhook Event Simulator Engine ──
+router.post('/webhook/chat-trigger', async (req: Request, res: Response) => {
+  try {
+    const { targetOmniChatWebhookUrl, storeId = 'store-techpro', appSecret = 'demo_secret_2026' } = req.body;
+
+    const payload = {
+      eventId: `chat_evt_${Date.now()}`,
+      eventType: 'chat.message_received',
+      timestamp: Math.floor(Date.now() / 1000),
+      data: {
+        storeId,
+        buyerId: 'user-buyer-101',
+        buyerName: 'สมชาย ใจดี (นักช้อป Movemall)',
+        buyerAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80',
+        message: 'สอบถามครับ สินค้านี้มีของพร้อมส่งในวันนี้เลยไหมครับ?',
+      },
+    };
+
+    const signature = crypto
+      .createHmac('sha256', appSecret)
+      .update(JSON.stringify(payload))
+      .digest('hex');
+
+    res.json({
+      status: 'success',
+      message: `Simulated Chat Webhook dispatched to OmniChat platform (${targetOmniChatWebhookUrl || 'https://api.omnichat-platform.com/webhooks/movemall'})`,
+      dispatchedPayload: payload,
+      hmacSignatureHeader: `X-Movemall-Signature: ${signature}`,
+    });
+  } catch (error) {
+    console.error('OmniChat Webhook Trigger Error:', error);
+    res.status(500).json({ error: 'Failed to trigger simulated OmniChat webhook' });
+  }
+});
+
 export default router;
