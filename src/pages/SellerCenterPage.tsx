@@ -1,25 +1,27 @@
 // src/pages/SellerCenterPage.tsx — Merchant / Seller Portal & Management
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Plus, Package, DollarSign, TrendingUp, Star, Trash2, X, Store, CheckCircle,
   Printer, Target, Eye, MousePointerClick, Wallet, ArrowUpRight, Play, Pause,
-  AlertCircle, RefreshCw, Zap, ShieldCheck
+  AlertCircle, RefreshCw, Zap, ShieldCheck, Pencil, Upload, Image as ImageIcon
 } from 'lucide-react';
 import { stores } from '../data/stores';
 import { initialAdCampaigns, initialAdWallet } from '../data/mockAdsData';
 import { ShippingLabelModal, type ShippingLabelProps } from '../components/ShippingLabelModal';
-import type { Product, AdCampaign, AdType, AdWallet, AdKeyword } from '../types';
+import type { Product, AdCampaign, AdType, AdWallet, AdKeyword, ProductCompliance, ComplianceType } from '../types';
 import { fetchApi } from '../utils/api';
 import './SellerCenterPage.css';
 
 interface SellerCenterPageProps {
   products: Product[];
   onAddProduct: (newProduct: Product) => void;
+  onUpdateProduct?: (updatedProduct: Product) => void;
   onDeleteProduct: (id: string) => void;
 }
 
-export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: SellerCenterPageProps) {
+export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDeleteProduct }: SellerCenterPageProps) {
   const currentStore = stores[0]; // "TechPro Official Store"
   const storeProducts = products.filter(p => p.storeId === currentStore.id);
 
@@ -95,6 +97,8 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
   const currentApiSecret = apiEnv === 'live' ? liveApiSecret : sandboxApiSecret;
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedOrderForLabel, setSelectedOrderForLabel] = useState<Omit<ShippingLabelProps, 'onClose'> | null>(null);
 
   // ── Ads State ──
@@ -123,6 +127,105 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
   const [videoUrl, setVideoUrl] = useState('');
   const [description, setDescription] = useState('');
   const [badge, setBadge] = useState<Product['badge']>(undefined);
+
+  // Compliance Form State
+  const [complianceFda, setComplianceFda] = useState('');
+  const [complianceTisi, setComplianceTisi] = useState('');
+  const [complianceCountry, setComplianceCountry] = useState('Thailand');
+  const [complianceCertType, setComplianceCertType] = useState<ComplianceType | ''>('');
+  const [complianceCertUrl, setComplianceCertUrl] = useState('');
+  const [complianceHalal, setComplianceHalal] = useState('');
+
+  function resetComplianceForm() {
+    setComplianceFda('');
+    setComplianceTisi('');
+    setComplianceCountry('Thailand');
+    setComplianceCertType('');
+    setComplianceCertUrl('');
+    setComplianceHalal('');
+  }
+
+  function handleImageFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setImage(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function handleOpenEditModal(product: Product) {
+    setEditingProduct(product);
+    setName(product.name);
+    setCategory(product.category);
+    setPrice(String(product.price));
+    setOriginalPrice(String(product.originalPrice || ''));
+    setStock(String(product.stock));
+    setImage(product.images[0] || '');
+    setVideoUrl(product.videoUrl || '');
+    setDescription(product.description || '');
+    setBadge(product.badge);
+
+    // Populate compliance fields
+    setComplianceFda(product.compliance?.fdaNumber || '');
+    setComplianceTisi(product.compliance?.tisiNumber || '');
+    setComplianceCountry(product.compliance?.countryOfOrigin || 'Thailand');
+    setComplianceCertType(product.compliance?.certType || '');
+    setComplianceCertUrl(product.compliance?.certDocUrl || '');
+    setComplianceHalal(product.compliance?.halalNumber || '');
+
+    setIsEditModalOpen(true);
+  }
+
+  function handleSaveEditProduct(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingProduct) return;
+
+    const hasCompliance = Boolean(complianceFda.trim() || complianceTisi.trim() || complianceCountry || complianceCertUrl.trim() || complianceHalal.trim());
+    const updatedCompliance: ProductCompliance | undefined = hasCompliance ? {
+      fdaNumber: complianceFda.trim() || undefined,
+      tisiNumber: complianceTisi.trim() || undefined,
+      countryOfOrigin: complianceCountry || 'Thailand',
+      certType: (complianceCertType as ComplianceType) || (complianceFda ? 'fda_cosmetics' : complianceTisi ? 'tisi_standard' : undefined),
+      certDocUrl: complianceCertUrl.trim() || undefined,
+      halalNumber: complianceHalal.trim() || undefined,
+      verificationStatus: (complianceFda.trim() || complianceTisi.trim()) ? 'verified' : 'unverified',
+      verifiedAt: (complianceFda.trim() || complianceTisi.trim()) ? new Date().toISOString().split('T')[0] : undefined,
+    } : editingProduct.compliance;
+
+    const updatedProduct: Product = {
+      ...editingProduct,
+      name,
+      category,
+      price: Number(price),
+      originalPrice: originalPrice ? Number(originalPrice) : undefined,
+      stock: Number(stock),
+      images: image ? [image] : editingProduct.images,
+      videoUrl: videoUrl || undefined,
+      description: description || editingProduct.description,
+      badge: badge || undefined,
+      compliance: updatedCompliance,
+    };
+
+    if (onUpdateProduct) {
+      onUpdateProduct(updatedProduct);
+    }
+
+    setIsEditModalOpen(false);
+    setEditingProduct(null);
+    setName('');
+    setPrice('');
+    setOriginalPrice('');
+    setStock('');
+    setImage('');
+    setVideoUrl('');
+    setDescription('');
+    resetComplianceForm();
+  }
 
   // Handlers for Ads
   function handleToggleCampaignStatus(campaignId: string) {
@@ -254,6 +357,18 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
     e.preventDefault();
     if (!name.trim() || !price) return;
 
+    const hasCompliance = Boolean(complianceFda.trim() || complianceTisi.trim() || complianceCountry || complianceCertUrl.trim() || complianceHalal.trim());
+    const newCompliance: ProductCompliance | undefined = hasCompliance ? {
+      fdaNumber: complianceFda.trim() || undefined,
+      tisiNumber: complianceTisi.trim() || undefined,
+      countryOfOrigin: complianceCountry || 'Thailand',
+      certType: (complianceCertType as ComplianceType) || (complianceFda ? 'fda_cosmetics' : complianceTisi ? 'tisi_standard' : undefined),
+      certDocUrl: complianceCertUrl.trim() || undefined,
+      halalNumber: complianceHalal.trim() || undefined,
+      verificationStatus: (complianceFda.trim() || complianceTisi.trim()) ? 'verified' : 'unverified',
+      verifiedAt: (complianceFda.trim() || complianceTisi.trim()) ? new Date().toISOString().split('T')[0] : undefined,
+    } : undefined;
+
     const newProd: Product = {
       id: `p-${Date.now()}`,
       storeId: currentStore.id,
@@ -272,6 +387,7 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
       reviewCount: 0,
       tags: [category, 'สินค้าใหม่'],
       badge: currentStore.isMall ? 'mall' : badge,
+      compliance: newCompliance,
     };
 
     try {
@@ -308,6 +424,7 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
     setVideoUrl('');
     setDescription('');
     setBadge(undefined);
+    resetComplianceForm();
     setIsAddModalOpen(false);
   }
 
@@ -336,6 +453,101 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
     setFlashNominations(prev => [newNom, ...prev]);
     setIsNominateModalOpen(false);
     alert(`ลงทะเบียนสินค้า "${targetProd.name}" เข้าร่วม Flash Sale รอบ ${nomTimeSlot} สำเร็จ! (สถานะ: อนุมัติแล้ว)`);
+  }
+
+  function renderComplianceFormFields() {
+    return (
+      <div className="seller-modal__group seller-modal__group--full seller-compliance-card">
+        <div className="seller-compliance-card__header">
+          <ShieldCheck size={16} className="seller-compliance-card__icon" />
+          <span className="seller-compliance-card__title">🛡️ ข้อมูลใบอนุญาต มาตรฐานสินค้า & ประเทศผู้ผลิต (Product Compliance)</span>
+        </div>
+
+        <div className="seller-compliance-card__grid">
+          {(category === 'beauty' || category === 'food' || category === 'health') && (
+            <div className="seller-modal__group">
+              <label className="seller-modal__label">
+                เลขที่จดแจ้ง / เลขสารบบอาหาร อย. (Thai FDA Notification No.)
+                {complianceFda.trim() && (
+                  <span className="seller-compliance-tag seller-compliance-tag--valid">
+                    ✓ เลข อย. ถูกต้อง
+                  </span>
+                )}
+              </label>
+              <input
+                type="text"
+                className="seller-modal__input"
+                placeholder="เช่น 10-1-6200012345 หรือ 11-1-02544-1-0001"
+                value={complianceFda}
+                onChange={e => setComplianceFda(e.target.value)}
+              />
+            </div>
+          )}
+
+          {(category === 'electronics' || category === 'home' || category === 'toys' || category === 'sports') && (
+            <div className="seller-modal__group">
+              <label className="seller-modal__label">
+                เครื่องหมายมาตรฐาน มอก. (TISI Standard)
+                {complianceTisi.trim() && (
+                  <span className="seller-compliance-tag seller-compliance-tag--valid">
+                    ✓ มอก. อนุมัติแล้ว
+                  </span>
+                )}
+              </label>
+              <input
+                type="text"
+                className="seller-modal__input"
+                placeholder="เช่น มอก. 1195-2553 หรือ มอก. 685-2540"
+                value={complianceTisi}
+                onChange={e => setComplianceTisi(e.target.value)}
+              />
+            </div>
+          )}
+
+          <div className="seller-modal__group">
+            <label className="seller-modal__label">ประเทศที่ผลิต (Country of Origin) *</label>
+            <select
+              className="seller-modal__select"
+              value={complianceCountry}
+              onChange={e => setComplianceCountry(e.target.value)}
+            >
+              <option value="Thailand">🇹🇭 ประเทศไทย (Thailand)</option>
+              <option value="Japan">🇯🇵 ญี่ปุ่น (Japan)</option>
+              <option value="South Korea">🇰🇷 เกาหลีใต้ (South Korea)</option>
+              <option value="China">🇨🇳 จีน (China)</option>
+              <option value="USA">🇺🇸 สหรัฐอเมริกา (USA)</option>
+              <option value="Germany">🇩🇪 เยอรมนี (Germany)</option>
+              <option value="Taiwan">🇹🇼 ไต้หวัน (Taiwan)</option>
+              <option value="Vietnam">🇻🇳 เวียดนาม (Vietnam)</option>
+            </select>
+          </div>
+
+          {category === 'food' && (
+            <div className="seller-modal__group">
+              <label className="seller-modal__label">เลขเครื่องหมายฮาลาล (Halal No. - ถ้ามี)</label>
+              <input
+                type="text"
+                className="seller-modal__input"
+                placeholder="เช่น 10 B987 001 02 65"
+                value={complianceHalal}
+                onChange={e => setComplianceHalal(e.target.value)}
+              />
+            </div>
+          )}
+
+          <div className="seller-modal__group seller-modal__group--full">
+            <label className="seller-modal__label">ลิงก์ภาพสแกนใบอนุญาต / Certificate URL (ตัวเลือกเสริม)</label>
+            <input
+              type="url"
+              className="seller-modal__input"
+              placeholder="https://.../certificate-doc.jpg หรือไฟล์สแกนใบจดแจ้ง"
+              value={complianceCertUrl}
+              onChange={e => setComplianceCertUrl(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -489,68 +701,174 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
           </button>
         </div>
 
-        {/* Products Table */}
+        {/* Products Table (Desktop) & Mobile Card List */}
         {activeTab === 'overview' && (
-          <div className="seller-table-container">
-            <table className="seller-table">
-              <thead>
-                <tr>
-                  <th>สินค้า</th>
-                  <th>หมวดหมู่</th>
-                  <th>ราคาขาย</th>
-                  <th>คงเหลือ (สต็อก)</th>
-                  <th>คะแนน / รีวิว</th>
-                  <th>การจัดการ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {storeProducts.map(product => (
-                  <tr key={product.id}>
-                    <td>
-                      <div className="seller-product-cell">
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="seller-product-img"
-                        />
-                        <div>
-                          <div className="seller-product-name">{product.name}</div>
-                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>ID: {product.id}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td><span style={{ textTransform: 'capitalize' }}>{product.category}</span></td>
-                    <td>
-                      <strong style={{ color: 'var(--primary-dark)' }}>฿{product.price.toLocaleString()}</strong>
-                      {product.originalPrice && (
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                          ฿{product.originalPrice.toLocaleString()}
-                        </div>
-                      )}
-                    </td>
-                    <td>
-                      {product.stock > 10 ? (
-                        <span style={{ color: 'var(--success)', fontWeight: 600 }}>{product.stock} ชิ้น</span>
-                      ) : (
-                        <span style={{ color: 'var(--error)', fontWeight: 700 }}>เหลือน้อย ({product.stock} ชิ้น)</span>
-                      )}
-                    </td>
-                    <td>⭐ {product.rating} ({product.reviewCount})</td>
-                    <td>
-                      <button
-                        className="seller-delete-btn"
-                        onClick={() => onDeleteProduct(product.id)}
-                        aria-label={`ลบ ${product.name}`}
-                      >
-                        <Trash2 size={13} />
-                        ลบสินค้า
-                      </button>
-                    </td>
+          <>
+            {/* Desktop Table View */}
+            <div className="seller-table-container seller-desktop-table">
+              <table className="seller-table">
+                <thead>
+                  <tr>
+                    <th>สินค้า</th>
+                    <th>หมวดหมู่</th>
+                    <th>ราคาขาย</th>
+                    <th>คงเหลือ (สต็อก)</th>
+                    <th>คะแนน / รีวิว</th>
+                    <th>ใบอนุญาต & มอก.</th>
+                    <th>การจัดการ</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {storeProducts.map(product => (
+                    <tr key={product.id}>
+                      <td>
+                        <div className="seller-product-cell">
+                          <img
+                            src={product.images[0]}
+                            alt={product.name}
+                            className="seller-product-img"
+                          />
+                          <div>
+                            <div className="seller-product-name">{product.name}</div>
+                            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>ID: {product.id}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span style={{ textTransform: 'capitalize' }}>{product.category}</span></td>
+                      <td>
+                        <strong style={{ color: 'var(--primary-dark)' }}>฿{product.price.toLocaleString()}</strong>
+                        {product.originalPrice && (
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                            ฿{product.originalPrice.toLocaleString()}
+                          </div>
+                        )}
+                      </td>
+                      <td>
+                        {product.stock > 10 ? (
+                          <span style={{ color: 'var(--success)', fontWeight: 600 }}>{product.stock} ชิ้น</span>
+                        ) : (
+                          <span style={{ color: 'var(--error)', fontWeight: 700 }}>เหลือน้อย ({product.stock} ชิ้น)</span>
+                        )}
+                      </td>
+                      <td>⭐ {product.rating} ({product.reviewCount})</td>
+                      <td>
+                        {product.compliance ? (
+                          <div style={{ fontSize: 11, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                            {product.compliance.fdaNumber && (
+                              <span style={{ color: '#059669', fontWeight: 600 }}>
+                                🛡️ อย. {product.compliance.fdaNumber}
+                              </span>
+                            )}
+                            {product.compliance.tisiNumber && (
+                              <span style={{ color: '#2563EB', fontWeight: 600 }}>
+                                ⚡ {product.compliance.tisiNumber}
+                              </span>
+                            )}
+                            {product.compliance.countryOfOrigin && (
+                              <span style={{ color: 'var(--text-muted)' }}>
+                                🌐 {product.compliance.countryOfOrigin}
+                              </span>
+                            )}
+                            <span className="seller-compliance-status-chip">
+                              ✓ ตรวจสอบแล้ว
+                            </span>
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: 11, color: '#9CA3AF' }}>- ไม่มีข้อมูล -</span>
+                        )}
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <button
+                            className="seller-edit-btn"
+                            onClick={() => handleOpenEditModal(product)}
+                            aria-label={`แก้ไข ${product.name}`}
+                          >
+                            <Pencil size={13} />
+                            แก้ไข
+                          </button>
+                          <button
+                            className="seller-delete-btn"
+                            onClick={() => onDeleteProduct(product.id)}
+                            aria-label={`ลบ ${product.name}`}
+                          >
+                            <Trash2 size={13} />
+                            ลบ
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card List View (Shopee / TikTok Seller Style) */}
+            <div className="seller-mobile-card-list">
+              {storeProducts.map(product => (
+                <div key={product.id} className="seller-mobile-card">
+                  <div className="seller-mobile-card__top">
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="seller-mobile-card__img"
+                    />
+                    <div className="seller-mobile-card__info">
+                      <span className="seller-mobile-card__category">{product.category}</span>
+                      <h4 className="seller-mobile-card__name">{product.name}</h4>
+                      <span className="seller-mobile-card__id">ID: {product.id}</span>
+                    </div>
+                  </div>
+
+                  <div className="seller-mobile-card__meta">
+                    <div className="seller-mobile-card__meta-item">
+                      <span className="seller-mobile-card__meta-label">ราคาขาย:</span>
+                      <strong className="seller-mobile-card__price">฿{product.price.toLocaleString()}</strong>
+                      {product.originalPrice && (
+                        <span className="seller-mobile-card__orig">฿{product.originalPrice.toLocaleString()}</span>
+                      )}
+                    </div>
+
+                    <div className="seller-mobile-card__meta-item">
+                      <span className="seller-mobile-card__meta-label">คงเหลือ:</span>
+                      {product.stock > 10 ? (
+                        <span className="seller-mobile-card__stock seller-mobile-card__stock--ok">
+                          {product.stock} ชิ้น
+                        </span>
+                      ) : (
+                        <span className="seller-mobile-card__stock seller-mobile-card__stock--low">
+                          เหลือน้อย ({product.stock} ชิ้น)
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="seller-mobile-card__meta-item">
+                      <span className="seller-mobile-card__meta-label">รีวิว:</span>
+                      <span className="seller-mobile-card__rating">⭐ {product.rating} ({product.reviewCount})</span>
+                    </div>
+                  </div>
+
+                  <div className="seller-mobile-card__actions">
+                    <button
+                      className="seller-mobile-card__btn-edit"
+                      onClick={() => handleOpenEditModal(product)}
+                    >
+                      <Pencil size={13} /> แก้ไข
+                    </button>
+                    <Link to={`/product/${product.id}`} className="seller-mobile-card__btn-view">
+                      👁️ ดูสินค้า
+                    </Link>
+                    <button
+                      className="seller-mobile-card__btn-delete"
+                      onClick={() => onDeleteProduct(product.id)}
+                    >
+                      <Trash2 size={13} /> ลบ
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         {/* Orders Tab */}
@@ -1811,15 +2129,46 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
                   />
                 </div>
 
-                <div className="seller-modal__group">
-                  <label className="seller-modal__label">ลิงก์รูปภาพ (Image URL)</label>
-                  <input
-                    type="url"
-                    className="seller-modal__input"
-                    placeholder="https://images.unsplash.com/..."
-                    value={image}
-                    onChange={e => setImage(e.target.value)}
-                  />
+                <div className="seller-modal__group seller-modal__group--full">
+                  <label className="seller-modal__label">🖼️ รูปภาพสินค้า (อัปโหลดจากเครื่อง หรือ วาง Image URL)</label>
+                  <div className="seller-modal__image-uploader-row">
+                    <label className="seller-modal__image-upload-btn">
+                      <Upload size={16} />
+                      เลือกไฟล์รูปภาพจากเครื่อง
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageFileUpload}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                    <span style={{ fontSize: '12px', color: '#6B7280', whiteSpace: 'nowrap' }}>หรือวาง URL:</span>
+                    <input
+                      type="url"
+                      className="seller-modal__input seller-modal__image-url-input"
+                      placeholder="https://images.unsplash.com/..."
+                      value={image}
+                      onChange={e => setImage(e.target.value)}
+                    />
+                  </div>
+                  {image && (
+                    <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '12px', background: '#F9FAFB', padding: '8px 12px', borderRadius: '6px', border: '1px solid #E5E7EB' }}>
+                      <img src={image} alt="Preview" style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '6px' }} />
+                      <div style={{ flex: 1, overflow: 'hidden' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#111827' }}>ตัวอย่างรูปสินค้า (Live Preview)</div>
+                        <div style={{ fontSize: '11px', color: '#6B7280', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                          {image.startsWith('data:') ? '📷 อัปโหลดรูปจากเครื่องแล้ว (Base64 Data)' : image}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setImage('')}
+                        style={{ background: '#FEE2E2', border: 'none', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', fontSize: '12px', color: '#DC2626', fontWeight: 500 }}
+                      >
+                        ลบรูป
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="seller-modal__group">
@@ -1842,6 +2191,8 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
                     onChange={e => setDescription(e.target.value)}
                   />
                 </div>
+
+                {renderComplianceFormFields()}
               </div>
 
               <div className="seller-modal__actions">
@@ -1855,6 +2206,164 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
                 <button type="submit" className="seller-modal__submit">
                   <CheckCircle size={15} style={{ display: 'inline', marginRight: 4 }} />
                   บันทึกและวางขายทันที
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Product Modal */}
+      {isEditModalOpen && editingProduct && (
+        <div className="seller-modal-backdrop" onClick={() => setIsEditModalOpen(false)}>
+          <div className="seller-modal" onClick={e => e.stopPropagation()}>
+            <div className="seller-modal__header">
+              <h2 className="seller-modal__title">✏️ แก้ไขข้อมูลสินค้า (ID: {editingProduct.id})</h2>
+              <button className="seller-modal__close" onClick={() => setIsEditModalOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditProduct}>
+              <div className="seller-modal__grid">
+                <div className="seller-modal__group seller-modal__group--full">
+                  <label className="seller-modal__label">ชื่อสินค้า *</label>
+                  <input
+                    className="seller-modal__input"
+                    required
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                  />
+                </div>
+
+                <div className="seller-modal__group">
+                  <label className="seller-modal__label">หมวดหมู่ *</label>
+                  <select
+                    className="seller-modal__select"
+                    value={category}
+                    onChange={e => setCategory(e.target.value)}
+                  >
+                    <option value="electronics">อิเล็กทรอนิกส์</option>
+                    <option value="fashion">แฟชั่น</option>
+                    <option value="beauty">ความงาม</option>
+                    <option value="home">บ้านและสวน</option>
+                    <option value="sports">กีฬา</option>
+                    <option value="food">อาหารและเครื่องดื่ม</option>
+                  </select>
+                </div>
+
+                <div className="seller-modal__group">
+                  <label className="seller-modal__label">ป้ายโปรโมชั่น</label>
+                  <select
+                    className="seller-modal__select"
+                    value={badge || ''}
+                    onChange={e => setBadge((e.target.value as Product['badge']) || undefined)}
+                  >
+                    <option value="">ไม่มีป้าย</option>
+                    <option value="new">✨ สินค้าใหม่</option>
+                    <option value="sale">🔥 ลดราคา (Sale)</option>
+                    <option value="hot">⚡ ยอดฮิต (Hot)</option>
+                  </select>
+                </div>
+
+                <div className="seller-modal__group">
+                  <label className="seller-modal__label">ราคาขาย (บาท) *</label>
+                  <input
+                    type="number"
+                    className="seller-modal__input"
+                    required
+                    value={price}
+                    onChange={e => setPrice(e.target.value)}
+                  />
+                </div>
+
+                <div className="seller-modal__group">
+                  <label className="seller-modal__label">ราคาเต็ม (บาท) ก่อนลด</label>
+                  <input
+                    type="number"
+                    className="seller-modal__input"
+                    value={originalPrice}
+                    onChange={e => setOriginalPrice(e.target.value)}
+                  />
+                </div>
+
+                <div className="seller-modal__group">
+                  <label className="seller-modal__label">จำนวนสินค้าในสต็อก *</label>
+                  <input
+                    type="number"
+                    className="seller-modal__input"
+                    required
+                    value={stock}
+                    onChange={e => setStock(e.target.value)}
+                  />
+                </div>
+
+                <div className="seller-modal__group seller-modal__group--full">
+                  <label className="seller-modal__label">🖼️ รูปภาพสินค้า (อัปโหลดจากเครื่อง หรือ วาง Image URL)</label>
+                  <div className="seller-modal__image-uploader-row">
+                    <label className="seller-modal__image-upload-btn">
+                      <Upload size={16} />
+                      เลือกไฟล์รูปภาพใหม่จากเครื่อง
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageFileUpload}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                    <span style={{ fontSize: '12px', color: '#6B7280', whiteSpace: 'nowrap' }}>หรือวาง URL:</span>
+                    <input
+                      type="url"
+                      className="seller-modal__input seller-modal__image-url-input"
+                      placeholder="https://images.unsplash.com/..."
+                      value={image}
+                      onChange={e => setImage(e.target.value)}
+                    />
+                  </div>
+                  {image && (
+                    <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '12px', background: '#F9FAFB', padding: '8px 12px', borderRadius: '6px', border: '1px solid #E5E7EB' }}>
+                      <img src={image} alt="Preview" style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '6px' }} />
+                      <div style={{ flex: 1, overflow: 'hidden' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#111827' }}>ตัวอย่างรูปสินค้าปัจจุบัน (Live Preview)</div>
+                        <div style={{ fontSize: '11px', color: '#6B7280', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                          {image.startsWith('data:') ? '📷 อัปโหลดรูปจากเครื่องแล้ว (Base64 Data)' : image}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setImage('')}
+                        style={{ background: '#FEE2E2', border: 'none', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', fontSize: '12px', color: '#DC2626', fontWeight: 500 }}
+                      >
+                        ลบรูป
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="seller-modal__group seller-modal__group--full">
+                  <label className="seller-modal__label">รายละเอียดสินค้าเพิ่มเติม</label>
+                  <textarea
+                    className="seller-modal__textarea"
+                    rows={3}
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                  />
+                </div>
+
+                {renderComplianceFormFields()}
+              </div>
+
+              <div className="seller-modal__actions">
+                <button
+                  type="button"
+                  className="review-form__cancel-btn"
+                  onClick={() => setIsEditModalOpen(false)}
+                >
+                  ยกเลิก
+                </button>
+                <button type="submit" className="seller-modal__submit">
+                  <CheckCircle size={15} style={{ display: 'inline', marginRight: 4 }} />
+                  บันทึกการแก้ไขสินค้า
                 </button>
               </div>
             </form>

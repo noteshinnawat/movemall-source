@@ -62,6 +62,7 @@ function AppLayout({
   handlePublishClip,
   handleAddProduct,
   handleDeleteProduct,
+  handleUpdateProduct,
   addToast,
 }: any) {
   const location = useLocation();
@@ -289,6 +290,7 @@ function AppLayout({
               <SellerCenterPage
                 products={productList}
                 onAddProduct={handleAddProduct}
+                onUpdateProduct={handleUpdateProduct}
                 onDeleteProduct={handleDeleteProduct}
               />
             }
@@ -615,6 +617,11 @@ function App() {
     addToast('ลบสินค้าออกจากร้านค้าแล้ว', 'info', '🗑️');
   }
 
+  function handleUpdateProduct(updatedProduct: Product) {
+    setProductList(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+    addToast(`อัปเดตข้อมูลสินค้า "${updatedProduct.name}" สำเร็จแล้ว!`, 'success', '✏️');
+  }
+
   return (
     <BrowserRouter>
       <AppLayout
@@ -630,6 +637,7 @@ function App() {
         handlePublishClip={handlePublishClip}
         handleAddProduct={handleAddProduct}
         handleDeleteProduct={handleDeleteProduct}
+        handleUpdateProduct={handleUpdateProduct}
         addToast={addToast}
       />
     </BrowserRouter>

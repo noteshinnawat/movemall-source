@@ -28,6 +28,20 @@ export interface VideoReview {
   isTrending?: boolean;
 }
 
+export type ComplianceType = 'fda_cosmetics' | 'fda_food' | 'tisi_standard' | 'import_license' | 'halal' | 'organic' | 'customs_co';
+
+export interface ProductCompliance {
+  fdaNumber?: string;          // เลขที่จดแจ้ง อย. (เช่น 10-1-6200012345 หรือ 11-1-02544-1-0001)
+  tisiNumber?: string;         // เลขที่ มอก. (เช่น มอก. 1195-2553)
+  countryOfOrigin?: string;    // ประเทศผู้ผลิต (เช่น Thailand, Japan, South Korea, China, USA, Germany)
+  certType?: ComplianceType;   // ประเภทใบรับรองหลัก
+  certDocUrl?: string;         // URL เอกสาร/ภาพใบรับรอง
+  halalNumber?: string;        // เลขฮาลาล (ถ้ามี)
+  verificationStatus: 'verified' | 'pending' | 'unverified' | 'rejected';
+  verifiedAt?: string;
+  rejectionReason?: string;
+}
+
 export interface Product {
   id: string;
   storeId: string;
@@ -45,6 +59,7 @@ export interface Product {
   tags: string[];
   badge?: 'new' | 'sale' | 'hot' | 'limited' | 'mall';
   isMall?: boolean;
+  compliance?: ProductCompliance;
 }
 
 export interface CartItem {

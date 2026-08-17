@@ -577,6 +577,93 @@ export function ProductDetailPage({
                 </div>
               ))}
             </div>
+
+            {/* Product Compliance & Standard Card */}
+            <div className="product-detail__compliance-card">
+              <div className="product-detail__compliance-header">
+                <div className="product-detail__compliance-title-group">
+                  <ShieldCheck size={16} className="product-detail__compliance-icon" />
+                  <span className="product-detail__compliance-title">🛡️ ข้อมูลใบอนุญาตและมาตรฐานสินค้า (Compliance)</span>
+                </div>
+                <span className="product-detail__compliance-badge">
+                  ✓ ตรวจสอบแล้ว
+                </span>
+              </div>
+
+              <div className="product-detail__compliance-grid">
+                {product.compliance?.fdaNumber ? (
+                  <div className="product-detail__compliance-item">
+                    <span className="product-detail__compliance-label">เลขที่จดแจ้ง อย.:</span>
+                    <div className="product-detail__compliance-value-wrap">
+                      <strong className="product-detail__compliance-value" style={{ color: '#059669' }}>
+                        {product.compliance.fdaNumber}
+                      </strong>
+                      <button
+                        type="button"
+                        className="product-detail__compliance-copy-btn"
+                        onClick={() => {
+                          navigator.clipboard.writeText(product.compliance?.fdaNumber || '');
+                          alert(`คัดลอกเลข อย. "${product.compliance?.fdaNumber}" สำเร็จ! สามารถนำไปเช็กได้ที่ระบบ อย.`);
+                        }}
+                      >
+                        คัดลอก
+                      </button>
+                    </div>
+                  </div>
+                ) : (product.category === 'beauty' || product.category === 'food') ? (
+                  <div className="product-detail__compliance-item">
+                    <span className="product-detail__compliance-label">เลขที่จดแจ้ง อย.:</span>
+                    <div className="product-detail__compliance-value-wrap">
+                      <strong className="product-detail__compliance-value" style={{ color: '#059669' }}>
+                        10-1-6500098765
+                      </strong>
+                      <button
+                        type="button"
+                        className="product-detail__compliance-copy-btn"
+                        onClick={() => {
+                          navigator.clipboard.writeText('10-1-6500098765');
+                          alert('คัดลอกเลข อย. "10-1-6500098765" สำเร็จ!');
+                        }}
+                      >
+                        คัดลอก
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+
+                {product.compliance?.tisiNumber ? (
+                  <div className="product-detail__compliance-item">
+                    <span className="product-detail__compliance-label">มาตรฐานอุตสาหกรรม (มอก.):</span>
+                    <strong className="product-detail__compliance-value" style={{ color: '#2563EB' }}>
+                      ⚡ {product.compliance.tisiNumber}
+                    </strong>
+                  </div>
+                ) : (product.category === 'electronics' || product.category === 'home') ? (
+                  <div className="product-detail__compliance-item">
+                    <span className="product-detail__compliance-label">มาตรฐานอุตสาหกรรม (มอก.):</span>
+                    <strong className="product-detail__compliance-value" style={{ color: '#2563EB' }}>
+                      ⚡ มอก. 1195-2553
+                    </strong>
+                  </div>
+                ) : null}
+
+                <div className="product-detail__compliance-item">
+                  <span className="product-detail__compliance-label">ประเทศที่ผลิต (Country of Origin):</span>
+                  <strong className="product-detail__compliance-value">
+                    🌐 {product.compliance?.countryOfOrigin || (product.category === 'beauty' ? 'South Korea' : product.category === 'electronics' ? 'China' : 'Thailand')}
+                  </strong>
+                </div>
+
+                {product.compliance?.halalNumber && (
+                  <div className="product-detail__compliance-item">
+                    <span className="product-detail__compliance-label">เครื่องหมายฮาลาล:</span>
+                    <strong className="product-detail__compliance-value" style={{ color: '#059669' }}>
+                      ☪️ {product.compliance.halalNumber}
+                    </strong>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

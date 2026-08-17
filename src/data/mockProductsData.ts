@@ -29,6 +29,13 @@ const rawProducts: Product[] = [
     description: 'หูฟังไร้สายคุณภาพระดับพรีเมียม ตัดเสียงรบกวน Active Noise Cancelling แบตเตอรี่ใช้งานได้ 30 ชั่วโมง ชาร์จ Type-C',
     tags: ['หูฟัง', 'ไร้สาย', 'ANC', 'บลูทูธ'],
     badge: 'sale',
+    compliance: {
+      tisiNumber: 'มอก. 1195-2553',
+      countryOfOrigin: 'China',
+      certType: 'tisi_standard',
+      verificationStatus: 'verified',
+      verifiedAt: '2026-01-15',
+    },
   },
   {
     id: 'el-2',
@@ -672,6 +679,13 @@ const rawProducts: Product[] = [
     description: 'กันแดดเนื้อเซรั่ม ซึมไวใน 10 วินาที ไม่ทิ้งคราบขาว คุมมันยาวนาน 12 ชั่วโมง ไม่อุดตันผิว',
     tags: ['กันแดด', 'SPF50', 'คุมมัน', 'สกินแคร์'],
     badge: 'hot',
+    compliance: {
+      fdaNumber: '10-1-6200012345',
+      countryOfOrigin: 'South Korea',
+      certType: 'fda_cosmetics',
+      verificationStatus: 'verified',
+      verifiedAt: '2026-02-10',
+    },
   },
   {
     id: 'bt-2',

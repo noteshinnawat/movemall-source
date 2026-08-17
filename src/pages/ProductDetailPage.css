@@ -2000,6 +2000,99 @@
   }
 }
 
+/* ──────────────────────────────────────────────
+   Product Detail Compliance Card Styles
+   ────────────────────────────────────────────── */
+.product-detail__compliance-card {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-md, 6px);
+}
+
+.product-detail__compliance-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #E2E8F0;
+  flex-wrap: wrap;
+}
+
+.product-detail__compliance-title-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.product-detail__compliance-icon {
+  color: #2563EB;
+}
+
+.product-detail__compliance-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.product-detail__compliance-badge {
+  font-size: 10px;
+  font-weight: 800;
+  color: #047857;
+  background: #D1FAE5;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.product-detail__compliance-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.product-detail__compliance-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.product-detail__compliance-label {
+  color: #64748B;
+  font-weight: 500;
+}
+
+.product-detail__compliance-value-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.product-detail__compliance-value {
+  color: #1E293B;
+  font-weight: 700;
+}
+
+.product-detail__compliance-copy-btn {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: #2563EB;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.product-detail__compliance-copy-btn:hover {
+  background: #DBEAFE;
+}
+
 
 
 

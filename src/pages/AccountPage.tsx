@@ -1,6 +1,7 @@
 // src/pages/AccountPage.tsx — Customer Account & Multi-channel Verification Portal
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   User,
   ShieldCheck,
@@ -13,7 +14,8 @@ import {
   Coins,
   Sparkles,
   Key,
-  X
+  X,
+  Upload
 } from 'lucide-react';
 import { fetchApi } from '../utils/api';
 import './AccountPage.css';
@@ -27,6 +29,23 @@ export function AccountPage() {
   const [phone, setPhone] = useState('0899999999');
   const [avatarUrl, setAvatarUrl] = useState('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80');
   const [coins, setCoins] = useState(250);
+
+  function handleAvatarFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('กรุณาเลือกไฟล์รูปภาพขนาดไม่เกิน 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setAvatarUrl(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
 
   // Verification Status
   const [isEmailVerified, setIsEmailVerified] = useState(true);
@@ -184,14 +203,22 @@ export function AccountPage() {
               <h1 className="account-section-title">โปรไฟล์ส่วนตัว (Personal Profile)</h1>
               <p className="account-section-sub">จัดการข้อมูลส่วนตัวและตรวจสอบยอดสะสม Movemall Coins</p>
 
-              <div className="account-card" style={{ background: 'linear-gradient(135deg, #1e3a8a, #2563eb)', color: '#ffffff' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="account-card account-vip-card">
+                <div className="account-vip-card__header">
+                  <div className="account-vip-badge">👑 MOVEMALL VIP MEMBER</div>
+                  <Sparkles size={20} className="account-vip-sparkle" />
+                </div>
+                <div className="account-vip-card__body">
                   <div>
-                    <span style={{ fontSize: '0.85rem', opacity: 0.9 }}>ยอดเหรียญสะสม Movemall Coins</span>
-                    <h2 style={{ fontSize: '2rem', fontWeight: 800, margin: '0.25rem 0' }}>🪙 {coins.toLocaleString()} Coins</h2>
-                    <span style={{ fontSize: '0.8rem', opacity: 0.9 }}>ใช้เป็นส่วนลดเงินสด 1 Coin = 1 บาท ในขั้นตอนชำระเงิน</span>
+                    <span className="account-vip-label">ยอดเหรียญสะสม Movemall Coins</span>
+                    <h2 className="account-vip-val">🪙 {coins.toLocaleString()} <span className="account-vip-unit">Coins</span></h2>
+                    <span className="account-vip-sub">💡 ใช้เป็นส่วนลดเงินสด 1 Coin = 1 บาท ในขั้นตอนชำระเงิน</span>
                   </div>
-                  <Sparkles size={48} opacity={0.8} />
+                  <div className="account-vip-actions">
+                    <Link to="/games" className="account-vip-btn">
+                      🪙 แลกรางวัล
+                    </Link>
+                  </div>
                 </div>
               </div>
 
@@ -202,11 +229,81 @@ export function AccountPage() {
                     <input type="text" className="account-input" value={name} onChange={e => setName(e.target.value)} />
                   </div>
                   <div className="account-field">
-                    <label className="account-label">URL รูปอวตาร (Avatar Image)</label>
-                    <input type="text" className="account-input" value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} />
+                    <label className="account-label">เบอร์โทรศัพท์ (ยืนยันแล้ว)</label>
+                    <input type="text" className="account-input" value="081-234-5678" disabled />
                   </div>
                 </div>
-                <button className="account-btn-primary" style={{ marginTop: '1rem' }}>บันทึกข้อมูลส่วนตัว</button>
+
+                <div className="account-field" style={{ marginTop: '1rem' }}>
+                  <label className="account-label">รูปโปรไฟล์ & อวตาร (Avatar Image)</label>
+                  <div className="account-avatar-picker">
+                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                      <img src={avatarUrl} alt="Avatar Preview" className="account-avatar-preview" />
+                      <label className="account-avatar-upload-icon-btn" title="อัปโหลดรูปจากเครื่อง">
+                        <Upload size={13} />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAvatarFileUpload}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    </div>
+
+                    <div className="account-avatar-inputs">
+                      <div className="account-avatar-action-row">
+                        <label className="account-avatar-file-label">
+                          <Upload size={14} />
+                          📷 เลือกรูปจากมือถือ / คอมพิวเตอร์
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleAvatarFileUpload}
+                            style={{ display: 'none' }}
+                          />
+                        </label>
+                        <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>หรือวาง Image URL:</span>
+                      </div>
+
+                      <input
+                        type="text"
+                        className="account-input"
+                        placeholder="วาง URL รูปภาพโปรไฟล์..."
+                        value={avatarUrl}
+                        onChange={e => setAvatarUrl(e.target.value)}
+                      />
+
+                      <div className="account-avatar-presets">
+                        <span style={{ fontSize: '0.75rem', color: '#6B7280', fontWeight: 600 }}>รูปตัวอย่าง:</span>
+                        <button
+                          type="button"
+                          className="account-preset-btn"
+                          onClick={() => setAvatarUrl('https://images.unsplash.com/photo-1535713875002-d1d0cf377fc6?auto=format&fit=crop&w=200&q=80')}
+                        >
+                          👤 ชาย
+                        </button>
+                        <button
+                          type="button"
+                          className="account-preset-btn"
+                          onClick={() => setAvatarUrl('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80')}
+                        >
+                          👩 หญิง
+                        </button>
+                        <button
+                          type="button"
+                          className="account-preset-btn"
+                          onClick={() => setAvatarUrl('https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80')}
+                        >
+                          🧑 ธุรกิจ
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button className="account-btn-primary" style={{ marginTop: '1.25rem' }}>
+                  💾 บันทึกข้อมูลส่วนตัว
+                </button>
               </div>
             </div>
           )}
