@@ -1,0 +1,18 @@
+{
+  "name": "Movemall — มาร์เก็ตเพลส & ไลฟ์สดช้อปปิ้ง",
+  "short_name": "Movemall",
+  "description": "แหล่งช้อปปิ้งออนไลน์รวมแบรนด์ดัง ไลฟ์สดขายของ และมินิเกมรับเหรียญ",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFFFFF",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

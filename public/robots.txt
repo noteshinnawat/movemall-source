@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /seller
+Disallow: /checkout
+Disallow: /order/success
+Disallow: /account
+
+Sitemap: https://movemall.com/sitemap.xml

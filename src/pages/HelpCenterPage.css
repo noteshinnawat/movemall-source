@@ -1,0 +1,285 @@
+/* HelpCenterPage.css — Clean Flat Help & Info Pages */
+
+.help-page {
+  padding-top: var(--navbar-height);
+  min-height: 100vh;
+  background: var(--background);
+  padding-bottom: var(--space-16);
+}
+
+.help-hero {
+  background: #FFFFFF;
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-10) 0;
+  text-align: center;
+}
+
+.help-hero__title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.help-hero__subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  max-width: 540px;
+  margin: 0 auto var(--space-6);
+}
+
+/* Tab Navigation */
+.help-nav {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.help-nav__item {
+  padding: 8px 18px;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.help-nav__item:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #FFFFFF;
+}
+
+.help-nav__item--active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.help-nav__item--active:hover {
+  background: var(--primary-dark);
+  color: white;
+}
+
+/* Content Container */
+.help-content {
+  margin-top: var(--space-8);
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.help-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: var(--space-8);
+  margin-bottom: var(--space-6);
+}
+
+.help-card__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Step Guides (How to order & Returns) */
+.help-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-6) 0;
+}
+
+.help-step-box {
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.help-step-num {
+  width: 28px;
+  height: 28px;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.help-step-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.help-step-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* FAQ Accordion */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.faq-item {
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: #FFFFFF;
+}
+
+.faq-question {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: var(--space-4);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.faq-answer {
+  padding: 0 var(--space-4) var(--space-4);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-3);
+}
+
+/* Shipping Partners Grid */
+.shipping-carriers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.carrier-card {
+  border: 1px solid var(--border);
+  background: var(--surface-hover);
+  padding: var(--space-4);
+  text-align: center;
+}
+
+.carrier-card__name {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+}
+
+.carrier-card__time {
+  font-size: 12px;
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+/* Contact Form */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.contact-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.contact-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.contact-info-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--primary-subtle);
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.contact-form__input,
+.contact-form__textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: #FFFFFF;
+  border-radius: 0;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+}
+
+.contact-form__input:focus,
+.contact-form__textarea:focus {
+  border-color: var(--primary);
+}
+
+.contact-form__textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.contact-form__btn {
+  padding: 10px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.contact-form__btn:hover {
+  background: var(--primary-dark);
+}
+
+@media (max-width: 768px) {
+  .contact-grid { grid-template-columns: 1fr; }
+  .shipping-carriers { grid-template-columns: 1fr; }
+}

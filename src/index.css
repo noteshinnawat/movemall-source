@@ -1,0 +1,22 @@
+/* ==========================================================================
+   Movemall — Clean Flat Design System (Master Entry Point)
+   src/index.css
+   ========================================================================== */
+
+/* 1. Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* 2. Design Tokens (Colors, Spacing, Shadows, Z-Indices) */
+@import './styles/variables.css';
+
+/* 3. Base Resets, Typography & Scrollbars */
+@import './styles/base.css';
+
+/* 4. Utility Classes (Flex, Grid, Spacing, Typography, Display) */
+@import './styles/utilities.css';
+
+/* 5. Shared Component Classes (Buttons, Badges, Cards, Forms, Modals) */
+@import './styles/components.css';
+
+/* 6. Animations & Keyframes */
+@import './styles/animations.css';

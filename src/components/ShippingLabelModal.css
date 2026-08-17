@@ -1,0 +1,233 @@
+/* ShippingLabelModal.css — Thermal Printer Shipping Label (100x150mm) */
+
+.label-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1300;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.label-modal-container {
+  background: #FFFFFF;
+  border-radius: 0;
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.label-modal-header {
+  padding: 12px 16px;
+  background: var(--surface-hover);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.label-modal-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.label-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.label-print-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.label-close-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* ── 4x6 Inch Air Waybill Label Sheet ── */
+.awb-sheet {
+  background: #FFFFFF;
+  margin: 16px auto;
+  width: 360px;
+  border: 2px solid #000000;
+  color: #000000;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.awb-row {
+  border-bottom: 1.5px solid #000000;
+  display: flex;
+}
+
+.awb-row--last {
+  border-bottom: none;
+}
+
+.awb-header-zone {
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #FAFAFA;
+}
+
+.awb-brand-logo {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.awb-courier-tag {
+  font-size: 13px;
+  font-weight: 900;
+  color: #EA580C;
+}
+
+.awb-cod-box {
+  background: #000000;
+  color: #FFFFFF;
+  padding: 3px 6px;
+  font-weight: 900;
+  font-size: 12px;
+}
+
+/* Sorting Code */
+.awb-sorting-zone {
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #F3F4F6;
+}
+
+.awb-sorting-code {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.awb-route-type {
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid #000000;
+  padding: 2px 6px;
+}
+
+/* Barcode Zone */
+.awb-barcode-zone {
+  padding: 10px;
+  text-align: center;
+}
+
+.awb-barcode-lines {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  gap: 1.5px;
+}
+
+.awb-barcode-bar {
+  background: #000000;
+  height: 100%;
+}
+
+.awb-tracking-number {
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+/* Address Grid */
+.awb-address-col {
+  padding: 8px 10px;
+  flex: 1;
+}
+
+.awb-address-col:first-child {
+  border-right: 1.5px solid #000000;
+}
+
+.awb-label-tag {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.awb-recipient-name {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.awb-recipient-zip {
+  font-size: 16px;
+  font-weight: 900;
+  margin-top: 4px;
+}
+
+/* Items List */
+.awb-items-zone {
+  padding: 6px 10px;
+  font-size: 10px;
+}
+
+.awb-fragile-alert {
+  padding: 6px 10px;
+  font-weight: 900;
+  font-size: 11px;
+  text-align: center;
+  background: #FEE2E2;
+  color: #DC2626;
+  border-top: 1px dashed #000000;
+}
+
+/* Print CSS for Thermal Printers (4x6 inch) */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .awb-sheet,
+  .awb-sheet * {
+    visibility: visible;
+  }
+  .awb-sheet {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    border: 1.5px solid #000;
+  }
+}

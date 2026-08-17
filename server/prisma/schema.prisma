@@ -1,0 +1,392 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_DIRECT")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ── 1. ผู้ใช้งาน & สมาชิก ──
+enum Role {
+  BUYER
+  SELLER
+  CREATOR
+  ADMIN
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String?        @unique
+  phone         String?        @unique
+  passwordHash  String
+  name          String
+  avatarUrl     String?
+  role          Role           @default(BUYER)
+  coinsBalance  Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  stores        Store[]
+  orders        Order[]
+  wishlists     WishlistItem[]
+  coinLedgers   CoinLedger[]
+  voucherClaims VoucherClaim[]
+  notifications Notification[]
+  reviews       Review[]
+  affiliateLogs AffiliateReferral[]
+  sentMessages  ChatMessage[]  @relation("SentMessages")
+
+  @@index([role])
+  @@index([createdAt(sort: Desc)])
+}
+
+// ── 2. ร้านค้า (Multi-Vendor) ──
+model Store {
+  id          String    @id @default(uuid())
+  ownerId     String
+  name        String
+  logo        String?
+  banner      String?
+  description String?
+  isMall      Boolean   @default(false)
+  isVerified  Boolean   @default(false)
+  rating      Float     @default(5.0)
+  followers   Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  owner       User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products    Product[]
+  vouchers    Voucher[]
+  liveStreams LiveSession[]
+
+  @@index([isMall])
+  @@index([rating(sort: Desc)])
+  @@index([followers(sort: Desc)])
+}
+
+// ── 3. สินค้า & หมวดหมู่ (High Traffic Composite Indexes) ──
+model Product {
+  id            String    @id @default(uuid())
+  storeId       String
+  name          String
+  description   String
+  price         Decimal   @db.Decimal(10, 2)
+  originalPrice Decimal?  @db.Decimal(10, 2)
+  category      String
+  brand         String?
+  images        String[]
+  stock         Int       @default(100)
+  salesCount    Int       @default(0)
+  rating        Float     @default(5.0)
+  badge         String?   // 'mall', 'sale', 'hot', 'new'
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  store         Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  orderItems    OrderItem[]
+  reviews       Review[]
+  wishlists     WishlistItem[]
+
+  // High Concurrency Optimized Composite Indexes
+  @@index([category, price])
+  @@index([storeId])
+  @@index([badge])
+  @@index([salesCount(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@index([brand])
+}
+
+// ── 4. คำสั่งซื้อ & การชำระเงิน ──
+enum OrderStatus {
+  PENDING
+  PAID
+  PREPARING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  PROMPTPAY
+  CREDIT_CARD
+  COD
+  PAYLATER
+}
+
+model Order {
+  id             String         @id @default(uuid())
+  userId         String
+  totalAmount    Decimal        @db.Decimal(10, 2)
+  shippingCost   Decimal        @default(0) @db.Decimal(10, 2)
+  discountAmount Decimal        @default(0) @db.Decimal(10, 2)
+  coinsUsed      Int            @default(0)
+  paymentMethod  PaymentMethod
+  status         OrderStatus    @default(PENDING)
+  shippingAddress Json
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  user          User                @relation(fields: [userId], references: [id])
+  items         OrderItem[]
+  tracking      TrackingLog?
+  payment       PaymentTransaction?
+
+  @@index([userId, status])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2)
+
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model PaymentTransaction {
+  id            String    @id @default(uuid())
+  orderId       String    @unique
+  providerRef   String?
+  qrCodeUrl     String?
+  amount        Decimal   @db.Decimal(10, 2)
+  status        String    // 'pending', 'successful', 'failed'
+  paidAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+}
+
+// ── 5. การติดตามพัสดุ & GPS ──
+model TrackingLog {
+  id                String    @id @default(uuid())
+  orderId           String    @unique
+  trackingNumber    String    @unique
+  courierProvider   String    // 'Flash Express', 'SPX', 'Kerry'
+  driverName        String?
+  driverPhone       String?
+  vehiclePlate      String?
+  currentLat        Float?
+  currentLng        Float?
+  estimatedDelivery DateTime?
+  timeline          Json
+  updatedAt         DateTime  @updatedAt
+
+  order             Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+// ── 6. ระบบ Movemall PayLater (BNPL) ──
+model PayLaterAccount {
+  id              String         @id @default(uuid())
+  userId          String         @unique
+  creditLimit     Decimal        @default(15000.00) @db.Decimal(10, 2)
+  availableCredit Decimal        @default(15000.00) @db.Decimal(10, 2)
+  usedCredit      Decimal        @default(0.00) @db.Decimal(10, 2)
+  kycStatus       String         @default("VERIFIED")
+  createdAt       DateTime       @default(now())
+
+  transactions    PayLaterTx[]
+  bills           PayLaterBill[]
+}
+
+model PayLaterTx {
+  id                String          @id @default(uuid())
+  accountId         String
+  orderId           String
+  principalAmount   Decimal         @db.Decimal(10, 2)
+  installmentMonths Int
+  monthlyAmount     Decimal         @db.Decimal(10, 2)
+  status            String          @default("ACTIVE")
+  createdAt         DateTime        @default(now())
+
+  account           PayLaterAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+}
+
+model PayLaterBill {
+  id          String          @id @default(uuid())
+  accountId   String
+  billMonth   String          // "2026-09"
+  totalDue    Decimal         @db.Decimal(10, 2)
+  dueDate     DateTime
+  status      String          @default("UNPAID")
+  paidAt      DateTime?
+
+  account     PayLaterAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, status])
+}
+
+// ── 7. ระบบ Merchant Open API & Webhooks ──
+model MerchantApiKey {
+  id          String    @id @default(uuid())
+  storeId     String
+  apiKey      String    @unique
+  secretHash  String
+  webhookUrl  String?
+  isActive    Boolean   @default(true)
+  lastUsedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([storeId, isActive])
+}
+
+// ── 8. ไลฟ์สดช้อปปิ้ง (Live Streaming) ──
+model LiveSession {
+  id              String        @id @default(uuid())
+  storeId         String
+  title           String
+  streamUrl       String
+  coverImage      String
+  pinnedProductId String?
+  viewersCount    Int           @default(0)
+  likesCount      Int           @default(0)
+  isLive          Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+
+  store           Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  comments        LiveComment[]
+
+  @@index([isLive, viewersCount(sort: Desc)])
+  @@index([storeId])
+}
+
+model LiveComment {
+  id          String      @id @default(uuid())
+  sessionId   String
+  userName    String
+  text        String
+  createdAt   DateTime    @default(now())
+
+  session     LiveSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt(sort: Desc)])
+}
+
+// ── 9. Gamification & เหรียญ Coins ──
+model CoinLedger {
+  id          String   @id @default(uuid())
+  userId      String
+  amount      Int
+  source      String   // 'daily_checkin', 'lucky_spin', 'order_discount'
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+// ── 10. คูปอง & ส่วนลด ──
+model Voucher {
+  id           String         @id @default(uuid())
+  storeId      String?
+  code         String         @unique
+  discountType String
+  value        Decimal        @db.Decimal(10, 2)
+  minSpend     Decimal        @default(0) @db.Decimal(10, 2)
+  expiryDate   DateTime
+  claimsCount  Int            @default(0)
+
+  store        Store?         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  claims       VoucherClaim[]
+
+  @@index([expiryDate])
+}
+
+model VoucherClaim {
+  id        String   @id @default(uuid())
+  userId    String
+  voucherId String
+  isUsed    Boolean  @default(false)
+  claimedAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  voucher   Voucher  @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, voucherId])
+  @@index([userId, isUsed])
+}
+
+// ── 11. แชท & การแจ้งเตือน ──
+model ChatMessage {
+  id          String   @id @default(uuid())
+  senderId    String
+  recipientId String
+  storeId     String?
+  text        String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, recipientId, createdAt(sort: Desc)])
+  @@index([storeId, createdAt(sort: Desc)])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  category  String   // 'orders', 'promos', 'live', 'vouchers'
+  title     String
+  body      String
+  link      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt(sort: Desc)])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  rating    Int
+  comment   String
+  likes     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, rating])
+  @@index([userId])
+}
+
+model WishlistItem {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+model AffiliateReferral {
+  id          String   @id @default(uuid())
+  creatorId   String
+  orderId     String?
+  commission  Decimal  @db.Decimal(10, 2)
+  status      String   // 'pending', 'paid'
+  createdAt   DateTime @default(now())
+
+  creator     User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId, status])
+}

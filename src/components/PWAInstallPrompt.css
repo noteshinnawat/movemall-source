@@ -1,0 +1,78 @@
+/* PWAInstallPrompt.css — Mobile App Install Banner */
+
+.pwa-prompt {
+  background: #1E293B;
+  color: #FFFFFF;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-bottom: 1px solid #334155;
+  font-size: 13px;
+  position: relative;
+  z-index: 1050;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pwa-prompt__info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.pwa-prompt__icon {
+  font-size: 20px;
+}
+
+.pwa-prompt__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.pwa-prompt__title {
+  font-weight: 800;
+  font-size: 13px;
+  color: #FFFFFF;
+}
+
+.pwa-prompt__desc {
+  font-size: 11px;
+  color: #94A3B8;
+}
+
+.pwa-prompt__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pwa-prompt__install-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 0;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pwa-prompt__close-btn {
+  background: none;
+  border: none;
+  color: #94A3B8;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

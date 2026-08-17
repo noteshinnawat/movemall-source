@@ -1,0 +1,422 @@
+/* src/components/Navbar.css — Clean Multi-Tier Marketplace Header */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #FFFFFF;
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* ── Tier 1: Top Utility Bar (Desktop) ── */
+.navbar__top-bar {
+  background: #F9FAFB;
+  border-bottom: 1px solid var(--border);
+  height: 34px;
+}
+
+.navbar__top-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.navbar__top-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.navbar__top-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s;
+}
+
+.navbar__top-link:hover {
+  color: var(--primary);
+}
+
+.navbar__top-divider {
+  width: 1px;
+  height: 12px;
+  background: var(--border);
+}
+
+/* ── Tier 2: Main Header Bar ── */
+.navbar__main-bar {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+}
+
+.navbar__main-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Logo (Desktop) */
+.navbar__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.navbar__logo-icon {
+  width: 34px;
+  height: 34px;
+  background: var(--primary);
+  color: white;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.navbar__logo-text {
+  color: var(--text-primary);
+}
+
+/* Search Box */
+.navbar__search {
+  flex: 1;
+  max-width: 680px;
+}
+
+.navbar__search-form {
+  display: flex;
+  align-items: center;
+  background: #F3F4F6;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  height: 40px;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.navbar__search-form:focus-within {
+  background: #FFFFFF;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.navbar__search-leading-icon {
+  color: #9CA3AF;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.navbar__search-input-wrap {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.navbar__search-input {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0 8px;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  font-weight: 600;
+  z-index: 2;
+}
+
+/* Animated Cycling Search Keyword Placeholder */
+.navbar__animated-placeholder {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.navbar__animated-text {
+  font-size: 13px;
+  color: #6B7280;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  animation: slideSearchUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideSearchUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Camera Visual Search Button */
+.navbar__visual-search-btn {
+  background: transparent;
+  border: none;
+  color: #6B7280;
+  height: 100%;
+  padding: 0 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.navbar__visual-search-btn:hover {
+  color: var(--primary);
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.navbar__search-submit-btn {
+  background: var(--primary);
+  color: #FFFFFF;
+  border: none;
+  width: 44px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 0;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.navbar__search-submit-btn:hover {
+  background: #1D4ED8;
+}
+
+/* ── Actions Right ── */
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar__action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-primary);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 0;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.navbar__action-btn:hover {
+  color: var(--primary);
+  background: var(--surface-hover);
+}
+
+.navbar__icon-badge-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar__action-label {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.navbar__badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #DC2626;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 900;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  border: 1.5px solid #FFFFFF;
+  line-height: 1;
+}
+
+.navbar__badge--chat {
+  background: #EF4444;
+}
+
+.navbar__badge--cart {
+  background: #2563EB;
+}
+
+.navbar__badge--wishlist {
+  background: #DC2626;
+}
+
+/* ── Tier 3: Sub Deals Bar (Desktop) ── */
+.navbar__sub-bar {
+  background: #FFFFFF;
+  border-top: 1px solid var(--border);
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.navbar__sub-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.navbar__sub-inner::-webkit-scrollbar {
+  display: none;
+}
+
+.navbar__sub-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.15s;
+}
+
+.navbar__sub-link:hover {
+  color: var(--primary);
+}
+
+.navbar__live-dot {
+  width: 6px;
+  height: 6px;
+  background: #EF4444;
+  border-radius: 50%;
+  animation: pulse 1s infinite alternate;
+}
+
+/* ── Mobile Responsive Overrides (Shopee-Style Mobile Topbar) ── */
+@media (max-width: 768px) {
+  .navbar__top-bar,
+  .navbar__sub-bar {
+    display: none;
+  }
+
+  .navbar__main-bar {
+    height: 54px;
+    background: #FFFFFF;
+  }
+
+  .navbar__main-inner {
+    padding: 0 10px;
+    gap: 8px;
+  }
+
+  /* 1. Hide Logo on Mobile */
+  .navbar__logo {
+    display: none !important;
+  }
+
+  /* 2. Full-Width Search Input with Camera */
+  .navbar__search {
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .navbar__search-form {
+    height: 38px;
+    background: #F3F4F6;
+    border: 1px solid #E5E7EB;
+  }
+
+  .navbar__search-submit-btn {
+    display: none; /* Mobile submits on enter or tap */
+  }
+
+  .navbar__visual-search-btn {
+    color: #4B5563;
+    padding: 0 8px;
+  }
+
+  /* 3. Right Icons: Cart & Chat Only */
+  .navbar__actions {
+    gap: 2px;
+  }
+
+  .navbar__wishlist-btn,
+  .navbar__action-label {
+    display: none !important;
+  }
+
+  .navbar__action-btn {
+    padding: 6px 8px;
+    color: #1F2937;
+  }
+
+  .navbar__cart-btn,
+  .navbar__chat-btn {
+    display: flex;
+  }
+
+  .navbar__badge {
+    top: -4px;
+    right: -6px;
+    font-size: 9px;
+    min-width: 15px;
+    height: 15px;
+  }
+}

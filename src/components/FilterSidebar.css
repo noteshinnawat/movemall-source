@@ -1,0 +1,211 @@
+/* FilterSidebar.css — Clean Flat Sidebar */
+
+.filter-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
+.filter-sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.filter-sidebar__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.filter-sidebar__clear {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: var(--transition);
+}
+
+.filter-sidebar__clear:hover {
+  text-decoration: underline;
+}
+
+.filter-group {
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.filter-group:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.filter-group__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Category checkboxes */
+.filter-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0;
+  cursor: pointer;
+}
+
+.filter-option__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.filter-option__check {
+  width: 16px;
+  height: 16px;
+  border-radius: 0;
+  border: 1px solid var(--border-hover);
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+
+.filter-option__check--active {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.filter-option__icon {
+  font-size: 14px;
+}
+
+.filter-option__name {
+  font-size: 13px;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.filter-option:hover .filter-option__name {
+  color: var(--text-primary);
+}
+
+.filter-option__count {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Price Range */
+.filter-price-inputs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.filter-price-input {
+  flex: 1;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px var(--space-2);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: var(--transition);
+  width: 100%;
+}
+
+.filter-price-input:focus {
+  background: #FFFFFF;
+  border-color: var(--primary);
+}
+
+.filter-price-sep {
+  color: var(--text-muted);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.filter-apply-btn {
+  width: 100%;
+  padding: 8px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.filter-apply-btn:hover {
+  background: var(--primary-dark);
+}
+
+/* Rating Filter */
+.filter-rating-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.filter-rating-option:hover .filter-option__name {
+  color: var(--text-primary);
+}
+
+.filter-stars {
+  color: var(--warning);
+  font-size: 13px;
+}
+
+/* Badge Filter */
+.filter-badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.filter-badge-chip {
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: var(--transition);
+  background: #FFFFFF;
+  color: var(--text-secondary);
+}
+
+.filter-badge-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.filter-badge-chip--active {
+  background: var(--primary-subtle);
+  border-color: var(--primary);
+  color: var(--primary-dark);
+}

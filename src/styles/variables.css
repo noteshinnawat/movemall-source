@@ -1,0 +1,111 @@
+/* ==========================================================================
+   Movemall Design System — Variables & Design Tokens
+   src/styles/variables.css
+   ========================================================================== */
+
+:root {
+  /* ── Brand Colors ── */
+  --primary: hsl(221, 83%, 53%);        /* #2563EB Royal Blue */
+  --primary-dark: hsl(221, 83%, 44%);   /* #1D4ED8 */
+  --primary-light: hsl(221, 83%, 62%);  /* #3B82F6 */
+  --primary-subtle: hsl(221, 95%, 96%); /* #EFF6FF */
+  --primary-glow: hsla(221, 83%, 53%, 0.15);
+
+  /* ── Accent Colors (CTAs & Action Highlights) ── */
+  --accent: hsl(12, 90%, 58%);          /* #F95738 */
+  --accent-dark: hsl(12, 90%, 48%);
+  --accent-subtle: hsl(12, 100%, 97%);
+
+  /* ── Backgrounds & Surfaces ── */
+  --background: #F9FAFB;
+  --background-2: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-hover: #F3F4F6;
+  --surface-active: #E5E7EB;
+
+  /* ── Typography Colors ── */
+  --text-primary: #111827;              /* Slate 900 */
+  --text-secondary: #4B5563;            /* Slate 600 */
+  --text-muted: #9CA3AF;                /* Slate 400 */
+  --text-inverse: #FFFFFF;
+
+  /* ── Borders ── */
+  --border: #E5E7EB;
+  --border-hover: #D1D5DB;
+  --border-dark: #9CA3AF;
+
+  /* ── Semantic Status Colors ── */
+  --success: #10B981;
+  --success-dark: #059669;
+  --success-subtle: #ECFDF5;
+
+  --warning: #F59E0B;
+  --warning-dark: #D97706;
+  --warning-subtle: #FFFBEB;
+
+  --error: #EF4444;
+  --error-dark: #DC2626;
+  --error-subtle: #FEF2F2;
+
+  --info: #3B82F6;
+  --info-subtle: #EFF6FF;
+
+  /* ── Mall & Live Colors ── */
+  --mall-red: #DC2626;
+  --mall-gold: #F59E0B;
+  --live-red: #EF4444;
+  --coins-gold: #F59E0B;
+
+  /* ── Spacing Scale ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* ── Border Radius (Matching Product Card 6px — Profile photos remain 50%) ── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 50%;
+
+  /* ── Box Shadows ── */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-primary: 0 4px 14px rgba(37, 99, 235, 0.25);
+  --shadow-accent: 0 4px 14px rgba(249, 87, 56, 0.25);
+
+  /* ── Transitions ── */
+  --transition-fast: all 0.1s ease;
+  --transition: all 0.15s ease;
+  --transition-slow: all 0.25s ease;
+
+  /* ── Layout Dimensions ── */
+  --container-max: 1240px;
+  --navbar-height: 136px;
+
+  /* ── Z-Index Layers ── */
+  --z-normal: 1;
+  --z-sticky: 100;
+  --z-dropdown: 200;
+  --z-drawer: 300;
+  --z-modal-backdrop: 900;
+  --z-modal: 1000;
+  --z-popover: 1100;
+  --z-toast: 1200;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --navbar-height: calc(54px + env(safe-area-inset-top, 0px));
+  }
+}

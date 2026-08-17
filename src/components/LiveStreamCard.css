@@ -1,0 +1,203 @@
+/* LiveStreamCard.css — In-Grid Live Stream Card */
+
+.live-stream-card {
+  position: relative;
+  background: #0F172A;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 380px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  color: #FFFFFF;
+}
+
+.live-stream-card:hover {
+  transform: translateY(-3px);
+  border-color: #EF4444;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2);
+}
+
+/* Background Live Video / Stream */
+.live-stream-video-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.live-stream-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.1) 40%, rgba(0, 0, 0, 0.9) 100%);
+  z-index: 2;
+}
+
+/* Top Header */
+.live-stream-card-top {
+  position: relative;
+  z-index: 3;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.live-stream-badge-pulse {
+  background: #DC2626;
+  color: white;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+}
+
+.live-stream-red-dot {
+  width: 7px;
+  height: 7px;
+  background: white;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulseDot 1s infinite alternate;
+}
+
+@keyframes pulseDot {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(1.3); opacity: 1; }
+}
+
+.live-stream-viewer-count {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+}
+
+/* Streamer Info */
+.live-stream-card-center {
+  position: relative;
+  z-index: 3;
+  padding: 0 12px;
+}
+
+.live-streamer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-streamer-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #DC2626;
+  object-fit: cover;
+}
+
+.live-stream-channel-name {
+  font-size: 13px;
+  font-weight: 800;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.live-stream-title {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-top: 4px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Bottom Pinned Deal Box */
+.live-stream-card-bottom {
+  position: relative;
+  z-index: 3;
+  padding: 12px;
+}
+
+.live-pinned-deal {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text-primary);
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-sm);
+}
+
+.live-pinned-deal-img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.live-pinned-deal-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.live-pinned-tag {
+  font-size: 9px;
+  font-weight: 900;
+  color: #DC2626;
+  text-transform: uppercase;
+}
+
+.live-pinned-name {
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.live-pinned-price {
+  font-size: 13px;
+  font-weight: 900;
+  color: #DC2626;
+}
+
+.live-pinned-orig {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-decoration: line-through;
+  margin-left: 4px;
+}
+
+/* Action Button */
+.live-watch-now-btn {
+  width: 100%;
+  background: linear-gradient(90deg, #DC2626 0%, #EF4444 100%);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  border-radius: var(--radius-md);
+}
+
+.live-watch-now-btn:hover {
+  opacity: 0.95;
+}

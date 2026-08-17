@@ -1,0 +1,74 @@
+// src/data/stores.ts — Marketplace Stores
+
+import type { Store } from '../types';
+
+export const stores: Store[] = [
+  {
+    id: 'store-techpro',
+    name: 'TechPro Official Store',
+    logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&q=80',
+    banner: 'linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%)',
+    badge: 'official',
+    rating: 4.9,
+    reviewCount: 15420,
+    responseRate: '99%',
+    responseTime: 'ภายในไม่กี่นาที',
+    joinedDate: '2 ปีที่แล้ว',
+    productCount: 142,
+    followerCount: 58200,
+    location: 'กรุงเทพมหานคร',
+    description: 'ตัวแทนจำหน่ายอุปกรณ์ไอทีและอิเล็กทรอนิกส์ของแท้ 100% ประกันศูนย์ไทย จัดส่งรวดเร็วทุกวัน',
+  },
+  {
+    id: 'store-fashionista',
+    name: 'Fashionista Studio',
+    logo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
+    banner: 'linear-gradient(135deg, #0F766E 0%, #14B8A6 100%)',
+    badge: 'preferred',
+    rating: 4.8,
+    reviewCount: 8930,
+    responseRate: '95%',
+    responseTime: 'ภายใน 1 ชั่วโมง',
+    joinedDate: '1 ปีที่แล้ว',
+    productCount: 89,
+    followerCount: 24500,
+    location: 'เชียงใหม่',
+    description: 'เสื้อผ้าและแฟชั่นมินิมอล ใส่สบาย ดีไซน์นำสมัย คุณภาพเกรดพรีเมียมในราคาสบายกระเป๋า',
+  },
+  {
+    id: 'store-beautyglow',
+    name: 'BeautyGlow Official',
+    logo: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=150&q=80',
+    banner: 'linear-gradient(135deg, #9D174D 0%, #F43F5E 100%)',
+    badge: 'official',
+    rating: 4.9,
+    reviewCount: 22100,
+    responseRate: '98%',
+    responseTime: 'ภายใน 15 นาที',
+    joinedDate: '3 ปีที่แล้ว',
+    productCount: 210,
+    followerCount: 89000,
+    location: 'กรุงเทพมหานคร',
+    description: 'สกินแคร์และเครื่องสำอางชั้นนำ นำเข้าจากเกาหลีและญี่ปุ่น ของแท้ 100% มีใบรับรอง',
+  },
+  {
+    id: 'store-sportmax',
+    name: 'SportMax Thailand',
+    logo: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=150&q=80',
+    banner: 'linear-gradient(135deg, #C2410C 0%, #F97316 100%)',
+    badge: 'preferred',
+    rating: 4.7,
+    reviewCount: 6420,
+    responseRate: '92%',
+    responseTime: 'ภายใน 2 ชั่วโมง',
+    joinedDate: '8 เดือนที่แล้ว',
+    productCount: 65,
+    followerCount: 15300,
+    location: 'สมุทรปราการ',
+    description: 'อุปกรณ์กีฬาและรองเท้าวิ่ง รองเท้าออกกำลังกายแบรนด์แท้ รองรับทุกกิจกรรมสปอร์ต',
+  },
+];
+
+export function getStoreById(id: string): Store | undefined {
+  return stores.find(s => s.id === id);
+}

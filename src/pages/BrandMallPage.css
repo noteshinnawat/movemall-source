@@ -1,0 +1,1016 @@
+/* BrandMallPage.css — Movemall Official Brand Mall (Clean Flat Strict Rectangular) */
+
+.mall-page {
+  padding-top: var(--navbar-height);
+  min-height: 100vh;
+  background: #F9FAFB;
+  padding-bottom: var(--space-16);
+}
+
+/* ──────────────────────────────────────────────
+   1. 4-Pillar Mall Guarantee Top Bar
+   ────────────────────────────────────────────── */
+.mall-guarantee-bar {
+  background: #DC2626;
+  color: #FFFFFF;
+  padding: 8px 0;
+  border-bottom: 2px solid #B91C1C;
+}
+
+.mall-guarantee-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.mall-guarantee-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mall-guarantee-icon {
+  color: #FFFFFF;
+  flex-shrink: 0;
+}
+
+.mall-guarantee-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.mall-guarantee-divider {
+  width: 1px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ──────────────────────────────────────────────
+   2. Hero Spotlight Header
+   ────────────────────────────────────────────── */
+.mall-hero {
+  background: #FFFFFF;
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-5) 0;
+  margin-bottom: var(--space-5);
+}
+
+.mall-hero-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.mall-hero-text {
+  max-width: 660px;
+}
+
+.mall-hero-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.mall-hero-badge {
+  background: #DC2626;
+  color: #FFFFFF;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.mall-hero-subbadge {
+  background: #FEE2E2;
+  color: #991B1B;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.mall-hero-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+
+.mall-hero-sub {
+  font-size: 13px;
+  color: #4B5563;
+  line-height: 1.5;
+}
+
+.mall-hero-stats {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.mall-stat-box {
+  background: #F9FAFB;
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  text-align: center;
+  min-width: 100px;
+}
+
+.mall-stat-num {
+  display: block;
+  font-size: 16px;
+  font-weight: 800;
+  color: #DC2626;
+  margin-bottom: 1px;
+}
+
+.mall-stat-label {
+  display: block;
+  font-size: 11px;
+  color: #6B7280;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ──────────────────────────────────────────────
+   3. Common Section Title & Headers
+   ────────────────────────────────────────────── */
+.mall-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.mall-section-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mall-tag-red {
+  font-size: 11px;
+  font-weight: 800;
+  color: #DC2626;
+  letter-spacing: 0.5px;
+}
+
+.mall-section-heading {
+  font-size: 16px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.mall-countdown-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  padding: 4px 10px;
+  color: #991B1B;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.mall-countdown-digits {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mall-digit {
+  background: #DC2626;
+  color: #FFFFFF;
+  padding: 1px 4px;
+}
+
+/* ──────────────────────────────────────────────
+   4. Super Brand Day Spotlight & Horizontal Nav
+   ────────────────────────────────────────────── */
+.mall-spotlight-section {
+  margin-bottom: var(--space-6);
+}
+
+.super-brand-nav-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin-bottom: -1px;
+}
+
+.super-brand-nav-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.super-brand-nav {
+  display: flex;
+  background: var(--border);
+  border: 1px solid var(--border);
+  min-width: 100%;
+  width: max-content;
+}
+
+.super-brand-nav-btn {
+  flex: 1;
+  min-width: 150px;
+  background: #FFFFFF;
+  border: none;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+}
+
+.super-brand-nav-btn:hover {
+  background: #F9FAFB;
+}
+
+.super-brand-nav-btn.active {
+  background: #111827;
+  color: #FFFFFF;
+}
+
+.super-brand-nav-name {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.super-brand-nav-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #DC2626;
+  background: #FEF2F2;
+  padding: 1px 5px;
+}
+
+.super-brand-nav-btn.active .super-brand-nav-badge {
+  background: #DC2626;
+  color: #FFFFFF;
+}
+
+.super-brand-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  align-items: center;
+}
+
+.super-brand-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.super-brand-label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.super-brand-pill {
+  background: #111827;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+}
+
+.super-brand-discount-badge {
+  background: #DC2626;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+}
+
+.super-brand-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.35;
+}
+
+.super-brand-desc {
+  font-size: 12px;
+  color: #4B5563;
+  line-height: 1.5;
+}
+
+.super-brand-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: #F9FAFB;
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+}
+
+.super-benefit-item {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.super-brand-action-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.super-brand-btn-primary {
+  background: #DC2626;
+  color: #FFFFFF;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #DC2626;
+  transition: background 0.15s ease;
+}
+
+.super-brand-btn-primary:hover {
+  background: #B91C1C;
+}
+
+.super-brand-btn-secondary {
+  background: #FFFFFF;
+  color: #111827;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  transition: background 0.15s ease;
+}
+
+.super-brand-btn-secondary:hover {
+  background: #F3F4F6;
+}
+
+.super-brand-media {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  background: #111827;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.super-brand-media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.super-brand-media-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(17, 24, 39, 0.88);
+  backdrop-filter: blur(4px);
+  color: #FFFFFF;
+  padding: 3px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ──────────────────────────────────────────────
+   5. Mall Exclusive Vouchers Section
+   ────────────────────────────────────────────── */
+.mall-vouchers-section {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.mall-claim-all-btn {
+  background: #111827;
+  color: #FFFFFF;
+  border: 1px solid #111827;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.15s ease;
+}
+
+.mall-claim-all-btn:hover {
+  background: #374151;
+}
+
+.mall-vouchers-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
+}
+
+.mall-voucher-card {
+  background: #FFF;
+  border: 1px dashed #DC2626;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.mall-voucher-card.claimed {
+  border-color: #D1D5DB;
+  background: #F9FAFB;
+}
+
+.mall-voucher-left {
+  border-bottom: 1px dashed #E5E7EB;
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+
+.mall-voucher-discount {
+  font-size: 15px;
+  font-weight: 800;
+  color: #DC2626;
+}
+
+.mall-voucher-card.claimed .mall-voucher-discount {
+  color: #6B7280;
+}
+
+.mall-voucher-code {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: monospace;
+  color: #4B5563;
+}
+
+.mall-voucher-middle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 6px;
+}
+
+.mall-voucher-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.mall-voucher-min {
+  font-size: 10px;
+  color: #6B7280;
+}
+
+.mall-voucher-expiry {
+  font-size: 10px;
+  color: #9CA3AF;
+  margin-top: 1px;
+}
+
+.mall-voucher-btn {
+  width: 100%;
+  padding: 4px;
+  background: #DC2626;
+  color: #FFFFFF;
+  border: 1px solid #DC2626;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: background 0.15s ease;
+}
+
+.mall-voucher-btn:hover:not(:disabled) {
+  background: #B91C1C;
+}
+
+.mall-voucher-btn.claimed {
+  background: #E5E7EB;
+  color: #4B5563;
+  border-color: #E5E7EB;
+  cursor: default;
+}
+
+/* ──────────────────────────────────────────────
+   6. Famous Brand Directory
+   ────────────────────────────────────────────── */
+.mall-directory-section {
+  margin-bottom: var(--space-6);
+}
+
+.mall-category-filter-tabs-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.mall-category-filter-tabs-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.mall-category-filter-tabs {
+  display: flex;
+  gap: 4px;
+  width: max-content;
+}
+
+.mall-cat-filter-btn {
+  padding: 5px 12px;
+  background: #FFFFFF;
+  color: #4B5563;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.mall-cat-filter-btn:hover {
+  background: #F3F4F6;
+}
+
+.mall-cat-filter-btn.active {
+  background: #DC2626;
+  color: #FFFFFF;
+  border-color: #DC2626;
+}
+
+.brand-directory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
+}
+
+.brand-directory-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.brand-directory-card:hover {
+  transform: translateY(-2px);
+  border-color: #DC2626;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.brand-directory-banner {
+  height: 52px;
+  position: relative;
+  padding: 4px 6px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.brand-directory-mall-tag {
+  background: #DC2626;
+  color: #FFFFFF;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  display: inline-block;
+}
+
+.brand-directory-body {
+  padding: 0 10px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+}
+
+.brand-directory-logo-container {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  flex-shrink: 0;
+  margin-top: -24px;
+  margin-bottom: 6px;
+  background: #FFFFFF;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.brand-directory-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.brand-directory-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.brand-directory-tagline {
+  font-size: 11px;
+  color: #6B7280;
+  line-height: 1.35;
+  margin-bottom: 6px;
+  height: 30px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.brand-directory-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: #F9FAFB;
+  border: 1px solid var(--border);
+  padding: 4px 6px;
+  margin-bottom: 6px;
+}
+
+.brand-discount-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #DC2626;
+}
+
+.brand-followers-text {
+  font-size: 10px;
+  color: #6B7280;
+}
+
+.brand-directory-actions {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.brand-follow-btn {
+  flex: 1;
+  padding: 5px;
+  background: #FFFFFF;
+  color: #111827;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.brand-follow-btn:hover {
+  background: #F3F4F6;
+}
+
+.brand-follow-btn.followed {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+
+.brand-visit-btn {
+  flex: 1;
+  padding: 5px;
+  background: #DC2626;
+  color: #FFFFFF;
+  border: 1px solid #DC2626;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  transition: background 0.15s ease;
+}
+
+.brand-visit-btn:hover {
+  background: #B91C1C;
+}
+
+/* ──────────────────────────────────────────────
+   7. Mall Exclusive Products Grid
+   ────────────────────────────────────────────── */
+.mall-products-section {
+  margin-bottom: var(--space-8);
+}
+
+.mall-product-tabs-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.mall-product-tabs-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.mall-product-tabs {
+  display: flex;
+  gap: 4px;
+  width: max-content;
+}
+
+.mall-product-tab-btn {
+  padding: 5px 12px;
+  background: #FFFFFF;
+  color: #4B5563;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.mall-product-tab-btn:hover {
+  background: #F3F4F6;
+}
+
+.mall-product-tab-btn.active {
+  background: #111827;
+  color: #FFFFFF;
+  border-color: #111827;
+}
+
+.mall-product-item-wrapper {
+  position: relative;
+}
+
+.mall-product-corner-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 5;
+  background: #DC2626;
+  color: #FFFFFF;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 4px;
+  letter-spacing: 0.5px;
+}
+
+.mall-view-all-container {
+  text-align: center;
+  margin-top: var(--space-5);
+}
+
+.mall-view-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #FFFFFF;
+  color: #111827;
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.mall-view-all-btn:hover {
+  background: #111827;
+  color: #FFFFFF;
+  border-color: #111827;
+}
+
+/* ──────────────────────────────────────────────
+   8. Mall Trust & Assurance 4 Pillars
+   ────────────────────────────────────────────── */
+.mall-trust-section {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  padding: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.mall-trust-heading {
+  font-size: 15px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: var(--space-4);
+  text-align: center;
+}
+
+.mall-trust-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
+}
+
+.mall-trust-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.mall-trust-icon-box {
+  width: 38px;
+  height: 38px;
+  background: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+
+.mall-trust-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.mall-trust-desc {
+  font-size: 11px;
+  color: #6B7280;
+  line-height: 1.4;
+}
+
+/* ──────────────────────────────────────────────
+   9. Responsive Media Queries
+   ────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .super-brand-card {
+    grid-template-columns: 1fr;
+  }
+  .super-brand-media {
+    height: 180px;
+  }
+  .brand-directory-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .mall-vouchers-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .mall-trust-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .mall-guarantee-bar {
+    padding: 6px 0;
+  }
+
+  .mall-guarantee-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 10px;
+  }
+
+  .mall-guarantee-item {
+    gap: 4px;
+  }
+
+  .mall-guarantee-text {
+    font-size: 11px;
+  }
+
+  .mall-guarantee-divider {
+    display: none;
+  }
+
+  .mall-hero {
+    padding: var(--space-3) 0;
+    margin-bottom: var(--space-3);
+  }
+
+  .mall-hero-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .mall-hero-title {
+    font-size: 16px;
+  }
+
+  .mall-hero-sub {
+    display: none;
+  }
+
+  .mall-hero-stats {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .mall-stat-box {
+    min-width: unset;
+    padding: 6px 4px;
+  }
+
+  .mall-stat-num {
+    font-size: 14px;
+  }
+
+  .mall-stat-label {
+    font-size: 10px;
+  }
+
+  .super-brand-card {
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .super-brand-title {
+    font-size: 15px;
+  }
+
+  .super-brand-desc {
+    font-size: 11px;
+  }
+
+  .super-brand-media {
+    height: 160px;
+  }
+
+  .brand-directory-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .mall-vouchers-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .mall-trust-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .super-brand-nav-btn {
+    min-width: 125px;
+    padding: 6px 8px;
+  }
+
+  .super-brand-action-row {
+    flex-direction: column;
+  }
+
+  .super-brand-btn-primary,
+  .super-brand-btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,68 @@
+// src/components/PromptPayModal.tsx — Interactive PromptPay QR Code Modal
+
+import { useState, useEffect } from 'react';
+import { X, CheckCircle2, Clock, QrCode } from 'lucide-react';
+import './PromptPayModal.css';
+
+interface PromptPayModalProps {
+  amount: number;
+  onSuccess: () => void;
+  onClose: () => void;
+}
+
+export function PromptPayModal({ amount, onSuccess, onClose }: PromptPayModalProps) {
+  const [secondsLeft, setSecondsLeft] = useState(300); // 5 minutes
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSecondsLeft(prev => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const mins = Math.floor(secondsLeft / 60);
+  const secs = secondsLeft % 60;
+
+  return (
+    <div className="promptpay-overlay" onClick={onClose}>
+      <div className="promptpay-modal" onClick={e => e.stopPropagation()}>
+        <div className="promptpay-header">
+          <div className="promptpay-logo-title">💳 PROMPTPAY (พร้อมเพย์)</div>
+          <button className="promptpay-close-btn" onClick={onClose} aria-label="ปิด">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="promptpay-body">
+          <span className="promptpay-amount-label">ยอดชำระเงินทั้งหมด</span>
+          <div className="promptpay-amount">฿{amount.toLocaleString()}</div>
+
+          {/* QR Code Container */}
+          <div className="promptpay-qr-box">
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=MOVEMALL_PROMPTPAY_${amount}_TH`}
+              alt="PromptPay QR Code"
+              className="promptpay-qr-img"
+            />
+          </div>
+
+          <div className="promptpay-timer-badge">
+            <Clock size={12} style={{ display: 'inline', marginRight: 4 }} />
+            กรุณาสแกนชำระภายใน {mins}:{secs < 10 ? `0${secs}` : secs} นาที
+          </div>
+
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 'var(--space-4)' }}>
+            ผู้รับเงิน: <strong>MOVEMALL THAILAND CO., LTD.</strong>
+          </div>
+
+          <button className="promptpay-confirm-btn" onClick={onSuccess}>
+            <CheckCircle2 size={16} style={{ display: 'inline', marginRight: 6 }} />
+            [จำลอง] ยืนยันการสแกนจ่ายเงินสำเร็จ
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default PromptPayModal;

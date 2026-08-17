@@ -1,0 +1,262 @@
+/* GamesPage.css — Movemall Gamification & Rewards Hub */
+
+.games-page {
+  padding-top: var(--navbar-height);
+  min-height: 100vh;
+  background: var(--background);
+  padding-bottom: var(--space-16);
+}
+
+.games-hero {
+  background: linear-gradient(135deg, #4338CA 0%, #6366F1 50%, #8B5CF6 100%);
+  color: #FFFFFF;
+  padding: var(--space-8) 0;
+  text-align: center;
+}
+
+.games-hero__title {
+  font-size: 26px;
+  font-weight: 900;
+  margin-bottom: var(--space-2);
+}
+
+.games-hero__coins-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 16px;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: 800;
+  margin-top: var(--space-3);
+}
+
+/* 7-Day Check-in Streak */
+.daily-checkin-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: var(--space-6);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.daily-checkin__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.daily-checkin__title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.daily-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.daily-box {
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: var(--space-3) var(--space-2);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: var(--transition);
+}
+
+.daily-box--claimed {
+  background: var(--success-subtle);
+  border-color: var(--success);
+}
+
+.daily-box--today {
+  border: 2px solid var(--primary);
+  background: var(--primary-subtle);
+}
+
+.daily-box-day {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.daily-box-coin {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--warning);
+}
+
+.daily-checkin-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.daily-checkin-btn:hover {
+  background: var(--primary-dark);
+}
+
+.daily-checkin-btn:disabled {
+  background: var(--surface-active);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* Games Grid */
+.games-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}
+
+/* Lucky Spin Wheel Game */
+.wheel-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.wheel-wrapper {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: var(--space-4) 0;
+}
+
+.wheel-pointer {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 24px solid var(--error);
+  z-index: 10;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.wheel-canvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: transform 4s cubic-bezier(0.15, 0.9, 0.2, 1);
+}
+
+.wheel-spin-btn {
+  padding: 10px 28px;
+  background: var(--error);
+  color: white;
+  border: none;
+  border-radius: 0;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: var(--space-2);
+}
+
+.wheel-spin-btn:hover {
+  background: hsl(0, 84%, 50%);
+}
+
+.wheel-spin-btn:disabled {
+  background: var(--surface-active);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* Mystery Cards Minigame */
+.cards-game-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin: var(--space-6) 0;
+  width: 100%;
+}
+
+.mystery-card {
+  height: 160px;
+  background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
+  color: white;
+  border: 2px solid var(--border);
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.3s, background 0.3s;
+  padding: var(--space-2);
+}
+
+.mystery-card:hover {
+  transform: translateY(-4px);
+}
+
+.mystery-card--flipped {
+  background: #FFFFFF;
+  color: var(--text-primary);
+  border-color: var(--primary);
+}
+
+.mystery-card-icon {
+  font-size: 32px;
+  margin-bottom: var(--space-2);
+}
+
+.mystery-card-reward {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .games-grid { grid-template-columns: 1fr; }
+  .daily-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .daily-grid { grid-template-columns: repeat(2, 1fr); }
+}

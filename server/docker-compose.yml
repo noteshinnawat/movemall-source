@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: movemall-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-movemall}
+      POSTGRES_USER: ${POSTGRES_USER:-movemall_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-MoveMallSecure2026!}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command: >
+      postgres
+      -c shared_buffers=256MB
+      -c effective_cache_size=768MB
+      -c work_mem=16MB
+      -c maintenance_work_mem=128MB
+      -c max_connections=150
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-movemall_admin} -d ${POSTGRES_DB:-movemall}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: movemall-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --save "" --appendonly no
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: movemall-pgbouncer
+    restart: always
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-movemall_admin}:${POSTGRES_PASSWORD:-MoveMallSecure2026!}@postgres:5432/${POSTGRES_DB:-movemall}
+      POOL_MODE: transaction
+      DEFAULT_POOL_SIZE: 30
+      MIN_POOL_SIZE: 5
+      RESERVE_POOL_SIZE: 10
+      MAX_CLIENT_CONN: 5000
+      SERVER_IDLE_TIMEOUT: 600
+      QUERY_WAIT_TIMEOUT: 120
+    ports:
+      - "6432:6432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  redisdata:

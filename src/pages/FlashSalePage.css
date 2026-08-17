@@ -1,0 +1,658 @@
+/* src/pages/FlashSalePage.css — Modern Flat Rectangular Flash Sale Hub */
+
+.flash-sale-page {
+  padding-top: var(--navbar-height);
+  min-height: 100vh;
+  background: var(--background);
+  padding-bottom: 70px;
+}
+
+/* ========================================================= */
+/* FLASH SALE HERO HEADER */
+/* ========================================================= */
+.flash-hero {
+  background: linear-gradient(135deg, #7F1D1D 0%, #DC2626 50%, #EF4444 100%);
+  color: #FFFFFF;
+  padding: 16px 0 12px;
+  border-bottom: 3px solid #B91C1C;
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.2);
+}
+
+.flash-hero__top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.flash-hero__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.flash-hero__badge {
+  background: #111827;
+  color: #FDE047;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--radius-sm);
+  width: fit-content;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  animation: flashBadgePulse 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes flashBadgePulse {
+  0% { transform: scale(1); box-shadow: 0 0 4px rgba(253, 224, 71, 0.3); }
+  100% { transform: scale(1.02); box-shadow: 0 0 12px rgba(253, 224, 71, 0.8); }
+}
+
+.flash-hero__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 900;
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.flash-hero__subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: #FEE2E2;
+  line-height: 1.4;
+}
+
+/* Prominent Countdown Timer Card */
+.flash-hero__timer-box {
+  background: #111827;
+  border: 1.5px solid #FCD34D;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  flex-shrink: 0;
+}
+
+.flash-timer-header {
+  font-size: 12px;
+  font-weight: 800;
+  color: #FDE047;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: 0.2px;
+}
+
+.flash-timer-digits {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flash-digit-block {
+  background: #1F2937;
+  border: 1px solid #374151;
+  padding: 4px 8px;
+  min-width: 42px;
+  text-align: center;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.flash-digit-block--sec {
+  background: #DC2626;
+  border-color: #EF4444;
+  animation: secFlash 1s infinite;
+}
+
+.flash-digit-num {
+  font-size: 22px;
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1;
+  display: block;
+}
+
+.flash-digit-unit {
+  font-size: 9px;
+  font-weight: 700;
+  color: #9CA3AF;
+  margin-top: 2px;
+}
+
+.flash-digit-block--sec .flash-digit-unit {
+  color: #FEE2E2;
+}
+
+@keyframes secFlash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.88; }
+}
+
+.flash-colon {
+  font-size: 20px;
+  font-weight: 900;
+  color: #FCD34D;
+  margin-top: -8px;
+  animation: colonBlink 1s infinite;
+}
+
+@keyframes colonBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.flash-live-traffic {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6EE7B7;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.flash-pulse-beacon {
+  width: 5px;
+  height: 5px;
+  background: #10B981;
+  border-radius: 50%;
+  animation: beaconPulse 1s infinite alternate;
+}
+
+@keyframes beaconPulse {
+  0% { transform: scale(0.8); opacity: 0.7; }
+  100% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 6px rgba(16, 185, 129, 0.9); }
+}
+
+/* ========================================================= */
+/* HORIZONTAL TIME SLOTS TAB BAR */
+/* ========================================================= */
+.flash-slots-bar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.flash-slots-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.flash-slot-tab {
+  flex: 1;
+  min-width: 80px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  padding: 6px 8px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  white-space: nowrap;
+}
+
+.flash-slot-tab:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.flash-slot-tab.active {
+  background: #FFFFFF;
+  color: #DC2626;
+  border-color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.flash-slot-time {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.flash-slot-status {
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.flash-slot-desc {
+  font-size: 9px;
+  opacity: 0.85;
+}
+
+/* ========================================================= */
+/* FLASH VOUCHERS TICKET STRIP (Compact Horizontal Carousel) */
+/* ========================================================= */
+.flash-vouchers-strip {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  margin: 12px 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.flash-vouchers-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 6px;
+}
+
+.flash-vouchers-header h3 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.flash-vouchers-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+
+.flash-vouchers-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.flash-voucher-ticket {
+  flex: 0 0 190px;
+  min-width: 190px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FFF7ED;
+  border: 1px solid #FFEDD5;
+  border-left: 3px solid #EA580C;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.flash-voucher-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.flash-voucher-tag {
+  font-size: 9px;
+  font-weight: 800;
+  color: #C2410C;
+}
+
+.flash-voucher-disc {
+  font-size: 13px;
+  font-weight: 900;
+  color: #9A3412;
+}
+
+.flash-voucher-min {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.flash-voucher-btn {
+  padding: 4px 10px;
+  background: #EA580C;
+  color: #FFFFFF;
+  border: none;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.flash-voucher-btn:hover {
+  background: #C2410C;
+}
+
+.flash-voucher-btn.claimed {
+  background: #E5E7EB;
+  color: #6B7280;
+  cursor: not-allowed;
+}
+
+/* ========================================================= */
+/* CATEGORIES FILTER TABS */
+/* ========================================================= */
+.flash-cat-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.flash-cat-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.flash-cat-btn {
+  padding: 6px 12px;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.flash-cat-btn:hover {
+  border-color: #DC2626;
+  color: #DC2626;
+}
+
+.flash-cat-btn.active {
+  background: #DC2626;
+  color: #FFFFFF;
+  border-color: #DC2626;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+}
+
+/* ========================================================= */
+/* PRODUCT CARDS GRID (With Flowing Lava Stream) */
+/* ========================================================= */
+.flash-products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.flash-item-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.flash-item-card:hover {
+  transform: translateY(-2px);
+  border-color: #DC2626;
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.16);
+}
+
+.flash-item-img-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #F3F4F6;
+  display: block;
+  overflow: hidden;
+  margin-bottom: 6px;
+  border-radius: 4px;
+}
+
+.flash-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.flash-item-card:hover .flash-item-img {
+  transform: scale(1.05);
+}
+
+.flash-item-disc-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #DC2626;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 5px;
+  border-radius: 3px;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+}
+
+.flash-item-guarantee-tag {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(17, 24, 39, 0.88);
+  color: #FDE047;
+  font-size: 8px;
+  font-weight: 800;
+  text-align: center;
+  padding: 1px 4px;
+  z-index: 2;
+}
+
+.flash-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.flash-item-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 28px;
+  margin: 0;
+}
+
+.flash-item-title:hover {
+  color: var(--primary);
+}
+
+.flash-item-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: 1px;
+}
+
+.flash-item-price {
+  font-size: 15px;
+  font-weight: 900;
+  color: #DC2626;
+}
+
+.flash-item-orig {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+/* Lava Stream Progress Bar */
+.flash-fire-progress {
+  position: relative;
+  height: 15px;
+  background: #FEE2E2;
+  border: 1px solid #FECACA;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flash-fire-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #F59E0B 0%, #EF4444 25%, #DC2626 50%, #F59E0B 75%, #EF4444 100%);
+  background-size: 200% 100%;
+  animation: fireLavaFlow 1.6s linear infinite;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  transition: width 0.3s ease;
+}
+
+@keyframes fireLavaFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.flash-fire-text {
+  position: relative;
+  z-index: 2;
+  font-size: 8.5px;
+  font-weight: 900;
+  color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.2px;
+  user-select: none;
+}
+
+.flash-upcoming-badge {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.flash-buy-btn {
+  background: linear-gradient(90deg, #DC2626 0%, #EF4444 50%, #DC2626 100%);
+  background-size: 200% 100%;
+  color: #FFFFFF;
+  border: none;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 0;
+  animation: buyGleam 2.8s ease infinite;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+@keyframes buyGleam {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.flash-buy-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.flash-remind-btn {
+  background: #FFFFFF;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 0;
+  transition: all 0.15s ease;
+}
+
+.flash-remind-btn:hover {
+  background: var(--primary-subtle);
+}
+
+.flash-remind-btn.reminded {
+  background: #ECFDF5;
+  color: #059669;
+  border-color: #059669;
+}
+
+/* Toast */
+.flash-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(17, 24, 39, 0.95);
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 0;
+  border: 1px solid #374151;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  z-index: 1000;
+  animation: toastFade 0.25s ease-out;
+}
+
+@keyframes toastFade {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ========================================================= */
+/* RESPONSIVE MEDIA QUERIES */
+/* ========================================================= */
+@media (max-width: 900px) {
+  .flash-hero__top-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .flash-hero__timer-box {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .flash-products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}

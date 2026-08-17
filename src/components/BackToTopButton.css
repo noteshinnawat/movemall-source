@@ -1,0 +1,72 @@
+/* BackToTopButton.css — Floating Smooth Scroll to Top */
+
+.back-to-top-btn {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  z-index: 995;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 48px;
+  background: #FFFFFF;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 4px 2px;
+  animation: backToTopPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.back-to-top-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #FFFFFF;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.25);
+}
+
+.back-to-top-btn:active {
+  transform: translateY(0);
+}
+
+.back-to-top-icon {
+  transition: transform 0.2s ease;
+}
+
+.back-to-top-btn:hover .back-to-top-icon {
+  transform: translateY(-2px);
+}
+
+.back-to-top-text {
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+  margin-top: 2px;
+  letter-spacing: -0.2px;
+}
+
+@keyframes backToTopPop {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Mobile Adjustments (Avoid overlapping bottom navigation) */
+@media (max-width: 768px) {
+  .back-to-top-btn {
+    bottom: 74px;
+    right: 14px;
+    width: 42px;
+    height: 44px;
+  }
+}
