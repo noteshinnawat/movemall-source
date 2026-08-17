@@ -29,3 +29,20 @@ export function authenticateJWT(req: AuthRequest, res: Response, next: NextFunct
     res.status(403).json({ error: 'Forbidden: Invalid or expired token' });
   }
 }
+
+export function requireRole(...allowedRoles: string[]) {
+  return (req: AuthRequest, res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    // SUPER_ADMIN and ADMIN have access to all routes by default
+    if (req.user.role === 'SUPER_ADMIN' || req.user.role === 'ADMIN' || allowedRoles.includes(req.user.role)) {
+      next();
+      return;
+    }
+
+    res.status(403).json({ error: `Forbidden: Access restricted to ${allowedRoles.join(', ')} roles` });
+  };
+}
