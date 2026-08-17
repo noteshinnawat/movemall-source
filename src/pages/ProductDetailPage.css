@@ -1,13 +1,14 @@
 /* ProductDetailPage.css — Clean Flat Detail */
 
 .product-detail {
-  padding-top: 16px;
+  padding-top: calc(var(--navbar-height, 136px) + 16px);
   padding-bottom: 48px;
   min-height: 100vh;
 }
 
 @media (max-width: 768px) {
   .product-detail {
+    padding-top: calc(var(--navbar-height, 54px) + 10px);
     padding-bottom: 96px;
   }
 }
