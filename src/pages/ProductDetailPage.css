@@ -83,7 +83,7 @@
 /* Shopee / TikTok Style Floating Navigation & Actions Overlay */
 .product-floating-top-bar {
   position: absolute;
-  top: max(18px, env(safe-area-inset-top, 18px));
+  top: max(14px, env(safe-area-inset-top, 14px));
   left: 14px;
   right: 14px;
   z-index: 10;
@@ -102,30 +102,29 @@
 
 .product-float-btn {
   pointer-events: auto;
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  color: var(--text-primary, #111827);
-  opacity: 0.72;
-  border: none;
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50% !important;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   text-decoration: none;
-  filter: drop-shadow(0 1px 3px rgba(255, 255, 255, 0.9));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .product-float-btn:hover {
-  background: rgba(0, 0, 0, 0.06);
+  background: #FFFFFF;
   color: var(--primary);
-  opacity: 1;
   transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 }
 
 .product-float-btn:active {
@@ -133,9 +132,8 @@
 }
 
 .product-float-btn--wished {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.95);
   color: #EF4444;
-  opacity: 1;
 }
 
 .product-float-cart-badge {
@@ -144,14 +142,15 @@
   right: -4px;
   background: #DC2626;
   color: #FFFFFF;
-  font-size: 10px;
-  font-weight: 800;
-  min-width: 17px;
-  height: 17px;
+  font-size: 9.5px;
+  font-weight: 900;
+  min-width: 16px;
+  height: 16px;
   padding: 0 4px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50% !important;
   border: 1.5px solid #FFFFFF;
   line-height: 1;
 }
@@ -1315,7 +1314,7 @@
 /* Responsive */
 @media (max-width: 900px) {
   .product-detail {
-    padding-top: max(8px, env(safe-area-inset-top, 8px));
+    padding-top: 0;
   }
   .product-detail > .container {
     padding-left: 0;
@@ -1387,7 +1386,7 @@
 
   /* Mobile Sticky Bar: Elevated with extra touch clearance from screen bottom */
   .product-floating-top-bar {
-    top: max(16px, env(safe-area-inset-top, 16px));
+    top: max(12px, env(safe-area-inset-top, 12px));
     left: 12px;
     right: 12px;
   }
