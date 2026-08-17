@@ -39,6 +39,7 @@ const ComparePage      = lazy(() => import('./pages/ComparePage').then(m => ({ d
 const AffiliatePage    = lazy(() => import('./pages/AffiliatePage').then(m => ({ default: m.AffiliatePage })));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
 const TermsPage        = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })));
+const AccountPage      = lazy(() => import('./pages/AccountPage').then(m => ({ default: m.AccountPage })));
 import { products as initialProducts } from './data/products';
 import { useCart } from './hooks/useCart';
 import { useWishlist } from './hooks/useWishlist';
@@ -234,7 +235,7 @@ function AppLayout({
           {/* Chat Inbox */}
           <Route path="/chat" element={<ChatPage />} />
 
-          {/* Auth: Login / Register */}
+          {/* Login / Authentication */}
           <Route
             path="/login"
             element={
@@ -245,6 +246,9 @@ function AppLayout({
               />
             }
           />
+
+          {/* Customer Account & Verification Portal */}
+          <Route path="/account" element={<AccountPage />} />
 
           {/* Product Detail */}
           <Route

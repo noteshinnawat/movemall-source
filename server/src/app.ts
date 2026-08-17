@@ -83,6 +83,7 @@ import productRoutes from './routes/product.routes.js';
 import storeRoutes from './routes/store.routes.js';
 import orderRoutes from './routes/order.routes.js';
 import chatRoutes from './routes/chat.routes.js';
+import userRoutes from './routes/user.routes.js';
 
 // ── Socket.io Live Chat Room Handlers ──
 io.on('connection', (socket) => {
@@ -121,6 +122,7 @@ app.get('/api/info', (_req, res) => {
       '/api/stores',
       '/api/orders',
       '/api/chat',
+      '/api/user',
     ],
   });
 });
@@ -131,6 +133,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/stores', storeRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/user', userRoutes);
 
 const PORT = Number(process.env.PORT) || 4000;
 
