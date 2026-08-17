@@ -44,6 +44,7 @@ export interface Product {
   description: string;
   tags: string[];
   badge?: 'new' | 'sale' | 'hot' | 'limited' | 'mall';
+  isMall?: boolean;
 }
 
 export interface CartItem {

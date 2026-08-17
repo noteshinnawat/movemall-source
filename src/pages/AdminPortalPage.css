@@ -1,0 +1,188 @@
+/* src/pages/AdminPortalPage.css — Super Admin Portal with 7 Department Workflows */
+
+.admin-page {
+  max-width: 1280px;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  background: #ffffff;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 6px;
+}
+
+.admin-title-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--color-text, #111827);
+  margin: 0;
+}
+
+.admin-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #eff6ff;
+  color: var(--color-primary, #2563eb);
+}
+
+/* Department Tabs */
+.admin-tabs {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--color-border, #e5e7eb);
+}
+
+.admin-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--color-text-muted, #6b7280);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.admin-tab-btn:hover {
+  background: #f9fafb;
+  color: var(--color-text, #111827);
+}
+
+.admin-tab-btn--active {
+  background: var(--color-primary, #2563eb) !important;
+  color: #ffffff !important;
+  border-color: var(--color-primary, #2563eb) !important;
+}
+
+/* Overview Metrics Grid */
+.admin-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-metric-card {
+  background: #ffffff;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 6px;
+  padding: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-metric-val {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--color-text, #111827);
+  margin: 0.25rem 0 0 0;
+}
+
+.admin-metric-lbl {
+  font-size: 0.825rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+/* Tables & Cards */
+.admin-card {
+  background: #ffffff;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.admin-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  margin: 0;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.admin-table th {
+  background: var(--color-surface, #f9fafb);
+  font-weight: 600;
+  color: var(--color-text-muted, #6b7280);
+}
+
+.admin-table tr:hover {
+  background: #f9fafb;
+}
+
+.admin-btn-sm {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.775rem;
+  font-weight: 600;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.admin-btn-primary {
+  background: var(--color-primary, #2563eb);
+  color: #ffffff;
+}
+
+.admin-btn-success {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.admin-btn-outline {
+  background: #ffffff;
+  border: 1px solid var(--color-border, #e5e7eb);
+  color: var(--color-text, #111827);
+}
+
+.admin-btn-outline:hover {
+  background: #f3f4f6;
+}
+
+@media (max-width: 768px) {
+  .admin-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}

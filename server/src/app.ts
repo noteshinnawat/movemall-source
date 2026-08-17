@@ -85,6 +85,7 @@ import orderRoutes from './routes/order.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import userRoutes from './routes/user.routes.js';
 import adsRoutes from './routes/ads.routes.js';
+import adminRoutes from './routes/admin.routes.js';
 
 // ── Socket.io Live Chat Room Handlers ──
 io.on('connection', (socket) => {
@@ -125,6 +126,7 @@ app.get('/api/info', (_req, res) => {
       '/api/chat',
       '/api/user',
       '/api/ads',
+      '/api/admin',
     ],
   });
 });
@@ -137,6 +139,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/ads', adsRoutes);
+app.use('/api/admin', adminRoutes);
 
 const PORT = Number(process.env.PORT) || 4000;
 

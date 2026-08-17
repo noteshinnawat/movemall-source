@@ -40,6 +40,7 @@ const AffiliatePage    = lazy(() => import('./pages/AffiliatePage').then(m => ({
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
 const TermsPage        = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })));
 const AccountPage      = lazy(() => import('./pages/AccountPage').then(m => ({ default: m.AccountPage })));
+const AdminPortalPage  = lazy(() => import('./pages/AdminPortalPage').then(m => ({ default: m.AdminPortalPage })));
 import { products as initialProducts } from './data/products';
 import { useCart } from './hooks/useCart';
 import { useWishlist } from './hooks/useWishlist';
@@ -249,6 +250,9 @@ function AppLayout({
 
           {/* Customer Account & Verification Portal */}
           <Route path="/account" element={<AccountPage />} />
+
+          {/* Super Admin Portal (7 Departments) */}
+          <Route path="/admin" element={<AdminPortalPage products={productList} />} />
 
           {/* Product Detail */}
           <Route
