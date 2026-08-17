@@ -24,6 +24,7 @@ interface NavbarProps {
   cartCount?: number;
   wishlistCount?: number;
   onOpenVisualSearch?: () => void;
+  className?: string;
 }
 
 const TRENDING_KEYWORDS = [
@@ -39,7 +40,12 @@ const TRENDING_KEYWORDS = [
   'iPad Air M2 ชิปเซ็ตแรง',
 ];
 
-export function Navbar({ cartCount = 0, wishlistCount = 0, onOpenVisualSearch }: NavbarProps) {
+export function Navbar({
+  cartCount = 0,
+  wishlistCount = 0,
+  onOpenVisualSearch,
+  className = '',
+}: NavbarProps) {
   const navigate = useNavigate();
   const [keywordIndex, setKeywordIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,7 +66,7 @@ export function Navbar({ cartCount = 0, wishlistCount = 0, onOpenVisualSearch }:
   }
 
   return (
-    <header className="navbar" role="banner">
+    <header className={`navbar ${className}`.trim()} role="banner">
       {/* ── Tier 1: Top Utility Bar (Desktop only) ── */}
       <div className="navbar__top-bar">
         <div className="navbar__top-inner">

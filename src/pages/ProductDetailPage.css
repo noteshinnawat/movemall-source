@@ -8,7 +8,7 @@
 
 @media (max-width: 768px) {
   .product-detail {
-    padding-top: calc(var(--navbar-height, 54px) + 10px);
+    padding-top: 0;
     padding-bottom: 96px;
   }
 }
@@ -96,7 +96,7 @@
   .product-floating-top-bar {
     display: flex;
     position: absolute;
-    top: max(14px, env(safe-area-inset-top, 14px));
+    top: max(14px, calc(env(safe-area-inset-top, 0px) + 12px));
     left: 14px;
     right: 14px;
     z-index: 10;

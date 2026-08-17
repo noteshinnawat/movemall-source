@@ -14,6 +14,12 @@
   padding-top: env(safe-area-inset-top, 0px);
 }
 
+@media (max-width: 768px) {
+  .navbar--desktop-only {
+    display: none !important;
+  }
+}
+
 /* ── Tier 1: Top Utility Bar (Desktop) ── */
 .navbar__top-bar {
   background: #F9FAFB;

@@ -97,6 +97,7 @@ function AppLayout({
           cartCount={cart.totalItems}
           wishlistCount={wishlist.count}
           onOpenVisualSearch={() => handleOpenVisualSearch()}
+          className={isProductDetailPage ? 'navbar--desktop-only' : ''}
         />
       )}
 
