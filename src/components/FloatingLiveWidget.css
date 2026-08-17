@@ -108,11 +108,12 @@
 /* Mobile Mini Size (< 768px) */
 @media (max-width: 768px) {
   .floating-live-widget {
-    bottom: 68px;
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px));
     right: 8px;
     width: 105px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     border-width: 1.5px;
+    z-index: 1002;
   }
 
   .floating-live-video-box {

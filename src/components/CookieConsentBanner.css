@@ -99,8 +99,9 @@
 
 @media (max-width: 768px) {
   .cookie-consent-bar {
-    bottom: 60px; /* Above mobile bottom navigation */
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
     padding: var(--space-3) var(--space-4);
+    z-index: 1005;
   }
   .cookie-consent-inner {
     flex-direction: column;

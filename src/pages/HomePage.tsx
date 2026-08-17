@@ -359,7 +359,7 @@ export function HomePage({ onAddToCart, isWishlisted, onToggleWishlist }: HomePa
               <div className="home-live-card-top">
                 <span className="home-live-tag">
                   <span className="home-live-tag-dot" />
-                  {ch.viewers} คนดู
+                  {ch.viewers}
                 </span>
                 <span className="home-live-channel">{ch.channelName}</span>
               </div>

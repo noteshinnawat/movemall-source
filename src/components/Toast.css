@@ -79,3 +79,12 @@
     transform: translateY(0);
   }
 }
+
+@media (max-width: 768px) {
+  .toast-container {
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+    right: var(--space-3);
+    left: var(--space-3);
+    align-items: center;
+  }
+}

@@ -92,10 +92,11 @@
 @media (max-width: 768px) {
   .activity-ticker-container {
     top: auto;
-    bottom: 68px;
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px));
     left: 8px;
     right: auto;
     max-width: 220px;
+    z-index: 1002;
   }
   .activity-ticker {
     padding: 5px 8px;
