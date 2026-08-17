@@ -357,7 +357,7 @@ export function ProductDetailPage({
                   aria-label="ย้อนกลับ"
                   title="ย้อนกลับ"
                 >
-                  <ArrowLeft size={20} />
+                  <ArrowLeft size={22} />
                 </button>
 
                 <div className="product-float-right-group">
@@ -368,7 +368,7 @@ export function ProductDetailPage({
                     aria-label="แชร์สินค้า"
                     title="แชร์สินค้า"
                   >
-                    <Share2 size={18} />
+                    <Share2 size={20} />
                   </button>
 
                   <button
@@ -379,9 +379,9 @@ export function ProductDetailPage({
                     title="บันทึกรายการโปรด"
                   >
                     <Heart
-                      size={18}
+                      size={20}
                       fill={isWishlisted?.(product.id) ? '#EF4444' : 'none'}
-                      color={isWishlisted?.(product.id) ? '#EF4444' : '#FFFFFF'}
+                      color={isWishlisted?.(product.id) ? '#EF4444' : 'currentColor'}
                     />
                   </button>
 
@@ -391,7 +391,7 @@ export function ProductDetailPage({
                     aria-label="ดูรถเข็น"
                     title="ดูรถเข็น"
                   >
-                    <ShoppingBag size={18} />
+                    <ShoppingBag size={20} />
                     {cartCount > 0 && (
                       <span className="product-float-cart-badge">{cartCount}</span>
                     )}
