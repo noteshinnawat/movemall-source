@@ -41,6 +41,7 @@ const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m 
 const TermsPage        = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })));
 const AccountPage      = lazy(() => import('./pages/AccountPage').then(m => ({ default: m.AccountPage })));
 const AdminPortalPage  = lazy(() => import('./pages/AdminPortalPage').then(m => ({ default: m.AdminPortalPage })));
+const SellerRegisterPage = lazy(() => import('./pages/SellerRegisterPage').then(m => ({ default: m.SellerRegisterPage })));
 import { products as initialProducts } from './data/products';
 import { useCart } from './hooks/useCart';
 import { useWishlist } from './hooks/useWishlist';
@@ -280,7 +281,8 @@ function AppLayout({
             }
           />
 
-          {/* Marketplace Seller Center */}
+          {/* Marketplace Seller Center & Registration */}
+          <Route path="/seller/register" element={<SellerRegisterPage />} />
           <Route
             path="/seller"
             element={

@@ -1,0 +1,226 @@
+/* src/pages/SellerRegisterPage.css — Merchant Onboarding & Store Registration */
+
+.seller-reg-page {
+  max-width: 860px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.seller-reg-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.seller-reg-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text, #111827);
+  margin-bottom: 0.5rem;
+}
+
+.seller-reg-sub {
+  font-size: 0.95rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+/* Stepper Bar */
+.seller-stepper {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 2.5rem;
+}
+
+.seller-stepper::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 40px;
+  right: 40px;
+  height: 2px;
+  background: var(--color-border, #e5e7eb);
+  z-index: 0;
+}
+
+.seller-step-item {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.seller-step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--color-border, #e5e7eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-text-muted, #6b7280);
+  transition: all 0.2s ease;
+}
+
+.seller-step-item--active .seller-step-num {
+  border-color: var(--color-primary, #2563eb);
+  background: var(--color-primary, #2563eb);
+  color: #ffffff;
+}
+
+.seller-step-item--completed .seller-step-num {
+  border-color: #10b981;
+  background: #10b981;
+  color: #ffffff;
+}
+
+.seller-step-lbl {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #6b7280);
+}
+
+.seller-step-item--active .seller-step-lbl {
+  color: var(--color-primary, #2563eb);
+  font-weight: 700;
+}
+
+/* Registration Form Card */
+.seller-reg-card {
+  background: #ffffff;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 6px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.seller-reg-step-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.seller-form-group {
+  margin-bottom: 1.25rem;
+}
+
+.seller-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  margin-bottom: 0.35rem;
+}
+
+.seller-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.seller-input:focus {
+  border-color: var(--color-primary, #2563eb);
+}
+
+.seller-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Type Selector Buttons */
+.seller-type-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.seller-type-card {
+  border: 2px solid var(--color-border, #e5e7eb);
+  border-radius: 6px;
+  padding: 1.25rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.seller-type-card:hover {
+  border-color: #93c5fd;
+}
+
+.seller-type-card--selected {
+  border-color: var(--color-primary, #2563eb) !important;
+  background: #eff6ff;
+}
+
+.seller-type-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  margin: 0.5rem 0 0.25rem 0;
+}
+
+.seller-type-desc {
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+/* Actions Footer */
+.seller-reg-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+}
+
+.seller-btn-primary {
+  padding: 0.75rem 1.75rem;
+  background: var(--color-primary, #2563eb);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.seller-btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.seller-btn-outline {
+  padding: 0.75rem 1.5rem;
+  background: #ffffff;
+  border: 1px solid var(--color-border, #e5e7eb);
+  color: var(--color-text, #111827);
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.seller-btn-outline:hover {
+  background: #f9fafb;
+}
+
+@media (max-width: 640px) {
+  .seller-grid-2,
+  .seller-type-selector {
+    grid-template-columns: 1fr;
+  }
+}
