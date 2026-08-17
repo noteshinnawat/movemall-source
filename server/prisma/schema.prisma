@@ -397,3 +397,47 @@ model AffiliateReferral {
 
   @@index([creatorId, status])
 }
+
+// ── 12. Movemall Ads Network ──
+model AdWallet {
+  id          String       @id @default(uuid())
+  storeId     String       @unique
+  balance     Decimal      @default(1000.00) @db.Decimal(10, 2)
+  totalSpent  Decimal      @default(0.00) @db.Decimal(10, 2)
+  updatedAt   DateTime     @updatedAt
+
+  txs         AdWalletTx[]
+}
+
+model AdWalletTx {
+  id          String   @id @default(uuid())
+  walletId    String
+  amount      Decimal  @db.Decimal(10, 2)
+  type        String   // 'topup', 'spend', 'bonus'
+  description String
+  createdAt   DateTime @default(now())
+
+  wallet      AdWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([walletId, createdAt(sort: Desc)])
+}
+
+model AdCampaign {
+  id          String   @id @default(uuid())
+  storeId     String
+  productId   String
+  type        String   // 'search', 'discovery', 'live'
+  name        String
+  dailyBudget Decimal  @db.Decimal(10, 2)
+  cpcBid      Decimal  @db.Decimal(10, 2)
+  keywords    String[]
+  status      String   @default("active") // 'active', 'paused', 'ended'
+  impressions Int      @default(0)
+  clicks      Int      @default(0)
+  totalSpent  Decimal  @default(0.00) @db.Decimal(10, 2)
+  revenue     Decimal  @default(0.00) @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+
+  @@index([storeId, status])
+  @@index([type, status])
+}

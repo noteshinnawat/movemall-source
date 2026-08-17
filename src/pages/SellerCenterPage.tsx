@@ -106,7 +106,7 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
     }
   }
 
-  function handleCreateCampaign(e: React.FormEvent) {
+  async function handleCreateCampaign(e: React.FormEvent) {
     e.preventDefault();
     const targetProduct = products.find(p => p.id === selectedProdId) || storeProducts[0];
     if (!targetProduct) return;
@@ -142,14 +142,43 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
       startDate: new Date().toISOString().split('T')[0],
     };
 
+    try {
+      await fetchApi('/api/ads/campaigns', {
+        method: 'POST',
+        body: JSON.stringify({
+          storeId: currentStore.id,
+          productId: targetProduct.id,
+          name: `${targetProduct.name} Ads`,
+          type: adCampaignType,
+          dailyBudget: Number(dailyBudget) || 100,
+          cpcBid: Number(cpcBid) || 2.0,
+          keywords: keywordsInput.split(',').map(k => k.trim()).filter(Boolean),
+        }),
+      });
+    } catch (err) {
+      console.warn('API Ad Campaign Note (falling back to local state):', err);
+    }
+
     setCampaigns([newCampaign, ...campaigns]);
     setIsCreateAdModalOpen(false);
   }
 
-  function handleTopup(e: React.FormEvent) {
+  async function handleTopup(e: React.FormEvent) {
     e.preventDefault();
     const amt = Number(topupAmount);
     if (!amt || amt <= 0) return;
+
+    try {
+      await fetchApi('/api/ads/wallet/topup', {
+        method: 'POST',
+        body: JSON.stringify({
+          storeId: currentStore.id,
+          amount: amt,
+        }),
+      });
+    } catch (err) {
+      console.warn('API Topup Note (falling back to local state):', err);
+    }
 
     setWallet(prev => ({
       ...prev,
