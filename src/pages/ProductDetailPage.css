@@ -87,17 +87,23 @@
   }
 }
 
-/* Shopee / TikTok Style Floating Navigation & Actions Overlay */
+/* Shopee / TikTok Style Floating Navigation & Actions Overlay (Mobile Only) */
 .product-floating-top-bar {
-  position: absolute;
-  top: max(14px, env(safe-area-inset-top, 14px));
-  left: 14px;
-  right: 14px;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  pointer-events: none;
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .product-floating-top-bar {
+    display: flex;
+    position: absolute;
+    top: max(14px, env(safe-area-inset-top, 14px));
+    left: 14px;
+    right: 14px;
+    z-index: 10;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: none;
+  }
 }
 
 .product-float-right-group {
