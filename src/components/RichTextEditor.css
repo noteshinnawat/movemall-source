@@ -1,0 +1,317 @@
+/* src/components/RichTextEditor.css — Rich text editor styles */
+
+.rich-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.rich-editor__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #475569);
+}
+
+.rich-editor__container {
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  background: #FFFFFF;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rich-editor__container:focus-within {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* Header & Tools */
+.rich-editor__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #F8FAFC;
+  border-bottom: 1px solid #E2E8F0;
+  flex-wrap: wrap;
+}
+
+.rich-editor__tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.rich-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #475569;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.12s ease;
+}
+
+.rich-tool-btn:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+.rich-tool-divider {
+  width: 1px;
+  height: 18px;
+  background: #CBD5E1;
+  margin: 0 4px;
+}
+
+/* Mode Switcher */
+.rich-editor__mode-switch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: #E2E8F0;
+  padding: 2px;
+  border-radius: 6px;
+}
+
+.rich-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #64748B;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rich-mode-btn--active {
+  background: #FFFFFF;
+  color: #2563EB;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* Quick Templates Ribbon */
+.rich-editor__templates-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #FAFAFC;
+  border-bottom: 1px dashed #E2E8F0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.rich-editor__templates-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #7C3AED;
+  margin-right: 2px;
+  flex-shrink: 0;
+}
+
+.rich-template-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #FFFFFF;
+  border: 1px solid #DDD6FE;
+  color: #6D28D9;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.rich-template-chip:hover {
+  background: #EDE9FE;
+  border-color: #C4B5FD;
+}
+
+/* Textarea Content */
+.rich-editor__textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #0F172A;
+  background: #FFFFFF;
+  border: none;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.rich-editor__textarea::placeholder {
+  color: #94A3B8;
+}
+
+/* Preview Area */
+.rich-editor__preview-area {
+  padding: 12px;
+  background: #FFFFFF;
+  overflow-y: auto;
+  box-sizing: border-box;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #1E293B;
+}
+
+.rich-editor__preview-empty {
+  color: #94A3B8;
+  font-style: italic;
+  font-size: 12px;
+  padding: 20px 0;
+  text-align: center;
+}
+
+/* Footer Info */
+.rich-editor__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: #F8FAFC;
+  border-top: 1px solid #E2E8F0;
+  font-size: 11px;
+  color: #64748B;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rich-editor__char-count {
+  font-weight: 600;
+  color: #475569;
+}
+
+.rich-editor__hint {
+  color: #94A3B8;
+}
+
+/* ── Rich Description Rendered Styles (Reusable) ── */
+.rich-desc-h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 10px 0 4px;
+}
+
+.rich-desc-h4 {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1E293B;
+  margin: 8px 0 3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rich-desc-p {
+  margin: 0 0 6px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #334155;
+}
+
+.rich-desc-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #334155;
+}
+
+.rich-desc-icon--bullet {
+  color: #2563EB;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.rich-desc-icon--check {
+  color: #10B981;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.rich-desc-icon--num {
+  color: #64748B;
+  font-weight: 600;
+  font-size: 12px;
+  min-width: 14px;
+}
+
+.rich-desc-hr {
+  border: none;
+  border-top: 1px dashed #CBD5E1;
+  margin: 10px 0;
+}
+
+.rich-desc-empty-line {
+  height: 8px;
+}
+
+.rich-bold {
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.rich-italic {
+  font-style: italic;
+  color: #475569;
+}
+
+.rich-tag-badge {
+  display: inline-block;
+  background: #FEF3C7;
+  color: #92400E;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid #FDE68A;
+  margin: 0 2px;
+}
+
+@media (max-width: 768px) {
+  .rich-editor__header {
+    gap: 6px;
+  }
+
+  .rich-editor__tools {
+    gap: 2px;
+  }
+
+  .rich-tool-btn {
+    width: 26px;
+    height: 26px;
+  }
+
+  .rich-editor__hint {
+    display: none;
+  }
+}

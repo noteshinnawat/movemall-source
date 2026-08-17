@@ -5,11 +5,14 @@ import { Link } from 'react-router-dom';
 import {
   Plus, Package, DollarSign, TrendingUp, Star, Trash2, X, Store, CheckCircle,
   Printer, Target, Eye, MousePointerClick, Wallet, ArrowUpRight, Play, Pause,
-  AlertCircle, RefreshCw, Zap, ShieldCheck, Pencil, Upload, Image as ImageIcon
+  AlertCircle, RefreshCw, Zap, ShieldCheck, Pencil, Upload, Image as ImageIcon, Video,
+  User, MapPin
 } from 'lucide-react';
 import { stores } from '../data/stores';
+import { categories } from '../data/products';
 import { initialAdCampaigns, initialAdWallet } from '../data/mockAdsData';
 import { ShippingLabelModal, type ShippingLabelProps } from '../components/ShippingLabelModal';
+import { RichTextEditor } from '../components/RichTextEditor';
 import type { Product, AdCampaign, AdType, AdWallet, AdKeyword, ProductCompliance, ComplianceType } from '../types';
 import { fetchApi } from '../utils/api';
 import './SellerCenterPage.css';
@@ -152,6 +155,19 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
           setImage(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function handleVideoFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setVideoUrl(reader.result);
         }
       };
       reader.readAsDataURL(file);
@@ -873,105 +889,265 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 
         {/* Orders Tab */}
         {activeTab === 'orders' && (
-          <div className="seller-table-container">
-            <table className="seller-table">
-              <thead>
-                <tr>
-                  <th>เลขที่คำสั่งซื้อ</th>
-                  <th>สินค้า</th>
-                  <th>ผู้ซื้อ & ที่อยู่จัดส่ง</th>
-                  <th>ยอดชำระ</th>
-                  <th>สถานะ</th>
-                  <th>การดำเนินการ</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>#ORD-20260816-001</strong></td>
-                  <td>หูฟังไร้สาย Premium Pro X (1 ชิ้น)</td>
-                  <td>
-                    <div>กิตติพงษ์ ส. (089-123-4567)</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>123 ถ.สุขุมวิท 39 วัฒนา กทม. 10110</div>
-                  </td>
-                  <td>฿1,290</td>
-                  <td><span style={{ color: 'var(--primary)', fontWeight: 700 }}>⚙️ รอดำเนินการส่ง</span></td>
-                  <td>
+          <div className="seller-orders-hub">
+            {/* Desktop Table View */}
+            <div className="seller-desktop-table seller-table-container">
+              <table className="seller-table">
+                <thead>
+                  <tr>
+                    <th>เลขที่คำสั่งซื้อ</th>
+                    <th>สินค้า</th>
+                    <th>ผู้ซื้อ & ที่อยู่จัดส่ง</th>
+                    <th>ยอดชำระ</th>
+                    <th>สถานะ</th>
+                    <th>การดำเนินการ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    {
+                      id: 'ord-1',
+                      orderId: 'ORD-20260816-001',
+                      trackingNo: 'TH-0891-FLASH',
+                      customerName: 'กิตติพงษ์ ส.',
+                      customerPhone: '089-123-4567',
+                      customerAddress: '123 ถ.สุขุมวิท 39 คลองตันเหนือ วัฒนา กทม.',
+                      zipCode: '10110',
+                      items: [{ name: 'หูฟังไร้สาย Premium Pro X', quantity: 1, price: 1290 }],
+                      total: 1290,
+                      status: 'pending' as const,
+                      statusText: '⚙️ รอดำเนินการส่ง',
+                      date: '16 ส.ค. 2026 14:32',
+                      isCOD: false,
+                    },
+                    {
+                      id: 'ord-2',
+                      orderId: 'ORD-20260815-098',
+                      trackingNo: 'TH-0982-FLASH',
+                      customerName: 'อรทัย ว.',
+                      customerPhone: '082-987-6543',
+                      customerAddress: '88/1 ถ.ติวานนท์ ต.ตลาดขวัญ เมือง นนทบุรี',
+                      zipCode: '11000',
+                      items: [{ name: 'สมาร์ทวอทช์ Series 8 Ultra', quantity: 1, price: 5990 }],
+                      total: 5990,
+                      status: 'shipped' as const,
+                      statusText: '✅ จัดส่งแล้ว',
+                      date: '15 ส.ค. 2026 18:20',
+                      isCOD: false,
+                    },
+                    {
+                      id: 'ord-3',
+                      orderId: 'ORD-20260815-045',
+                      trackingNo: 'TH-0451-KERRY',
+                      customerName: 'ชินวัตร ภ.',
+                      customerPhone: '081-456-7890',
+                      customerAddress: '55 หมู่ 4 ต.สุเทพ อ.เมือง จ.เชียงใหม่',
+                      zipCode: '50200',
+                      items: [{ name: 'รองเท้าวิ่ง Ultra Lightweight Pro', quantity: 1, price: 2890 }],
+                      total: 2890,
+                      status: 'pending' as const,
+                      statusText: '⚙️ รอดำเนินการส่ง',
+                      date: '15 ส.ค. 2026 11:15',
+                      isCOD: true,
+                    },
+                    {
+                      id: 'ord-4',
+                      orderId: 'ORD-20260814-112',
+                      trackingNo: 'TH-1123-FLASH',
+                      customerName: 'ณภัทร ม.',
+                      customerPhone: '085-789-0123',
+                      customerAddress: '99/4 อาคารไอทีทาวเวอร์ ถ.พหลโยธิน จตุจักร กทม.',
+                      zipCode: '10900',
+                      items: [{ name: 'เคสป้องกันแม่เหล็ก Magnetic Pro', quantity: 2, price: 490 }],
+                      total: 980,
+                      status: 'shipped' as const,
+                      statusText: '✅ จัดส่งแล้ว',
+                      date: '14 ส.ค. 2026 09:40',
+                      isCOD: false,
+                    },
+                  ].map(order => (
+                    <tr key={order.id}>
+                      <td><strong>#{order.orderId}</strong></td>
+                      <td>{order.items.map(i => `${i.name} (${i.quantity} ชิ้น)`).join(', ')}</td>
+                      <td>
+                        <div>{order.customerName} ({order.customerPhone})</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{order.customerAddress} {order.zipCode}</div>
+                      </td>
+                      <td>฿{order.total.toLocaleString()}</td>
+                      <td>
+                        <span style={{
+                          color: order.status === 'pending' ? 'var(--primary)' : 'var(--success)',
+                          fontWeight: 700
+                        }}>
+                          {order.statusText}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => setSelectedOrderForLabel({
+                            orderId: order.orderId,
+                            trackingNo: order.trackingNo,
+                            customerName: order.customerName,
+                            customerPhone: order.customerPhone,
+                            customerAddress: order.customerAddress,
+                            zipCode: order.zipCode,
+                            storeName: currentStore.name,
+                            storePhone: '081-234-5678',
+                            storeAddress: '456 ถ.พระราม 4 คลองเตย กทม. 10110',
+                            items: order.items.map(i => ({ name: i.name, quantity: i.quantity })),
+                            total: order.total,
+                            isCOD: order.isCOD,
+                          })}
+                          style={{
+                            padding: '6px 12px',
+                            background: order.status === 'pending' ? 'var(--primary)' : 'var(--surface)',
+                            color: order.status === 'pending' ? 'white' : 'var(--text-primary)',
+                            border: order.status === 'pending' ? 'none' : '1px solid var(--border)',
+                            borderRadius: 'var(--radius-md, 6px)',
+                            fontSize: 12,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                          }}
+                        >
+                          <Printer size={13} /> {order.status === 'pending' ? 'พิมพ์ใบปะหน้า (4x6)' : 'พิมพ์ซ้ำ'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards View */}
+            <div className="seller-orders-mobile-list">
+              {[
+                {
+                  id: 'ord-1',
+                  orderId: 'ORD-20260816-001',
+                  trackingNo: 'TH-0891-FLASH',
+                  customerName: 'กิตติพงษ์ ส.',
+                  customerPhone: '089-123-4567',
+                  customerAddress: '123 ถ.สุขุมวิท 39 คลองตันเหนือ วัฒนา กทม.',
+                  zipCode: '10110',
+                  items: [{ name: 'หูฟังไร้สาย Premium Pro X', quantity: 1, price: 1290 }],
+                  total: 1290,
+                  status: 'pending' as const,
+                  statusText: '⚙️ รอดำเนินการส่ง',
+                  date: '16 ส.ค. 2026 14:32',
+                  isCOD: false,
+                },
+                {
+                  id: 'ord-2',
+                  orderId: 'ORD-20260815-098',
+                  trackingNo: 'TH-0982-FLASH',
+                  customerName: 'อรทัย ว.',
+                  customerPhone: '082-987-6543',
+                  customerAddress: '88/1 ถ.ติวานนท์ ต.ตลาดขวัญ เมือง นนทบุรี',
+                  zipCode: '11000',
+                  items: [{ name: 'สมาร์ทวอทช์ Series 8 Ultra', quantity: 1, price: 5990 }],
+                  total: 5990,
+                  status: 'shipped' as const,
+                  statusText: '✅ จัดส่งแล้ว',
+                  date: '15 ส.ค. 2026 18:20',
+                  isCOD: false,
+                },
+                {
+                  id: 'ord-3',
+                  orderId: 'ORD-20260815-045',
+                  trackingNo: 'TH-0451-KERRY',
+                  customerName: 'ชินวัตร ภ.',
+                  customerPhone: '081-456-7890',
+                  customerAddress: '55 หมู่ 4 ต.สุเทพ อ.เมือง จ.เชียงใหม่',
+                  zipCode: '50200',
+                  items: [{ name: 'รองเท้าวิ่ง Ultra Lightweight Pro', quantity: 1, price: 2890 }],
+                  total: 2890,
+                  status: 'pending' as const,
+                  statusText: '⚙️ รอดำเนินการส่ง',
+                  date: '15 ส.ค. 2026 11:15',
+                  isCOD: true,
+                },
+                {
+                  id: 'ord-4',
+                  orderId: 'ORD-20260814-112',
+                  trackingNo: 'TH-1123-FLASH',
+                  customerName: 'ณภัทร ม.',
+                  customerPhone: '085-789-0123',
+                  customerAddress: '99/4 อาคารไอทีทาวเวอร์ ถ.พหลโยธิน จตุจักร กทม.',
+                  zipCode: '10900',
+                  items: [{ name: 'เคสป้องกันแม่เหล็ก Magnetic Pro', quantity: 2, price: 490 }],
+                  total: 980,
+                  status: 'shipped' as const,
+                  statusText: '✅ จัดส่งแล้ว',
+                  date: '14 ส.ค. 2026 09:40',
+                  isCOD: false,
+                },
+              ].map(order => (
+                <div key={order.id} className="seller-order-mobile-card">
+                  <div className="seller-order-mobile-card__header">
+                    <div className="seller-order-mobile-card__id">
+                      <strong>#{order.orderId}</strong>
+                      <span className="seller-order-mobile-card__date">{order.date}</span>
+                    </div>
+                    <span className={`seller-order-status-badge seller-order-status-badge--${order.status}`}>
+                      {order.statusText}
+                    </span>
+                  </div>
+
+                  <div className="seller-order-mobile-card__body">
+                    <div className="seller-order-mobile-card__item">
+                      <Package size={15} className="seller-order-icon" />
+                      <span className="seller-order-item-title">
+                        {order.items.map(i => `${i.name} (${i.quantity} ชิ้น)`).join(', ')}
+                      </span>
+                    </div>
+
+                    <div className="seller-order-mobile-card__customer">
+                      <div className="seller-order-customer-line">
+                        <User size={14} className="seller-order-icon" />
+                        <strong>{order.customerName}</strong>
+                        <span className="seller-order-customer-phone">({order.customerPhone})</span>
+                      </div>
+                      <div className="seller-order-customer-addr">
+                        <MapPin size={14} className="seller-order-icon" />
+                        <span>{order.customerAddress} {order.zipCode}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="seller-order-mobile-card__footer">
+                    <div className="seller-order-mobile-card__total">
+                      <span className="seller-order-total-label">ยอดชำระสุทธิ</span>
+                      <span className="seller-order-total-value">฿{order.total.toLocaleString()}</span>
+                      {order.isCOD && <span className="seller-order-cod-tag">เก็บเงินปลายทาง</span>}
+                    </div>
                     <button
+                      type="button"
                       onClick={() => setSelectedOrderForLabel({
-                        orderId: 'ORD-20260816-001',
-                        trackingNo: 'TH-0891-FLASH',
-                        customerName: 'กิตติพงษ์ ส.',
-                        customerPhone: '089-123-4567',
-                        customerAddress: '123 ถ.สุขุมวิท 39 คลองตันเหนือ วัฒนา กทม.',
-                        zipCode: '10110',
+                        orderId: order.orderId,
+                        trackingNo: order.trackingNo,
+                        customerName: order.customerName,
+                        customerPhone: order.customerPhone,
+                        customerAddress: order.customerAddress,
+                        zipCode: order.zipCode,
                         storeName: currentStore.name,
                         storePhone: '081-234-5678',
                         storeAddress: '456 ถ.พระราม 4 คลองเตย กทม. 10110',
-                        items: [{ name: 'หูฟังไร้สาย Premium Pro X', quantity: 1 }],
-                        total: 1290,
-                        isCOD: false,
+                        items: order.items.map(i => ({ name: i.name, quantity: i.quantity })),
+                        total: order.total,
+                        isCOD: order.isCOD,
                       })}
-                      style={{
-                        padding: '6px 12px',
-                        background: 'var(--primary)',
-                        color: 'white',
-                        border: 'none',
-                        fontSize: 12,
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 4,
-                      }}
+                      className={`seller-order-print-btn ${order.status !== 'pending' ? 'seller-order-print-btn--secondary' : ''}`}
                     >
-                      <Printer size={13} /> พิมพ์ใบปะหน้า (4x6)
+                      <Printer size={14} />
+                      {order.status === 'pending' ? 'พิมพ์ใบปะหน้า (4x6)' : 'พิมพ์ซ้ำ'}
                     </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>#ORD-20260815-098</strong></td>
-                  <td>สมาร์ทวอทช์ Series 8 Ultra (1 ชิ้น)</td>
-                  <td>
-                    <div>อรทัย ว. (082-987-6543)</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>88/1 ถ.ติวานนท์ เมือง นนทบุรี 11000</div>
-                  </td>
-                  <td>฿5,990</td>
-                  <td><span style={{ color: 'var(--success)', fontWeight: 700 }}>✅ จัดส่งแล้ว</span></td>
-                  <td>
-                    <button
-                      onClick={() => setSelectedOrderForLabel({
-                        orderId: 'ORD-20260815-098',
-                        trackingNo: 'TH-0982-FLASH',
-                        customerName: 'อรทัย ว.',
-                        customerPhone: '082-987-6543',
-                        customerAddress: '88/1 ถ.ติวานนท์ ต.ตลาดขวัญ เมือง นนทบุรี',
-                        zipCode: '11000',
-                        storeName: currentStore.name,
-                        storePhone: '081-234-5678',
-                        storeAddress: '456 ถ.พระราม 4 คลองเตย กทม. 10110',
-                        items: [{ name: 'สมาร์ทวอทช์ Series 8 Ultra', quantity: 1 }],
-                        total: 5990,
-                        isCOD: false,
-                      })}
-                      style={{
-                        padding: '6px 12px',
-                        background: 'var(--surface)',
-                        color: 'var(--text-primary)',
-                        border: '1px solid var(--border)',
-                        fontSize: 12,
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 4,
-                      }}
-                    >
-                      <Printer size={13} /> พิมพ์ซ้ำ
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -1298,52 +1474,53 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             </div>
 
             {/* 5. Webhook Configuration & HMAC-SHA256 Signature Simulator */}
-            <div style={{ background: '#FFFFFF', border: '1px solid var(--border)', padding: 'var(--space-6)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <div className="seller-api-card">
+              <div className="seller-api-card__header">
                 <div>
-                  <h3 style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)', margin: 0 }}>
+                  <h3 className="seller-api-card__title">
                     🔔 Webhook & ระบบตรวจสอบลายเซ็นดิจิทัล (HMAC-SHA256)
                   </h3>
-                  <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0' }}>
+                  <p className="seller-api-card__sub">
                     เมื่อมีคำสั่งซื้อใหม่ (<code>order.paid</code>) Movemall จะส่งแจ้งเตือนพร้อมลายเซ็นเพื่อป้องกันการปลอมแปลงคำขอ
                   </p>
                 </div>
-                <span style={{ background: '#EFF6FF', color: 'var(--primary)', fontSize: 11, fontWeight: 800, padding: '3px 8px', border: '1px solid #BFDBFE' }}>
+                <span className="seller-api-card__badge">
                   HMAC-SHA256 SECURED
                 </span>
               </div>
 
               {/* Webhook Endpoint & Secret */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12, marginBottom: 14 }}>
+              <div className="seller-webhook-fields-grid">
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>
+                  <label className="seller-api-field-label">
                     WEBHOOK ENDPOINT URL
                   </label>
                   <input
                     type="url"
                     value={webhookUrl}
                     onChange={e => setWebhookUrl(e.target.value)}
-                    placeholder="https://erp.myshop.com/api/movemall-webhook"
-                    style={{ width: '100%', padding: '9px 12px', border: '1.5px solid var(--border)', fontSize: 12 }}
+                    placeholder="https://erp.techpro.co.th/api/movemall/webhook"
+                    className="seller-api-field-input"
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>
+                  <label className="seller-api-field-label">
                     WEBHOOK SIGNING SECRET (ใช้ตรวจ Signature)
                   </label>
-                  <div style={{ display: 'flex', gap: 6 }}>
+                  <div className="seller-api-secret-row">
                     <input
                       type="text"
                       readOnly
                       value={webhookSecret}
-                      style={{ flex: 1, padding: '9px 12px', background: '#F8FAFC', border: '1.5px solid var(--border)', fontFamily: 'monospace', fontSize: 12 }}
+                      className="seller-api-field-input seller-api-field-input--mono"
                     />
                     <button
+                      type="button"
                       onClick={() => {
                         setWebhookSecret(`whsec_${Math.random().toString(36).substring(2)}${Date.now().toString(36)}`);
                         alert('สร้าง Webhook Secret ใหม่แล้ว!');
                       }}
-                      style={{ padding: '8px 12px', background: '#F1F5F9', border: '1px solid var(--border)', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}
+                      className="seller-api-secret-regen-btn"
                     >
                       🔄 สร้างใหม่
                     </button>
@@ -1352,32 +1529,32 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
               </div>
 
               {/* Interactive Webhook Simulator */}
-              <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-                  <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>
+              <div className="seller-webhook-simulator-box">
+                <div className="seller-webhook-simulator-header">
+                  <strong className="seller-webhook-simulator-title">
                     🧪 เครื่องมือทดสอบยิง Webhook จำลอง (Signature Simulator)
                   </strong>
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div className="seller-webhook-simulator-controls">
                     <select
                       value={webhookTestEvent}
                       onChange={e => setWebhookTestEvent(e.target.value as 'order.paid' | 'inventory.low')}
-                      style={{ padding: '6px 10px', fontSize: 12, border: '1px solid var(--border)', background: 'white' }}
+                      className="seller-webhook-select"
                     >
                       <option value="order.paid">Event: order.paid (ชำระเงินสำเร็จ)</option>
                       <option value="inventory.low">Event: inventory.low (สต็อกสินค้าต่ำ)</option>
                     </select>
                     <button
+                      type="button"
                       onClick={() => {
                         const timestamp = Math.floor(Date.now() / 1000);
                         const fakePayload = webhookTestEvent === 'order.paid'
                           ? JSON.stringify({ event: 'order.paid', orderId: 'MM-2026-9941', amount: 3590, storeId: currentStore.id, paidAt: new Date().toISOString() }, null, 2)
                           : JSON.stringify({ event: 'inventory.low', sku: 'EL-001', remainingStock: 3, alertThreshold: 5 }, null, 2);
                         
-                        // Fake generated signature representation
                         const fakeSig = `t=${timestamp},v1=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`;
-                        setWebhookSimResult(`POST ${webhookUrl || 'https://erp.myshop.com/api/webhook'}\nHeaders:\n  X-Movemall-Signature: ${fakeSig}\n  X-Movemall-Timestamp: ${timestamp}\n  Content-Type: application/json\n\nPayload:\n${fakePayload}`);
+                        setWebhookSimResult(`POST ${webhookUrl || 'https://erp.techpro.co.th/api/movemall/webhook'}\nHeaders:\n  X-Movemall-Signature: ${fakeSig}\n  X-Movemall-Timestamp: ${timestamp}\n  Content-Type: application/json\n\nPayload:\n${fakePayload}`);
                       }}
-                      style={{ padding: '6px 14px', background: 'var(--primary)', color: 'white', border: 'none', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
+                      className="seller-webhook-test-btn"
                     >
                       🚀 ทดสอบยิง Webhook
                     </button>
@@ -1389,7 +1566,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                     <div style={{ fontSize: 11, fontWeight: 800, color: '#15803D', marginBottom: 4 }}>
                       ✓ คำนวณ Payload & ลายเซ็น HMAC เรียบร้อย:
                     </div>
-                    <pre style={{ margin: 0, padding: 12, background: '#0F172A', color: '#38BDF8', fontSize: 11, overflowX: 'auto' }}>
+                    <pre style={{ margin: 0, padding: 12, background: '#0F172A', color: '#38BDF8', fontSize: 11, overflowX: 'auto', borderRadius: 6 }}>
                       {webhookSimResult}
                     </pre>
                   </div>
@@ -1538,8 +1715,8 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 </div>
               </div>
 
-              {/* Campaigns Table */}
-              <div className="seller-table-container">
+              {/* Desktop Campaigns Table */}
+              <div className="seller-table-container seller-desktop-table">
                 <table className="seller-table">
                   <thead>
                     <tr>
@@ -1660,10 +1837,115 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                   </tbody>
                 </table>
               </div>
+
+              {/* Mobile Campaigns Card List */}
+              <div className="seller-ads-mobile-list">
+                {filteredCampaigns.length === 0 ? (
+                  <div className="seller-ads-mobile-empty">
+                    ยังไม่มีแคมเปญโฆษณาในหมวดนี้ คลิก <strong>"+ สร้างแคมเปญโฆษณาใหม่"</strong> เพื่อเริ่มต้นยิงแอด
+                  </div>
+                ) : (
+                  filteredCampaigns.map(camp => {
+                    const ctr = camp.impressions > 0 ? ((camp.clicks / camp.impressions) * 100).toFixed(1) : '0.0';
+                    const roas = camp.totalSpent > 0 ? (camp.revenue / camp.totalSpent).toFixed(1) : '0.0';
+
+                    return (
+                      <div key={camp.id} className="seller-ad-mobile-card">
+                        <div className="seller-ad-mobile-card__header">
+                          <img
+                            src={camp.productImage}
+                            alt={camp.productName}
+                            className="seller-ad-mobile-card__img"
+                          />
+                          <div className="seller-ad-mobile-card__title-wrap">
+                            <div className="seller-ad-mobile-card__type-row">
+                              {camp.type === 'search' ? (
+                                <span className="seller-ad-badge seller-ad-badge--search">🔍 Search Ads</span>
+                              ) : camp.type === 'discovery' ? (
+                                <span className="seller-ad-badge seller-ad-badge--discovery">📱 Discovery Ads</span>
+                              ) : (
+                                <span className="seller-ad-badge seller-ad-badge--live">🔴 Live Boost</span>
+                              )}
+                              <span className="seller-ad-mobile-card__id">{camp.id}</span>
+                            </div>
+                            <h4 className="seller-ad-mobile-card__name">{camp.productName}</h4>
+                          </div>
+                        </div>
+
+                        {camp.keywords.length > 0 && (
+                          <div className="seller-ad-mobile-card__kw-row">
+                            <span className="seller-ad-mobile-card__kw-label">คีย์เวิร์ด:</span>
+                            <div className="seller-ad-mobile-card__kw-tags">
+                              {camp.keywords.map(kw => (
+                                <span key={kw.id} className="seller-kw-tag">
+                                  {kw.keyword} <small>(฿{kw.bidPrice})</small>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="seller-ad-mobile-card__budget-row">
+                          <div className="seller-ad-mobile-card__budget-item">
+                            <span className="seller-ad-mobile-card__budget-label">งบต่อวัน</span>
+                            <strong className="seller-ad-mobile-card__budget-val">฿{camp.dailyBudget.toLocaleString()}</strong>
+                          </div>
+                          <div className="seller-ad-mobile-card__budget-item">
+                            <span className="seller-ad-mobile-card__budget-label">ราคาบิด/คลิก (CPC)</span>
+                            <strong className="seller-ad-mobile-card__budget-val">฿{camp.cpcBid.toFixed(2)}</strong>
+                          </div>
+                        </div>
+
+                        <div className="seller-ad-mobile-card__stats-grid">
+                          <div className="seller-ad-mobile-stat">
+                            <span className="seller-ad-mobile-stat__label">การมองเห็น</span>
+                            <span className="seller-ad-mobile-stat__val">{camp.impressions.toLocaleString()}</span>
+                          </div>
+                          <div className="seller-ad-mobile-stat">
+                            <span className="seller-ad-mobile-stat__label">คลิก (CTR)</span>
+                            <span className="seller-ad-mobile-stat__val">{camp.clicks.toLocaleString()} ({ctr}%)</span>
+                          </div>
+                          <div className="seller-ad-mobile-stat">
+                            <span className="seller-ad-mobile-stat__label">ค่าแอดที่ใช้</span>
+                            <span className="seller-ad-mobile-stat__val seller-ad-mobile-stat__val--spent">฿{camp.totalSpent.toLocaleString()}</span>
+                          </div>
+                          <div className="seller-ad-mobile-stat">
+                            <span className="seller-ad-mobile-stat__label">ยอดขาย (ROAS)</span>
+                            <span className="seller-ad-mobile-stat__val seller-ad-mobile-stat__val--roas">฿{camp.revenue.toLocaleString()} ({roas}x)</span>
+                          </div>
+                        </div>
+
+                        <div className="seller-ad-mobile-card__footer">
+                          <button
+                            onClick={() => handleToggleCampaignStatus(camp.id)}
+                            className={`seller-status-toggle seller-ad-mobile-card__toggle-btn${camp.status === 'active' ? ' seller-status-toggle--active' : ''}`}
+                          >
+                            {camp.status === 'active' ? (
+                              <>
+                                <Play size={12} /> ใช้งานอยู่ (เปิด)
+                              </>
+                            ) : (
+                              <>
+                                <Pause size={12} /> หยุดชั่วคราว
+                              </>
+                            )}
+                          </button>
+                          <button
+                            className="seller-delete-btn seller-ad-mobile-card__delete-btn"
+                            onClick={() => handleDeleteCampaign(camp.id)}
+                          >
+                            <Trash2 size={13} /> ลบแคมเปญ
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </div>
 
             {/* Ad Wallet Transactions & Fraud Protection Info */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-5)' }}>
+            <div className="seller-ads-bottom-grid">
               {/* Transactions History */}
               <div style={{ background: '#FFFFFF', border: '1px solid var(--border)', padding: 'var(--space-5)' }}>
                 <h4 style={{ fontSize: 14, fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -1843,14 +2125,15 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
               </div>
             </div>
 
-            {/* Registered Nominations Table */}
-            <div style={{ background: '#FFFFFF', border: '1px solid var(--border)', overflow: 'hidden' }}>
-              <div style={{ padding: '12px 16px', background: '#F8FAFC', borderBottom: '1px solid var(--border)', fontWeight: 800, fontSize: 13, color: '#111827', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {/* Registered Nominations Table & Cards */}
+            <div className="seller-flash-nominations-box">
+              <div className="seller-flash-nominations-header">
                 <span>รายการสินค้าที่เสนอเข้าร่วม Flash Sale ({flashNominations.length})</span>
                 <span style={{ fontSize: 11, color: '#059669', fontWeight: 700 }}>🟢 อนุมัติแล้ว {flashNominations.filter(n => n.status === 'approved').length} ดีล</span>
               </div>
 
-              <div style={{ overflowX: 'auto' }}>
+              {/* Desktop Table View */}
+              <div className="seller-desktop-table seller-table-container">
                 <table className="seller-table">
                   <thead>
                     <tr>
@@ -1934,6 +2217,81 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Flash Sale Cards List */}
+              <div className="seller-flash-mobile-list">
+                {flashNominations.length === 0 ? (
+                  <div className="seller-flash-mobile-empty">
+                    ยังไม่มีสินค้าที่เสนอเข้าร่วม Flash Sale ในขณะนี้
+                  </div>
+                ) : (
+                  flashNominations.map(nom => (
+                    <div key={nom.id} className="seller-flash-mobile-card">
+                      <div className="seller-flash-mobile-card__header">
+                        <img
+                          src={nom.productImage}
+                          alt={nom.productName}
+                          className="seller-flash-mobile-card__img"
+                        />
+                        <div className="seller-flash-mobile-card__info">
+                          <h4 className="seller-flash-mobile-card__name">{nom.productName}</h4>
+                          <span className="seller-flash-mobile-card__date">ลงทะเบียน: {nom.registeredAt}</span>
+                        </div>
+                      </div>
+
+                      <div className="seller-flash-mobile-card__slot-badge">
+                        ⏰ รอบเวลากิจกรรม: {nom.timeSlot}
+                      </div>
+
+                      <div className="seller-flash-mobile-card__stats-grid">
+                        <div className="seller-flash-mobile-card__stat">
+                          <span className="seller-flash-mobile-card__stat-label">ราคาปกติ</span>
+                          <span className="seller-flash-mobile-card__stat-val seller-flash-mobile-card__stat-val--orig">
+                            ฿{nom.originalPrice.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="seller-flash-mobile-card__stat">
+                          <span className="seller-flash-mobile-card__stat-label">ราคา Flash Sale</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <span className="seller-flash-mobile-card__stat-val seller-flash-mobile-card__stat-val--flash">
+                              ฿{nom.flashPrice.toLocaleString()}
+                            </span>
+                            <span className="seller-flash-mobile-card__discount">
+                              -{nom.discountPct}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="seller-flash-mobile-card__stat">
+                          <span className="seller-flash-mobile-card__stat-label">สต็อกสำรอง</span>
+                          <span className="seller-flash-mobile-card__stat-val">
+                            📦 {nom.reservedStock} ชิ้น
+                          </span>
+                        </div>
+                        <div className="seller-flash-mobile-card__stat">
+                          <span className="seller-flash-mobile-card__stat-label">สถานะดีล</span>
+                          <span className={`seller-flash-status-badge seller-flash-status-badge--${nom.status}`}>
+                            {nom.status === 'approved' ? '🟢 อนุมัติแล้ว' : '⏳ กำลังตรวจ'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="seller-flash-mobile-card__footer">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm('คุณต้องการยกเลิกการเสนอสินค้า Flash Sale รายการนี้ใช่หรือไม่?')) {
+                              setFlashNominations(prev => prev.filter(n => n.id !== nom.id));
+                            }
+                          }}
+                          className="seller-flash-mobile-cancel-btn"
+                        >
+                          <Trash2 size={13} /> ยกเลิกคำขอ Flash Sale
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -2071,12 +2429,11 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                     value={category}
                     onChange={e => setCategory(e.target.value)}
                   >
-                    <option value="electronics">อิเล็กทรอนิกส์</option>
-                    <option value="fashion">แฟชั่น</option>
-                    <option value="beauty">ความงาม</option>
-                    <option value="home">บ้านและสวน</option>
-                    <option value="sports">กีฬา</option>
-                    <option value="food">อาหารและเครื่องดื่ม</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.icon} {cat.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -2130,65 +2487,121 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 </div>
 
                 <div className="seller-modal__group seller-modal__group--full">
-                  <label className="seller-modal__label">🖼️ รูปภาพสินค้า (อัปโหลดจากเครื่อง หรือ วาง Image URL)</label>
-                  <div className="seller-modal__image-uploader-row">
-                    <label className="seller-modal__image-upload-btn">
-                      <Upload size={16} />
-                      เลือกไฟล์รูปภาพจากเครื่อง
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageFileUpload}
-                        style={{ display: 'none' }}
-                      />
-                    </label>
-                    <span style={{ fontSize: '12px', color: '#6B7280', whiteSpace: 'nowrap' }}>หรือวาง URL:</span>
-                    <input
-                      type="url"
-                      className="seller-modal__input seller-modal__image-url-input"
-                      placeholder="https://images.unsplash.com/..."
-                      value={image}
-                      onChange={e => setImage(e.target.value)}
-                    />
-                  </div>
-                  {image && (
-                    <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '12px', background: '#F9FAFB', padding: '8px 12px', borderRadius: '6px', border: '1px solid #E5E7EB' }}>
-                      <img src={image} alt="Preview" style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '6px' }} />
-                      <div style={{ flex: 1, overflow: 'hidden' }}>
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#111827' }}>ตัวอย่างรูปสินค้า (Live Preview)</div>
-                        <div style={{ fontSize: '11px', color: '#6B7280', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                          {image.startsWith('data:') ? '📷 อัปโหลดรูปจากเครื่องแล้ว (Base64 Data)' : image}
+                  <label className="seller-modal__label">🖼️ รูปภาพสินค้า (อัปโหลดโดยตรงจากเครื่องเพื่อความปลอดภัย)</label>
+                  <div className="seller-image-manager">
+                    {image ? (
+                      <div className="seller-image-preview-card">
+                        <div className="seller-image-preview-card__thumb-wrap">
+                          <img src={image} alt="Product Preview" className="seller-image-preview-card__thumb" />
+                          <span className="seller-image-preview-card__badge">✓ พรีวิวรูปภาพ</span>
+                        </div>
+                        <div className="seller-image-preview-card__info">
+                          <div className="seller-image-preview-card__title">
+                            {image.startsWith('data:') ? '📷 อัปโหลดรูปภาพจากเครื่องสำเร็จ' : '🖼️ รูปภาพสินค้า'}
+                          </div>
+                          <div className="seller-image-preview-card__sub">
+                            {image.startsWith('data:') ? 'ไฟล์รูปภาพถูกโหลดลงระบบเรียบร้อย พร้อมบันทึก' : 'รูปภาพสินค้าพร้อมใช้งาน'}
+                          </div>
+                          <div className="seller-image-preview-card__actions">
+                            <label className="seller-image-btn seller-image-btn--change">
+                              <Upload size={14} />
+                              เปลี่ยนรูปจากเครื่อง
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageFileUpload}
+                                style={{ display: 'none' }}
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              className="seller-image-btn seller-image-btn--delete"
+                              onClick={() => setImage('')}
+                            >
+                              <Trash2 size={14} /> ลบรูปภาพ
+                            </button>
+                          </div>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setImage('')}
-                        style={{ background: '#FEE2E2', border: 'none', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', fontSize: '12px', color: '#DC2626', fontWeight: 500 }}
-                      >
-                        ลบรูป
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="seller-modal__group">
-                  <label className="seller-modal__label">🎬 ลิงก์วิดีโอสาธิตสินค้า (Video URL - ตัวเลือกเสริม)</label>
-                  <input
-                    type="url"
-                    className="seller-modal__input"
-                    placeholder="https://.../demo-video.mp4"
-                    value={videoUrl}
-                    onChange={e => setVideoUrl(e.target.value)}
-                  />
+                    ) : (
+                      <label className="seller-image-dropzone">
+                        <div className="seller-image-dropzone__icon-circle">
+                          <Upload size={22} />
+                        </div>
+                        <div className="seller-image-dropzone__title">คลิกเพื่ออัปโหลดรูปภาพสินค้าจากเครื่อง</div>
+                        <div className="seller-image-dropzone__sub">รองรับไฟล์ JPG, PNG, WEBP จากมือถือหรือคอมพิวเตอร์</div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageFileUpload}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    )}
+                  </div>
                 </div>
 
                 <div className="seller-modal__group seller-modal__group--full">
-                  <label className="seller-modal__label">รายละเอียดสินค้า</label>
-                  <textarea
-                    className="seller-modal__textarea"
+                  <label className="seller-modal__label">🎬 วิดีโอสาธิตสินค้า (อัปโหลดโดยตรงจากเครื่อง - ตัวเลือกเสริม)</label>
+                  <div className="seller-video-manager">
+                    {videoUrl ? (
+                      <div className="seller-video-preview-card">
+                        <div className="seller-video-preview-card__player-wrap">
+                          <video src={videoUrl} controls className="seller-video-preview-card__player" />
+                        </div>
+                        <div className="seller-video-preview-card__info">
+                          <div className="seller-video-preview-card__title">
+                            🎬 อัปโหลดวิดีโอสาธิตสินค้าสำเร็จ
+                          </div>
+                          <div className="seller-video-preview-card__sub">
+                            ไฟล์วิดีโอพร้อมแสดงผลในหน้ารายละเอียดสินค้า
+                          </div>
+                          <div className="seller-video-preview-card__actions">
+                            <label className="seller-image-btn seller-image-btn--change">
+                              <Upload size={14} />
+                              เปลี่ยนวิดีโอใหม่
+                              <input
+                                type="file"
+                                accept="video/*"
+                                onChange={handleVideoFileUpload}
+                                style={{ display: 'none' }}
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              className="seller-image-btn seller-image-btn--delete"
+                              onClick={() => setVideoUrl('')}
+                            >
+                              <Trash2 size={14} /> ลบวิดีโอ
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <label className="seller-video-dropzone">
+                        <div className="seller-video-dropzone__icon-circle">
+                          <Video size={20} />
+                        </div>
+                        <div className="seller-video-dropzone__title">คลิกเพื่ออัปโหลดวิดีโอสาธิตสินค้า (MP4, WebM, MOV)</div>
+                        <div className="seller-video-dropzone__sub">คลิปความยาวสั้น 15-60 วินาที ช่วยเพิ่มยอดขายได้ถึง 2.5 เท่า</div>
+                        <input
+                          type="file"
+                          accept="video/*"
+                          onChange={handleVideoFileUpload}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+
+                <div className="seller-modal__group seller-modal__group--full">
+                  <RichTextEditor
+                    label="📝 รายละเอียดสินค้า (ปรับแต่งตัวหนา, หัวข้อ, เช็คลิสต์ และแม่แบบได้)"
                     placeholder="ระบุจุดเด่น ขนาด สี และฟังก์ชันการใช้งาน..."
                     value={description}
-                    onChange={e => setDescription(e.target.value)}
+                    onChange={setDescription}
+                    minHeight={170}
                   />
                 </div>
 
@@ -2243,12 +2656,11 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                     value={category}
                     onChange={e => setCategory(e.target.value)}
                   >
-                    <option value="electronics">อิเล็กทรอนิกส์</option>
-                    <option value="fashion">แฟชั่น</option>
-                    <option value="beauty">ความงาม</option>
-                    <option value="home">บ้านและสวน</option>
-                    <option value="sports">กีฬา</option>
-                    <option value="food">อาหารและเครื่องดื่ม</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.icon} {cat.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -2299,54 +2711,121 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 </div>
 
                 <div className="seller-modal__group seller-modal__group--full">
-                  <label className="seller-modal__label">🖼️ รูปภาพสินค้า (อัปโหลดจากเครื่อง หรือ วาง Image URL)</label>
-                  <div className="seller-modal__image-uploader-row">
-                    <label className="seller-modal__image-upload-btn">
-                      <Upload size={16} />
-                      เลือกไฟล์รูปภาพใหม่จากเครื่อง
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageFileUpload}
-                        style={{ display: 'none' }}
-                      />
-                    </label>
-                    <span style={{ fontSize: '12px', color: '#6B7280', whiteSpace: 'nowrap' }}>หรือวาง URL:</span>
-                    <input
-                      type="url"
-                      className="seller-modal__input seller-modal__image-url-input"
-                      placeholder="https://images.unsplash.com/..."
-                      value={image}
-                      onChange={e => setImage(e.target.value)}
-                    />
-                  </div>
-                  {image && (
-                    <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '12px', background: '#F9FAFB', padding: '8px 12px', borderRadius: '6px', border: '1px solid #E5E7EB' }}>
-                      <img src={image} alt="Preview" style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '6px' }} />
-                      <div style={{ flex: 1, overflow: 'hidden' }}>
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#111827' }}>ตัวอย่างรูปสินค้าปัจจุบัน (Live Preview)</div>
-                        <div style={{ fontSize: '11px', color: '#6B7280', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                          {image.startsWith('data:') ? '📷 อัปโหลดรูปจากเครื่องแล้ว (Base64 Data)' : image}
+                  <label className="seller-modal__label">🖼️ รูปภาพสินค้า (อัปโหลดโดยตรงจากเครื่องเพื่อความปลอดภัย)</label>
+                  <div className="seller-image-manager">
+                    {image ? (
+                      <div className="seller-image-preview-card">
+                        <div className="seller-image-preview-card__thumb-wrap">
+                          <img src={image} alt="Product Preview" className="seller-image-preview-card__thumb" />
+                          <span className="seller-image-preview-card__badge">✓ รูปภาพปัจจุบัน</span>
+                        </div>
+                        <div className="seller-image-preview-card__info">
+                          <div className="seller-image-preview-card__title">
+                            {image.startsWith('data:') ? '📷 อัปโหลดรูปภาพใหม่จากเครื่องสำเร็จ' : '🖼️ รูปภาพสินค้าปัจจุบัน'}
+                          </div>
+                          <div className="seller-image-preview-card__sub">
+                            {image.startsWith('data:') ? 'ไฟล์รูปภาพถูกโหลดลงระบบเรียบร้อย พร้อมบันทึก' : 'รูปภาพสินค้าพร้อมใช้งาน'}
+                          </div>
+                          <div className="seller-image-preview-card__actions">
+                            <label className="seller-image-btn seller-image-btn--change">
+                              <Upload size={14} />
+                              เปลี่ยนรูปภาพจากเครื่อง
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageFileUpload}
+                                style={{ display: 'none' }}
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              className="seller-image-btn seller-image-btn--delete"
+                              onClick={() => setImage('')}
+                            >
+                              <Trash2 size={14} /> ลบรูปภาพ
+                            </button>
+                          </div>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setImage('')}
-                        style={{ background: '#FEE2E2', border: 'none', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', fontSize: '12px', color: '#DC2626', fontWeight: 500 }}
-                      >
-                        ลบรูป
-                      </button>
-                    </div>
-                  )}
+                    ) : (
+                      <label className="seller-image-dropzone">
+                        <div className="seller-image-dropzone__icon-circle">
+                          <Upload size={22} />
+                        </div>
+                        <div className="seller-image-dropzone__title">คลิกเพื่ออัปโหลดรูปภาพสินค้าใหม่จากเครื่อง</div>
+                        <div className="seller-image-dropzone__sub">รองรับไฟล์ JPG, PNG, WEBP จากมือถือหรือคอมพิวเตอร์</div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageFileUpload}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    )}
+                  </div>
                 </div>
 
                 <div className="seller-modal__group seller-modal__group--full">
-                  <label className="seller-modal__label">รายละเอียดสินค้าเพิ่มเติม</label>
-                  <textarea
-                    className="seller-modal__textarea"
-                    rows={3}
+                  <label className="seller-modal__label">🎬 วิดีโอสาธิตสินค้า (อัปโหลดโดยตรงจากเครื่อง - ตัวเลือกเสริม)</label>
+                  <div className="seller-video-manager">
+                    {videoUrl ? (
+                      <div className="seller-video-preview-card">
+                        <div className="seller-video-preview-card__player-wrap">
+                          <video src={videoUrl} controls className="seller-video-preview-card__player" />
+                        </div>
+                        <div className="seller-video-preview-card__info">
+                          <div className="seller-video-preview-card__title">
+                            🎬 วิดีโอสาธิตสินค้าปัจจุบัน
+                          </div>
+                          <div className="seller-video-preview-card__sub">
+                            ไฟล์วิดีโอพร้อมแสดงผลในหน้ารายละเอียดสินค้า
+                          </div>
+                          <div className="seller-video-preview-card__actions">
+                            <label className="seller-image-btn seller-image-btn--change">
+                              <Upload size={14} />
+                              เปลี่ยนวิดีโอใหม่
+                              <input
+                                type="file"
+                                accept="video/*"
+                                onChange={handleVideoFileUpload}
+                                style={{ display: 'none' }}
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              className="seller-image-btn seller-image-btn--delete"
+                              onClick={() => setVideoUrl('')}
+                            >
+                              <Trash2 size={14} /> ลบวิดีโอ
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <label className="seller-video-dropzone">
+                        <div className="seller-video-dropzone__icon-circle">
+                          <Video size={20} />
+                        </div>
+                        <div className="seller-video-dropzone__title">คลิกเพื่ออัปโหลดวิดีโอสาธิตสินค้า (MP4, WebM, MOV)</div>
+                        <div className="seller-video-dropzone__sub">คลิปความยาวสั้น 15-60 วินาที ช่วยเพิ่มยอดขายได้ถึง 2.5 เท่า</div>
+                        <input
+                          type="file"
+                          accept="video/*"
+                          onChange={handleVideoFileUpload}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+
+                <div className="seller-modal__group seller-modal__group--full">
+                  <RichTextEditor
+                    label="📝 รายละเอียดสินค้าเพิ่มเติม (ปรับแต่งตัวหนา, หัวข้อ, เช็คลิสต์ และแม่แบบได้)"
+                    placeholder="ระบุจุดเด่น ขนาด สี และฟังก์ชันการใช้งาน..."
                     value={description}
-                    onChange={e => setDescription(e.target.value)}
+                    onChange={setDescription}
+                    minHeight={170}
                   />
                 </div>
 

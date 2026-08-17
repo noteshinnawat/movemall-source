@@ -692,3 +692,217 @@
     width: 100%;
   }
 }
+
+/* Address Book Styles */
+.account-address-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.account-address-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.account-address-count-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1E40AF;
+  background: #DBEAFE;
+  border: 1px solid #BFDBFE;
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.account-add-address-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.account-address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.account-address-card {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  margin-bottom: 0 !important;
+}
+
+.account-address-card--default {
+  border-left: 4px solid #2563EB !important;
+  background: #FAFBFF;
+}
+
+.account-address-card__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.account-address-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-address-card__name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.account-address-card__recipient {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.account-address-card__phone {
+  font-size: 0.85rem;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.account-address-card__default-badge {
+  font-size: 0.72rem;
+  background: #DBEAFE;
+  color: #1E40AF;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+}
+
+.account-address-card__text {
+  font-size: 0.9rem;
+  color: #374151;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.account-address-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.account-address-action-btn {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.account-address-action-btn--edit {
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  color: #1E293B;
+}
+
+.account-address-action-btn--edit:hover {
+  background: #F8FAFC;
+  border-color: #94A3B8;
+}
+
+.account-address-action-btn--set-default {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: #2563EB;
+}
+
+.account-address-action-btn--set-default:hover {
+  background: #DBEAFE;
+}
+
+.account-address-action-btn--delete {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #DC2626;
+}
+
+.account-address-action-btn--delete:hover {
+  background: #FEE2E2;
+}
+
+/* Modal Form styling */
+.account-modal {
+  background: #FFFFFF;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 520px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.account-address-default-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .account-address-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .account-address-header-actions {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .account-add-address-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .account-address-card__content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .account-address-card__actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    border-top: 1px solid #F3F4F6;
+    padding-top: 10px;
+  }
+
+  .account-modal {
+    max-width: 100% !important;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 1.25rem 1rem !important;
+    max-height: 85vh !important;
+  }
+}

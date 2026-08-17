@@ -8,6 +8,7 @@ import { ReviewsSection } from '../components/ReviewsSection';
 import { products } from '../data/products';
 import { getStoreById, stores } from '../data/stores';
 import { mockLiveStreams } from '../data/liveStreams';
+import { parseRichText } from '../components/RichTextEditor';
 import type { Product } from '../types';
 import './ProductDetailPage.css';
 
@@ -872,7 +873,9 @@ export function ProductDetailPage({
         {/* Description */}
         <div className="product-detail__section">
           <h2 className="product-detail__section-title">รายละเอียดสินค้า</h2>
-          <p className="product-detail__desc">{product.description}</p>
+          <div className="product-detail__desc">
+            {product.description ? parseRichText(product.description) : 'ไม่มีรายละเอียดสินค้า'}
+          </div>
         </div>
 
         {/* Customer Reviews Section */}

@@ -15,7 +15,11 @@ import {
   Sparkles,
   Key,
   X,
-  Upload
+  Upload,
+  Plus,
+  Trash2,
+  Pencil,
+  Store
 } from 'lucide-react';
 import { fetchApi } from '../utils/api';
 import './AccountPage.css';
@@ -63,7 +67,7 @@ export function AccountPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMsg, setPasswordMsg] = useState('');
 
-  // Shipping Addresses State
+  // Shipping Addresses State (Up to 10 addresses)
   const [addresses, setAddresses] = useState([
     {
       id: 'addr-1',
@@ -76,6 +80,102 @@ export function AccountPage() {
       isDefault: true,
     },
   ]);
+
+  // Address Modal State
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [addressForm, setAddressForm] = useState({
+    recipientName: '',
+    phone: '',
+    addressLine: '',
+    district: '',
+    province: 'กรุงเทพมหานคร',
+    postalCode: '',
+    isDefault: false,
+  });
+
+  function handleOpenAddAddress() {
+    if (addresses.length >= 10) {
+      alert('คุณสามารถบันทึกที่อยู่จัดส่งได้สูงสุดไม่เกิน 10 ที่อยู่');
+      return;
+    }
+    setEditingAddressId(null);
+    setAddressForm({
+      recipientName: name || '',
+      phone: phone || '',
+      addressLine: '',
+      district: '',
+      province: 'กรุงเทพมหานคร',
+      postalCode: '',
+      isDefault: addresses.length === 0,
+    });
+    setIsAddressModalOpen(true);
+  }
+
+  function handleOpenEditAddress(addr: typeof addresses[0]) {
+    setEditingAddressId(addr.id);
+    setAddressForm({
+      recipientName: addr.recipientName,
+      phone: addr.phone,
+      addressLine: addr.addressLine,
+      district: addr.district,
+      province: addr.province,
+      postalCode: addr.postalCode,
+      isDefault: addr.isDefault,
+    });
+    setIsAddressModalOpen(true);
+  }
+
+  function handleSaveAddress(e: React.FormEvent) {
+    e.preventDefault();
+    if (editingAddressId) {
+      setAddresses(prev =>
+        prev.map(a => {
+          if (a.id === editingAddressId) {
+            return { ...a, ...addressForm };
+          }
+          return addressForm.isDefault ? { ...a, isDefault: false } : a;
+        })
+      );
+    } else {
+      if (addresses.length >= 10) {
+        alert('คุณสามารถบันทึกที่อยู่จัดส่งได้สูงสุดไม่เกิน 10 ที่อยู่');
+        return;
+      }
+      const newAddr = {
+        id: `addr-${Date.now()}`,
+        ...addressForm,
+      };
+      setAddresses(prev => {
+        if (addressForm.isDefault) {
+          return [...prev.map(a => ({ ...a, isDefault: false })), newAddr];
+        }
+        return [...prev, newAddr];
+      });
+    }
+    setIsAddressModalOpen(false);
+  }
+
+  function handleDeleteAddress(id: string) {
+    if (confirm('คุณต้องการลบที่อยู่จัดส่งนี้ใช่หรือไม่?')) {
+      setAddresses(prev => {
+        const remaining = prev.filter(a => a.id !== id);
+        if (remaining.length > 0 && !remaining.some(a => a.isDefault)) {
+          remaining[0].isDefault = true;
+        }
+        return remaining;
+      });
+    }
+  }
+
+  function handleSetDefaultAddress(id: string) {
+    setAddresses(prev =>
+      prev.map(a => ({
+        ...a,
+        isDefault: a.id === id,
+      }))
+    );
+  }
 
   async function handleRequestOtp(type: 'email' | 'phone') {
     setOtpModalType(type);
@@ -193,6 +293,20 @@ export function AccountPage() {
             >
               <CreditCard size={18} /> Movemall PayLater
             </button>
+            <div style={{ height: 1, background: '#E2E8F0', margin: '8px 0' }} />
+            <Link
+              to="/seller"
+              className="account-nav-btn"
+              style={{
+                textDecoration: 'none',
+                background: '#EFF6FF',
+                color: '#2563EB',
+                fontWeight: 700,
+                border: '1px solid #BFDBFE',
+              }}
+            >
+              <Store size={18} /> 🏪 ศูนย์ผู้ขาย (Seller Centre)
+            </Link>
           </nav>
         </aside>
 
@@ -254,7 +368,7 @@ export function AccountPage() {
                       <div className="account-avatar-action-row">
                         <label className="account-avatar-file-label">
                           <Upload size={14} />
-                          📷 เลือกรูปจากมือถือ / คอมพิวเตอร์
+                          📷 เลือกรูปโปรไฟล์ใหม่จากเครื่อง (มือถือ / คอม)
                           <input
                             type="file"
                             accept="image/*"
@@ -262,19 +376,10 @@ export function AccountPage() {
                             style={{ display: 'none' }}
                           />
                         </label>
-                        <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>หรือวาง Image URL:</span>
                       </div>
 
-                      <input
-                        type="text"
-                        className="account-input"
-                        placeholder="วาง URL รูปภาพโปรไฟล์..."
-                        value={avatarUrl}
-                        onChange={e => setAvatarUrl(e.target.value)}
-                      />
-
                       <div className="account-avatar-presets">
-                        <span style={{ fontSize: '0.75rem', color: '#6B7280', fontWeight: 600 }}>รูปตัวอย่าง:</span>
+                        <span style={{ fontSize: '0.75rem', color: '#6B7280', fontWeight: 600 }}>หรือเลือกอวตารทางการ:</span>
                         <button
                           type="button"
                           className="account-preset-btn"
@@ -388,29 +493,94 @@ export function AccountPage() {
 
           {activeTab === 'addresses' && (
             <div>
-              <h1 className="account-section-title">สมุดที่อยู่จัดส่งพัสดุ (Shipping Address Book)</h1>
-              <p className="account-section-sub">จัดการที่อยู่สำหรับจัดส่งพัสดุด่วนจากคำสั่งซื้อของคุณ</p>
-
-              {addresses.map(addr => (
-                <div key={addr.id} className="account-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>
-                        {addr.recipientName} <span style={{ fontSize: '0.85rem', color: '#6b7280', fontWeight: 400 }}>({addr.phone})</span>
-                      </h3>
-                      <p style={{ fontSize: '0.9rem', color: '#374151', margin: '0.5rem 0' }}>
-                        {addr.addressLine} {addr.district} {addr.province} {addr.postalCode}
-                      </p>
-                      {addr.isDefault && (
-                        <span style={{ fontSize: '0.75rem', background: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: 4, fontWeight: 600 }}>
-                          ที่อยู่หลักสำหรับจัดส่ง
-                        </span>
-                      )}
-                    </div>
-                    <button className="account-btn-outline">แก้ไขที่อยู่</button>
-                  </div>
+              <div className="account-address-header">
+                <div>
+                  <h1 className="account-section-title">สมุดที่อยู่จัดส่งพัสดุ (Shipping Address Book)</h1>
+                  <p className="account-section-sub" style={{ marginBottom: 0 }}>
+                    จัดการที่อยู่สำหรับจัดส่งพัสดุด่วน (บันทึกได้สูงสุดไม่เกิน 10 ที่อยู่)
+                  </p>
                 </div>
-              ))}
+                <div className="account-address-header-actions">
+                  <span className="account-address-count-badge">
+                    📍 {addresses.length}/10 ที่อยู่
+                  </span>
+                  <button
+                    type="button"
+                    className="account-btn-primary account-add-address-btn"
+                    onClick={handleOpenAddAddress}
+                    disabled={addresses.length >= 10}
+                  >
+                    <Plus size={16} /> เพิ่มที่อยู่ใหม่
+                  </button>
+                </div>
+              </div>
+
+              {addresses.length === 0 ? (
+                <div className="account-card" style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                  <MapPin size={40} style={{ color: '#9CA3AF', margin: '0 auto 10px auto' }} />
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#111827', margin: '0 0 6px 0' }}>ยังไม่มีที่อยู่สำหรับจัดส่ง</h3>
+                  <p style={{ fontSize: '0.85rem', color: '#6B7280', margin: '0 0 16px 0' }}>เพิ่มที่อยู่เพื่อความสะดวกรวดเร็วในการสั่งซื้อสินค้า</p>
+                  <button type="button" className="account-btn-primary" onClick={handleOpenAddAddress}>
+                    <Plus size={16} /> เพิ่มที่อยู่แรก
+                  </button>
+                </div>
+              ) : (
+                <div className="account-address-list">
+                  {addresses.map(addr => (
+                    <div
+                      key={addr.id}
+                      className={`account-card account-address-card ${addr.isDefault ? 'account-address-card--default' : ''}`}
+                    >
+                      <div className="account-address-card__content">
+                        <div className="account-address-card__info">
+                          <div className="account-address-card__name-row">
+                            <h3 className="account-address-card__recipient">{addr.recipientName}</h3>
+                            <span className="account-address-card__phone">({addr.phone})</span>
+                            {addr.isDefault && (
+                              <span className="account-address-card__default-badge">
+                                ✓ ที่อยู่หลักสำหรับจัดส่ง
+                              </span>
+                            )}
+                          </div>
+                          <p className="account-address-card__text">
+                            {addr.addressLine} {addr.district} {addr.province} {addr.postalCode}
+                          </p>
+                        </div>
+
+                        <div className="account-address-card__actions">
+                          <button
+                            type="button"
+                            className="account-address-action-btn account-address-action-btn--edit"
+                            onClick={() => handleOpenEditAddress(addr)}
+                          >
+                            <Pencil size={13} /> แก้ไขที่อยู่
+                          </button>
+
+                          {!addr.isDefault && (
+                            <>
+                              <button
+                                type="button"
+                                className="account-address-action-btn account-address-action-btn--set-default"
+                                onClick={() => handleSetDefaultAddress(addr.id)}
+                              >
+                                ตั้งเป็นที่อยู่หลัก
+                              </button>
+                              <button
+                                type="button"
+                                className="account-address-action-btn account-address-action-btn--delete"
+                                onClick={() => handleDeleteAddress(addr.id)}
+                                title="ลบที่อยู่นี้"
+                              >
+                                <Trash2 size={13} /> ลบ
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -432,6 +602,127 @@ export function AccountPage() {
           )}
         </section>
       </div>
+
+      {/* Add / Edit Shipping Address Modal */}
+      {isAddressModalOpen && (
+        <div className="otp-modal-backdrop" style={{ zIndex: 9999 }}>
+          <div className="account-modal account-address-modal">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #E5E7EB', paddingBottom: '0.75rem' }}>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <MapPin size={20} color="#2563EB" />
+                {editingAddressId ? 'แก้ไขที่อยู่จัดส่งพัสดุ' : 'เพิ่มที่อยู่จัดส่งพัสดุใหม่'}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setIsAddressModalOpen(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveAddress}>
+              <div className="account-grid-2">
+                <div className="account-field">
+                  <label className="account-label">ชื่อ-นามสกุล ผู้รับ *</label>
+                  <input
+                    type="text"
+                    required
+                    className="account-input"
+                    placeholder="เช่น สมชาย ใจดี"
+                    value={addressForm.recipientName}
+                    onChange={e => setAddressForm({ ...addressForm, recipientName: e.target.value })}
+                  />
+                </div>
+                <div className="account-field">
+                  <label className="account-label">เบอร์โทรศัพท์ติดต่อ *</label>
+                  <input
+                    type="tel"
+                    required
+                    className="account-input"
+                    placeholder="เช่น 0812345678"
+                    value={addressForm.phone}
+                    onChange={e => setAddressForm({ ...addressForm, phone: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="account-field">
+                <label className="account-label">ที่อยู่ (บ้านเลขที่, ซอย, หมู่, ถนน, อาคาร) *</label>
+                <input
+                  type="text"
+                  required
+                  className="account-input"
+                  placeholder="เช่น 99/1 อาคารมูฟมอลล์ ชั้น 5 ถ.สุขุมวิท"
+                  value={addressForm.addressLine}
+                  onChange={e => setAddressForm({ ...addressForm, addressLine: e.target.value })}
+                />
+              </div>
+
+              <div className="account-grid-2">
+                <div className="account-field">
+                  <label className="account-label">แขวง / ตำบล, เขต / อำเภอ *</label>
+                  <input
+                    type="text"
+                    required
+                    className="account-input"
+                    placeholder="เช่น แขวงคลองเตย เขตคลองเตย"
+                    value={addressForm.district}
+                    onChange={e => setAddressForm({ ...addressForm, district: e.target.value })}
+                  />
+                </div>
+                <div className="account-field">
+                  <label className="account-label">จังหวัด *</label>
+                  <input
+                    type="text"
+                    required
+                    className="account-input"
+                    placeholder="เช่น กรุงเทพมหานคร"
+                    value={addressForm.province}
+                    onChange={e => setAddressForm({ ...addressForm, province: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="account-field">
+                <label className="account-label">รหัสไปรษณีย์ *</label>
+                <input
+                  type="text"
+                  required
+                  pattern="[0-9]{5}"
+                  maxLength={5}
+                  className="account-input"
+                  placeholder="เช่น 10110"
+                  value={addressForm.postalCode}
+                  onChange={e => setAddressForm({ ...addressForm, postalCode: e.target.value })}
+                />
+              </div>
+
+              <label className="account-address-default-checkbox">
+                <input
+                  type="checkbox"
+                  checked={addressForm.isDefault}
+                  onChange={e => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
+                />
+                <span>ตั้งที่อยู่นี้เป็นที่อยู่หลักสำหรับจัดส่ง</span>
+              </label>
+
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '1.25rem', borderTop: '1px solid #E5E7EB', paddingTop: '1rem' }}>
+                <button
+                  type="button"
+                  className="account-btn-outline"
+                  onClick={() => setIsAddressModalOpen(false)}
+                >
+                  ยกเลิก
+                </button>
+                <button type="submit" className="account-btn-primary">
+                  💾 บันทึกที่อยู่
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* OTP Verification Modal */}
       {otpModalType && (
