@@ -282,14 +282,118 @@
 }
 
 @media (max-width: 768px) {
+  .account-page {
+    margin: 0 auto;
+    padding: 12px;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+
   .account-container {
     grid-template-columns: 1fr;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
+    gap: 0;
   }
+
   .account-sidebar {
-    border-right: none;
-    border-bottom: 1px solid var(--color-border, #e5e7eb);
+    background: transparent;
+    border: none;
+    padding: 0;
   }
+
+  .account-user-card {
+    background: #FFFFFF;
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+
+  .account-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .account-name {
+    font-size: 1rem;
+  }
+
+  /* Horizontal Pill Navigation Tabs on Mobile */
+  .account-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 8px;
+    padding: 2px 0 8px 0;
+    margin-bottom: 12px;
+  }
+
+  .account-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .account-nav-btn {
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    background: #FFFFFF;
+    color: #4B5563;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+
+  .account-nav-btn:hover {
+    background: #F3F4F6;
+  }
+
+  .account-nav-btn--active {
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    border-color: #2563EB !important;
+  }
+
+  .account-content {
+    padding: 0;
+  }
+
+  .account-section-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+  }
+
+  .account-section-sub {
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .account-card {
+    padding: 14px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+
   .account-grid-2 {
     grid-template-columns: 1fr;
+  }
+
+  .verify-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .verify-card button {
+    width: 100%;
   }
 }
