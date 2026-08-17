@@ -23,7 +23,7 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
   const currentStore = stores[0]; // "TechPro Official Store"
   const storeProducts = products.filter(p => p.storeId === currentStore.id);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'api' | 'ads'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'api' | 'ads' | 'tax'>('overview');
   
   // ── Open API & Security State ──
   const [apiEnv, setApiEnv] = useState<'live' | 'sandbox'>('live');
@@ -397,6 +397,13 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
           >
             <span style={{ fontSize: 14 }}>🔌</span>
             Open API & เชื่อมสต็อก ERP
+          </button>
+          <button
+            className={`seller-tab-btn${activeTab === 'tax' ? ' seller-tab-btn--active' : ''}`}
+            onClick={() => setActiveTab('tax')}
+          >
+            <span style={{ fontSize: 14 }}>📄</span>
+            ระบบภาษี & ใบกำกับภาษี
           </button>
         </div>
 
@@ -1311,6 +1318,70 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
                   <div>✓ Real-time Fraud Deduction</div>
                   <div>✓ 24/7 Quality Scoring</div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tax & e-Tax Invoices Hub */}
+        {activeTab === 'tax' && (
+          <div style={{ background: 'white', border: '1px solid var(--border)', padding: 'var(--space-6)', marginTop: 'var(--space-4)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-5)', paddingBottom: 'var(--space-3)', borderBottom: '1px solid var(--border)' }}>
+              <div>
+                <h3 style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-primary)', margin: 0 }}>
+                  📄 ระบบภาษี & ใบกำกับภาษี (Tax & e-Tax Invoice Hub)
+                </h3>
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4, margin: 0 }}>
+                  จัดการภาษีมูลค่าเพิ่ม (VAT 7%), ใบกำกับภาษีค่าธรรมเนียมแพลตฟอร์ม และออกรายงานสรุปยื่นกรมสรรพากร
+                </p>
+              </div>
+              <span style={{ fontSize: 11, background: '#ECFDF5', color: '#047857', padding: '4px 10px', borderRadius: 4, fontWeight: 700 }}>
+                ✓ รองรับ e-Tax Invoice & ภ.ง.ด. 90/94/50
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+              <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 'var(--space-4)' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ยอดขายรวมเดือนนี้</span>
+                <h4 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', margin: '4px 0' }}>฿128,500.00</h4>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>คำนวณจาก 4 คำสั่งซื้อสำเร็จ</span>
+              </div>
+              <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 'var(--space-4)' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ค่าธรรมเนียม Movemall (3%)</span>
+                <h4 style={{ fontSize: 22, fontWeight: 900, color: '#DC2626', margin: '4px 0' }}>฿3,855.00</h4>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>VAT 7% บนค่าธรรมเนียม: ฿269.85</span>
+              </div>
+              <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 'var(--space-4)' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ภาษีหัก ณ ที่จ่าย (WHT 3%)</span>
+                <h4 style={{ fontSize: 22, fontWeight: 900, color: '#2563EB', margin: '4px 0' }}>฿115.65</h4>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>นำส่งกรมสรรพากรอัตโนมัติ</span>
+              </div>
+              <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 'var(--space-4)' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ยอดรับสุทธิหลังหักภาษี</span>
+                <h4 style={{ fontSize: 22, fontWeight: 900, color: '#10B981', margin: '4px 0' }}>฿124,375.15</h4>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>โอนเข้าบัญชีธนาคารร้านค้า</span>
+              </div>
+            </div>
+
+            <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: 'var(--space-4)', borderRadius: 6, marginBottom: 'var(--space-5)' }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, color: '#1E40AF', margin: '0 0 6px 0' }}>
+                📑 ดาวน์โหลดเอกสารภาษีร้านค้า (Monthly Tax Reports)
+              </h4>
+              <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  style={{ padding: '8px 14px', background: '#2563EB', color: 'white', border: 'none', borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                  onClick={() => alert('ดาวน์โหลดใบกำกับภาษีค่าบริการ Movemall (e-Tax Invoice PDF) สำเร็จ!')}
+                >
+                  📥 ดาวน์โหลด e-Tax Invoice ค่าธรรมเนียม (PDF)
+                </button>
+                <button
+                  type="button"
+                  style={{ padding: '8px 14px', background: 'white', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                  onClick={() => alert('ดาวน์โหลดรายงานภาษีขายประจำเดือนสำหรับยื่นสรรพากร (CSV) สำเร็จ!')}
+                >
+                  📊 ดาวน์โหลดรายงานภาษีขายประจำเดือน (CSV)
+                </button>
               </div>
             </div>
           </div>
