@@ -13,21 +13,37 @@ const server = http.createServer(app);
 // ── Middleware Security & Performance ──
 app.use(helmet());
 app.use(compression()); // Gzip/Brotli compression ลด bandwidth ~70%
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    credentials: true,
-  })
-);
+// Flexible CORS configuration (Cloudflare Pages, Localhost & Custom Domains)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:4173',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL,
+].filter(Boolean) as string[];
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.pages.dev') ||
+      origin.includes('movemall')
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true); // Allow all during connected deployment
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ── WebSocket Server ──
 export const io = new SocketIOServer(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    credentials: true,
-  },
+  cors: corsOptions,
   pingInterval: 25000,
   pingTimeout: 20000,
 });

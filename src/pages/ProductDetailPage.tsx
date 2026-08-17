@@ -5,7 +5,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, Heart, Minus, Plus, Store as StoreIcon, MessageSquare, ShieldCheck, ChevronLeft, ChevronRight, Play, Video, Share2, Scale, Check, X, CreditCard, Sparkles, Flame, Zap, Loader2 } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { ReviewsSection } from '../components/ReviewsSection';
-import { products } from '../data/products';
+import { products as staticProducts } from '../data/products';
 import { getStoreById, stores } from '../data/stores';
 import { mockLiveStreams } from '../data/liveStreams';
 import { parseRichText } from '../components/RichTextEditor';
@@ -13,6 +13,7 @@ import type { Product } from '../types';
 import './ProductDetailPage.css';
 
 interface ProductDetailPageProps {
+  products?: Product[];
   onAddToCart: (product: Product, qty: number) => void;
   isWishlisted?: (productId: string) => boolean;
   onToggleWishlist?: (product: Product) => void;
@@ -28,6 +29,7 @@ const PERKS = [
 ];
 
 export function ProductDetailPage({
+  products: propProducts,
   onAddToCart,
   isWishlisted,
   onToggleWishlist,
@@ -36,7 +38,8 @@ export function ProductDetailPage({
 }: ProductDetailPageProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const product = products.find(p => p.id === id);
+  const sourceProducts = propProducts || staticProducts;
+  const product = sourceProducts.find(p => p.id === id);
   const activeLive = mockLiveStreams.find(s => s.storeId === product?.storeId && s.type === 'live');
 
   const [qty, setQty] = useState(1);
@@ -154,8 +157,8 @@ export function ProductDetailPage({
     );
   }
 
-  const storeProducts = products.filter(p => p.storeId === product.storeId && p.id !== product.id).slice(0, 8);
-  const related = products.filter(p => p.category === product.category && p.id !== product.id && p.storeId !== product.storeId).slice(0, 8);
+  const storeProducts = sourceProducts.filter(p => p.storeId === product.storeId && p.id !== product.id).slice(0, 8);
+  const related = sourceProducts.filter(p => p.category === product.category && p.id !== product.id && p.storeId !== product.storeId).slice(0, 8);
   const store = (product.storeId && getStoreById(product.storeId)) || stores[0];
   const fullStars = Math.floor(product.rating);
   const stars = '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
@@ -167,7 +170,7 @@ export function ProductDetailPage({
 
   const userInterest = typeof window !== 'undefined' ? localStorage.getItem('mm_user_interest') || product.category : product.category;
 
-  const recommendedProducts = [...products]
+  const recommendedProducts = [...sourceProducts]
     .filter(p => p.id !== product.id)
     .sort((a, b) => {
       if (recommendedTab === 'foryou') {

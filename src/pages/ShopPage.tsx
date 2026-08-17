@@ -5,7 +5,7 @@ import { ProductCard } from '../components/ProductCard';
 import { LiveStreamCard } from '../components/LiveStreamCard';
 import { VideoClipInGridCard } from '../components/VideoClipInGridCard';
 import { FilterSidebar } from '../components/FilterSidebar';
-import { products, categories } from '../data/products';
+import { products as staticProducts, categories } from '../data/products';
 import { initialVideoClips } from '../data/videoClips';
 import { initialAdCampaigns } from '../data/mockAdsData';
 import type { Product } from '../types';
@@ -23,14 +23,16 @@ const DEFAULT_FILTERS: FilterState = {
 };
 
 interface ShopPageProps {
+  products?: Product[];
   onAddToCart: (product: Product) => void;
   isWishlisted?: (productId: string) => boolean;
   onToggleWishlist?: (product: Product) => void;
 }
 
-export function ShopPage({ onAddToCart, isWishlisted, onToggleWishlist }: ShopPageProps) {
+export function ShopPage({ products: propProducts, onAddToCart, isWishlisted, onToggleWishlist }: ShopPageProps) {
   const [searchParams] = useSearchParams();
   const urlCategory = searchParams.get('category');
+  const sourceProducts = propProducts || staticProducts;
 
   const [filters, setFilters] = useState<FilterState>(() => ({
     ...DEFAULT_FILTERS,
@@ -47,7 +49,7 @@ export function ShopPage({ onAddToCart, isWishlisted, onToggleWishlist }: ShopPa
   }, []);
 
   const filtered = useMemo(() => {
-    let result = [...products];
+    let result = [...sourceProducts];
 
 
     // Category

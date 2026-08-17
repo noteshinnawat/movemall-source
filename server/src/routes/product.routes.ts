@@ -107,8 +107,14 @@ router.get('/', async (req: Request, res: Response) => {
         prismaRead.product.count({ where }),
       ]);
 
+      const formattedProducts = products.map((p) => ({
+        ...p,
+        price: Number(p.price),
+        originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
+      }));
+
       return {
-        products,
+        products: formattedProducts,
         pagination: {
           total: totalCount,
           page: pageNum,
@@ -172,7 +178,13 @@ router.get('/:id', async (req: Request, res: Response) => {
       return;
     }
 
-    res.json({ product });
+    const formattedProduct = {
+      ...product,
+      price: Number(product.price),
+      originalPrice: product.originalPrice ? Number(product.originalPrice) : undefined,
+    };
+
+    res.json({ product: formattedProduct });
   } catch (error) {
     console.error('Fetch Product Detail Error:', error);
     res.status(500).json({ error: 'Failed to fetch product detail' });

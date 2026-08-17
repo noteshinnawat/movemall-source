@@ -124,6 +124,7 @@ function AppLayout({
             path="/"
             element={
               <HomePage
+                products={productList}
                 onAddToCart={p => handleAddToCart(p)}
                 isWishlisted={id => wishlist.isWished(id)}
                 onToggleWishlist={p => handleToggleWishlist(p)}
@@ -136,6 +137,7 @@ function AppLayout({
             path="/shop"
             element={
               <ShopPage
+                products={productList}
                 onAddToCart={p => handleAddToCart(p)}
                 isWishlisted={id => wishlist.isWished(id)}
                 onToggleWishlist={p => handleToggleWishlist(p)}
@@ -261,6 +263,7 @@ function AppLayout({
             path="/product/:id"
             element={
               <ProductDetailPage
+                products={productList}
                 onAddToCart={(p, qty) => handleAddToCart(p, qty)}
                 isWishlisted={id => wishlist.isWished(id)}
                 onToggleWishlist={p => handleToggleWishlist(p)}
@@ -586,6 +589,32 @@ function App() {
   const cart = useCart();
   const wishlist = useWishlist();
   const { toasts, addToast, removeToast } = useToast();
+
+  // ── Sync Products Live from Supabase / Railway Backend ──
+  useEffect(() => {
+    async function loadProductsLive() {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+        const res = await fetch(`${apiUrl}/api/products?limit=100`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.products) && data.products.length > 0) {
+            setProductList(prev => {
+              const liveIds = new Set(data.products.map((p: Product) => p.id));
+              const remainingMock = prev.filter(p => !liveIds.has(p.id));
+              return [...data.products, ...remainingMock];
+            });
+            console.log(`[Movemall DB] ✅ Synced ${data.products.length} products live from Supabase Database!`);
+          }
+        }
+      } catch {
+        // Fallback gracefully to offline cache/mock data
+        console.info('[Movemall DB] Backend offline or using local product cache');
+      }
+    }
+
+    loadProductsLive();
+  }, []);
 
   function handleAddToCart(product: Product, qty = 1) {
     cart.addItem(product, qty);

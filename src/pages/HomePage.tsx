@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Zap, ChevronLeft, ChevronRight, Sparkles, X, ShoppingCart } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { LiveStreamCard } from '../components/LiveStreamCard';
-import { products, categories, banners, subBanners } from '../data/products';
+import { products as staticProducts, categories, banners, subBanners } from '../data/products';
 import { stores } from '../data/stores';
 import { mockLiveStreams } from '../data/liveStreams';
 import { famousBrands } from '../data/brands';
@@ -12,6 +12,7 @@ import type { Product } from '../types';
 import './HomePage.css';
 
 interface HomePageProps {
+  products?: Product[];
   onAddToCart: (product: Product) => void;
   isWishlisted?: (productId: string) => boolean;
   onToggleWishlist?: (product: Product) => void;
@@ -81,8 +82,9 @@ const FEED_TABS = [
   },
 ];
 
-export function HomePage({ onAddToCart, isWishlisted, onToggleWishlist }: HomePageProps) {
+export function HomePage({ products: propProducts, onAddToCart, isWishlisted, onToggleWishlist }: HomePageProps) {
   const { h, m, s } = useCountdown(4 * 3600 + 32 * 60 + 15);
+  const sourceProducts = propProducts || staticProducts;
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [feedTab, setFeedTab] = useState<'foryou' | 'bestseller' | 'deals' | 'mall'>('foryou');
@@ -94,7 +96,7 @@ export function HomePage({ onAddToCart, isWishlisted, onToggleWishlist }: HomePa
   // AI Personalized Scoring Engine based on user affinity in localStorage
   const userInterest = typeof window !== 'undefined' ? localStorage.getItem('mm_user_interest') || 'electronics' : 'electronics';
 
-  const personalizedProducts = [...products].sort((a, b) => {
+  const personalizedProducts = [...sourceProducts].sort((a, b) => {
     if (feedTab === 'foryou') {
       const aScore = (a.category === userInterest ? 50 : 0) + a.rating * 10 + (a.badge === 'sale' ? 15 : 0);
       const bScore = (b.category === userInterest ? 50 : 0) + b.rating * 10 + (b.badge === 'sale' ? 15 : 0);
@@ -443,7 +445,7 @@ export function HomePage({ onAddToCart, isWishlisted, onToggleWishlist }: HomePa
 
           {/* Flash Sale Products Horizontal Grid Carousel */}
           <div className="home-flash-grid" ref={flashGridRef}>
-            {products.slice(0, 6).map((product, idx) => {
+            {sourceProducts.slice(0, 6).map((product, idx) => {
               const discountPct = [55, 60, 48, 70, 65, 50][idx % 6];
               const flashPrice = Math.round(product.price * (1 - discountPct / 100));
               const soldPct = [88, 94, 76, 96, 82, 91][idx % 6];
@@ -636,7 +638,7 @@ export function HomePage({ onAddToCart, isWishlisted, onToggleWishlist }: HomePa
 
         <div className="home-stores-compact-grid">
           {stores.slice(0, 4).map(st => {
-            const storeProducts = products.filter(p => p.storeId === st.id).slice(0, 3);
+            const storeProducts = sourceProducts.filter(p => p.storeId === st.id).slice(0, 3);
             return (
               <div key={st.id} className="home-store-card-compact">
                 <div
