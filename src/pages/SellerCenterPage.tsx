@@ -23,7 +23,44 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
   const currentStore = stores[0]; // "TechPro Official Store"
   const storeProducts = products.filter(p => p.storeId === currentStore.id);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'api' | 'ads' | 'tax'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'api' | 'ads' | 'tax' | 'flash'>('overview');
+
+  // ── Flash Sale Nomination State ──
+  interface FlashNomination {
+    id: string;
+    productId: string;
+    productName: string;
+    productImage: string;
+    originalPrice: number;
+    flashPrice: number;
+    discountPct: number;
+    timeSlot: string;
+    reservedStock: number;
+    status: 'approved' | 'pending' | 'rejected';
+    registeredAt: string;
+  }
+
+  const [flashNominations, setFlashNominations] = useState<FlashNomination[]>([
+    {
+      id: 'nom-1',
+      productId: storeProducts[0]?.id || 'p1',
+      productName: storeProducts[0]?.name || 'หูฟังไร้สาย Pro ANC ตัดเสียงรบกวน',
+      productImage: storeProducts[0]?.images[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80',
+      originalPrice: storeProducts[0]?.price || 1200,
+      flashPrice: 580,
+      discountPct: 52,
+      timeSlot: '20:00 - 00:00 (รอบค่ำดีลเดือด 🌙)',
+      reservedStock: 50,
+      status: 'approved',
+      registeredAt: '2026-08-17 10:30',
+    },
+  ]);
+
+  const [isNominateModalOpen, setIsNominateModalOpen] = useState(false);
+  const [nomProdId, setNomProdId] = useState(storeProducts[0]?.id || '');
+  const [nomTimeSlot, setNomTimeSlot] = useState('12:00 - 16:00 (รอบกลางวัน ดีลเด็ด ☀️)');
+  const [nomFlashPrice, setNomFlashPrice] = useState('');
+  const [nomStock, setNomStock] = useState('30');
   
   // ── Open API & Security State ──
   const [apiEnv, setApiEnv] = useState<'live' | 'sandbox'>('live');
@@ -274,6 +311,33 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
     setIsAddModalOpen(false);
   }
 
+  function handleNominateFlashSale(e: React.FormEvent) {
+    e.preventDefault();
+    const targetProd = storeProducts.find(p => p.id === nomProdId) || storeProducts[0];
+    if (!targetProd) return;
+
+    const fPrice = Number(nomFlashPrice) || Math.round(targetProd.price * 0.6);
+    const discPct = Math.round(((targetProd.price - fPrice) / targetProd.price) * 100);
+
+    const newNom: FlashNomination = {
+      id: `nom-${Date.now()}`,
+      productId: targetProd.id,
+      productName: targetProd.name,
+      productImage: targetProd.images[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80',
+      originalPrice: targetProd.price,
+      flashPrice: fPrice,
+      discountPct: discPct,
+      timeSlot: nomTimeSlot,
+      reservedStock: Number(nomStock) || 20,
+      status: 'approved',
+      registeredAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+    };
+
+    setFlashNominations(prev => [newNom, ...prev]);
+    setIsNominateModalOpen(false);
+    alert(`ลงทะเบียนสินค้า "${targetProd.name}" เข้าร่วม Flash Sale รอบ ${nomTimeSlot} สำเร็จ! (สถานะ: อนุมัติแล้ว)`);
+  }
+
   return (
     <main className="seller-page">
       {/* Seller Header */}
@@ -404,6 +468,24 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
           >
             <span style={{ fontSize: 14 }}>📄</span>
             ระบบภาษี & ใบกำกับภาษี
+          </button>
+          <button
+            className={`seller-tab-btn${activeTab === 'flash' ? ' seller-tab-btn--active' : ''}`}
+            onClick={() => setActiveTab('flash')}
+          >
+            <Zap size={15} style={{ color: '#DC2626' }} />
+            ศูนย์เสนอขาย Flash Sale
+            <span style={{
+              background: '#DC2626',
+              color: 'white',
+              fontSize: 9,
+              fontWeight: 900,
+              padding: '2px 5px',
+              marginLeft: 6,
+              letterSpacing: '0.3px',
+            }}>
+              HOT
+            </span>
           </button>
         </div>
 
@@ -1386,7 +1468,259 @@ export function SellerCenterPage({ products, onAddProduct, onDeleteProduct }: Se
             </div>
           </div>
         )}
+
+        {/* Flash Sale Campaign Nomination Hub */}
+        {activeTab === 'flash' && (
+          <div style={{ background: 'white', border: '1px solid var(--border)', padding: 'var(--space-6)', marginTop: 'var(--space-4)' }}>
+            {/* Master Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-5)', paddingBottom: 'var(--space-3)', borderBottom: '1px solid var(--border)', flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <h3 style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Zap size={20} style={{ color: '#DC2626' }} />
+                  ศูนย์เสนอขาย Flash Sale สำหรับผู้ขาย (Flash Sale Nomination Hub)
+                </h3>
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4, margin: 0 }}>
+                  เพิ่มยอดเข้าชมร้านค้า (Traffic Boost 10x) และเร่งยอดขายทันที ด้วยการเสนอสินค้าเข้าร่วมดีลลดราคาแรงประจำวัน
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsNominateModalOpen(true)}
+                style={{
+                  background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  fontWeight: 800,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  borderRadius: 'var(--radius-md)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  boxShadow: '0 2px 8px rgba(220, 38, 38, 0.3)',
+                }}
+              >
+                <Plus size={16} />
+                + เสนอสินค้าเข้าร่วม Flash Sale
+              </button>
+            </div>
+
+            {/* 3 Steps Guide */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-3)', marginBottom: 'var(--space-6)' }}>
+              <div style={{ background: '#FFF1F2', border: '1px solid #FFE4E6', padding: '12px 14px', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ fontSize: 11, fontWeight: 900, color: '#DC2626' }}>STEP 1: เลือกรอบเวลา</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#111827', marginTop: 2 }}>เลือกรอบกิจกรรมประจำวัน</div>
+                <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2 }}>เลือกช่วงเวลา 12:00 น., 16:00 น. หรือ 20:00 น.</div>
+              </div>
+              <div style={{ background: '#EFF6FF', border: '1px solid #DBEAFE', padding: '12px 14px', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ fontSize: 11, fontWeight: 900, color: '#2563EB' }}>STEP 2: ตั้งราคาลดพิเศษ</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#111827', marginTop: 2 }}>ส่วนลดพิเศษ 15% - 70%</div>
+                <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2 }}>ระบุราคาส่วนลดดีลเดือดพร้อมสำรองจำนวนสต็อก</div>
+              </div>
+              <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '12px 14px', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ fontSize: 11, fontWeight: 900, color: '#059669' }}>STEP 3: ติดป้ายแดงหน้าแรก</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#111827', marginTop: 2 }}>การันตีแท็ก Flash Sale</div>
+                <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2 }}>ระบบโปรโมตสินค้าของคุณบนหน้าแรกทันทีเมื่อเปิดรอบ</div>
+              </div>
+            </div>
+
+            {/* Registered Nominations Table */}
+            <div style={{ background: '#FFFFFF', border: '1px solid var(--border)', overflow: 'hidden' }}>
+              <div style={{ padding: '12px 16px', background: '#F8FAFC', borderBottom: '1px solid var(--border)', fontWeight: 800, fontSize: 13, color: '#111827', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>รายการสินค้าที่เสนอเข้าร่วม Flash Sale ({flashNominations.length})</span>
+                <span style={{ fontSize: 11, color: '#059669', fontWeight: 700 }}>🟢 อนุมัติแล้ว {flashNominations.filter(n => n.status === 'approved').length} ดีล</span>
+              </div>
+
+              <div style={{ overflowX: 'auto' }}>
+                <table className="seller-table">
+                  <thead>
+                    <tr>
+                      <th>สินค้า</th>
+                      <th>รอบเวลากิจกรรม</th>
+                      <th>ราคาปกติ</th>
+                      <th>ราคา Flash Sale</th>
+                      <th>สต็อกสำรอง</th>
+                      <th>สถานะ</th>
+                      <th style={{ textAlign: 'right' }}>จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {flashNominations.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+                          ยังไม่มีสินค้าที่ลงทะเบียนในขณะนี้ กดปุ่ม "+ เสนอสินค้าเข้าร่วม Flash Sale" ด้านบนเพื่อเริ่มต้น
+                        </td>
+                      </tr>
+                    ) : (
+                      flashNominations.map(nom => (
+                        <tr key={nom.id}>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <img
+                                src={nom.productImage}
+                                alt={nom.productName}
+                                style={{ width: 42, height: 42, objectFit: 'cover', border: '1px solid var(--border)', borderRadius: 4 }}
+                              />
+                              <div>
+                                <div style={{ fontWeight: 800, fontSize: 13, color: '#111827' }}>{nom.productName}</div>
+                                <div style={{ fontSize: 10, color: '#6B7280' }}>ลงทะเบียน: {nom.registeredAt}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <span style={{ fontSize: 11, fontWeight: 800, background: '#FFF1F2', color: '#DC2626', padding: '3px 8px', borderRadius: 4 }}>
+                              ⏰ {nom.timeSlot}
+                            </span>
+                          </td>
+                          <td style={{ textDecoration: 'line-through', color: '#9CA3AF', fontSize: 12 }}>
+                            ฿{nom.originalPrice.toLocaleString()}
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 900, color: '#DC2626', fontSize: 14 }}>
+                              ฿{nom.flashPrice.toLocaleString()}
+                            </div>
+                            <span style={{ fontSize: 10, fontWeight: 900, background: '#DC2626', color: 'white', padding: '1px 5px', borderRadius: 2 }}>
+                              -{nom.discountPct}%
+                            </span>
+                          </td>
+                          <td style={{ fontWeight: 700, fontSize: 12 }}>
+                            📦 {nom.reservedStock} ชิ้น
+                          </td>
+                          <td>
+                            {nom.status === 'approved' ? (
+                              <span className="seller-order-status seller-order-status--delivered">
+                                🟢 อนุมัติแล้ว (Scheduled)
+                              </span>
+                            ) : (
+                              <span className="seller-order-status seller-order-status--processing">
+                                ⏳ กำลังตรวจสอบ
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (confirm('คุณต้องการยกเลิกการเสนอสินค้า Flash Sale รายการนี้ใช่หรือไม่?')) {
+                                  setFlashNominations(prev => prev.filter(n => n.id !== nom.id));
+                                }
+                              }}
+                              className="seller-table-action-btn seller-table-action-btn--delete"
+                            >
+                              <Trash2 size={13} /> ยกเลิกคำขอ
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Nomination Form Modal */}
+      {isNominateModalOpen && (
+        <div className="seller-modal-backdrop" onClick={() => setIsNominateModalOpen(false)}>
+          <div className="seller-modal" onClick={e => e.stopPropagation()}>
+            <div className="seller-modal__header">
+              <h2 className="seller-modal__title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Zap size={18} style={{ color: '#DC2626' }} />
+                เสนอสินค้าเข้าร่วม Flash Sale
+              </h2>
+              <button className="seller-modal__close" onClick={() => setIsNominateModalOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleNominateFlashSale}>
+              <div className="seller-modal__grid">
+                <div className="seller-modal__group seller-modal__group--full">
+                  <label className="seller-modal__label">เลือกรอบเวลากิจกรรม Flash Sale *</label>
+                  <select
+                    className="seller-modal__select"
+                    value={nomTimeSlot}
+                    onChange={e => setNomTimeSlot(e.target.value)}
+                  >
+                    <option value="12:00 - 16:00 (รอบกลางวัน ดีลเด็ด ☀️)">12:00 - 16:00 น. (รอบกลางวัน ดีลเด็ด ☀️)</option>
+                    <option value="16:00 - 20:00 น. (รอบเลิกงาน ช้อปกระจาย 🌆)">16:00 - 20:00 น. (รอบเลิกงาน ช้อปกระจาย 🌆)</option>
+                    <option value="20:00 - 00:00 (รอบค่ำดีลเดือด 🌙)">20:00 - 00:00 น. (รอบค่ำดีลเดือด 🌙)</option>
+                  </select>
+                </div>
+
+                <div className="seller-modal__group seller-modal__group--full">
+                  <label className="seller-modal__label">เลือกรายการสินค้าของร้าน *</label>
+                  <select
+                    className="seller-modal__select"
+                    value={nomProdId}
+                    onChange={e => {
+                      setNomProdId(e.target.value);
+                      const target = storeProducts.find(p => p.id === e.target.value);
+                      if (target) {
+                        setNomFlashPrice(String(Math.round(target.price * 0.6)));
+                      }
+                    }}
+                  >
+                    {storeProducts.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} (ราคาปกติ ฿{p.price.toLocaleString()})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="seller-modal__group">
+                  <label className="seller-modal__label">ราคา Flash Sale ที่เสนอ (บาท) *</label>
+                  <input
+                    type="number"
+                    className="seller-modal__input"
+                    placeholder="เช่น 580"
+                    required
+                    value={nomFlashPrice}
+                    onChange={e => setNomFlashPrice(e.target.value)}
+                  />
+                  <span style={{ fontSize: 10, color: '#DC2626', fontWeight: 700, marginTop: 2 }}>
+                    * แนะนำให้ตั้งส่วนลดตั้งแต่ 15% ถึง 70% เพื่อเพิ่มโอกาสอนุมัติ
+                  </span>
+                </div>
+
+                <div className="seller-modal__group">
+                  <label className="seller-modal__label">จำนวนสต็อกสำรองสำหรับดีล (ชิ้น) *</label>
+                  <input
+                    type="number"
+                    min="5"
+                    className="seller-modal__input"
+                    placeholder="เช่น 30"
+                    required
+                    value={nomStock}
+                    onChange={e => setNomStock(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="seller-modal__actions" style={{ marginTop: 20 }}>
+                <button
+                  type="button"
+                  className="review-form__cancel-btn"
+                  onClick={() => setIsNominateModalOpen(false)}
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  className="seller-modal__submit"
+                  style={{ background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)' }}
+                >
+                  ⚡ ส่งคำขอลงทะเบียน Flash Sale
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Add Product Modal */}
       {isAddModalOpen && (
