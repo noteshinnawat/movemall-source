@@ -226,10 +226,12 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('guest_user');
   const [sellerInputVal, setSellerInputVal] = useState('');
   const [isSellerSocketConnected, setIsSellerSocketConnected] = useState(false);
-  const sellerChatEndRef = useRef<HTMLDivElement>(null);
+  const sellerMessagesAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    sellerChatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (activeTab === 'chat' && sellerMessagesAreaRef.current) {
+      sellerMessagesAreaRef.current.scrollTop = sellerMessagesAreaRef.current.scrollHeight;
+    }
   }, [sellerMessages, selectedCustomerId, activeTab]);
 
   useEffect(() => {
@@ -4010,7 +4012,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                   </span>
                 </div>
 
-                <div className="seller-chat-messages-area">
+                <div ref={sellerMessagesAreaRef} className="seller-chat-messages-area">
                   {(() => {
                     const activeThreadKey = `${currentStore.id}::${selectedCustomerId}`;
                     const activeChatList = sellerMessages[activeThreadKey] || sellerMessages[selectedCustomerId] || initialCustomerThreads[selectedCustomerId] || [];
@@ -4034,7 +4036,6 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                       </div>
                     ));
                   })()}
-                  <div ref={sellerChatEndRef} />
                 </div>
 
                 {/* Quick Merchant Replies */}
