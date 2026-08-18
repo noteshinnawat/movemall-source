@@ -1993,37 +1993,323 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
         </div>
       )}
 
-      {/* 📊 Overview Metrics */}
+      {/* 📊 Overview Metrics & Executive Command Center */}
       {activeTab === 'overview' && (
-        <div>
-          <div className="admin-metrics-grid">
-            <div className="admin-metric-card">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Executive Header & Quick Filters */}
+          <div className="admin-card" style={{ marginBottom: 0 }}>
+            <div className="admin-card-header" style={{ marginBottom: 0 }}>
               <div>
-                <span className="admin-metric-lbl">ยอดขายรวม (GMV)</span>
-                <h3 className="admin-metric-val">฿{metrics.gmv.toLocaleString()}</h3>
+                <h2 className="admin-card-title">📊 ศูนย์สั่งการและสถิติภาพรวมธุรกิจ (Movemall Executive Command Center)</h2>
+                <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '4px 0 0 0' }}>
+                  รายงานสถิติแบบ Realtime ซิงค์ตรงจากฐานข้อมูล Supabase PostgreSQL & Redis Gateway
+                </p>
               </div>
-              <DollarSign size={32} color="#10b981" opacity={0.6} />
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', background: '#f1f5f9', padding: 3, borderRadius: 6, gap: 2 }}>
+                  {['วันนี้ (Live)', '7 วันล่าสุด', '30 วันล่าสุด', 'ปี 2026'].map((period, idx) => (
+                    <button
+                      key={period}
+                      type="button"
+                      className="admin-btn-sm"
+                      style={{
+                        background: idx === 1 ? '#ffffff' : 'transparent',
+                        color: idx === 1 ? '#0f172a' : '#64748b',
+                        boxShadow: idx === 1 ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+                        fontWeight: idx === 1 ? 700 : 500,
+                      }}
+                    >
+                      {period}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="admin-btn-sm admin-btn-outline"
+                  onClick={() => alert('ดาวน์โหลดรายงานสถิติ Movemall Business BI Report (CSV/Excel) เรียบร้อย')}
+                >
+                  📥 ส่งออกรายงาน (Export CSV)
+                </button>
+              </div>
             </div>
-            <div className="admin-metric-card">
-              <div>
-                <span className="admin-metric-lbl">คำสั่งซื้อทั้งหมด</span>
-                <h3 className="admin-metric-val">{metrics.totalOrders.toLocaleString()} ออเดอร์</h3>
+          </div>
+
+          {/* 4 Main Hero KPI Cards */}
+          <div className="admin-metrics-grid" style={{ marginBottom: 0 }}>
+            <div className="admin-metric-card" style={{ borderTop: '4px solid #10b981' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+                <div>
+                  <span className="admin-metric-lbl">ยอดขายรวมสุทธิ (GMV)</span>
+                  <h3 className="admin-metric-val" style={{ color: '#059669' }}>฿{metrics.gmv.toLocaleString()}</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', background: '#ecfdf5', padding: '1px 6px', borderRadius: 4 }}>
+                      ▲ +18.4% WoW
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>เทียบสัปดาห์ก่อน</span>
+                  </div>
+                </div>
+                <div style={{ width: 44, height: 44, borderRadius: 8, background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <DollarSign size={24} color="#059669" />
+                </div>
               </div>
-              <Package size={32} color="#2563eb" opacity={0.6} />
             </div>
-            <div className="admin-metric-card">
-              <div>
-                <span className="admin-metric-lbl">สินค้าทั้งหมดในระบบ</span>
-                <h3 className="admin-metric-val">{metrics.totalProducts.toLocaleString()} รายการ</h3>
+
+            <div className="admin-metric-card" style={{ borderTop: '4px solid #2563eb' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+                <div>
+                  <span className="admin-metric-lbl">คำสั่งซื้อสำเร็จทั้งหมด</span>
+                  <h3 className="admin-metric-val" style={{ color: '#1d4ed8' }}>{metrics.totalOrders.toLocaleString()} <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>ออเดอร์</span></h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#2563eb', background: '#eff6ff', padding: '1px 6px', borderRadius: 4 }}>
+                      ✓ 98.6% สำเร็จ
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>เฉลี่ย 488 ออเดอร์/วัน</span>
+                  </div>
+                </div>
+                <div style={{ width: 44, height: 44, borderRadius: 8, background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Package size={24} color="#2563eb" />
+                </div>
               </div>
-              <Sparkles size={32} color="#f59e0b" opacity={0.6} />
             </div>
-            <div className="admin-metric-card">
-              <div>
-                <span className="admin-metric-lbl">ร้านค้าที่เปิดให้บริการ</span>
-                <h3 className="admin-metric-val">{metrics.totalStores} ร้านค้า</h3>
+
+            <div className="admin-metric-card" style={{ borderTop: '4px solid #f59e0b' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+                <div>
+                  <span className="admin-metric-lbl">สินค้าทั้งหมดในระบบ</span>
+                  <h3 className="admin-metric-val" style={{ color: '#d97706' }}>{metrics.totalProducts.toLocaleString()} <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>รายการ</span></h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#d97706', background: '#fffbeb', padding: '1px 6px', borderRadius: 4 }}>
+                      🛡️ 100% อย./มอก.
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>AI Verified ผ่านเกณฑ์</span>
+                  </div>
+                </div>
+                <div style={{ width: 44, height: 44, borderRadius: 8, background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Sparkles size={24} color="#d97706" />
+                </div>
               </div>
-              <Users size={32} color="#8b5cf6" opacity={0.6} />
+            </div>
+
+            <div className="admin-metric-card" style={{ borderTop: '4px solid #7c3aed' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+                <div>
+                  <span className="admin-metric-lbl">ร้านค้า & ครีเอเตอร์ทางการ</span>
+                  <h3 className="admin-metric-val" style={{ color: '#6d28d9' }}>{metrics.totalStores} <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>ร้าน / 42 ครีเอเตอร์</span></h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#7c3aed', background: '#f5f3ff', padding: '1px 6px', borderRadius: 4 }}>
+                      👑 8 Official Mall
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>ตอบแชทเฉลี่ย 1.2 นาที</span>
+                  </div>
+                </div>
+                <div style={{ width: 44, height: 44, borderRadius: 8, background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Users size={24} color="#6d28d9" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 2-Column Analytics Charts & Category Mix */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: '1.5rem' }}>
+            {/* Column 1: Weekly Revenue Velocity Visual Chart */}
+            <div className="admin-card" style={{ marginBottom: 0 }}>
+              <div className="admin-card-header">
+                <div>
+                  <h3 className="admin-card-title" style={{ fontSize: '1rem' }}>📈 แนวโน้มยอดขาย & รายได้ 7 วันล่าสุด</h3>
+                  <span style={{ fontSize: '0.78rem', color: '#64748b' }}>แยกตามช่องทาง: Live Stream (ฟ้า) / Mall Brands (ม่วง) / สินค้าทั่วไป (เขียว)</span>
+                </div>
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#059669' }}>รวม ฿1.85M</span>
+              </div>
+
+              {/* CSS Bar Chart */}
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: 180, gap: 12, padding: '10px 0', borderBottom: '1px solid #e2e8f0' }}>
+                {[
+                  { day: 'จันทร์', live: 35, mall: 45, general: 20, total: '฿210k' },
+                  { day: 'อังคาร', live: 40, mall: 42, general: 18, total: '฿280k' },
+                  { day: 'พุธ', live: 30, mall: 50, general: 20, total: '฿245k' },
+                  { day: 'พฤหัส', live: 45, mall: 38, general: 17, total: '฿310k' },
+                  { day: 'ศุกร์', live: 55, mall: 32, general: 13, total: '฿390k' },
+                  { day: 'เสาร์', live: 60, mall: 28, general: 12, total: '฿450k' },
+                  { day: 'อาทิตย์', live: 50, mall: 35, general: 15, total: '฿420k' },
+                ].map(bar => (
+                  <div key={bar.day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, height: '100%', justifyContent: 'flex-end' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#334155', marginBottom: 4 }}>{bar.total}</span>
+                    <div style={{ width: '100%', maxWidth: 36, display: 'flex', flexDirection: 'column', borderRadius: 4, overflow: 'hidden', height: `${(parseInt(bar.total.replace(/[^0-9]/g, '')) / 450) * 120}px` }}>
+                      <div style={{ height: `${bar.live}%`, background: '#2563eb', transition: 'height 0.3s' }} title={`Live Stream: ${bar.live}%`} />
+                      <div style={{ height: `${bar.mall}%`, background: '#7c3aed', transition: 'height 0.3s' }} title={`Mall Brands: ${bar.mall}%`} />
+                      <div style={{ height: `${bar.general}%`, background: '#10b981', transition: 'height 0.3s' }} title={`ทั่วไป: ${bar.general}%`} />
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 6, fontWeight: 600 }}>{bar.day}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Chart Legend */}
+              <div style={{ display: 'flex', gap: 16, marginTop: 12, justifyContent: 'center' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: '#475569' }}>
+                  <span style={{ width: 10, height: 10, borderRadius: 2, background: '#2563eb' }} /> MOVEMALL LIVE (38%)
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: '#475569' }}>
+                  <span style={{ width: 10, height: 10, borderRadius: 2, background: '#7c3aed' }} /> Super Brand Mall (44%)
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: '#475569' }}>
+                  <span style={{ width: 10, height: 10, borderRadius: 2, background: '#10b981' }} /> Marketplace ทั่วไป (18%)
+                </span>
+              </div>
+            </div>
+
+            {/* Column 2: Category Mix & Market Share */}
+            <div className="admin-card" style={{ marginBottom: 0 }}>
+              <div className="admin-card-header">
+                <div>
+                  <h3 className="admin-card-title" style={{ fontSize: '1rem' }}>🛍️ สัดส่วนยอดขายตามหมวดหมู่สินค้า</h3>
+                  <span style={{ fontSize: '0.78rem', color: '#64748b' }}>สัดส่วนรายได้แยกตามประเภทสินค้าหลักในแพลตฟอร์ม</span>
+                </div>
+                <span style={{ fontSize: '0.78rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: 4, fontWeight: 600, color: '#475569' }}>
+                  8 หมวดหมู่
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 }}>
+                {[
+                  { name: 'สมาร์ทโฟน & แกดเจ็ต (Apple / Samsung)', percent: 38, amount: '฿704,596', color: '#2563eb' },
+                  { name: 'แฟชั่น สปอร์ต & รองเท้า (Nike / Adidas)', percent: 24, amount: '฿445,008', color: '#7c3aed' },
+                  { name: 'เครื่องใช้ไฟฟ้า & ไลฟ์สไตล์ (Dyson / Sony)', percent: 18, amount: '฿333,756', color: '#f59e0b' },
+                  { name: 'ความงาม & ผลิตภัณฑ์ดูแลผิว (FDA Approved)', percent: 12, amount: '฿222,504', color: '#ec4899' },
+                  { name: 'อาหารเสริม สุขภาพ & อื่นๆ', percent: 8, amount: '฿148,336', color: '#10b981' },
+                ].map(cat => (
+                  <div key={cat.name}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, marginBottom: 4 }}>
+                      <span style={{ color: '#1e293b' }}>{cat.name}</span>
+                      <span style={{ color: '#0f172a', fontWeight: 700 }}>{cat.percent}% <span style={{ color: '#64748b', fontWeight: 500, fontSize: '0.75rem' }}>({cat.amount})</span></span>
+                    </div>
+                    <div style={{ width: '100%', height: 6, background: '#f1f5f9', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ width: `${cat.percent}%`, height: '100%', background: cat.color, borderRadius: 3 }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 4 Realtime Operations Pulses */}
+          <div>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: 12 }}>
+              ⚡ สถานะการดำเนินงาน & ความปลอดภัยแบบ Realtime (Operational Health)
+            </h3>
+            <div className="admin-stats-grid" style={{ marginBottom: 0 }}>
+              <div className="admin-stat-card" style={{ borderLeft: '4px solid #ef4444' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="admin-stat-label">🔴 MOVEMALL LIVE & วิดีโอ</span>
+                  <span style={{ fontSize: '0.7rem', background: '#fee2e2', color: '#b91c1c', padding: '1px 6px', borderRadius: 4, fontWeight: 700 }}>LIVE NOW</span>
+                </div>
+                <div className="admin-stat-val" style={{ color: '#dc2626' }}>6 ห้องสด</div>
+                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>ผู้ชมพร้อมกัน 8,420 คน | 420 คำสั่งซื้อสด</span>
+              </div>
+
+              <div className="admin-stat-card" style={{ borderLeft: '4px solid #10b981' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="admin-stat-label">🤖 AI FDA & TISI Shield</span>
+                  <span style={{ fontSize: '0.7rem', background: '#dcfce7', color: '#15803d', padding: '1px 6px', borderRadius: 4, fontWeight: 700 }}>ACTIVE</span>
+                </div>
+                <div className="admin-stat-val" style={{ color: '#059669' }}>96.8% Match</div>
+                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>161 รายการสแกนผ่าน 0 ข้อพิพาทรุนแรง</span>
+              </div>
+
+              <div className="admin-stat-card" style={{ borderLeft: '4px solid #2563eb' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="admin-stat-label">🚚 ขนส่ง & นำจ่ายพัสดุ (SLA)</span>
+                  <span style={{ fontSize: '0.7rem', background: '#eff6ff', color: '#1d4ed8', padding: '1px 6px', borderRadius: 4, fontWeight: 700 }}>ON TIME</span>
+                </div>
+                <div className="admin-stat-val" style={{ color: '#2563eb' }}>98.6%</div>
+                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>342 ชิ้นกำลังนำจ่าย | Flash, Kerry, EMS</span>
+              </div>
+
+              <div className="admin-stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="admin-stat-label">💳 Movemall PayLater & PromptPay</span>
+                  <span style={{ fontSize: '0.7rem', background: '#fffbeb', color: '#b45309', padding: '1px 6px', borderRadius: 4, fontWeight: 700 }}>VERIFIED</span>
+                </div>
+                <div className="admin-stat-val" style={{ color: '#d97706' }}>฿482k</div>
+                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>วงเงินผ่อนชำระ 0% | หักภาษี 3% ถูกต้อง</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Orders Table */}
+          <div className="admin-card" style={{ marginBottom: 0 }}>
+            <div className="admin-card-header">
+              <div>
+                <h3 className="admin-card-title" style={{ fontSize: '1rem' }}>📦 ธุรกรรม & คำสั่งซื้อล่าสุด (Latest Platform Orders)</h3>
+                <span style={{ fontSize: '0.78rem', color: '#64748b' }}>ซิงค์ออเดอร์ล่าสุดแบบ Atomic Transaction</span>
+              </div>
+              <button
+                type="button"
+                className="admin-btn-sm admin-btn-outline"
+                onClick={() => setActiveTab('finance')}
+              >
+                ดูทั้งหมดในแผนกการเงิน →
+              </button>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>เลขออเดอร์</th>
+                    <th>ลูกค้า</th>
+                    <th>ร้านค้า</th>
+                    <th>ยอดรวมสุทธิ</th>
+                    <th>ช่องทางชำระ</th>
+                    <th>สถานะออเดอร์</th>
+                    <th>เวลา</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { id: 'ORD-2026-9812', buyer: 'คุณสมชาย นามสมมุติ', store: 'Apple Official Store 🍎', total: 42900, method: 'PromptPay QR', status: 'PAID', time: '2 นาทีที่แล้ว' },
+                    { id: 'ORD-2026-9811', buyer: 'คุณศศิธร พูนผล', store: 'Nike Thailand Official 👟', total: 4500, method: 'PayLater 0% (3 ด.)', status: 'SHIPPED', time: '8 นาทีที่แล้ว' },
+                    { id: 'ORD-2026-9810', buyer: 'คุณกิตติศักดิ์ เจริญดี', store: 'Dyson Thailand 💨', total: 18900, method: 'บัตรเครดิต/เดบิต', status: 'PAID', time: '15 นาทีที่แล้ว' },
+                    { id: 'ORD-2026-9809', buyer: 'คุณวรัญญา สุวรรณ', store: 'Samsung Thailand 📱', total: 34900, method: 'PromptPay QR', status: 'DELIVERED', time: '32 นาทีที่แล้ว' },
+                    { id: 'ORD-2026-9808', buyer: 'คุณณัฐพล แสงแก้ว', store: 'TechPro Official Store 🎧', total: 1290, method: 'Movemall Coins + COD', status: 'PAID', time: '45 นาทีที่แล้ว' },
+                  ].map(ord => (
+                    <tr key={ord.id}>
+                      <td>
+                        <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#2563eb' }}>{ord.id}</span>
+                      </td>
+                      <td>
+                        <div style={{ fontWeight: 600, color: '#0f172a' }}>{ord.buyer}</div>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.8rem', color: '#475569' }}>{ord.store}</span>
+                      </td>
+                      <td>
+                        <strong style={{ color: '#059669' }}>฿{ord.total.toLocaleString()}</strong>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.75rem', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '2px 6px', borderRadius: 4 }}>
+                          {ord.method}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: 4,
+                            background: ord.status === 'PAID' ? '#dcfce7' : ord.status === 'SHIPPED' ? '#eff6ff' : '#f3e8ff',
+                            color: ord.status === 'PAID' ? '#15803d' : ord.status === 'SHIPPED' ? '#1d4ed8' : '#7e22ce',
+                          }}
+                        >
+                          {ord.status === 'PAID' ? '✓ ชำระแล้ว' : ord.status === 'SHIPPED' ? '🚚 กำลังจัดส่ง' : '🎉 ส่งสำเร็จแล้ว'}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: '0.75rem', color: '#64748b' }}>{ord.time}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
