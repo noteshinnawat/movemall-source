@@ -2496,6 +2496,9 @@
 /* =========================================================
    Seller Live Customer Chat Box
 ========================================================= */
+/* =========================================================
+   Seller Live Customer Chat Box
+========================================================= */
 .seller-chat-wrapper {
   background: #FFFFFF;
   border: 1px solid var(--border);
@@ -2503,13 +2506,17 @@
   margin-top: 16px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .seller-chat-layout {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 280px minmax(0, 1fr);
   min-height: 580px;
   max-height: 680px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .seller-chat-sidebar {
@@ -2517,6 +2524,8 @@
   display: flex;
   flex-direction: column;
   background: #FAFAFA;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .seller-chat-sidebar__header {
@@ -2609,6 +2618,10 @@
   display: flex;
   flex-direction: column;
   background: #FFFFFF;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .seller-chat-header {
@@ -2624,25 +2637,32 @@
   flex: 1;
   padding: 16px 20px;
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 12px;
   background: #F9FAFB;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .seller-chat-bubble {
-  max-width: 70%;
+  max-width: 75%;
   padding: 10px 14px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 13.5px;
-  line-height: 1.45;
+  line-height: 1.5;
   word-break: break-word;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
 }
 
 .seller-chat-bubble-wrap {
   display: flex;
   flex-direction: column;
   margin-bottom: 4px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .seller-chat-bubble-wrap--customer {
@@ -2679,6 +2699,7 @@
   background: #FFFFFF;
   display: flex;
   gap: 8px;
+  box-sizing: border-box;
 }
 
 .seller-chat-input {
@@ -2688,6 +2709,7 @@
   border-radius: 6px;
   font-size: 13px;
   outline: none;
+  min-width: 0;
 }
 
 .seller-chat-input:focus {
@@ -2707,6 +2729,7 @@
   align-items: center;
   gap: 6px;
   transition: opacity 0.15s;
+  flex-shrink: 0;
 }
 
 .seller-chat-send-btn:hover {
@@ -2720,6 +2743,12 @@
   background: #F3F4F6;
   border-top: 1px solid #E5E7EB;
   overflow-x: auto;
+  scrollbar-width: none;
+  box-sizing: border-box;
+}
+
+.seller-chat-quick-replies::-webkit-scrollbar {
+  display: none;
 }
 
 .seller-chat-quick-btn {
@@ -2732,6 +2761,7 @@
   white-space: nowrap;
   color: #374151;
   transition: all 0.15s;
+  flex-shrink: 0;
 }
 
 .seller-chat-quick-btn:hover {
