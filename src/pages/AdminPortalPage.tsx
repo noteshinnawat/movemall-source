@@ -149,85 +149,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
   const [showAddTeamModal, setShowAddTeamModal] = useState<boolean>(false);
   const [editingTeamMember, setEditingTeamMember] = useState<AdminTeamMember | null>(null);
 
-  const [teamMembers, setTeamMembers] = useState<AdminTeamMember[]>([
-    {
-      id: 'staff-01',
-      name: 'Note Shinnawat (Super Admin)',
-      email: 'note.shinnawat@gmail.com',
-      department: 'Executive Board',
-      role: 'SUPER_ADMIN',
-      permissions: ['ALL_PERMISSIONS', 'DATABASE_ROOT', 'FINANCIAL_RELEASE', 'USER_BAN', 'SYSTEM_CONFIG'],
-      status: 'ACTIVE',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
-      lastActive: 'กำลังใช้งาน (Active Now)',
-    },
-    {
-      id: 'staff-02',
-      name: 'กมลวรรณ สุขเกษม',
-      email: 'kamonwan.s@movemall.com',
-      department: 'ฝ่ายการตลาด & แคมเปญ',
-      role: 'MARKETING_ADMIN',
-      permissions: ['CAMPAIGN_CREATE', 'PUSH_BROADCAST', 'VOUCHER_MANAGE', 'FLASH_SALE_SCHEDULE'],
-      status: 'ACTIVE',
-      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80',
-      lastActive: '10 นาทีที่แล้ว',
-    },
-    {
-      id: 'staff-03',
-      name: 'ธนภัทร วงศ์ษา',
-      email: 'thanapat.w@movemall.com',
-      department: 'ฝ่ายการเงิน & บัญชี',
-      role: 'FINANCE_ADMIN',
-      permissions: ['PAYOUT_APPROVE', 'VAT_TAX_AUDIT', 'REFUND_SETTLEMENT', 'LEDGER_INSPECT'],
-      status: 'ACTIVE',
-      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&q=80',
-      lastActive: '25 นาทีที่แล้ว',
-    },
-    {
-      id: 'staff-04',
-      name: 'ชลิตา จิตสง่า',
-      email: 'chalita.j@movemall.com',
-      department: 'ฝ่ายสินค้า & แบรนด์ Mall',
-      role: 'CATALOG_ADMIN',
-      permissions: ['MALL_VERIFICATION', 'PRODUCT_SUPPRESS', 'AI_FDA_OVERRIDE', 'STORE_APPROVAL'],
-      status: 'ACTIVE',
-      avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&q=80',
-      lastActive: '1 ชั่วโมงที่แล้ว',
-    },
-    {
-      id: 'staff-05',
-      name: 'อภิสิทธิ์ รัตนกุล',
-      email: 'aphisit.r@movemall.com',
-      department: 'ฝ่ายความปลอดภัย & ป้องกันโกง',
-      role: 'MODERATOR',
-      permissions: ['FRAUD_INVESTIGATION', 'BUYER_TRUST_SCORE', 'STORE_PENALTY', 'LIVE_RESTRICT'],
-      status: 'ACTIVE',
-      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&q=80',
-      lastActive: '3 ชั่วโมงที่แล้ว',
-    },
-    {
-      id: 'staff-06',
-      name: 'พรรณิภา เลิศไพบูลย์',
-      email: 'pannipa.l@movemall.com',
-      department: 'ฝ่ายบริการลูกค้า (CS)',
-      role: 'CS_ADMIN',
-      permissions: ['DISPUTE_MEDIATION', 'REFUND_PROCESS', 'CHAT_SUPPORT', 'CUSTOMER_TICKETS'],
-      status: 'ACTIVE',
-      avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&q=80',
-      lastActive: 'เมื่อวานนี้ 18:45',
-    },
-    {
-      id: 'staff-07',
-      name: 'วรเมธ ศิริโชค',
-      email: 'woramet.s@movemall.com',
-      department: 'ฝ่ายขนส่ง & โลจิสติกส์',
-      role: 'LOGISTICS_ADMIN',
-      permissions: ['COURIER_DISPATCH', 'GPS_FLEET_MONITOR', 'PARCEL_EXCEPTION', 'SLA_TRACKING'],
-      status: 'ACTIVE',
-      avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&q=80',
-      lastActive: '2 วันที่แล้ว',
-    },
-  ]);
+  const [teamMembers, setTeamMembers] = useState<AdminTeamMember[]>([]);
 
   const [newTeamMemberForm, setNewTeamMemberForm] = useState({
     name: '',
@@ -238,152 +160,35 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
   });
 
   const [metrics, setMetrics] = useState<AdminMetrics>({
-    gmv: 1854200.0,
-    totalOrders: 3420,
-    totalProducts: 160,
-    totalUsers: 12850,
-    totalStores: 48,
+    gmv: 0,
+    totalOrders: 0,
+    totalProducts: products.length || 0,
+    totalUsers: 0,
+    totalStores: 0,
   });
 
-  const [payouts, setPayouts] = useState<PayoutRequest[]>([
-    {
-      id: 'payout-101',
-      storeName: 'TechPro Official Store 🇹🇭',
-      bankName: 'ธนาคารกสิกรไทย (KBANK)',
-      bankAccountNo: 'xxx-x-x1234-x',
-      accountName: 'บจก. เทคโปร โซลูชั่นส์',
-      amount: 45800.0,
-      status: 'pending',
-      requestedAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-    },
-    {
-      id: 'payout-102',
-      storeName: 'Fashion Hub Official Mall 👗',
-      bankName: 'ธนาคารไทยพาณิชย์ (SCB)',
-      bankAccountNo: 'xxx-x-x5678-x',
-      accountName: 'ร้านแฟชั่นฮับ',
-      amount: 28400.0,
-      status: 'pending',
-      requestedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-    },
-  ]);
+  const [payouts, setPayouts] = useState<PayoutRequest[]>([]);
 
-  const [disputes, setDisputes] = useState<DisputeTicket[]>([
-    {
-      id: 'disp-801',
-      orderId: 'ord-9921',
-      buyerName: 'สมชาย ใจดี',
-      storeName: 'TechPro Official Store',
-      productName: 'หูฟังบลูทูธไร้สาย ANC Noise Cancelling Pro',
-      reason: 'สินค้าชำรุดเสียหายจากสภาพบรรจุภัณฑ์ส่งพัสดุ',
-      refundAmount: 1290.0,
-      status: 'open',
-      evidenceImage: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80',
-      createdAt: new Date(Date.now() - 3600000 * 8).toISOString(),
-    },
-  ]);
+  const [disputes, setDisputes] = useState<DisputeTicket[]>([]);
 
   const [localProducts, setLocalProducts] = useState<Product[]>(products);
 
   // Marketing Campaigns State
-  const [campaigns, setCampaigns] = useState<MarketingCampaign[]>([
-    {
-      id: 'camp-sbd-001',
-      title: 'Apple Super Brand Day 🍎',
-      brand: 'Apple Official Store',
-      tag: 'Super Brand Day',
-      discountPercent: 40,
-      bannerUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80',
-      accentColor: '#1d1d1f',
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
-      status: 'active',
-      vouchers: ['APPLE500', 'APPLEDAY10'],
-      totalClicks: 14230,
-      gmvGenerated: 589000,
-    },
-    {
-      id: 'camp-payday-002',
-      title: 'PayDay ช้อปคุ้มรับสิ้นเดือน 💳',
-      brand: 'All Mall Brands',
-      tag: 'PayDay 25th',
-      discountPercent: 70,
-      bannerUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&q=80',
-      accentColor: '#dc2626',
-      startDate: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
-      endDate: new Date(Date.now() + 86400000 * 9).toISOString().split('T')[0],
-      status: 'scheduled',
-      vouchers: ['PAYDAY70', 'MALLPAYDAY'],
-      totalClicks: 0,
-      gmvGenerated: 0,
-    },
-    {
-      id: 'camp-nike-003',
-      title: 'Nike Just Do It Festival 👟',
-      brand: 'Nike Thailand',
-      tag: 'Super Brand Day',
-      discountPercent: 50,
-      bannerUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80',
-      accentColor: '#ea580c',
-      startDate: new Date(Date.now() - 86400000 * 7).toISOString().split('T')[0],
-      endDate: new Date(Date.now() - 86400000 * 4).toISOString().split('T')[0],
-      status: 'ended',
-      vouchers: ['NIKE50OFF'],
-      totalClicks: 28400,
-      gmvGenerated: 890400,
-    },
-  ]);
+  const [campaigns, setCampaigns] = useState<MarketingCampaign[]>([]);
 
   // Broadcaster State
   const [broadcastForm, setBroadcastForm] = useState({
-    title: '⚡ Apple Super Brand Day ลดสูงสุด 40% เฉพาะวันนี้!',
-    body: 'ช้อป iPhone, iPad, และ Mac ของแท้ 100% พร้อมแจกคูปอง ฿500 ส่งฟรีทั่วไทย',
+    title: '',
+    body: '',
     category: 'promos',
     targetUrl: '/mall',
     audience: 'all',
   });
   const [isBroadcasting, setIsBroadcasting] = useState(false);
-  const [broadcastLogs, setBroadcastLogs] = useState<BroadcastLog[]>([
-    {
-      id: 'bc-1',
-      title: '⚡ Apple Super Brand Day เริ่มแล้ว!',
-      body: 'สินค้า Apple แท้ 100% ลดสูงสุด 40% พร้อมแจกคูปอง ฿500 เฉพาะวันนี้',
-      category: 'promos',
-      targetUrl: '/mall',
-      audience: 'all',
-      sentCount: 12850,
-      openedCount: 4120,
-      sentAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    },
-  ]);
+  const [broadcastLogs, setBroadcastLogs] = useState<BroadcastLog[]>([]);
 
   // Vouchers State
-  const [vouchers, setVouchers] = useState<PlatformVoucher[]>([
-    {
-      id: 'vouch-001',
-      code: 'SUPERMALL500',
-      title: 'ส่วนลดแบรนด์ดัง Mall ฿500',
-      discountType: 'fixed',
-      discountValue: 500,
-      minSpend: 2500,
-      totalQuota: 1000,
-      usedCount: 432,
-      status: 'active',
-      expiresAt: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0],
-    },
-    {
-      id: 'vouch-002',
-      code: 'FREESHIPMAX',
-      title: 'คูปองส่งฟรีทั่วไทย ขั้นต่ำ ฿0',
-      discountType: 'shipping',
-      discountValue: 40,
-      minSpend: 0,
-      totalQuota: 5000,
-      usedCount: 3820,
-      status: 'active',
-      expiresAt: new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0],
-    },
-  ]);
+  const [vouchers, setVouchers] = useState<PlatformVoucher[]>([]);
 
   // Flash Sale Slot State
   const [flashSaleSlots, setFlashSaleSlots] = useState([
@@ -419,148 +224,9 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
 
   // ── Moderation & Trust System State ──
   const [moderationSubTab, setModerationSubTab] = useState<'users' | 'stores' | 'reports'>('users');
-  const [moderatedUsers, setModeratedUsers] = useState<ModeratedUser[]>([
-    {
-      id: 'user-sus-001',
-      name: 'กิตติศักดิ์ สั่งเล่น',
-      phone: '089-111-2233',
-      email: 'kittisak.fake@example.com',
-      role: 'BUYER',
-      status: 'COD_RESTRICTED',
-      trustScore: 45,
-      codSuccessRate: 40.0,
-      codRejectedCount: 6,
-      fraudRefundCount: 2,
-      suspensionReason: 'สั่งสินค้าเก็บเงินปลายทาง (COD) แต่ปฏิเสธรับพัสดุ 6 ครั้งติดต่อกัน',
-      createdAt: '2026-06-10T10:00:00.000Z',
-    },
-    {
-      id: 'user-sus-002',
-      name: 'อภิสิทธิ์ เคลมเท็จ',
-      phone: '081-999-8877',
-      email: 'apisit.claim@example.com',
-      role: 'BUYER',
-      status: 'SUSPENDED',
-      trustScore: 20,
-      codSuccessRate: 60.0,
-      codRejectedCount: 2,
-      fraudRefundCount: 5,
-      suspensionReason: 'ขอเงินคืนซ้ำซากโดยไม่ส่งสินค้าจริงคืนร้านค้า (ตรวจพบกล่องเปล่า)',
-      createdAt: '2026-05-18T14:30:00.000Z',
-    },
-    {
-      id: 'user-sus-003',
-      name: 'สมชาย ใจซื่อ (ลูกค้าชั้นดี)',
-      phone: '086-555-1234',
-      email: 'somchai.vip@example.com',
-      role: 'BUYER',
-      status: 'ACTIVE',
-      trustScore: 100,
-      codSuccessRate: 100.0,
-      codRejectedCount: 0,
-      fraudRefundCount: 0,
-      suspensionReason: null,
-      createdAt: '2026-01-15T08:00:00.000Z',
-    },
-    {
-      id: 'user-sus-004',
-      name: 'ประวิทย์ ไม่รับสาย',
-      phone: '082-333-4455',
-      email: 'prawit.call@example.com',
-      role: 'BUYER',
-      status: 'WARNING',
-      trustScore: 68,
-      codSuccessRate: 75.0,
-      codRejectedCount: 3,
-      fraudRefundCount: 0,
-      suspensionReason: 'มีประวัติปฏิเสธรับสินค้า COD 3 ครั้ง ขนส่งติดต่อไม่ได้',
-      createdAt: '2026-07-01T09:15:00.000Z',
-    }
-  ]);
-
-  const [moderatedStores, setModeratedStores] = useState<ModeratedStore[]>([
-    {
-      id: 'store-apple',
-      name: 'Apple Flagship Store 🍎',
-      status: 'ACTIVE',
-      healthScore: 98,
-      penaltyPoints: 0,
-      penaltyReason: null,
-      isLiveRestricted: false,
-      isSearchRestricted: false,
-      rating: 4.9,
-      lateShipmentRate: 0.5,
-      cancellationRate: 0.2,
-    },
-    {
-      id: 'store-tech-fake',
-      name: 'Gadget Best Deals 99 ⚡',
-      status: 'RESTRICTED',
-      healthScore: 62,
-      penaltyPoints: 6,
-      penaltyReason: 'ส่งสินค้าไม่ตรงปก และอัตราจัดส่งล่าช้าเกิน 15%',
-      isLiveRestricted: true,
-      isSearchRestricted: false,
-      rating: 3.4,
-      lateShipmentRate: 18.2,
-      cancellationRate: 8.5,
-    },
-    {
-      id: 'store-fraud-001',
-      name: 'Super Copy Shoes Shop 👟',
-      status: 'SUSPENDED',
-      healthScore: 15,
-      penaltyPoints: 15,
-      penaltyReason: 'ตรวจพบจำหน่ายสินค้าละเมิดลิขสิทธิ์และไม่คืนเงินลูกค้าตามกำหนด',
-      isLiveRestricted: true,
-      isSearchRestricted: true,
-      rating: 2.1,
-      lateShipmentRate: 35.0,
-      cancellationRate: 20.0,
-    }
-  ]);
-
-  const [violationReports, setViolationReports] = useState<ViolationReport[]>([
-    {
-      id: 'rep-901',
-      reporterName: 'TechPro Official Store 🇹🇭',
-      reporterType: 'SELLER',
-      reportedName: 'กิตติศักดิ์ สั่งเล่น',
-      reportedType: 'BUYER',
-      orderId: 'ORD-9841',
-      type: 'COD_REJECTED',
-      description: 'ลูกค้าสั่งหูฟังบลูทูธ ฿1,290 แบบเก็บเงินปลายทาง ขนส่งไปส่ง 3 ครั้งติดต่อกัน ลูกค้าตัดสายและปฏิเสธรับของ ทำให้ร้านเสียค่าส่งฟรี',
-      evidenceUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=400&q=80',
-      status: 'PENDING',
-      createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-    },
-    {
-      id: 'rep-902',
-      reporterName: 'Fashion Hub Mall 👗',
-      reporterType: 'SELLER',
-      reportedName: 'อภิสิทธิ์ เคลมเท็จ',
-      reportedType: 'BUYER',
-      orderId: 'ORD-7723',
-      type: 'REFUND_ABUSE',
-      description: 'ขอยกเลิกและคืนเงินเสื้อแจ็คเก็ตหนัง ฿2,400 แต่เมื่อพัสดุตีกลับมาถึงร้าน กลายเป็นกระดาษหนังสือพิมพ์ในกล่อง',
-      evidenceUrl: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=400&q=80',
-      status: 'INVESTIGATING',
-      createdAt: new Date(Date.now() - 3600000 * 26).toISOString(),
-    },
-    {
-      id: 'rep-903',
-      reporterName: 'วิภาดา รัตนกุล',
-      reporterType: 'BUYER',
-      reportedName: 'Super Copy Shoes Shop 👟',
-      reportedType: 'STORE',
-      orderId: 'ORD-6510',
-      type: 'FAKE_PRODUCT',
-      description: 'ร้านอ้างว่าเป็นรองเท้าแท้ 100% แต่ส่งของปลอมเกรดตลาดนัดมาให้ และบล็อกแชทไม่ยอมตอบ',
-      evidenceUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80',
-      status: 'PENDING',
-      createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
-    }
-  ]);
+  const [moderatedUsers, setModeratedUsers] = useState<ModeratedUser[]>([]);
+  const [moderatedStores, setModeratedStores] = useState<ModeratedStore[]>([]);
+  const [violationReports, setViolationReports] = useState<ViolationReport[]>([]);
 
   const [userSearchText, setUserSearchText] = useState('');
   const [storeSearchText, setStoreSearchText] = useState('');
@@ -770,6 +436,26 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
       if (reportsRes.status === 'fulfilled' && reportsRes.value?.reports?.length) {
         setViolationReports(reportsRes.value.reports);
       }
+
+      if (currentUser) {
+        setTeamMembers(prev => {
+          if (prev.length === 0) {
+            return [{
+              id: currentUser.id || 'admin-root-01',
+              name: currentUser.name || 'Movemall Super Admin',
+              email: currentUser.email || 'admin@movemall.com',
+              department: 'Executive Board',
+              role: (currentUser.role as any) || 'SUPER_ADMIN',
+              permissions: ['ALL_PERMISSIONS', 'DATABASE_ROOT', 'FINANCIAL_RELEASE', 'USER_BAN', 'SYSTEM_CONFIG'],
+              status: 'ACTIVE',
+              avatarUrl: currentUser.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
+              lastActive: 'กำลังใช้งาน (Active Now)',
+            }];
+          }
+          return prev;
+        });
+      }
+
       setLastSyncTime(new Date().toLocaleTimeString('th-TH'));
       if (showToast) {
         alert('⚡ ซิงค์ข้อมูลจริงจากฐานข้อมูล PostgreSQL สำเร็จเรียบร้อยแล้ว!');
