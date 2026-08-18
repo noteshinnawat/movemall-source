@@ -1,82 +1,363 @@
-/* src/pages/AdminPortalPage.css — Super Admin Portal with 7 Department Workflows */
+/* src/pages/AdminPortalPage.css — Movemall Super Admin Enterprise Portal */
 
-.admin-page {
-  max-width: 1280px;
-  margin: 1.5rem auto;
-  padding: 0 1rem;
+/* ── 1. Enterprise Shell & Topbar ── */
+.admin-enterprise-shell {
+  min-height: 100vh;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  color: #0f172a;
 }
 
-.admin-header {
+.admin-enterprise-topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  padding: 0.75rem 1.5rem;
   background: #ffffff;
-  padding: 1.25rem 1.5rem;
-  border: 1px solid var(--color-border, #e5e7eb);
-  border-radius: 6px;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
 }
 
-.admin-title-box {
+.admin-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-brand-card {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.admin-title {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--color-text, #111827);
-  margin: 0;
-}
-
-.admin-badge {
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: #eff6ff;
-  color: var(--color-primary, #2563eb);
-}
-
-/* Department Tabs */
-.admin-tabs {
+.admin-brand-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--color-border, #e5e7eb);
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
 }
 
-.admin-tab-btn {
+.admin-brand-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.65rem 1rem;
-  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.admin-brand-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.admin-db-status {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.admin-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.admin-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-quick-metrics {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-right: 0.25rem;
+}
+
+.admin-stat-chip {
+  font-size: 0.75rem;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 4px 8px;
   border-radius: 6px;
-  background: #ffffff;
-  color: var(--color-text-muted, #6b7280);
-  font-size: 0.85rem;
+  border: 1px solid #e2e8f0;
+}
+
+.admin-stat-chip strong {
+  color: #0f172a;
+}
+
+.admin-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
+  text-decoration: none;
+  transition: all 0.15s ease;
 }
 
-.admin-tab-btn:hover {
-  background: #f9fafb;
-  color: var(--color-text, #111827);
+.admin-action-btn--sync {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
 }
 
-.admin-tab-btn--active {
-  background: var(--color-primary, #2563eb) !important;
-  color: #ffffff !important;
-  border-color: var(--color-primary, #2563eb) !important;
+.admin-action-btn--sync:hover:not(:disabled) {
+  background: #dbeafe;
 }
 
-/* Overview Metrics Grid */
+.admin-action-btn--storefront {
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.admin-action-btn--storefront:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.admin-action-btn--logout {
+  background: #fff;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+}
+
+.admin-action-btn--logout:hover {
+  background: #fef2f2;
+}
+
+.admin-profile-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 3px 8px 3px 3px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+.admin-avatar-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.admin-profile-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-profile-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.admin-profile-role {
+  font-size: 0.65rem;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* ── 2. Enterprise Body: Sidebar + Workspace ── */
+.admin-enterprise-body {
+  display: flex;
+  flex: 1;
+  min-height: calc(100vh - 61px);
+}
+
+.admin-sidebar {
+  width: 260px;
+  min-width: 260px;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.25rem 0.85rem;
+}
+
+.admin-sidebar-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  padding: 0 0.5rem 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 0.75rem;
+}
+
+.admin-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex: 1;
+}
+
+.admin-nav-cluster {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-cluster-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b;
+  padding: 0 0.5rem 0.35rem;
+}
+
+.admin-nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.admin-nav-item:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.admin-nav-item--active {
+  background: #eff6ff !important;
+  color: #2563eb !important;
+  border-color: #bfdbfe !important;
+  font-weight: 700 !important;
+}
+
+.admin-nav-item-content {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.admin-item-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.admin-item-tag--hot {
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+}
+
+.admin-item-tag--neutral {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.admin-item-tag--amber {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.admin-item-tag--red {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  animation: pulse 2s infinite;
+}
+
+.admin-sidebar-foot {
+  padding: 0.75rem 0.5rem 0;
+  border-top: 1px solid #f1f5f9;
+}
+
+.admin-foot-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.admin-foot-sub {
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+/* ── 3. Workspace & Breadcrumb ── */
+.admin-workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+  overflow-x: hidden;
+}
+
+.admin-breadcrumb-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.75rem 1.75rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.8rem;
+}
+
+.admin-crumb-root {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.admin-crumb-sep {
+  color: #cbd5e1;
+}
+
+.admin-crumb-current {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.admin-workspace-inner {
+  padding: 1.5rem 1.75rem;
+  max-width: 1400px;
+  width: 100%;
+}
+
 .admin-metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

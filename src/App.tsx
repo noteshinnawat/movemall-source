@@ -100,9 +100,10 @@ function AppLayout({
   const isLivePage = location.pathname.startsWith('/live');
   const isVideoFeedPage = location.pathname.startsWith('/video') || location.pathname.startsWith('/creator');
   const isCheckoutPage = location.pathname.startsWith('/checkout');
+  const isAdminPage = location.pathname.startsWith('/admin');
   
   // Clean full-screen pages where floating popups and footer should be suppressed
-  const isDistractionFreePage = isChatPage || isLivePage || isVideoFeedPage || isCheckoutPage;
+  const isDistractionFreePage = isChatPage || isLivePage || isVideoFeedPage || isCheckoutPage || isAdminPage;
 
   const [isVisualSearchOpen, setIsVisualSearchOpen] = useState(false);
   const [visualSearchInitialImage, setVisualSearchInitialImage] = useState<string | null>(null);
@@ -114,8 +115,8 @@ function AppLayout({
 
   return (
     <>
-      <PWAInstallPrompt />
-      {!isChatPage && location.pathname !== '/video' && (
+      {!isAdminPage && <PWAInstallPrompt />}
+      {!isChatPage && location.pathname !== '/video' && !isAdminPage && (
         <Navbar
           cartCount={cart.totalItems}
           wishlistCount={wishlist.count}
@@ -618,9 +619,9 @@ function AppLayout({
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       {!isDistractionFreePage && <LiveActivityTicker />}
       {!isDistractionFreePage && <FloatingLiveWidget />}
-      {!isProductDetailPage && !isLivePage && !isChatPage && <MobileBottomNav cartCount={cart.totalItems} />}
-      {!isLivePage && !isVideoFeedPage && <BackToTopButton />}
-      <CookieConsentBanner />
+      {!isProductDetailPage && !isLivePage && !isChatPage && !isAdminPage && <MobileBottomNav cartCount={cart.totalItems} />}
+      {!isLivePage && !isVideoFeedPage && !isAdminPage && <BackToTopButton />}
+      {!isAdminPage && <CookieConsentBanner />}
     </>
   );
 }

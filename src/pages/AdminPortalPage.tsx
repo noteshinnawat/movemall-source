@@ -43,7 +43,10 @@ import {
   KeyRound,
   LogIn,
   LogOut,
-  ArrowLeft
+  ArrowLeft,
+  Globe,
+  ExternalLink,
+  ChevronRight
 } from 'lucide-react';
 import { fetchApi } from '../utils/api';
 import { scanProductCompliance, batchScanProductsCompliance, type AIComplianceResult } from '../utils/aiComplianceScanner';
@@ -1224,107 +1227,246 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
     );
   }
 
+  const pendingPayoutsCount = payouts.filter(p => p.status === 'pending').length;
+  const pendingDisputesCount = disputes.filter(d => d.status === 'pending').length;
+  const pendingReportsCount = violationReports.filter(r => r.status === 'PENDING').length;
+  const flaggedComplianceCount = Object.values(complianceResults).filter(
+    r => r.status === 'EXPIRED_LICENSE' || r.status === 'MISMATCH_NAME' || r.status === 'REVOKED_BANNED'
+  ).length;
+
+  const departmentLabels: Record<string, string> = {
+    overview: 'ภาพรวมระบบ & KPIs (System Overview)',
+    marketing: 'ฝ่ายการตลาด & แคมเปญ (Campaign Hub & Automations)',
+    catalog: 'ฝ่ายสินค้า & แบรนด์ Mall (Catalog & Verification)',
+    compliance: 'AI ตรวจสอบ อย. / มอก. (FDA & TISI AI Auditor)',
+    finance: 'ฝ่ายการเงิน & ถอนเงิน (Finance & Payouts)',
+    cs: 'ฝ่าย CS & คืนเงิน (Customer Support & Disputes)',
+    logistics: 'ฝ่ายขนส่ง & โลจิสติกส์ (Fleet & Live Tracking)',
+    moderation: 'ความปลอดภัย & ระงับสิทธิ์ (Trust & Anti-Fraud Shield)',
+    team: 'จัดการสิทธิ์ทีมงาน (Team Roles & RBAC)',
+  };
+
   // ── 🛡️ Guard Passed: Full Super Admin Portal ──
   return (
-    <main className="admin-page">
-      {/* Admin Title Header */}
-      <header className="admin-header">
-        <div className="admin-title-box">
-          <ShieldAlert size={28} color="#2563eb" />
-          <div>
-            <h1 className="admin-title">Movemall Super Admin Portal</h1>
-            <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>
-              ศูนย์ควบคุมและบริหารจัดการแพลตฟอร์ม 7 แผนกงาน
-            </span>
+    <div className="admin-enterprise-shell">
+      {/* ── 1. Executive Top Navigation Bar ── */}
+      <header className="admin-enterprise-topbar">
+        <div className="admin-topbar-left">
+          <div className="admin-brand-card">
+            <div className="admin-brand-icon-box">
+              <ShieldAlert size={20} color="#ffffff" />
+            </div>
+            <div>
+              <div className="admin-brand-name">
+                MOVEMALL <span className="admin-brand-badge">SUPER ADMIN</span>
+              </div>
+              <div className="admin-db-status">
+                <span className="admin-status-dot" />
+                <span>Supabase PostgreSQL 🟢 Connected</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="admin-user-bar">
-          <button
-            type="button"
-            className="admin-logout-btn"
-            onClick={() => loadAllAdminData(true)}
-            disabled={isRefreshingData}
-            title="กดเพื่อดึงข้อมูลจริงล่าสุดจากฐานข้อมูล PostgreSQL"
-            style={{ color: '#2563eb', borderColor: '#bfdbfe', background: '#eff6ff', fontWeight: 600 }}
-          >
-            <RefreshCw size={13} style={{ animation: isRefreshingData ? 'spin 1s linear infinite' : 'none' }} />
-            {isRefreshingData ? 'กำลังซิงค์...' : `ซิงค์ข้อมูลจริง ${lastSyncTime ? `(${lastSyncTime})` : ''}`}
-          </button>
-
-          <div className="admin-user-pill">
-            <span className="admin-role-tag">👑 {currentUser.role || 'SUPER_ADMIN'}</span>
-            <span>{currentUser.name || 'Admin'}</span>
+        <div className="admin-topbar-right">
+          <div className="admin-quick-metrics">
+            <span className="admin-stat-chip">📦 สินค้า <strong>{products.length}</strong></span>
+            <span className="admin-stat-chip">👥 สมาชิก <strong>{metrics.totalUsers.toLocaleString()}</strong></span>
+            <span className="admin-stat-chip">🏪 ร้านค้า <strong>{metrics.totalStores}</strong></span>
           </div>
 
           <button
             type="button"
-            className="admin-logout-btn"
+            className="admin-action-btn admin-action-btn--sync"
+            onClick={() => loadAllAdminData(true)}
+            disabled={isRefreshingData}
+            title="กดเพื่อดึงข้อมูลจริงล่าสุดจากฐานข้อมูล PostgreSQL"
+          >
+            <RefreshCw size={13} style={{ animation: isRefreshingData ? 'spin 1s linear infinite' : 'none' }} />
+            <span>{isRefreshingData ? 'กำลังซิงค์...' : `ซิงค์ข้อมูลจริง ${lastSyncTime ? `(${lastSyncTime})` : ''}`}</span>
+          </button>
+
+          <Link
+            to="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="admin-action-btn admin-action-btn--storefront"
+            title="เปิดหน้าร้านค้ามุมมองผู้ซื้อในแท็บใหม่"
+          >
+            <Globe size={13} />
+            <span>หน้าร้านค้า (Storefront)</span>
+            <ExternalLink size={11} />
+          </Link>
+
+          <div className="admin-profile-pill">
+            <img
+              src={currentUser.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80'}
+              alt={currentUser.name || 'Admin'}
+              className="admin-avatar-img"
+            />
+            <div className="admin-profile-text">
+              <span className="admin-profile-name">{currentUser.name || 'Note Shinnawat'}</span>
+              <span className="admin-profile-role">👑 {currentUser.role || 'SUPER_ADMIN'}</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="admin-action-btn admin-action-btn--logout"
             onClick={handleAdminLogout}
             title="ออกจากระบบ Admin"
           >
-            <LogOut size={14} /> ออกจากระบบ
+            <LogOut size={13} />
+            <span>ออกจากระบบ</span>
           </button>
         </div>
       </header>
 
-      {/* 7 Department Navigation Tabs */}
-      <nav className="admin-tabs">
-        <button
-          className={`admin-tab-btn ${activeTab === 'marketing' ? 'admin-tab-btn--active' : ''}`}
-          onClick={() => setActiveTab('marketing')}
-        >
-          <Tag size={16} /> 🎯 ฝ่ายการตลาด & แคมเปญ
-        </button>
-        <button
-          className={`admin-tab-btn ${activeTab === 'overview' ? 'admin-tab-btn--active' : ''}`}
-          onClick={() => setActiveTab('overview')}
-        >
-          <BarChart3 size={16} /> 📊 ภาพรวมระบบ
-        </button>
-        <button
-          className={`admin-tab-btn ${activeTab === 'catalog' ? 'admin-tab-btn--active' : ''}`}
-          onClick={() => setActiveTab('catalog')}
-        >
-          <Package size={16} /> 📦 ฝ่ายสินค้า & แบรนด์ Mall
-        </button>
-        <button
-          className={`admin-tab-btn ${activeTab === 'compliance' ? 'admin-tab-btn--active' : ''}`}
-          onClick={() => setActiveTab('compliance')}
-        >
-          <Cpu size={16} /> 🤖 AI ตรวจ อย. / มอก.
-        </button>
-        <button
-          className={`admin-tab-btn ${activeTab === 'finance' ? 'admin-tab-btn--active' : ''}`}
-          onClick={() => setActiveTab('finance')}
-        >
-          <DollarSign size={16} /> 💳 ฝ่ายการเงิน & ถอนเงิน
-        </button>
-        <button
-          className={`admin-tab-btn ${activeTab === 'cs' ? 'admin-tab-btn--active' : ''}`}
-          onClick={() => setActiveTab('cs')}
-        >
-          <Headphones size={16} /> 💬 ฝ่าย CS & คืนเงิน
-        </button>
-        <button
-          className={`admin-tab-btn ${activeTab === 'logistics' ? 'admin-tab-btn--active' : ''}`}
-          onClick={() => setActiveTab('logistics')}
-        >
-          <Truck size={16} /> 🚚 ฝ่ายขนส่งพัสดุ
-        </button>
-        <button
-          className={`admin-tab-btn ${activeTab === 'moderation' ? 'admin-tab-btn--active' : ''}`}
-          onClick={() => setActiveTab('moderation')}
-        >
-          <ShieldAlert size={16} /> 🛡️ ความปลอดภัย & ระงับผู้กระทำผิด
-        </button>
-        <button
-          className={`admin-tab-btn ${activeTab === 'team' ? 'admin-tab-btn--active' : ''}`}
-          onClick={() => setActiveTab('team')}
-        >
-          <Users size={16} /> 👑 จัดการสิทธิ์ทีมงาน
-        </button>
-      </nav>
+      {/* ── 2. Enterprise Layout: Sidebar + Workspace ── */}
+      <div className="admin-enterprise-body">
+        {/* Left Sidebar Navigation */}
+        <aside className="admin-sidebar">
+          <div className="admin-sidebar-section-title">
+            <span>🏢 แผนกงานบริหาร (Departments)</span>
+          </div>
+
+          <nav className="admin-sidebar-nav">
+            {/* Group 1: Executive & Strategy */}
+            <div className="admin-nav-cluster">
+              <div className="admin-cluster-label">📊 ศูนย์ควบคุมหลัก (Management)</div>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'overview' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('overview')}
+              >
+                <div className="admin-nav-item-content">
+                  <BarChart3 size={15} />
+                  <span>ภาพรวมระบบ (KPIs)</span>
+                </div>
+              </button>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'marketing' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('marketing')}
+              >
+                <div className="admin-nav-item-content">
+                  <Tag size={15} />
+                  <span>การตลาด & แคมเปญ</span>
+                </div>
+                <span className="admin-item-tag admin-item-tag--hot">HOT</span>
+              </button>
+            </div>
+
+            {/* Group 2: Commerce, AI & Logistics */}
+            <div className="admin-nav-cluster">
+              <div className="admin-cluster-label">📦 สินค้า, การค้า & AI (Commerce & AI)</div>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'catalog' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('catalog')}
+              >
+                <div className="admin-nav-item-content">
+                  <Package size={15} />
+                  <span>สินค้า & แบรนด์ Mall</span>
+                </div>
+                <span className="admin-item-tag admin-item-tag--neutral">{products.length}</span>
+              </button>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'compliance' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('compliance')}
+              >
+                <div className="admin-nav-item-content">
+                  <Cpu size={15} />
+                  <span>AI ตรวจ อย. / มอก.</span>
+                </div>
+                {flaggedComplianceCount > 0 && (
+                  <span className="admin-item-tag admin-item-tag--amber">⚠️ {flaggedComplianceCount}</span>
+                )}
+              </button>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'finance' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('finance')}
+              >
+                <div className="admin-nav-item-content">
+                  <DollarSign size={15} />
+                  <span>การเงิน & ถอนเงิน</span>
+                </div>
+                {pendingPayoutsCount > 0 && (
+                  <span className="admin-item-tag admin-item-tag--amber">⏳ {pendingPayoutsCount}</span>
+                )}
+              </button>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'logistics' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('logistics')}
+              >
+                <div className="admin-nav-item-content">
+                  <Truck size={15} />
+                  <span>ขนส่ง & โลจิสติกส์</span>
+                </div>
+              </button>
+            </div>
+
+            {/* Group 3: Trust, Security & Governance */}
+            <div className="admin-nav-cluster">
+              <div className="admin-cluster-label">🛡️ กำกับดูแล & ป้องกันโกง (Governance)</div>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'cs' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('cs')}
+              >
+                <div className="admin-nav-item-content">
+                  <Headphones size={15} />
+                  <span>ฝ่าย CS & คืนเงิน</span>
+                </div>
+                {pendingDisputesCount > 0 && (
+                  <span className="admin-item-tag admin-item-tag--red">⚡ {pendingDisputesCount}</span>
+                )}
+              </button>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'moderation' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('moderation')}
+              >
+                <div className="admin-nav-item-content">
+                  <ShieldAlert size={15} />
+                  <span>ตรวจจับโกง & ระงับสิทธิ์</span>
+                </div>
+                {pendingReportsCount > 0 && (
+                  <span className="admin-item-tag admin-item-tag--red">🚩 {pendingReportsCount}</span>
+                )}
+              </button>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'team' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('team')}
+              >
+                <div className="admin-nav-item-content">
+                  <Users size={15} />
+                  <span>สิทธิ์ทีมงาน (RBAC)</span>
+                </div>
+              </button>
+            </div>
+          </nav>
+
+          <div className="admin-sidebar-foot">
+            <div className="admin-foot-title">Movemall Core Enterprise</div>
+            <div className="admin-foot-sub">v2.6.0 • PostgreSQL Connected</div>
+          </div>
+        </aside>
+
+        {/* Right Main Workspace */}
+        <main className="admin-workspace">
+          {/* Breadcrumb Bar */}
+          <div className="admin-breadcrumb-strip">
+            <span className="admin-crumb-root">Movemall Admin</span>
+            <ChevronRight size={12} className="admin-crumb-sep" />
+            <span className="admin-crumb-current">{departmentLabels[activeTab]}</span>
+          </div>
+
+          <div className="admin-workspace-inner">
 
       {/* 🎯 1. Marketing & Campaign Department (Enhanced Deep Features) */}
       {activeTab === 'marketing' && (
@@ -3082,9 +3224,13 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
           </div>
         </div>
       )}
-    </main>
+          </div>
+        </main>
+      </div>
+    </div>
   );
 }
 
 export default AdminPortalPage;
+
 
