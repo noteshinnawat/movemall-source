@@ -196,8 +196,24 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   }
 
   // ── Live Seller Chat State ──
+  const initialCustomerThreads: Record<string, any[]> = {
+    guest_user: [
+      { id: 'g-1', sender: 'customer', text: 'สวัสดีครับ สอบถามข้อมูลสินค้าและสต็อกพร้อมส่งครับ', time: '10:28' },
+      { id: 'g-2', sender: 'store', text: `สวัสดีครับ ยินดีต้อนรับสู่ ${currentStore.name} มีอะไรให้ร้านค้าดูแลสอบถามได้เลยครับ!`, time: '10:30' },
+    ],
+    'user-buyer-1': [
+      { id: 'b1-1', sender: 'customer', text: 'ได้รับสินค้าเรียบร้อยแล้วครับ แพ็คเกจดีมาก ขอบคุณสำหรับบริการครับ', time: '16:20' },
+      { id: 'b1-2', sender: 'store', text: 'ขอบพระคุณคุณสมชายที่ไว้วางใจอุดหนุน Movemall ของเราครับ หากต้องการคำแนะนำการใช้งานแจ้งได้ตลอดเลยนะครับ 😊', time: '16:28' },
+    ],
+    'user-buyer-2': [
+      { id: 'b2-1', sender: 'customer', text: 'ทางร้านสามารถออกใบกำกับภาษีเต็มรูปแบบในชื่อบริษัทได้ไหมคะ?', time: '14:15' },
+      { id: 'b2-2', sender: 'store', text: 'สามารถออกใบกำกับภาษี e-Tax Invoice ได้เต็มรูปแบบเลยครับคุณอารียา เพียงแนบข้อมูลเลขประจำตัวผู้เสียภาษีมาในหมายเหตุคำสั่งซื้อได้เลยครับ 📑', time: '14:18' },
+    ],
+  };
+
   const [sellerMessages, setSellerMessages] = useState<Record<string, any[]>>(() => {
-    return getStoredChatHistory();
+    const stored = getStoredChatHistory();
+    return Object.keys(stored).length > 0 ? stored : initialCustomerThreads;
   });
 
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('guest_user');
@@ -222,12 +238,16 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     const handleReceiveMsg = (msg: any) => {
       if (!msg) return;
       const storeTargetId = msg.storeId || currentStore.id;
+      const custId = msg.customerId || msg.userId || (msg.sender === 'store' ? (msg.recipientId || selectedCustomerId) : 'guest_user');
+      const threadKey = `${storeTargetId}::${custId}`;
+
       setSellerMessages(prev => {
-        const list = prev[storeTargetId] || [];
+        const list = prev[threadKey] || prev[custId] || initialCustomerThreads[custId] || [];
         if (list.some(m => m.id === msg.id)) return prev;
         const updated = {
           ...prev,
-          [storeTargetId]: [...list, msg],
+          [threadKey]: [...list, msg],
+          [custId]: [...list, msg],
         };
         saveStoredChatHistory(updated);
         return updated;
@@ -241,13 +261,14 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
       socket.off('connect', handleConnect);
       socket.off('receive_chat_message', handleReceiveMsg);
     };
-  }, [currentStore.id]);
+  }, [currentStore.id, selectedCustomerId]);
 
   function handleSellerSendMessage(e?: React.FormEvent, customText?: string) {
     if (e) e.preventDefault();
     const textToSend = customText || sellerInputVal;
     if (!textToSend.trim()) return;
 
+    const threadKey = `${currentStore.id}::${selectedCustomerId}`;
     const newMsg = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       sender: 'store',
@@ -259,10 +280,11 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     };
 
     setSellerMessages(prev => {
-      const list = prev[currentStore.id] || [];
+      const list = prev[threadKey] || prev[selectedCustomerId] || initialCustomerThreads[selectedCustomerId] || [];
       const updated = {
         ...prev,
-        [currentStore.id]: [...list, newMsg],
+        [threadKey]: [...list, newMsg],
+        [selectedCustomerId]: [...list, newMsg],
       };
       saveStoredChatHistory(updated);
       return updated;
@@ -3928,12 +3950,14 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 <div className="seller-chat-customer-list">
                   {['guest_user', 'user-buyer-1', 'user-buyer-2'].map((cId, idx) => {
                     const isSelected = selectedCustomerId === cId;
-                    const lastMsg = (sellerMessages[currentStore.id] || [])[sellerMessages[currentStore.id]?.length - 1];
                     const customerNames: Record<string, string> = {
                       guest_user: 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)',
                       'user-buyer-1': 'คุณสมชาย มุ่งมั่น (Movemall VIP)',
                       'user-buyer-2': 'คุณอารียา พรรณดี (ผู้ซื้อยืนยันตัวตน)',
                     };
+                    const threadKey = `${currentStore.id}::${cId}`;
+                    const threadMsgs = sellerMessages[threadKey] || sellerMessages[cId] || initialCustomerThreads[cId] || [];
+                    const lastMsg = threadMsgs[threadMsgs.length - 1];
 
                     return (
                       <div
@@ -3950,7 +3974,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                             <span className="seller-chat-customer-time">{lastMsg?.time || '10:30'}</span>
                           </div>
                           <p className="seller-chat-customer-preview">
-                            {isSelected && lastMsg ? lastMsg.text : (idx === 0 ? 'สอบถามข้อมูลสินค้าและสต็อก...' : 'ขอบคุณสำหรับบริการค่ะ')}
+                            {lastMsg ? lastMsg.text : 'เริ่มการสนทนากับลูกค้า...'}
                           </p>
                         </div>
                       </div>
@@ -3964,7 +3988,11 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 <div className="seller-chat-header">
                   <div>
                     <strong style={{ fontSize: 14, color: 'var(--text-primary)' }}>
-                      {selectedCustomerId === 'guest_user' ? 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)' : selectedCustomerId}
+                      {{
+                        guest_user: 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)',
+                        'user-buyer-1': 'คุณสมชาย มุ่งมั่น (Movemall VIP)',
+                        'user-buyer-2': 'คุณอารียา พรรณดี (ผู้ซื้อยืนยันตัวตน)',
+                      }[selectedCustomerId] || selectedCustomerId}
                     </strong>
                     <div style={{ fontSize: 11, color: '#10B981', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
                       <span>● กำลังสนทนาผ่าน WebSocket สด</span>
@@ -3976,21 +4004,29 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 </div>
 
                 <div className="seller-chat-messages-area">
-                  {(sellerMessages[currentStore.id] || [
-                    { id: 'init-1', sender: 'store', text: `สวัสดีครับ ยินดีต้อนรับสู่ ${currentStore.name} มีอะไรให้ร้านค้าดูแลสอบถามได้เลยครับ!`, time: '10:00' }
-                  ]).map((msg, mIdx) => (
-                    <div
-                      key={msg.id || mIdx}
-                      className={`seller-chat-bubble-wrap ${msg.sender === 'store' ? 'seller-chat-bubble-wrap--seller' : 'seller-chat-bubble-wrap--customer'}`}
-                    >
-                      <div className="seller-chat-bubble">
-                        {msg.text}
+                  {(() => {
+                    const activeThreadKey = `${currentStore.id}::${selectedCustomerId}`;
+                    const activeChatList = sellerMessages[activeThreadKey] || sellerMessages[selectedCustomerId] || initialCustomerThreads[selectedCustomerId] || [];
+                    const customerNames: Record<string, string> = {
+                      guest_user: 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)',
+                      'user-buyer-1': 'คุณสมชาย มุ่งมั่น',
+                      'user-buyer-2': 'คุณอารียา พรรณดี',
+                    };
+
+                    return activeChatList.map((msg, mIdx) => (
+                      <div
+                        key={msg.id || mIdx}
+                        className={`seller-chat-bubble-wrap ${msg.sender === 'store' ? 'seller-chat-bubble-wrap--seller' : 'seller-chat-bubble-wrap--customer'}`}
+                      >
+                        <div className="seller-chat-bubble">
+                          {msg.text}
+                        </div>
+                        <span className="seller-chat-time">
+                          {msg.time || '10:00'} • {msg.sender === 'store' ? 'ร้านค้า (คุณ)' : (customerNames[selectedCustomerId] || 'ลูกค้า')}
+                        </span>
                       </div>
-                      <span className="seller-chat-time">
-                        {msg.time || '10:00'} • {msg.sender === 'store' ? 'ร้านค้า (คุณ)' : 'ลูกค้า'}
-                      </span>
-                    </div>
-                  ))}
+                    ));
+                  })()}
                   <div ref={sellerChatEndRef} />
                 </div>
 
