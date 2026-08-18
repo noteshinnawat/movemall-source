@@ -51,10 +51,11 @@ export function SellerRegisterPage() {
   async function handleSubmitStoreRegistration() {
     setIsSubmitting(true);
     try {
-      await fetchApi('/api/stores/register', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const res = await fetchApi<{ message: string; store: any }>('/api/stores/register', {
         method: 'POST',
         body: JSON.stringify({
-          name: storeName || 'ร้านค้าใหม่ของผู้ขาย',
+          name: storeName.trim() || 'ร้านค้าใหม่ของผู้ขาย',
           description,
           logo: logoUrl,
           sellerType,
@@ -70,15 +71,32 @@ export function SellerRegisterPage() {
         }),
       });
 
+      if (res && res.store) {
+        localStorage.setItem('movemall_custom_store_name', res.store.name);
+        localStorage.setItem('movemall_seller_store_id', res.store.id);
+        const uStr = localStorage.getItem('movemall_user');
+        if (uStr) {
+          try {
+            const u = JSON.parse(uStr);
+            u.role = 'SELLER';
+            u.storeId = res.store.id;
+            localStorage.setItem('movemall_user', JSON.stringify(u));
+          } catch {
+            // Ignore
+          }
+        }
+      }
+
       setIsSuccess(true);
       setTimeout(() => {
         navigate('/seller');
-      }, 2000);
+      }, 1500);
     } catch {
+      localStorage.setItem('movemall_custom_store_name', storeName || 'ร้านค้าใหม่ของผู้ขาย');
       setIsSuccess(true);
       setTimeout(() => {
         navigate('/seller');
-      }, 2000);
+      }, 1500);
     } finally {
       setIsSubmitting(false);
     }

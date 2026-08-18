@@ -114,7 +114,11 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   }
 
   const [customStoreName, setCustomStoreName] = useState(() => {
-    return localStorage.getItem('movemall_my_store_name') || (currentUser?.name ? `ร้านค้าของ ${currentUser.name}` : 'ร้านค้าของฉัน');
+    return (
+      localStorage.getItem('movemall_custom_store_name') ||
+      localStorage.getItem('movemall_my_store_name') ||
+      (currentUser?.name ? `ร้านค้าของ ${currentUser.name}` : 'ร้านค้าของฉัน')
+    );
   });
 
   const [isEditingStoreName, setIsEditingStoreName] = useState(false);
@@ -124,12 +128,15 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     e.preventDefault();
     if (!storeNameInput.trim()) return;
     setCustomStoreName(storeNameInput.trim());
+    localStorage.setItem('movemall_custom_store_name', storeNameInput.trim());
     localStorage.setItem('movemall_my_store_name', storeNameInput.trim());
     setIsEditingStoreName(false);
   }
 
+  const sellerStoreId = localStorage.getItem('movemall_seller_store_id') || (currentUser?.id ? `store-${currentUser.id}` : 'store-my-live');
+
   const currentStore = {
-    id: currentUser?.id ? `store-${currentUser.id}` : 'store-my-live',
+    id: sellerStoreId,
     name: customStoreName,
     logo: currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80',
     rating: 5.0,
