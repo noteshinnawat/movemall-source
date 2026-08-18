@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Plus, Package, DollarSign, TrendingUp, Star, Trash2, X, Store, CheckCircle,
@@ -34,6 +34,7 @@ import {
   getStoredChatHistory,
   saveStoredChatHistory,
 } from '../utils/chatSocket';
+import './AdminPortalPage.css';
 import './SellerCenterPage.css';
 
 interface SellerCenterPageProps {
@@ -665,70 +666,82 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   });
 
   // Sync Live Orders, Live Ads & Tax Settings from Supabase Backend
-  useEffect(() => {
-    async function syncSellerHubLive() {
-      try {
-        const [ordersRes, walletRes, campsRes, taxRes] = await Promise.all([
-          fetchSellerOrdersApi(currentStore.id).catch(() => null),
-          fetchAdWalletApi(currentStore.id).catch(() => null),
-          fetchAdCampaignsApi(currentStore.id).catch(() => null),
-          fetchStoreTaxSettingsApi(currentStore.id).catch(() => null),
-        ]);
+  const [isRefreshingData, setIsRefreshingData] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<string>(() => new Date().toLocaleTimeString('th-TH'));
 
-        if (ordersRes && Array.isArray(ordersRes.orders)) {
-          const mappedOrders = ordersRes.orders.map((o: any) => ({
-            id: o.id,
-            orderId: `ORD-${o.id.slice(0, 8).toUpperCase()}`,
-            trackingNo: o.tracking?.trackingNumber || `TH-${o.id.slice(0, 4).toUpperCase()}-FLASH`,
-            customerName: o.user?.name || (typeof o.shippingAddress === 'object' ? o.shippingAddress?.fullName : 'ผู้ซื้อ'),
-            customerPhone: o.user?.phone || (typeof o.shippingAddress === 'object' ? o.shippingAddress?.phone : '08x-xxx-xxxx'),
-            customerAddress: typeof o.shippingAddress === 'object' ? o.shippingAddress?.address : (o.shippingAddress || 'กรุงเทพมหานคร'),
-            zipCode: typeof o.shippingAddress === 'object' ? o.shippingAddress?.postalCode : '10110',
-            items: (o.items || []).map((i: any) => ({
-              name: i.product?.name || 'สินค้า',
-              quantity: i.quantity || 1,
-              price: Number(i.price || 0),
-            })),
-            total: Number(o.totalAmount || 0),
-            status: (o.status?.toLowerCase() === 'shipped' || o.status?.toLowerCase() === 'delivered') ? 'shipped' : 'pending',
-            statusText: (o.status?.toLowerCase() === 'shipped' || o.status?.toLowerCase() === 'delivered') ? '✅ จัดส่งแล้ว' : '⚙️ รอดำเนินการส่ง',
-            date: new Date(o.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-            isCOD: o.paymentMethod === 'COD',
-          }));
+  const syncSellerHubLive = useCallback(async (showNotification = false) => {
+    setIsRefreshingData(true);
+    try {
+      const [ordersRes, walletRes, campsRes, taxRes] = await Promise.all([
+        fetchSellerOrdersApi(currentStore.id).catch(() => null),
+        fetchAdWalletApi(currentStore.id).catch(() => null),
+        fetchAdCampaignsApi(currentStore.id).catch(() => null),
+        fetchStoreTaxSettingsApi(currentStore.id).catch(() => null),
+      ]);
 
-          setSellerOrders(mappedOrders);
-        }
+      if (ordersRes && Array.isArray(ordersRes.orders)) {
+        const mappedOrders = ordersRes.orders.map((o: any) => ({
+          id: o.id,
+          orderId: `ORD-${o.id.slice(0, 8).toUpperCase()}`,
+          trackingNo: o.tracking?.trackingNumber || `TH-${o.id.slice(0, 4).toUpperCase()}-FLASH`,
+          customerName: o.user?.name || (typeof o.shippingAddress === 'object' ? o.shippingAddress?.fullName : 'ผู้ซื้อ'),
+          customerPhone: o.user?.phone || (typeof o.shippingAddress === 'object' ? o.shippingAddress?.phone : '08x-xxx-xxxx'),
+          customerAddress: typeof o.shippingAddress === 'object' ? o.shippingAddress?.address : (o.shippingAddress || 'กรุงเทพมหานคร'),
+          zipCode: typeof o.shippingAddress === 'object' ? o.shippingAddress?.postalCode : '10110',
+          items: (o.items || []).map((i: any) => ({
+            name: i.product?.name || 'สินค้า',
+            quantity: i.quantity || 1,
+            price: Number(i.price || 0),
+          })),
+          total: Number(o.totalAmount || 0),
+          status: (o.status?.toLowerCase() === 'shipped' || o.status?.toLowerCase() === 'delivered') ? 'shipped' : 'pending',
+          statusText: (o.status?.toLowerCase() === 'shipped' || o.status?.toLowerCase() === 'delivered') ? '✅ จัดส่งแล้ว' : '⚙️ รอดำเนินการส่ง',
+          date: new Date(o.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          isCOD: o.paymentMethod === 'COD',
+        }));
 
-        if (walletRes?.wallet) {
-          setWallet(prev => ({
-            ...prev,
-            balance: Number(walletRes.wallet.balance || 0),
-          }));
-        }
-
-        if (campsRes?.campaigns && Array.isArray(campsRes.campaigns)) {
-          setCampaigns(campsRes.campaigns);
-        }
-
-        if (taxRes && taxRes.storeId) {
-          setTaxProfile({
-            storeId: taxRes.storeId,
-            isVatRegistered: !!taxRes.isVatRegistered,
-            taxId: taxRes.taxId || '0105562019876',
-            taxCompanyName: taxRes.taxCompanyName || currentStore.name,
-            taxBranchCode: taxRes.taxBranchCode || '00000',
-            taxAddress: taxRes.taxAddress || 'กรุงเทพมหานคร 10110',
-            eTaxAutoEmail: !!taxRes.eTaxAutoEmail,
-            eTaxProvider: taxRes.eTaxProvider || 'ETDA / Revenue Dept e-Tax by Email',
-          });
-        }
-      } catch (err) {
-        console.warn('Seller hub live sync fallback:', err);
+        setSellerOrders(mappedOrders);
       }
-    }
 
-    syncSellerHubLive();
-  }, [currentStore.id]);
+      if (walletRes?.wallet) {
+        setWallet(prev => ({
+          ...prev,
+          balance: Number(walletRes.wallet.balance || 0),
+        }));
+      }
+
+      if (campsRes?.campaigns && Array.isArray(campsRes.campaigns)) {
+        setCampaigns(campsRes.campaigns);
+      }
+
+      if (taxRes && taxRes.storeId) {
+        setTaxProfile({
+          storeId: taxRes.storeId,
+          isVatRegistered: !!taxRes.isVatRegistered,
+          taxId: taxRes.taxId || '0105562019876',
+          taxCompanyName: taxRes.taxCompanyName || currentStore.name,
+          taxBranchCode: taxRes.taxBranchCode || '00000',
+          taxAddress: taxRes.taxAddress || 'กรุงเทพมหานคร 10110',
+          eTaxAutoEmail: !!taxRes.eTaxAutoEmail,
+          eTaxProvider: taxRes.eTaxProvider || 'ETDA / Revenue Dept e-Tax by Email',
+        });
+      }
+
+      const timeStr = new Date().toLocaleTimeString('th-TH');
+      setLastSyncTime(timeStr);
+      if (showNotification) {
+        alert(`✓ ซิงค์ข้อมูลร้านค้าล่าสุดจาก PostgreSQL สำเร็จ (${timeStr})`);
+      }
+    } catch (err) {
+      console.warn('Seller hub live sync fallback:', err);
+    } finally {
+      setIsRefreshingData(false);
+    }
+  }, [currentStore.id, currentStore.name]);
+
+  useEffect(() => {
+    syncSellerHubLive(false);
+  }, [syncSellerHubLive]);
   const [isCreateAdModalOpen, setIsCreateAdModalOpen] = useState(false);
   const [isTopupModalOpen, setIsTopupModalOpen] = useState(false);
   const [topupAmount, setTopupAmount] = useState('1000');
@@ -1361,224 +1374,489 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   }
 
   return (
-    <main className="seller-page">
-      {/* Modern Seller Header */}
-      <section className="seller-header">
-        <div className="container">
-          <div className="seller-header__inner">
-            <div className="seller-header__left">
-              <div className="seller-header__avatar-box">
-                <Store size={22} color="#2563EB" />
+    <div className="admin-enterprise-shell">
+      {/* ── 1. Enterprise Top Navigation Bar ── */}
+      <header className="admin-enterprise-topbar">
+        <div className="admin-topbar-left">
+          <div className="admin-brand-card">
+            <div className="admin-brand-icon-box">
+              <Store size={20} color="#ffffff" />
+            </div>
+            <div>
+              <div className="admin-brand-name">
+                MOVEMALL <span className="admin-brand-badge">SELLER CENTRE</span>
               </div>
-              <div className="seller-header__info">
-                <div className="seller-header__title-row">
-                  <h1 className="seller-header__title">
-                    ศูนย์ผู้ขาย Movemall (Seller Centre)
-                  </h1>
-                  {isEditingStoreName ? (
-                    <form onSubmit={handleSaveStoreName} className="seller-header__rename-form">
-                      <input
-                        type="text"
-                        value={storeNameInput}
-                        onChange={e => setStoreNameInput(e.target.value)}
-                        className="seller-header__rename-input"
-                        autoFocus
-                      />
-                      <button type="submit" className="seller-header__rename-save">บันทึก</button>
-                      <button type="button" onClick={() => setIsEditingStoreName(false)} className="seller-header__rename-cancel">ยกเลิก</button>
-                    </form>
-                  ) : (
-                    <div className="seller-header__store-tag">
-                      <span className="seller-header__store-name">{currentStore.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setStoreNameInput(customStoreName);
-                          setIsEditingStoreName(true);
-                        }}
-                        className="seller-header__edit-btn"
-                        title="เปลี่ยนชื่อร้านค้า"
-                      >
-                        <Pencil size={11} />
-                        แก้ไข
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <div className="seller-header__meta-row">
-                  <span className="seller-header__status-badge">
-                    <span className="seller-header__status-dot"></span> เปิดร้านขายปกติ
-                  </span>
-                  <span className="seller-header__meta-divider">•</span>
-                  <span className="seller-header__meta-item">⭐ คะแนน {currentStore.rating}</span>
-                  <span className="seller-header__meta-divider">•</span>
-                  <span className="seller-header__meta-item">⚡ ตอบแชท {currentStore.responseRate}</span>
-                </div>
+              <div className="admin-db-status">
+                <span className="admin-status-dot" />
+                <span>Supabase PostgreSQL 🟢 Connected</span>
               </div>
             </div>
+          </div>
 
-            <div className="seller-header__actions">
-              <Link to={`/store/${currentStore.slug || currentStore.id}`} className="seller-header__btn--view">
-                <ExternalLink size={14} />
-                ดูหน้าร้านค้า
-              </Link>
-              <button className="seller-header__btn--add" onClick={() => setIsAddModalOpen(true)}>
-                <Plus size={16} />
-                + ลงขายสินค้าใหม่
-              </button>
+          {/* Store Name with inline edit */}
+          <div style={{ marginLeft: '1rem', display: 'flex', alignItems: 'center' }}>
+            {isEditingStoreName ? (
+              <form onSubmit={handleSaveStoreName} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                <input
+                  type="text"
+                  value={storeNameInput}
+                  onChange={e => setStoreNameInput(e.target.value)}
+                  style={{
+                    padding: '3px 8px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    border: '1.5px solid #2563eb',
+                    borderRadius: '4px',
+                    outline: 'none',
+                    color: '#0f172a',
+                  }}
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  style={{
+                    background: '#2563eb',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '3px 8px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  บันทึก
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingStoreName(false)}
+                  style={{
+                    background: '#e2e8f0',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '3px 6px',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer',
+                    color: '#475569',
+                  }}
+                >
+                  ยกเลิก
+                </button>
+              </form>
+            ) : (
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  background: '#f1f5f9',
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  border: '1px solid #e2e8f0',
+                }}
+              >
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155' }}>
+                  🏪 {currentStore.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStoreNameInput(customStoreName);
+                    setIsEditingStoreName(true);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#2563eb',
+                    cursor: 'pointer',
+                    fontSize: '0.7rem',
+                    fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '2px',
+                    padding: 0,
+                  }}
+                  title="เปลี่ยนชื่อร้านค้า"
+                >
+                  <Pencil size={10} /> แก้ไข
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="admin-topbar-right">
+          <div className="admin-quick-metrics">
+            <span className="admin-stat-chip">📦 สินค้า <strong>{storeProducts.length}</strong></span>
+            <span className="admin-stat-chip">🛒 รอส่ง <strong>{sellerOrders.filter(o => o.status === 'pending').length}</strong></span>
+            <span className="admin-stat-chip">⭐ เรตติ้ง <strong>{currentStore.rating}</strong></span>
+          </div>
+
+          <button
+            type="button"
+            className="admin-action-btn admin-action-btn--sync"
+            onClick={() => syncSellerHubLive(true)}
+            disabled={isRefreshingData}
+            title="กดเพื่อดึงข้อมูลออเดอร์และยอดขายจริงล่าสุดจากฐานข้อมูล PostgreSQL"
+          >
+            <RefreshCw size={13} style={{ animation: isRefreshingData ? 'spin 1s linear infinite' : 'none' }} />
+            <span>{isRefreshingData ? 'กำลังซิงค์...' : `ซิงค์ข้อมูลจริง ${lastSyncTime ? `(${lastSyncTime})` : ''}`}</span>
+          </button>
+
+          <Link
+            to={`/store/${currentStore.slug || currentStore.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="admin-action-btn admin-action-btn--storefront"
+            title="เปิดหน้าร้านค้ามุมมองผู้ซื้อในแท็บใหม่"
+          >
+            <Globe size={13} />
+            <span>หน้าร้านค้า (Storefront)</span>
+            <ExternalLink size={11} />
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setIsAddModalOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              padding: '0.45rem 0.85rem',
+              borderRadius: '6px',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              background: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)',
+            }}
+          >
+            <Plus size={14} />
+            <span>+ ลงขายสินค้าใหม่</span>
+          </button>
+
+          <div className="admin-profile-pill">
+            {currentStore.logo ? (
+              <img
+                src={currentStore.logo}
+                alt={currentStore.name}
+                className="admin-avatar-img"
+              />
+            ) : (
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 6,
+                  background: '#2563eb',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                }}
+              >
+                🏪
+              </div>
+            )}
+            <div className="admin-profile-text">
+              <span className="admin-profile-name">{currentStore.name}</span>
+              <span className="admin-profile-role">🏪 ACTIVE SELLER</span>
             </div>
           </div>
         </div>
-      </section>
+      </header>
 
-      <div className="container">
-        {/* Modern Metric KPI Cards */}
-        {(() => {
-          const totalSalesAmount = sellerOrders.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
-          const pendingOrdersCount = sellerOrders.filter(o => o.status === 'pending').length;
-          const totalStockCount = storeProducts.reduce((acc, p) => acc + (p.stock || 0), 0);
+      {/* ── 2. Enterprise Layout: Sidebar + Workspace ── */}
+      <div className="admin-enterprise-body">
+        {/* Left Sidebar Navigation */}
+        <aside className="admin-sidebar">
+          <div className="admin-sidebar-section-title">
+            <span>🏢 เมนูจัดการร้านค้า (Seller Navigation)</span>
+          </div>
 
-          return (
-            <div className="seller-metrics">
-              <div className="seller-metric-card">
-                <div className="seller-metric-top">
-                  <div className="seller-metric-icon seller-metric-icon--sales">
-                    <DollarSign size={20} />
-                  </div>
-                  <span className="seller-metric-badge seller-metric-badge--green">
-                    {sellerOrders.length > 0 ? `${sellerOrders.length} ออเดอร์` : 'พร้อมรับออเดอร์'}
+          <nav className="admin-sidebar-nav">
+            {/* Cluster 1: Commerce */}
+            <div className="admin-nav-cluster">
+              <div className="admin-cluster-label">🛍️ สินค้า & การขาย (Commerce)</div>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'overview' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('overview')}
+              >
+                <div className="admin-nav-item-content">
+                  <Store size={15} />
+                  <span>สินค้าของร้าน</span>
+                </div>
+                <span className="admin-item-tag admin-item-tag--neutral">{storeProducts.length}</span>
+              </button>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'orders' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('orders')}
+              >
+                <div className="admin-nav-item-content">
+                  <Package size={15} />
+                  <span>รายการคำสั่งซื้อ</span>
+                </div>
+                {sellerOrders.filter(o => o.status === 'pending').length > 0 ? (
+                  <span className="admin-item-tag admin-item-tag--amber">
+                    {sellerOrders.filter(o => o.status === 'pending').length} รอส่ง
                   </span>
+                ) : (
+                  <span className="admin-item-tag admin-item-tag--neutral">{sellerOrders.length}</span>
+                )}
+              </button>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'flash' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('flash')}
+              >
+                <div className="admin-nav-item-content">
+                  <Zap size={15} />
+                  <span>ดีล Flash Sale</span>
                 </div>
-                <div className="seller-metric-info">
-                  <span className="seller-metric-label">ยอดขายรวมร้านค้า</span>
-                  <span className="seller-metric-val">฿{totalSalesAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  <span className="seller-metric-sub">จากคำสั่งซื้อทั้งหมด {sellerOrders.length} รายการ</span>
+                <span className="admin-item-tag admin-item-tag--hot">HOT</span>
+              </button>
+            </div>
+
+            {/* Cluster 2: Growth & Finance */}
+            <div className="admin-nav-cluster">
+              <div className="admin-cluster-label">🎯 การตลาด & รายได้ (Growth & Tax)</div>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'ads' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('ads')}
+              >
+                <div className="admin-nav-item-content">
+                  <Target size={15} />
+                  <span>Movemall Ads</span>
+                </div>
+                <span className="admin-item-tag admin-item-tag--hot">ROI {overallROAS}x</span>
+              </button>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'tax' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('tax')}
+              >
+                <div className="admin-nav-item-content">
+                  <FileText size={15} />
+                  <span>ระบบภาษี & e-Tax</span>
+                </div>
+                <span className="admin-item-tag admin-item-tag--neutral">7%</span>
+              </button>
+            </div>
+
+            {/* Cluster 3: CRM & Trust */}
+            <div className="admin-nav-cluster">
+              <div className="admin-cluster-label">💬 ลูกค้า & ความปลอดภัย (CRM & Trust)</div>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'chat' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('chat')}
+              >
+                <div className="admin-nav-item-content">
+                  <MessageSquare size={15} />
+                  <span>แชทสดกับลูกค้า</span>
+                </div>
+                {isSellerSocketConnected && (
+                  <span className="admin-item-tag" style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0' }}>
+                    ● LIVE
+                  </span>
+                )}
+              </button>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'health' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('health')}
+              >
+                <div className="admin-nav-item-content">
+                  <ShieldCheck size={15} />
+                  <span>สุขภาพร้านค้า</span>
+                </div>
+                <span className="admin-item-tag" style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0' }}>
+                  {storeHealthScore}/100
+                </span>
+              </button>
+            </div>
+
+            {/* Cluster 4: Integration & Settings */}
+            <div className="admin-nav-cluster">
+              <div className="admin-cluster-label">⚙️ การเชื่อมต่อ & ตั้งค่า (Settings)</div>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'api' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('api')}
+              >
+                <div className="admin-nav-item-content">
+                  <Cpu size={15} />
+                  <span>พาร์ทเนอร์ ERP Hub</span>
+                </div>
+                <span className="admin-item-tag admin-item-tag--neutral">ISV</span>
+              </button>
+              <button
+                type="button"
+                className={`admin-nav-item ${activeTab === 'settings' ? 'admin-nav-item--active' : ''}`}
+                onClick={() => setActiveTab('settings')}
+              >
+                <div className="admin-nav-item-content">
+                  <Settings size={15} />
+                  <span>ตั้งค่ารายละเอียดร้านค้า</span>
+                </div>
+              </button>
+            </div>
+          </nav>
+
+          {/* Bottom Card */}
+          <div className="admin-sidebar-foot">
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6, padding: '10px 12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
+                <ShieldCheck size={14} color="#10b981" />
+                <span>Movemall Merchant Shield</span>
+              </div>
+              <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: 4, lineHeight: 1.4 }}>
+                ร้านค้านี้ได้รับการการันตีและคุ้มครอง 100% เคลมค่าเสียหาย COD ได้เต็มจำนวน
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Workspace Area */}
+        <main className="admin-workspace">
+          {/* Breadcrumb Strip */}
+          <div className="admin-breadcrumb-strip">
+            <Link to="/" style={{ color: '#64748b', textDecoration: 'none' }}>Movemall</Link>
+            <span style={{ color: '#cbd5e1' }}>/</span>
+            <span style={{ color: '#64748b' }}>ศูนย์ผู้ขาย (Seller Centre)</span>
+            <span style={{ color: '#cbd5e1' }}>/</span>
+            <span style={{ color: '#0f172a', fontWeight: 700 }}>
+              {activeTab === 'overview' && 'สินค้าของร้าน (Product Catalog)'}
+              {activeTab === 'orders' && 'รายการคำสั่งซื้อ (Order Management)'}
+              {activeTab === 'ads' && 'Movemall Ads (Campaign Hub)'}
+              {activeTab === 'flash' && 'ดีล Flash Sale'}
+              {activeTab === 'api' && 'พาร์ทเนอร์ ERP Hub'}
+              {activeTab === 'chat' && 'แชทสดกับลูกค้า (Live Customer CRM)'}
+              {activeTab === 'health' && 'สุขภาพร้านค้า (Shop Health Shield)'}
+              {activeTab === 'tax' && 'ระบบภาษี & e-Tax (e-Tax Invoice & VAT 7%)'}
+              {activeTab === 'settings' && 'ตั้งค่ารายละเอียดร้านค้า (Store Settings)'}
+            </span>
+          </div>
+
+          {/* Department Header Banner */}
+          <div className="admin-workspace-header">
+            <div className="admin-workspace-title-box">
+              <h1 className="admin-workspace-title">
+                {activeTab === 'overview' && '📦 จัดการสินค้าในร้าน (Product Catalog)'}
+                {activeTab === 'orders' && '🚚 รายการคำสั่งซื้อ & จัดส่งพัสดุ (Order Fulfillment)'}
+                {activeTab === 'ads' && '🎯 Movemall Ads & Smart Keyword Bidding'}
+                {activeTab === 'flash' && '⚡ ดีลลดแรง Flash Sale (Flash Deals Hub)'}
+                {activeTab === 'api' && '🔌 Movemall Partner & Omnichannel ERP Hub'}
+                {activeTab === 'chat' && '💬 ศูนย์สนทนากับลูกค้าแบบสด (Live Customer CRM)'}
+                {activeTab === 'health' && '🛡️ สุขภาพร้านค้า & ปกป้องความปลอดภัย (Shop Health Shield)'}
+                {activeTab === 'tax' && '🧾 ระบบภาษี & ใบกำกับภาษีอิเล็กทรอนิกส์ (e-Tax Invoice & VAT 7%)'}
+                {activeTab === 'settings' && '⚙️ ตั้งค่ารายละเอียดร้านค้า (Store Settings)'}
+              </h1>
+              <p className="admin-workspace-subtitle">
+                {activeTab === 'overview' && 'จัดการแคตตาล็อกสินค้า กำหนดสต็อก ราคาปกติ/ลดพิเศษ และตรวจสอบคุณภาพรายการสินค้า'}
+                {activeTab === 'orders' && 'ตรวจสอบออเดอร์ พิมพ์ใบปะหน้าขนส่ง Flash, Kerry, J&T, EMS และอัปเดตสถานะจัดส่ง'}
+                {activeTab === 'ads' && 'ยิงโฆษณา Search / Discovery / Live เพิ่มยอดขาย ดันสินค้าติดอันดับการค้นหา'}
+                {activeTab === 'flash' && 'ยื่นเสนอสินค้าเข้าร่วมรอบเวลา Flash Sale ประจำวัน เพื่อเพิ่มยอดขายและยอดเข้าชมร้าน'}
+                {activeTab === 'api' && 'เชื่อมต่อ 1-Click: BigSeller, Ginee, BentoWeb, Page365, Zwiz.ai, Oho Chat'}
+                {activeTab === 'chat' && 'ตอบกลับลูกค้าแบบเรียลไทม์ผ่าน WebSocket พร้อมข้อความด่วนและบอทต้อนรับอัตโนมัติ'}
+                {activeTab === 'health' && 'ดูคะแนนความน่าเชื่อถือ ตรวจสอบแต้มตัด และยื่นเคลมค่าเสียหายกรณีลูกค้าปฏิเสธรับ COD'}
+                {activeTab === 'tax' && 'ออกใบกำกับภาษี e-Tax Invoice & Receipt อัตโนมัติ พร้อมตั้งค่า ภ.พ.20 และรหัสสาขา'}
+                {activeTab === 'settings' && 'จัดการโปรไฟล์ร้านค้า อัปโหลดแบนเนอร์/โลโก้ ที่อยู่คลังจัดส่ง และบัญชีรับเงินโอน Payout'}
+              </p>
+            </div>
+
+            <div className="admin-workspace-actions">
+              {activeTab === 'overview' && (
+                <button
+                  type="button"
+                  className="admin-action-btn admin-action-btn--sync"
+                  style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '8px 18px', borderRadius: 6, fontWeight: 700 }}
+                  onClick={() => setIsAddModalOpen(true)}
+                >
+                  <Plus size={14} /> + เพิ่มสินค้าใหม่
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Top 4 KPI Metric Cards */}
+          <div style={{ padding: '0 1.75rem 1.5rem' }}>
+            <div className="admin-kpi-grid">
+              <div className="admin-kpi-card">
+                <div className="admin-kpi-header">
+                  <span className="admin-kpi-label">ยอดขายรวมร้านค้า</span>
+                  <div className="admin-kpi-icon-box admin-kpi-icon-box--blue">
+                    <DollarSign size={18} />
+                  </div>
+                </div>
+                <div className="admin-kpi-val">
+                  ฿{sellerOrders.reduce((acc, o) => acc + (Number(o.total) || 0), 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+                <div className="admin-kpi-sub">
+                  <span className="admin-kpi-pill admin-kpi-pill--green">✓ ยอดขายจริง</span>
+                  <span>จากคำสั่งซื้อทั้งหมด {sellerOrders.length} รายการ</span>
                 </div>
               </div>
 
-              <div className="seller-metric-card">
-                <div className="seller-metric-top">
-                  <div className="seller-metric-icon seller-metric-icon--orders">
-                    <Package size={20} />
+              <div className="admin-kpi-card">
+                <div className="admin-kpi-header">
+                  <span className="admin-kpi-label">คำสั่งซื้อที่ต้องจัดส่ง</span>
+                  <div className="admin-kpi-icon-box admin-kpi-icon-box--amber">
+                    <Package size={18} />
                   </div>
-                  <span className="seller-metric-badge seller-metric-badge--blue">รอดำเนินการ {pendingOrdersCount}</span>
                 </div>
-                <div className="seller-metric-info">
-                  <span className="seller-metric-label">คำสั่งซื้อที่ต้องจัดส่ง</span>
-                  <span className="seller-metric-val">{pendingOrdersCount} ออเดอร์</span>
-                  <span className="seller-metric-sub">เตรียมพัสดุและพิมพ์ใบปะหน้า</span>
+                <div className="admin-kpi-val">
+                  {sellerOrders.filter(o => o.status === 'pending').length} รายการ
+                </div>
+                <div className="admin-kpi-sub">
+                  <span className="admin-kpi-pill admin-kpi-pill--blue">รอจัดส่ง</span>
+                  <span>เตรียมพัสดุและพิมพ์ใบปะหน้า</span>
                 </div>
               </div>
 
-              <div className="seller-metric-card">
-                <div className="seller-metric-top">
-                  <div className="seller-metric-icon seller-metric-icon--products">
-                    <TrendingUp size={20} />
+              <div className="admin-kpi-card">
+                <div className="admin-kpi-header">
+                  <span className="admin-kpi-label">สินค้าที่วางขาย</span>
+                  <div className="admin-kpi-icon-box admin-kpi-icon-box--green">
+                    <Store size={18} />
                   </div>
-                  <span className="seller-metric-badge seller-metric-badge--purple">พร้อมขาย {storeProducts.length > 0 ? '100%' : '0%'}</span>
                 </div>
-                <div className="seller-metric-info">
-                  <span className="seller-metric-label">สินค้าที่วางขาย</span>
-                  <span className="seller-metric-val">{storeProducts.length} รายการ</span>
-                  <span className="seller-metric-sub">สต็อกในคลัง {totalStockCount.toLocaleString()} ชิ้น</span>
+                <div className="admin-kpi-val">
+                  {storeProducts.length} รายการ
+                </div>
+                <div className="admin-kpi-sub">
+                  <span className="admin-kpi-pill admin-kpi-pill--purple">สต็อกรวม</span>
+                  <span>{storeProducts.reduce((acc, p) => acc + (p.stock || 0), 0).toLocaleString()} ชิ้นในคลัง</span>
                 </div>
               </div>
 
-              <div className="seller-metric-card">
-                <div className="seller-metric-top">
-                  <div className="seller-metric-icon seller-metric-icon--rating">
-                    <Star size={20} />
+              <div className="admin-kpi-card">
+                <div className="admin-kpi-header">
+                  <span className="admin-kpi-label">คะแนนร้านค้า & สุขภาพ</span>
+                  <div className="admin-kpi-icon-box admin-kpi-icon-box--purple">
+                    <Star size={18} />
                   </div>
-                  <span className="seller-metric-badge seller-metric-badge--amber">สุขภาพ {storeHealthScore}/100 🛡️</span>
                 </div>
-                <div className="seller-metric-info">
-                  <span className="seller-metric-label">คะแนนร้านค้า</span>
-                  <span className="seller-metric-val">{currentStore.rating} / 5.0</span>
-                  <span className="seller-metric-sub">มาตรฐานร้านค้ายอดเยี่ยม</span>
+                <div className="admin-kpi-val">
+                  {currentStore.rating} / 5.0
+                </div>
+                <div className="admin-kpi-sub">
+                  <span className="admin-kpi-pill admin-kpi-pill--green">สุขภาพ {storeHealthScore}/100 🛡️</span>
+                  <span>ตอบแชท {currentStore.responseRate}</span>
                 </div>
               </div>
             </div>
-          );
-        })()}
+          </div>
 
-        {/* Modern Seller Segmented Tabs */}
-        <div className="seller-tabs-container">
-          <nav className="seller-tabs" aria-label="Seller Tabs">
-            <button
-              className={`seller-tab-btn${activeTab === 'overview' ? ' seller-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('overview')}
-            >
-              <Store size={15} />
-              <span>สินค้าของร้าน</span>
-              <span className="seller-tab-count">{storeProducts.length}</span>
-            </button>
-            <button
-              className={`seller-tab-btn${activeTab === 'orders' ? ' seller-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('orders')}
-            >
-              <Package size={15} />
-              <span>รายการคำสั่งซื้อ</span>
-              <span className="seller-tab-count seller-tab-count--blue">{sellerOrders.filter(o => o.status === 'pending').length}</span>
-            </button>
-            <button
-              className={`seller-tab-btn${activeTab === 'ads' ? ' seller-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('ads')}
-            >
-              <Target size={15} />
-              <span>Movemall Ads</span>
-              <span className="seller-tab-pill seller-tab-pill--red">ROI {overallROAS}x</span>
-            </button>
-            <button
-              className={`seller-tab-btn${activeTab === 'flash' ? ' seller-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('flash')}
-            >
-              <Zap size={15} />
-              <span>Flash Sale</span>
-              <span className="seller-tab-pill seller-tab-pill--orange">HOT</span>
-            </button>
-            <button
-              className={`seller-tab-btn${activeTab === 'api' ? ' seller-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('api')}
-            >
-              <Cpu size={15} />
-              <span>พาร์ทเนอร์ ERP</span>
-              <span className="seller-tab-pill seller-tab-pill--blue">ISV HUB</span>
-            </button>
-            <button
-              className={`seller-tab-btn${activeTab === 'chat' ? ' seller-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('chat')}
-            >
-              <MessageSquare size={15} />
-              <span>แชทลูกค้า</span>
-              {isSellerSocketConnected && (
-                <span className="seller-tab-pill seller-tab-pill--green">LIVE</span>
-              )}
-            </button>
-            <button
-              className={`seller-tab-btn${activeTab === 'health' ? ' seller-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('health')}
-            >
-              <ShieldCheck size={15} />
-              <span>สุขภาพร้านค้า</span>
-              <span className="seller-tab-pill seller-tab-pill--green">100/100</span>
-            </button>
-            <button
-              className={`seller-tab-btn${activeTab === 'tax' ? ' seller-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('tax')}
-            >
-              <FileText size={15} />
-              <span>ระบบภาษี & e-Tax</span>
-            </button>
-            <button
-              className={`seller-tab-btn${activeTab === 'settings' ? ' seller-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('settings')}
-            >
-              <Settings size={15} />
-              <span>⚙️ ตั้งค่าร้านค้า</span>
-            </button>
-          </nav>
-        </div>
-
+          {/* Main Content Workspace Canvas */}
+          <div style={{ padding: '0 1.75rem 2.5rem' }}>
         {/* Products Table (Desktop) & Mobile Card List */}
         {activeTab === 'overview' && (
           <>
@@ -4782,6 +5060,8 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
           </div>
         )}
       </div>
+    </main>
+  </div>
 
       {/* ── Modal: Seller Report Buyer Form ── */}
       {showBuyerReportModal && (
@@ -6029,7 +6309,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
           onClose={() => setSelectedOrderForLabel(null)}
         />
       )}
-    </main>
+    </div>
   );
 }
 
