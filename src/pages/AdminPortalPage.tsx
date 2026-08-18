@@ -2787,25 +2787,28 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
           <div className="admin-card-header">
             <div>
               <h2 className="admin-card-title">🛡️ ศูนย์ความปลอดภัย & ระงับผู้กระทำผิด (Trust, Suspension & Anti-Fraud Center)</h2>
-              <p className="admin-card-subtitle">
+              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
                 จัดการและลงโทษผู้ใช้/ร้านค้าที่ทำผิดกฎ: สั่งแล้วไม่รับของ (COD Reject), สั่งเล่น, ขอเงินคืนโดยไม่คืนสินค้า และส่งของปลอม
-              </p>
+              </span>
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div className="admin-segmented-strip">
               <button
-                className={`admin-btn-sm ${moderationSubTab === 'users' ? 'admin-btn-primary' : 'admin-btn-outline'}`}
+                type="button"
+                className={`admin-segmented-btn ${moderationSubTab === 'users' ? 'admin-segmented-btn--active' : ''}`}
                 onClick={() => setModerationSubTab('users')}
               >
                 <Users size={14} /> ผู้ใช้งาน & Trust Score ({moderatedUsers.length})
               </button>
               <button
-                className={`admin-btn-sm ${moderationSubTab === 'stores' ? 'admin-btn-primary' : 'admin-btn-outline'}`}
+                type="button"
+                className={`admin-segmented-btn ${moderationSubTab === 'stores' ? 'admin-segmented-btn--active' : ''}`}
                 onClick={() => setModerationSubTab('stores')}
               >
                 <StoreIcon size={14} /> ร้านค้า & บทลงโทษ ({moderatedStores.length})
               </button>
               <button
-                className={`admin-btn-sm ${moderationSubTab === 'reports' ? 'admin-btn-primary' : 'admin-btn-outline'}`}
+                type="button"
+                className={`admin-segmented-btn ${moderationSubTab === 'reports' ? 'admin-segmented-btn--active' : ''}`}
                 onClick={() => setModerationSubTab('reports')}
               >
                 <AlertTriangle size={14} /> รายงานการฉ้อโกง & COD ({violationReports.length})
@@ -2813,27 +2816,61 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
             </div>
           </div>
 
+          {/* 4 Summary Stats */}
+          <div className="admin-stats-grid">
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #10b981' }}>
+              <span className="admin-stat-label">🛡️ ผู้ซื้อความน่าเชื่อถือสูง (Trust Score 80-100)</span>
+              <div className="admin-stat-val" style={{ color: '#059669' }}>
+                {moderatedUsers.filter(u => u.trustScore >= 80).length} คน
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>สั่งซื้อปกติ ไม่มีประวัติปฏิเสธรับ</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #ef4444' }}>
+              <span className="admin-stat-label">🚫 ผู้ซื้อถูกตัดสิทธิ์ COD</span>
+              <div className="admin-stat-val" style={{ color: '#dc2626' }}>
+                {moderatedUsers.filter(u => u.status === 'COD_RESTRICTED').length} คน
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>มีประวัติปฏิเสธรับของซ้ำซ้อน</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #2563eb' }}>
+              <span className="admin-stat-label">🏪 ร้านค้าสุขภาพดีเยี่ยม</span>
+              <div className="admin-stat-val" style={{ color: '#2563eb' }}>
+                {moderatedStores.filter(s => s.healthScore >= 80).length} ร้าน
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>อัตราส่งตรงเวลา 98%+</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+              <span className="admin-stat-label">⚖️ รายงานฉ้อโกงรอตัดสิน</span>
+              <div className="admin-stat-val" style={{ color: '#d97706' }}>
+                {violationReports.filter(r => r.status === 'PENDING' || r.status === 'INVESTIGATING').length} เคส
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>ฝ่าย Super Admin ตรวจสอบ</span>
+            </div>
+          </div>
+
           {/* 👤 SubTab 1: Moderated Users & Buyer Trust Scores */}
           {moderationSubTab === 'users' && (
             <div style={{ marginTop: '1.25rem' }}>
               {/* Filter and Search Bar */}
-              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-                <div style={{ position: 'relative', flex: 1, minWidth: 260 }}>
-                  <Search size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#9ca3af' }} />
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="admin-search-wrapper" style={{ flex: 1, minWidth: 260, maxWidth: 400 }}>
+                  <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                   <input
                     type="text"
-                    className="form-input"
-                    style={{ paddingLeft: '2.25rem' }}
+                    className="admin-search-input"
                     placeholder="ค้นหาชื่อ, เบอร์โทร, หรืออีเมลผู้ซื้อ..."
                     value={userSearchText}
                     onChange={e => setUserSearchText(e.target.value)}
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.85rem', color: '#6b7280', fontWeight: 600 }}>สถานะ:</span>
+                  <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>สถานะ:</span>
                   <select
                     className="form-select"
-                    style={{ width: 'auto', padding: '0.4rem 0.75rem' }}
+                    style={{ width: 'auto', padding: '0.4rem 0.75rem', borderRadius: 6, fontSize: '0.82rem', border: '1px solid #e2e8f0' }}
                     value={userStatusFilter}
                     onChange={e => setUserStatusFilter(e.target.value as any)}
                   >
@@ -2848,16 +2885,16 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
               </div>
 
               {/* Users Moderation Table */}
-              <div style={{ overflowX: 'auto' }}>
-                <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div className="admin-table-container">
+                <table className="admin-table">
                   <thead>
-                    <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>
-                      <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: '#4b5563' }}>ข้อมูลผู้ใช้งาน</th>
-                      <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: '#4b5563' }}>คะแนนความน่าเชื่อถือ (Trust Score)</th>
-                      <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: '#4b5563' }}>สถิติ COD / ไม่รับของ</th>
-                      <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: '#4b5563' }}>เคลมเงินคืนเท็จ</th>
-                      <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: '#4b5563' }}>สถานะบัญชี</th>
-                      <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: '#4b5563', textAlign: 'right' }}>การดำเนินการ</th>
+                    <tr>
+                      <th>ข้อมูลผู้ใช้งาน</th>
+                      <th>คะแนนความน่าเชื่อถือ (Trust Score)</th>
+                      <th>สถิติ COD / ไม่รับของ</th>
+                      <th>เคลมเงินคืนเท็จ</th>
+                      <th>สถานะบัญชี</th>
+                      <th style={{ textAlign: 'right' }}>การดำเนินการ</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2877,10 +2914,10 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                           user.trustScore >= 80 ? '#ecfdf5' : user.trustScore >= 50 ? '#fffbeb' : '#fef2f2';
 
                         return (
-                          <tr key={user.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                            <td style={{ padding: '0.85rem 1rem' }}>
-                              <div style={{ fontWeight: 700, color: '#111827' }}>{user.name}</div>
-                              <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                          <tr key={user.id}>
+                            <td>
+                              <div style={{ fontWeight: 700, color: '#0f172a' }}>{user.name}</div>
+                              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
                                 📞 {user.phone} • ✉️ {user.email}
                               </div>
                               {user.suspensionReason && (
@@ -2889,7 +2926,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                                 </div>
                               )}
                             </td>
-                            <td style={{ padding: '0.85rem 1rem' }}>
+                            <td>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <div
                                   style={{
@@ -2912,19 +2949,19 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                                   <div style={{ fontSize: '0.8rem', fontWeight: 700, color: scoreColor }}>
                                     {user.trustScore >= 80 ? 'ดีเยี่ยม' : user.trustScore >= 50 ? 'เสี่ยงปานกลาง' : 'เสี่ยงสูงมาก'}
                                   </div>
-                                  <div style={{ fontSize: '0.7rem', color: '#9ca3af' }}>เต็ม 100 คะแนน</div>
+                                  <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>เต็ม 100 คะแนน</div>
                                 </div>
                               </div>
                             </td>
-                            <td style={{ padding: '0.85rem 1rem' }}>
-                              <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                                สำเร็จ: <span style={{ color: user.codSuccessRate >= 90 ? '#10b981' : '#dc2626' }}>{user.codSuccessRate}%</span>
+                            <td>
+                              <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>
+                                สำเร็จ: <span style={{ color: user.codSuccessRate >= 90 ? '#10b981' : '#dc2626', fontWeight: 700 }}>{user.codSuccessRate}%</span>
                               </div>
-                              <div style={{ fontSize: '0.75rem', color: user.codRejectedCount > 0 ? '#dc2626' : '#6b7280', fontWeight: user.codRejectedCount > 0 ? 700 : 400 }}>
+                              <div style={{ fontSize: '0.75rem', color: user.codRejectedCount > 0 ? '#dc2626' : '#64748b', fontWeight: user.codRejectedCount > 0 ? 700 : 400 }}>
                                 ปฏิเสธไม่รับของ: {user.codRejectedCount} ครั้ง
                               </div>
                             </td>
-                            <td style={{ padding: '0.85rem 1rem' }}>
+                            <td>
                               <span
                                 style={{
                                   fontSize: '0.8rem',
@@ -2935,49 +2972,50 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                                 {user.fraudRefundCount > 0 ? `🚨 ${user.fraudRefundCount} ครั้ง` : '✓ 0 ครั้ง'}
                               </span>
                             </td>
-                            <td style={{ padding: '0.85rem 1rem' }}>
+                            <td>
                               {user.status === 'ACTIVE' && (
-                                <span style={{ fontSize: '0.75rem', background: '#dcfce7', color: '#15803d', padding: '3px 8px', borderRadius: 6, fontWeight: 700 }}>
+                                <span style={{ fontSize: '0.75rem', background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '3px 8px', borderRadius: 4, fontWeight: 700 }}>
                                   ปกติ (Active)
                                 </span>
                               )}
                               {user.status === 'WARNING' && (
-                                <span style={{ fontSize: '0.75rem', background: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: 6, fontWeight: 700 }}>
+                                <span style={{ fontSize: '0.75rem', background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a', padding: '3px 8px', borderRadius: 4, fontWeight: 700 }}>
                                   ⚠️ ตักเตือน (Warning)
                                 </span>
                               )}
                               {user.status === 'COD_RESTRICTED' && (
-                                <span style={{ fontSize: '0.75rem', background: '#fee2e2', color: '#b91c1c', padding: '3px 8px', borderRadius: 6, fontWeight: 700 }}>
+                                <span style={{ fontSize: '0.75rem', background: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5', padding: '3px 8px', borderRadius: 4, fontWeight: 700 }}>
                                   🚫 ตัดสิทธิ์ COD
                                 </span>
                               )}
                               {(user.status === 'SUSPENDED' || user.status === 'BANNED') && (
-                                <span style={{ fontSize: '0.75rem', background: '#111827', color: '#ffffff', padding: '3px 8px', borderRadius: 6, fontWeight: 700 }}>
+                                <span style={{ fontSize: '0.75rem', background: '#0f172a', color: '#ffffff', padding: '3px 8px', borderRadius: 4, fontWeight: 700 }}>
                                   ⛔ ระงับบัญชี (Banned)
                                 </span>
                               )}
                             </td>
-                            <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
+                            <td style={{ textAlign: 'right' }}>
                               <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
                                 <button
+                                  type="button"
                                   className="admin-btn-sm admin-btn-outline"
-                                  style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
                                   title="สลับสิทธิ์การเก็บเงินปลายทาง"
                                   onClick={() => handleQuickToggleUserCod(user)}
                                 >
                                   {user.status === 'COD_RESTRICTED' ? 'ปลดบล็อก COD' : 'บล็อก COD'}
                                 </button>
                                 <button
+                                  type="button"
                                   className={`admin-btn-sm ${user.status === 'SUSPENDED' || user.status === 'BANNED' ? 'admin-btn-success' : 'admin-btn-outline'}`}
-                                  style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', color: user.status === 'SUSPENDED' ? '#fff' : '#dc2626', borderColor: '#fca5a5' }}
+                                  style={{ color: user.status === 'SUSPENDED' ? '#fff' : '#ef4444', borderColor: '#fca5a5' }}
                                   title="ระงับการเข้าใช้ระบบ"
                                   onClick={() => handleQuickToggleUserBan(user)}
                                 >
                                   {user.status === 'SUSPENDED' || user.status === 'BANNED' ? 'ปลดแบน' : 'ระงับบัญชี'}
                                 </button>
                                 <button
+                                  type="button"
                                   className="admin-btn-sm admin-btn-primary"
-                                  style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
                                   onClick={() => handleOpenUserModal(user)}
                                 >
                                   จัดการละเอียด
