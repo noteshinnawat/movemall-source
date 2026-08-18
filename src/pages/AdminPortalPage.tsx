@@ -126,12 +126,116 @@ interface PlatformVoucher {
   expiresAt: string;
 }
 
+export interface AdminTeamMember {
+  id: string;
+  name: string;
+  email: string;
+  department: string;
+  role: 'SUPER_ADMIN' | 'CATALOG_ADMIN' | 'FINANCE_ADMIN' | 'CS_ADMIN' | 'MARKETING_ADMIN' | 'LOGISTICS_ADMIN' | 'MODERATOR';
+  permissions: string[];
+  status: 'ACTIVE' | 'SUSPENDED';
+  avatarUrl: string;
+  lastActive: string;
+}
+
 export function AdminPortalPage({ products }: { products: Product[] }) {
   const [activeTab, setActiveTab] = useState<
     'overview' | 'catalog' | 'compliance' | 'finance' | 'cs' | 'marketing' | 'logistics' | 'moderation' | 'team'
   >('marketing');
 
   const [marketingSubTab, setMarketingSubTab] = useState<'campaigns' | 'broadcast' | 'vouchers' | 'flashsale'>('campaigns');
+  const [teamRoleFilter, setTeamRoleFilter] = useState<string>('ALL');
+  const [teamSearchQuery, setTeamSearchQuery] = useState<string>('');
+  const [showAddTeamModal, setShowAddTeamModal] = useState<boolean>(false);
+  const [editingTeamMember, setEditingTeamMember] = useState<AdminTeamMember | null>(null);
+
+  const [teamMembers, setTeamMembers] = useState<AdminTeamMember[]>([
+    {
+      id: 'staff-01',
+      name: 'Note Shinnawat (Super Admin)',
+      email: 'note.shinnawat@gmail.com',
+      department: 'Executive Board',
+      role: 'SUPER_ADMIN',
+      permissions: ['ALL_PERMISSIONS', 'DATABASE_ROOT', 'FINANCIAL_RELEASE', 'USER_BAN', 'SYSTEM_CONFIG'],
+      status: 'ACTIVE',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
+      lastActive: 'กำลังใช้งาน (Active Now)',
+    },
+    {
+      id: 'staff-02',
+      name: 'กมลวรรณ สุขเกษม',
+      email: 'kamonwan.s@movemall.com',
+      department: 'ฝ่ายการตลาด & แคมเปญ',
+      role: 'MARKETING_ADMIN',
+      permissions: ['CAMPAIGN_CREATE', 'PUSH_BROADCAST', 'VOUCHER_MANAGE', 'FLASH_SALE_SCHEDULE'],
+      status: 'ACTIVE',
+      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80',
+      lastActive: '10 นาทีที่แล้ว',
+    },
+    {
+      id: 'staff-03',
+      name: 'ธนภัทร วงศ์ษา',
+      email: 'thanapat.w@movemall.com',
+      department: 'ฝ่ายการเงิน & บัญชี',
+      role: 'FINANCE_ADMIN',
+      permissions: ['PAYOUT_APPROVE', 'VAT_TAX_AUDIT', 'REFUND_SETTLEMENT', 'LEDGER_INSPECT'],
+      status: 'ACTIVE',
+      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&q=80',
+      lastActive: '25 นาทีที่แล้ว',
+    },
+    {
+      id: 'staff-04',
+      name: 'ชลิตา จิตสง่า',
+      email: 'chalita.j@movemall.com',
+      department: 'ฝ่ายสินค้า & แบรนด์ Mall',
+      role: 'CATALOG_ADMIN',
+      permissions: ['MALL_VERIFICATION', 'PRODUCT_SUPPRESS', 'AI_FDA_OVERRIDE', 'STORE_APPROVAL'],
+      status: 'ACTIVE',
+      avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&q=80',
+      lastActive: '1 ชั่วโมงที่แล้ว',
+    },
+    {
+      id: 'staff-05',
+      name: 'อภิสิทธิ์ รัตนกุล',
+      email: 'aphisit.r@movemall.com',
+      department: 'ฝ่ายความปลอดภัย & ป้องกันโกง',
+      role: 'MODERATOR',
+      permissions: ['FRAUD_INVESTIGATION', 'BUYER_TRUST_SCORE', 'STORE_PENALTY', 'LIVE_RESTRICT'],
+      status: 'ACTIVE',
+      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&q=80',
+      lastActive: '3 ชั่วโมงที่แล้ว',
+    },
+    {
+      id: 'staff-06',
+      name: 'พรรณิภา เลิศไพบูลย์',
+      email: 'pannipa.l@movemall.com',
+      department: 'ฝ่ายบริการลูกค้า (CS)',
+      role: 'CS_ADMIN',
+      permissions: ['DISPUTE_MEDIATION', 'REFUND_PROCESS', 'CHAT_SUPPORT', 'CUSTOMER_TICKETS'],
+      status: 'ACTIVE',
+      avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&q=80',
+      lastActive: 'เมื่อวานนี้ 18:45',
+    },
+    {
+      id: 'staff-07',
+      name: 'วรเมธ ศิริโชค',
+      email: 'woramet.s@movemall.com',
+      department: 'ฝ่ายขนส่ง & โลจิสติกส์',
+      role: 'LOGISTICS_ADMIN',
+      permissions: ['COURIER_DISPATCH', 'GPS_FLEET_MONITOR', 'PARCEL_EXCEPTION', 'SLA_TRACKING'],
+      status: 'ACTIVE',
+      avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&q=80',
+      lastActive: '2 วันที่แล้ว',
+    },
+  ]);
+
+  const [newTeamMemberForm, setNewTeamMemberForm] = useState({
+    name: '',
+    email: '',
+    department: 'ฝ่ายการตลาด & แคมเปญ',
+    role: 'MARKETING_ADMIN' as AdminTeamMember['role'],
+    initialPassword: '',
+  });
 
   const [metrics, setMetrics] = useState<AdminMetrics>({
     gmv: 1854200.0,
@@ -2823,12 +2927,463 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
         </div>
       )}
 
-      {/* 👑 RBAC Team Admin */}
+      {/* 👑 RBAC Team Admin (Full Enterprise Console) */}
       {activeTab === 'team' && (
-        <div className="admin-card">
-          <h2 className="admin-card-title" style={{ marginBottom: '1rem' }}>👑 สิทธิ์ทีมงาน Admin ทั้ง 7 แผนก (Role-Based Access Control)</h2>
-          <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>กำหนดบทบาท SUPER_ADMIN, CATALOG_ADMIN, FINANCE_ADMIN, CS_ADMIN, MARKETING_ADMIN, LOGISTICS_ADMIN, MODERATOR</p>
-          <button className="admin-btn-sm admin-btn-primary" style={{ marginTop: '1rem' }}>+ เพิ่มทีมงาน Admin ใหม่</button>
+        <div>
+          {/* Header Card */}
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <div>
+                <h2 className="admin-card-title">👑 จัดการสิทธิ์ทีมงาน & กำหนดบทบาท (Role-Based Access Control)</h2>
+                <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+                  ควบคุมสิทธิ์การเข้าถึงข้อมูลของเจ้าหน้าที่แต่ละแผนกงานอย่างละเอียด (Granular RBAC Permissions & Audit Trail)
+                </span>
+              </div>
+              <button
+                type="button"
+                className="admin-btn-sm admin-btn-primary"
+                onClick={() => setShowAddTeamModal(true)}
+              >
+                <Plus size={14} /> + เพิ่มทีมงาน Admin ใหม่
+              </button>
+            </div>
+
+            {/* 4 Summary Cards */}
+            <div className="admin-stats-grid">
+              <div className="admin-stat-card" style={{ borderLeft: '4px solid #7c3aed' }}>
+                <span className="admin-stat-label">👑 ผู้ดูแลระบบสูงสุด (Super Admins)</span>
+                <div className="admin-stat-val" style={{ color: '#7c3aed' }}>
+                  {teamMembers.filter(m => m.role === 'SUPER_ADMIN').length} คน
+                </div>
+                <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>สิทธิ์เต็มทุกระบบ ควบคุมฐานข้อมูล</span>
+              </div>
+
+              <div className="admin-stat-card" style={{ borderLeft: '4px solid #2563eb' }}>
+                <span className="admin-stat-label">🏢 เจ้าหน้าที่ปฏิบัติการ (Operations)</span>
+                <div className="admin-stat-val" style={{ color: '#2563eb' }}>
+                  {teamMembers.filter(m => m.role === 'MARKETING_ADMIN' || m.role === 'CATALOG_ADMIN' || m.role === 'LOGISTICS_ADMIN').length} คน
+                </div>
+                <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>การตลาด, สินค้า Mall และขนส่ง</span>
+              </div>
+
+              <div className="admin-stat-card" style={{ borderLeft: '4px solid #10b981' }}>
+                <span className="admin-stat-label">💵 การเงิน & บัญชี (Finance)</span>
+                <div className="admin-stat-val" style={{ color: '#10b981' }}>
+                  {teamMembers.filter(m => m.role === 'FINANCE_ADMIN').length} คน
+                </div>
+                <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>อนุมัติถอนเงินร้านค้า & ภาษี หัก ณ ที่จ่าย</span>
+              </div>
+
+              <div className="admin-stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+                <span className="admin-stat-label">🛡️ ตรวจสอบ & CS (Trust & Safety)</span>
+                <div className="admin-stat-val" style={{ color: '#f59e0b' }}>
+                  {teamMembers.filter(m => m.role === 'MODERATOR' || m.role === 'CS_ADMIN').length} คน
+                </div>
+                <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>ดูแลข้อพิพาท & ตรวจจับมิจฉาชีพ</span>
+              </div>
+            </div>
+
+            {/* Filter Pills & Search */}
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: 16 }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {[
+                  { key: 'ALL', label: 'ทั้งหมด' },
+                  { key: 'SUPER_ADMIN', label: '👑 Super Admin' },
+                  { key: 'MARKETING_ADMIN', label: '🎯 การตลาด' },
+                  { key: 'FINANCE_ADMIN', label: '💵 การเงิน' },
+                  { key: 'CATALOG_ADMIN', label: '📦 สินค้า & Mall' },
+                  { key: 'MODERATOR', label: '🛡️ ตรวจจับโกง' },
+                  { key: 'CS_ADMIN', label: '🎧 ฝ่าย CS' },
+                  { key: 'LOGISTICS_ADMIN', label: '🚚 ขนส่ง' },
+                ].map(f => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    className={`admin-btn-sm ${teamRoleFilter === f.key ? 'admin-btn-primary' : 'admin-btn-outline'}`}
+                    onClick={() => setTeamRoleFilter(f.key)}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ position: 'relative', width: 260 }}>
+                <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <input
+                  type="text"
+                  placeholder="ค้นหาชื่อ หรือ อีเมลเจ้าหน้าที่..."
+                  value={teamSearchQuery}
+                  onChange={e => setTeamSearchQuery(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '6px 12px 6px 30px',
+                    borderRadius: 6,
+                    border: '1px solid #e2e8f0',
+                    fontSize: '0.82rem',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Team Members Table */}
+            <div style={{ overflowX: 'auto' }}>
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>เจ้าหน้าที่</th>
+                    <th>แผนกงาน</th>
+                    <th>บทบาทสิทธิ์ (RBAC Role)</th>
+                    <th>ขอบเขตสิทธิ์ (Permissions)</th>
+                    <th>สถานะ</th>
+                    <th>ใช้งานล่าสุด</th>
+                    <th>จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {teamMembers
+                    .filter(m => {
+                      if (teamRoleFilter !== 'ALL' && m.role !== teamRoleFilter) return false;
+                      if (teamSearchQuery.trim()) {
+                        const q = teamSearchQuery.toLowerCase();
+                        return m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q) || m.department.toLowerCase().includes(q);
+                      }
+                      return true;
+                    })
+                    .map(member => (
+                      <tr key={member.id}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <img
+                              src={member.avatarUrl}
+                              alt={member.name}
+                              style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '1px solid #e2e8f0' }}
+                            />
+                            <div>
+                              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>{member.name}</div>
+                              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{member.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155' }}>
+                            {member.department}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 4,
+                              padding: '3px 8px',
+                              borderRadius: 4,
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              background:
+                                member.role === 'SUPER_ADMIN'
+                                  ? '#f5f3ff'
+                                  : member.role === 'FINANCE_ADMIN'
+                                  ? '#ecfdf5'
+                                  : member.role === 'MARKETING_ADMIN'
+                                  ? '#eff6ff'
+                                  : member.role === 'MODERATOR'
+                                  ? '#fff1f2'
+                                  : '#f8fafc',
+                              color:
+                                member.role === 'SUPER_ADMIN'
+                                  ? '#7c3aed'
+                                  : member.role === 'FINANCE_ADMIN'
+                                  ? '#059669'
+                                  : member.role === 'MARKETING_ADMIN'
+                                  ? '#2563eb'
+                                  : member.role === 'MODERATOR'
+                                  ? '#e11d48'
+                                  : '#475569',
+                              border: `1px solid ${
+                                member.role === 'SUPER_ADMIN'
+                                  ? '#ddd6fe'
+                                  : member.role === 'FINANCE_ADMIN'
+                                  ? '#a7f3d0'
+                                  : member.role === 'MARKETING_ADMIN'
+                                  ? '#bfdbfe'
+                                  : '#e2e8f0'
+                              }`,
+                            }}
+                          >
+                            {member.role}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', maxWidth: 280 }}>
+                            {member.permissions.map(perm => (
+                              <span
+                                key={perm}
+                                style={{
+                                  fontSize: '0.68rem',
+                                  padding: '1px 5px',
+                                  borderRadius: 3,
+                                  background: '#f1f5f9',
+                                  color: '#475569',
+                                  border: '1px solid #e2e8f0',
+                                }}
+                              >
+                                {perm}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 4,
+                              padding: '2px 8px',
+                              borderRadius: 4,
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              background: member.status === 'ACTIVE' ? '#dcfce7' : '#fee2e2',
+                              color: member.status === 'ACTIVE' ? '#15803d' : '#b91c1c',
+                            }}
+                          >
+                            {member.status === 'ACTIVE' ? '🟢 เปิดใช้งาน' : '🔴 พักงาน'}
+                          </span>
+                        </td>
+                        <td>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{member.lastActive}</span>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <button
+                              type="button"
+                              className="admin-btn-sm admin-btn-outline"
+                              onClick={() => setEditingTeamMember(member)}
+                              title="แก้ไขสิทธิ์"
+                            >
+                              แก้ไขสิทธิ์
+                            </button>
+                            {member.role !== 'SUPER_ADMIN' && (
+                              <button
+                                type="button"
+                                className={`admin-btn-sm ${member.status === 'ACTIVE' ? 'admin-btn-danger' : 'admin-btn-success'}`}
+                                onClick={() => {
+                                  setTeamMembers(prev =>
+                                    prev.map(m =>
+                                      m.id === member.id
+                                        ? { ...m, status: m.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE' }
+                                        : m
+                                    )
+                                  );
+                                }}
+                              >
+                                {member.status === 'ACTIVE' ? 'พักงาน' : 'เปิดใช้งาน'}
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Add New Team Member ── */}
+      {showAddTeamModal && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-content">
+            <div className="admin-modal-header">
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>👥 เพิ่มเจ้าหน้าที่ทีมงาน Admin ใหม่</h3>
+              <button onClick={() => setShowAddTeamModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                if (!newTeamMemberForm.name || !newTeamMemberForm.email) {
+                  alert('กรุณากรอกชื่อและอีเมล');
+                  return;
+                }
+
+                const rolePermissionsMap: Record<AdminTeamMember['role'], string[]> = {
+                  SUPER_ADMIN: ['ALL_PERMISSIONS', 'DATABASE_ROOT', 'FINANCIAL_RELEASE'],
+                  MARKETING_ADMIN: ['CAMPAIGN_CREATE', 'PUSH_BROADCAST', 'VOUCHER_MANAGE'],
+                  FINANCE_ADMIN: ['PAYOUT_APPROVE', 'VAT_TAX_AUDIT', 'REFUND_SETTLEMENT'],
+                  CATALOG_ADMIN: ['MALL_VERIFICATION', 'PRODUCT_SUPPRESS', 'AI_FDA_OVERRIDE'],
+                  MODERATOR: ['FRAUD_INVESTIGATION', 'BUYER_TRUST_SCORE', 'STORE_PENALTY'],
+                  CS_ADMIN: ['DISPUTE_MEDIATION', 'REFUND_PROCESS', 'CHAT_SUPPORT'],
+                  LOGISTICS_ADMIN: ['COURIER_DISPATCH', 'GPS_FLEET_MONITOR', 'SLA_TRACKING'],
+                };
+
+                const newMember: AdminTeamMember = {
+                  id: `staff-${Date.now()}`,
+                  name: newTeamMemberForm.name.trim(),
+                  email: newTeamMemberForm.email.trim(),
+                  department: newTeamMemberForm.department,
+                  role: newTeamMemberForm.role,
+                  permissions: rolePermissionsMap[newTeamMemberForm.role] || ['BASIC_VIEW'],
+                  status: 'ACTIVE',
+                  avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(newTeamMemberForm.name)}`,
+                  lastActive: 'เพิ่มใหม่เมื่อสักครู่',
+                };
+
+                setTeamMembers(prev => [newMember, ...prev]);
+                setShowAddTeamModal(false);
+                setNewTeamMemberForm({
+                  name: '',
+                  email: '',
+                  department: 'ฝ่ายการตลาด & แคมเปญ',
+                  role: 'MARKETING_ADMIN',
+                  initialPassword: '',
+                });
+                alert(`เพิ่มเจ้าหน้าที่ "${newMember.name}" เรียบร้อยแล้ว! พร้อมเข้าใช้งานด้วยสิทธิ์ ${newMember.role}`);
+              }}
+            >
+              <div className="form-group">
+                <label className="form-label">ชื่อ-นามสกุล เจ้าหน้าที่</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="เช่น: ภานุมาศ เจริญรัตน์"
+                  value={newTeamMemberForm.name}
+                  onChange={e => setNewTeamMemberForm(prev => ({ ...prev, name: e.target.value }))}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">อีเมลองค์กร (Company Email)</label>
+                <input
+                  type="email"
+                  className="form-input"
+                  placeholder="เช่น: panumas.c@movemall.com"
+                  value={newTeamMemberForm.email}
+                  onChange={e => setNewTeamMemberForm(prev => ({ ...prev, email: e.target.value }))}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">แผนกงาน (Department)</label>
+                  <select
+                    className="form-select"
+                    value={newTeamMemberForm.department}
+                    onChange={e => setNewTeamMemberForm(prev => ({ ...prev, department: e.target.value }))}
+                  >
+                    <option value="ฝ่ายการตลาด & แคมเปญ">ฝ่ายการตลาด & แคมเปญ</option>
+                    <option value="ฝ่ายการเงิน & บัญชี">ฝ่ายการเงิน & บัญชี</option>
+                    <option value="ฝ่ายสินค้า & แบรนด์ Mall">ฝ่ายสินค้า & แบรนด์ Mall</option>
+                    <option value="ฝ่ายความปลอดภัย & ป้องกันโกง">ฝ่ายความปลอดภัย & ป้องกันโกง</option>
+                    <option value="ฝ่ายบริการลูกค้า (CS)">ฝ่ายบริการลูกค้า (CS)</option>
+                    <option value="ฝ่ายขนส่ง & โลจิสติกส์">ฝ่ายขนส่ง & โลจิสติกส์</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">บทบาทสิทธิ์ (RBAC Role)</label>
+                  <select
+                    className="form-select"
+                    value={newTeamMemberForm.role}
+                    onChange={e => setNewTeamMemberForm(prev => ({ ...prev, role: e.target.value as any }))}
+                  >
+                    <option value="MARKETING_ADMIN">🎯 MARKETING_ADMIN</option>
+                    <option value="FINANCE_ADMIN">💵 FINANCE_ADMIN</option>
+                    <option value="CATALOG_ADMIN">📦 CATALOG_ADMIN</option>
+                    <option value="MODERATOR">🛡️ MODERATOR</option>
+                    <option value="CS_ADMIN">🎧 CS_ADMIN</option>
+                    <option value="LOGISTICS_ADMIN">🚚 LOGISTICS_ADMIN</option>
+                    <option value="SUPER_ADMIN">👑 SUPER_ADMIN</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">รหัสผ่านเริ่มต้น (Initial Temporary Password)</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="เช่น: MovemallPass2026!"
+                  value={newTeamMemberForm.initialPassword}
+                  onChange={e => setNewTeamMemberForm(prev => ({ ...prev, initialPassword: e.target.value }))}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
+                <button type="submit" className="admin-btn-sm admin-btn-primary" style={{ flex: 1, padding: '0.65rem', justifyContent: 'center' }}>
+                  บันทึก & มอบสิทธิ์เจ้าหน้าที่
+                </button>
+                <button type="button" className="admin-btn-sm admin-btn-outline" onClick={() => setShowAddTeamModal(false)}>
+                  ยกเลิก
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Edit Team Member Role & Permissions ── */}
+      {editingTeamMember && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-content">
+            <div className="admin-modal-header">
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>✏️ แก้ไขสิทธิ์เจ้าหน้าที่: {editingTeamMember.name}</h3>
+              <button onClick={() => setEditingTeamMember(null)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                setTeamMembers(prev =>
+                  prev.map(m => (m.id === editingTeamMember.id ? editingTeamMember : m))
+                );
+                setEditingTeamMember(null);
+                alert(`อัปเดตสิทธิ์ของ "${editingTeamMember.name}" เรียบร้อยแล้ว!`);
+              }}
+            >
+              <div className="form-group">
+                <label className="form-label">บทบาทสิทธิ์ (Role)</label>
+                <select
+                  className="form-select"
+                  value={editingTeamMember.role}
+                  onChange={e => setEditingTeamMember(prev => prev ? { ...prev, role: e.target.value as any } : null)}
+                >
+                  <option value="SUPER_ADMIN">👑 SUPER_ADMIN (ผู้ดูแลระบบสูงสุด)</option>
+                  <option value="MARKETING_ADMIN">🎯 MARKETING_ADMIN (การตลาด & แคมเปญ)</option>
+                  <option value="FINANCE_ADMIN">💵 FINANCE_ADMIN (การเงิน & Payouts)</option>
+                  <option value="CATALOG_ADMIN">📦 CATALOG_ADMIN (สินค้า & แบรนด์ Mall)</option>
+                  <option value="MODERATOR">🛡️ MODERATOR (ความปลอดภัย & ตรวจจับโกง)</option>
+                  <option value="CS_ADMIN">🎧 CS_ADMIN (บริการลูกค้า & ข้อพิพาท)</option>
+                  <option value="LOGISTICS_ADMIN">🚚 LOGISTICS_ADMIN (ขนส่ง & โลจิสติกส์)</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">แผนกงาน (Department)</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={editingTeamMember.department}
+                  onChange={e => setEditingTeamMember(prev => prev ? { ...prev, department: e.target.value } : null)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
+                <button type="submit" className="admin-btn-sm admin-btn-primary" style={{ flex: 1, padding: '0.65rem', justifyContent: 'center' }}>
+                  บันทึกการเปลี่ยนแปลงสิทธิ์
+                </button>
+                <button type="button" className="admin-btn-sm admin-btn-outline" onClick={() => setEditingTeamMember(null)}>
+                  ยกเลิก
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
