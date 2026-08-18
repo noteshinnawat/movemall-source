@@ -254,6 +254,8 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
           method: 'POST',
           body: JSON.stringify({
             credential: authRes.credential,
+            accessToken: authRes.accessToken,
+            googleUser: authRes.googleUser,
             mockUser: authRes.mockUser,
             referralCode: referralCode.trim() || undefined,
           }),

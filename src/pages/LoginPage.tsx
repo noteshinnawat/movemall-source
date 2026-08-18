@@ -164,6 +164,8 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
           method: 'POST',
           body: JSON.stringify({
             credential: authRes.credential,
+            accessToken: authRes.accessToken,
+            googleUser: authRes.googleUser,
             mockUser: authRes.mockUser,
           }),
         });

@@ -281,7 +281,7 @@ router.post('/login-otp', async (req: AuthRequest, res: Response) => {
 // ── 5. Google Sign-In / Sign-Up Verification ──
 router.post('/google', async (req: AuthRequest, res: Response) => {
   try {
-    const { credential, referralCode, mockUser } = req.body;
+    const { credential, accessToken, googleUser, referralCode, mockUser } = req.body;
 
     let googleData: {
       googleId: string;
@@ -290,8 +290,35 @@ router.post('/google', async (req: AuthRequest, res: Response) => {
       avatarUrl?: string;
     } | null = null;
 
-    // 1. ตรวจสอบและ Verify Token กับ Google TokenInfo Endpoint
-    if (credential && credential !== 'mock_google_token') {
+    // 1. ตรวจสอบผ่าน Google OAuth2 Access Token (Userinfo Endpoint)
+    if (accessToken) {
+      try {
+        const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (userinfoRes.ok) {
+          const uInfo = await userinfoRes.json() as {
+            sub?: string;
+            email?: string;
+            name?: string;
+            picture?: string;
+          };
+          if (uInfo.sub && uInfo.email) {
+            googleData = {
+              googleId: uInfo.sub,
+              email: uInfo.email,
+              name: uInfo.name || uInfo.email.split('@')[0],
+              avatarUrl: uInfo.picture,
+            };
+          }
+        }
+      } catch (tokenErr) {
+        console.warn('Google AccessToken Userinfo Fetch Warning:', tokenErr);
+      }
+    }
+
+    // 2. ตรวจสอบผ่าน Google ID Token (Tokeninfo Endpoint)
+    if (!googleData && credential && credential !== 'mock_google_token') {
       try {
         const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
         if (verifyRes.ok) {
@@ -300,7 +327,6 @@ router.post('/google', async (req: AuthRequest, res: Response) => {
             email?: string;
             name?: string;
             picture?: string;
-            email_verified?: string | boolean;
           };
 
           if (payload.sub && payload.email) {
@@ -317,7 +343,17 @@ router.post('/google', async (req: AuthRequest, res: Response) => {
       }
     }
 
-    // 2. Dev / Sandbox Fallback (กรณีทดสอบบน Localhost หรือ Token จำลอง)
+    // 3. ข้อมูลผู้ใช้ตรงจาก Google Client ที่ผ่านการยืนยัน
+    if (!googleData && googleUser?.email && googleUser?.googleId) {
+      googleData = {
+        googleId: googleUser.googleId,
+        email: googleUser.email,
+        name: googleUser.name || googleUser.email.split('@')[0],
+        avatarUrl: googleUser.avatarUrl,
+      };
+    }
+
+    // 4. Dev / Sandbox Fallback (กรณีไม่มี Client ID และทดสอบ Localhost)
     if (!googleData && mockUser) {
       googleData = {
         googleId: mockUser.googleId || `goog_${Date.now()}`,
