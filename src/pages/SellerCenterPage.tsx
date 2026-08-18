@@ -1537,19 +1537,25 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             <span>+ ลงขายสินค้าใหม่</span>
           </button>
 
-          <div className="admin-profile-pill">
+          <div
+            className="admin-profile-pill"
+            onClick={() => setActiveTab('settings')}
+            style={{ cursor: 'pointer' }}
+            title="คลิกเพื่อไปที่การตั้งค่าร้านค้า (เปลี่ยนรูปโปรไฟล์ / แบนเนอร์)"
+          >
             {currentStore.logo ? (
               <img
                 src={currentStore.logo}
                 alt={currentStore.name}
                 className="admin-avatar-img"
+                style={{ borderRadius: '50%' }}
               />
             ) : (
               <div
                 style={{
                   width: 28,
                   height: 28,
-                  borderRadius: 6,
+                  borderRadius: '50%',
                   background: '#2563eb',
                   color: '#ffffff',
                   display: 'flex',
@@ -1564,7 +1570,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             )}
             <div className="admin-profile-text">
               <span className="admin-profile-name">{currentStore.name}</span>
-              <span className="admin-profile-role">🏪 ACTIVE SELLER</span>
+              <span className="admin-profile-role">⚙️ ตั้งค่าร้านค้า</span>
             </div>
           </div>
         </div>
