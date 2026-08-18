@@ -22,56 +22,16 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Movemall App Error Caught:', error, errorInfo);
-
-    // If it's a chunk loading error caused by a new deployment on Cloudflare Pages
-    const isChunkError =
-      error.name === 'ChunkLoadError' ||
-      error.message?.includes('Failed to fetch dynamically imported module') ||
-      error.message?.includes('Importing a module script failed') ||
-      error.message?.includes('MIME type of "text/html"');
-
-    if (isChunkError) {
-      const retryKey = 'mm_chunk_reload_' + window.location.pathname;
-      if (!sessionStorage.getItem(retryKey)) {
-        sessionStorage.setItem(retryKey, 'true');
-        console.warn('🔄 Stale chunk detected, refreshing to latest deployment...');
-        window.location.reload();
-      }
-    }
   }
 
-  private handleReload = async () => {
-    try {
-      sessionStorage.clear();
-      if ('caches' in window) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map(key => caches.delete(key)));
-      }
-      if ('serviceWorker' in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map(r => r.unregister()));
-      }
-    } catch {
-      // ignore
-    }
-    window.location.href = window.location.origin + window.location.pathname + '?_reload=' + Date.now();
+  private handleReload = () => {
+    this.setState({ hasError: false, error: null });
+    window.location.href = window.location.origin + window.location.pathname;
   };
 
-  private handleGoHome = async () => {
-    try {
-      sessionStorage.clear();
-      if ('caches' in window) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map(key => caches.delete(key)));
-      }
-      if ('serviceWorker' in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map(r => r.unregister()));
-      }
-    } catch {
-      // ignore
-    }
-    window.location.href = window.location.origin + '/?_reload=' + Date.now();
+  private handleGoHome = () => {
+    this.setState({ hasError: false, error: null });
+    window.location.href = window.location.origin + '/';
   };
 
   public render() {

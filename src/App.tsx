@@ -14,7 +14,7 @@ import { VisualSearchModal } from './components/VisualSearchModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { API_BASE_URL, createProductApi, updateProductApi, deleteProductApi } from './utils/api';
 
-// Helper to automatically retry & reload on stale chunks (Cloudflare Pages deployment invalidation)
+// Helper to safely retry module imports without causing browser reload loops
 function lazyRetry<T extends ComponentType<any>>(
   componentImport: () => Promise<{ default: T }>
 ) {
@@ -22,13 +22,14 @@ function lazyRetry<T extends ComponentType<any>>(
     try {
       return await componentImport();
     } catch (error) {
-      console.warn('🔄 Chunk load failed, attempting auto-reload to fetch newest assets...', error);
-      const reloadKey = 'mm_retry_' + window.location.pathname;
-      if (!sessionStorage.getItem(reloadKey)) {
-        sessionStorage.setItem(reloadKey, 'true');
-        window.location.reload();
+      // Retry once in memory after a short delay
+      try {
+        await new Promise(resolve => setTimeout(resolve, 300));
+        return await componentImport();
+      } catch (retryError) {
+        console.error('Failed to load page module:', retryError);
+        throw retryError;
       }
-      throw error;
     }
   });
 }
