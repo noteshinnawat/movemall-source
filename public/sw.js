@@ -1,8 +1,6 @@
 // Movemall Service Worker (PWA)
-const CACHE_NAME = 'movemall-cache-v2';
+const CACHE_NAME = 'movemall-cache-v3';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
   '/manifest.json',
   '/favicon.svg'
 ];
