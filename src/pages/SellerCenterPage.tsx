@@ -148,11 +148,13 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   const sellerStoreSlug = localStorage.getItem('movemall_store_slug') || (customStoreName ? generateSlug(customStoreName) : 'my-shop');
   const sellerStoreId = localStorage.getItem('movemall_seller_store_id') || (currentUser?.id ? `store-${currentUser.id}` : 'store-my-live');
 
+  const currentStoreLogo = localStorage.getItem('movemall_store_logo') || currentUser?.avatarUrl || '';
+
   const currentStore = {
     id: sellerStoreId,
     slug: sellerStoreSlug,
     name: customStoreName || 'ร้านค้าของฉัน',
-    logo: currentUser?.avatarUrl || localStorage.getItem('movemall_store_logo') || '',
+    logo: currentStoreLogo,
     rating: 5.0,
     responseRate: '100%',
     followers: 0,
@@ -167,7 +169,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   const [storeSettingsForm, setStoreSettingsForm] = useState({
     name: customStoreName || '',
     description: localStorage.getItem('movemall_store_bio') || '',
-    logo: currentUser?.avatarUrl || localStorage.getItem('movemall_store_logo') || '',
+    logo: localStorage.getItem('movemall_store_logo') || currentUser?.avatarUrl || '',
     banner: localStorage.getItem('movemall_store_banner') || '',
     category: localStorage.getItem('movemall_store_category') || 'electronics',
     contactPhone: localStorage.getItem('movemall_store_phone') || '',
@@ -291,15 +293,48 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     alert(`ส่งรายงานพฤติกรรมลูกค้าออเดอร์ ${reportForm.orderId} เรียบร้อยแล้ว ทีมงาน CS Admin จะตรวจสอบและชดเชยค่าขนส่งให้ภายใน 24 ชม.`);
   }
 
-  // ── Live Seller Chat State ──
+  // ── Live Seller Chat State (Strict Store Isolated) ──
   const [sellerMessages, setSellerMessages] = useState<Record<string, any[]>>(() => {
-    return getStoredChatHistory();
+    const all = getStoredChatHistory();
+    const filtered: Record<string, any[]> = {};
+    Object.keys(all).forEach(k => {
+      if (k.startsWith(`${currentStore.id}::`)) {
+        filtered[k] = all[k];
+      }
+    });
+    return filtered;
   });
 
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('guest_user');
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
   const [sellerInputVal, setSellerInputVal] = useState('');
   const [isSellerSocketConnected, setIsSellerSocketConnected] = useState(false);
   const sellerMessagesAreaRef = useRef<HTMLDivElement>(null);
+
+  // Sync real chat messages for this specific store from DB
+  useEffect(() => {
+    async function loadStoreChatHistory() {
+      try {
+        const res = await fetchApi<{ success: boolean; messages: any[] }>(`/api/chat/messages?storeId=${currentStore.id}`);
+        if (res?.messages && res.messages.length > 0) {
+          setSellerMessages(prev => {
+            const next = { ...prev };
+            res.messages.forEach((m: any) => {
+              const custId = m.sender === 'store' ? m.recipientId : m.senderId;
+              const threadKey = `${currentStore.id}::${custId}`;
+              const list = next[threadKey] || [];
+              if (!list.some(existing => existing.id === m.id)) {
+                next[threadKey] = [...list, m];
+              }
+            });
+            return next;
+          });
+        }
+      } catch {
+        // local mode
+      }
+    }
+    loadStoreChatHistory();
+  }, [currentStore.id]);
 
   useEffect(() => {
     if (activeTab === 'chat' && sellerMessagesAreaRef.current) {
@@ -320,11 +355,14 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     const handleReceiveMsg = (msg: any) => {
       if (!msg) return;
       const storeTargetId = msg.storeId || currentStore.id;
+      // Strictly ignore messages from other stores
+      if (storeTargetId !== currentStore.id) return;
+
       const custId = msg.customerId || msg.userId || (msg.sender === 'store' ? (msg.recipientId || selectedCustomerId) : 'guest_user');
-      const threadKey = `${storeTargetId}::${custId}`;
+      const threadKey = `${currentStore.id}::${custId}`;
 
       setSellerMessages(prev => {
-        const list = prev[threadKey] || prev[custId] || [];
+        const list = prev[threadKey] || [];
         // Deduplicate by ID or identical text from same sender
         const isDuplicate = list.some(m =>
           m.id === msg.id ||
@@ -334,9 +372,9 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
         const updated = {
           ...prev,
           [threadKey]: [...list, msg],
-          [custId]: [...list, msg],
         };
-        saveStoredChatHistory(updated);
+        const allStored = getStoredChatHistory();
+        saveStoredChatHistory({ ...allStored, [threadKey]: updated[threadKey] });
         return updated;
       });
     };
@@ -4240,25 +4278,31 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 <div className="seller-chat-customer-list">
                   {(() => {
                     const activeChatCustomerIds = Array.from(new Set([
-                      ...Object.keys(sellerMessages).map(k => k.includes('::') ? k.split('::')[1] : k),
-                      ...sellerOrders.map(o => o.user?.id || (o.customerName ? `buyer-${o.orderId}` : null)).filter(Boolean) as string[],
+                      ...Object.keys(sellerMessages)
+                        .filter(k => k.startsWith(`${currentStore.id}::`))
+                        .map(k => k.split('::')[1]),
+                      ...sellerOrders
+                        .filter(o => o.storeId === currentStore.id)
+                        .map(o => o.user?.id || (o.customerName ? `buyer-${o.orderId}` : null))
+                        .filter(Boolean) as string[],
                     ]));
 
                     if (activeChatCustomerIds.length === 0) {
                       return (
-                        <div style={{ padding: '36px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.5 }}>
-                          <MessageSquare size={24} style={{ opacity: 0.4, margin: '0 auto 8px', display: 'block' }} />
-                          ยังไม่มีลูกค้าทักแชทเข้ามาในขณะนี้
+                        <div style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6 }}>
+                          <MessageSquare size={28} style={{ opacity: 0.35, margin: '0 auto 10px', display: 'block', color: '#64748B' }} />
+                          <strong style={{ color: '#334155', display: 'block', marginBottom: 4 }}>ยังไม่มีลูกค้าทักแชท</strong>
+                          เมื่อมีผู้ซื้อส่งข้อความสอบถามสินค้า จะปรากฏในรายการนี้แบบสด
                         </div>
                       );
                     }
 
                     return activeChatCustomerIds.map((cId, idx) => {
-                      const isSelected = selectedCustomerId === cId;
+                      const isSelected = (selectedCustomerId || activeChatCustomerIds[0]) === cId;
                       const matchedOrder = sellerOrders.find(o => o.user?.id === cId || `buyer-${o.orderId}` === cId);
                       const customerDisplayName = matchedOrder ? `${matchedOrder.customerName} (${matchedOrder.orderId})` : (cId === 'guest_user' ? 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)' : `ลูกค้า ${cId}`);
                       const threadKey = `${currentStore.id}::${cId}`;
-                      const threadMsgs = sellerMessages[threadKey] || sellerMessages[cId] || [];
+                      const threadMsgs = sellerMessages[threadKey] || [];
                       const lastMsg = threadMsgs[threadMsgs.length - 1];
 
                       return (
@@ -4288,87 +4332,111 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 
               {/* Chat Thread */}
               <div className="seller-chat-main">
-                <div className="seller-chat-header">
-                  <div>
-                    <strong style={{ fontSize: 14, color: 'var(--text-primary)' }}>
-                      {(() => {
-                        const matchedOrder = sellerOrders.find(o => o.user?.id === selectedCustomerId || `buyer-${o.orderId}` === selectedCustomerId);
-                        return matchedOrder ? `${matchedOrder.customerName} (คำสั่งซื้อ ${matchedOrder.orderId})` : (selectedCustomerId === 'guest_user' ? 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)' : selectedCustomerId);
-                      })()}
-                    </strong>
-                    <div style={{ fontSize: 11, color: '#10B981', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                      <span>● กำลังสนทนาผ่าน WebSocket สด</span>
-                    </div>
-                  </div>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)', background: '#F3F4F6', padding: '4px 8px', borderRadius: 4 }}>
-                    🔒 ปลอดภัยด้วย Movemall Merchant Shield
-                  </span>
-                </div>
+                {(() => {
+                  const activeChatCustomerIds = Array.from(new Set([
+                    ...Object.keys(sellerMessages)
+                      .filter(k => k.startsWith(`${currentStore.id}::`))
+                      .map(k => k.split('::')[1]),
+                    ...sellerOrders
+                      .filter(o => o.storeId === currentStore.id)
+                      .map(o => o.user?.id || (o.customerName ? `buyer-${o.orderId}` : null))
+                      .filter(Boolean) as string[],
+                  ]));
 
-                <div ref={sellerMessagesAreaRef} className="seller-chat-messages-area">
-                  {(() => {
-                    const activeThreadKey = `${currentStore.id}::${selectedCustomerId}`;
-                    const activeChatList = sellerMessages[activeThreadKey] || sellerMessages[selectedCustomerId] || [];
-
-                    if (activeChatList.length === 0) {
-                      return (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', padding: 30, textAlign: 'center' }}>
-                          <MessageSquare size={36} style={{ opacity: 0.3, marginBottom: 10 }} />
-                          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>พร้อมรับข้อความสนทนา</div>
-                          <div style={{ fontSize: 12 }}>พิมพ์ข้อความตอบกลับหรือเลือกข้อความด่วนด้านล่างเพื่อเริ่มการสนทนา</div>
+                  if (activeChatCustomerIds.length === 0) {
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', padding: 40, textAlign: 'center' }}>
+                        <MessageSquare size={48} style={{ opacity: 0.25, marginBottom: 14, color: '#2563EB' }} />
+                        <div style={{ fontSize: 16, fontWeight: 700, color: '#1E293B', marginBottom: 6 }}>พร้อมรับข้อความสนทนาจากลูกค้า</div>
+                        <div style={{ fontSize: 13, color: '#64748B', maxWidth: 380, lineHeight: 1.6 }}>
+                          ร้านค้าของคุณเชื่อมต่อกับระบบ <strong>Movemall Live WebSocket</strong> แล้ว เมื่อมีลูกค้าทักเข้ามา ข้อความจะแสดงผลที่นี่ทันทีแบบเรียลไทม์
                         </div>
-                      );
-                    }
+                      </div>
+                    );
+                  }
 
-                    return activeChatList.map((msg, mIdx) => (
-                      <div
-                        key={msg.id || mIdx}
-                        className={`seller-chat-bubble-wrap ${msg.sender === 'store' ? 'seller-chat-bubble-wrap--seller' : 'seller-chat-bubble-wrap--customer'}`}
-                      >
-                        <div className="seller-chat-bubble">
-                          {msg.text}
+                  const activeCustomerId = selectedCustomerId || activeChatCustomerIds[0];
+                  const activeThreadKey = `${currentStore.id}::${activeCustomerId}`;
+                  const activeChatList = sellerMessages[activeThreadKey] || [];
+                  const matchedOrder = sellerOrders.find(o => o.user?.id === activeCustomerId || `buyer-${o.orderId}` === activeCustomerId);
+                  const currentCustomerTitle = matchedOrder ? `${matchedOrder.customerName} (คำสั่งซื้อ ${matchedOrder.orderId})` : (activeCustomerId === 'guest_user' ? 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)' : `ลูกค้า ${activeCustomerId}`);
+
+                  return (
+                    <>
+                      <div className="seller-chat-header">
+                        <div>
+                          <strong style={{ fontSize: 14, color: 'var(--text-primary)' }}>
+                            {currentCustomerTitle}
+                          </strong>
+                          <div style={{ fontSize: 11, color: '#10B981', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                            <span>● กำลังสนทนาผ่าน WebSocket สด</span>
+                          </div>
                         </div>
-                        <span className="seller-chat-time">
-                          {msg.time || '10:00'} • {msg.sender === 'store' ? 'ร้านค้า (คุณ)' : 'ลูกค้า'}
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)', background: '#F3F4F6', padding: '4px 8px', borderRadius: 4 }}>
+                          🔒 ปลอดภัยด้วย Movemall Merchant Shield
                         </span>
                       </div>
-                    ));
-                  })()}
-                </div>
 
-                {/* Quick Merchant Replies */}
-                <div className="seller-chat-quick-replies">
-                  {[
-                    '📦 สินค้ามีพร้อมส่งสต็อกแน่น จัดส่งรอบวันนี้ทันทีครับ 🚀',
-                    '🧾 ทางร้านสามารถออกใบกำกับภาษีเต็มรูปแบบได้ครับ 📑',
-                    '🎟️ มอบโค้ดส่วนลด 10% พิเศษสำหรับคำสั่งซื้อนี้ครับ 🎁',
-                    '✨ สินค้าของแท้ 100% มีประกันศูนย์ไทย 1 ปีเต็มครับ 🛡️',
-                  ].map((quick, qIdx) => (
-                    <button
-                      key={qIdx}
-                      type="button"
-                      className="seller-chat-quick-btn"
-                      onClick={() => handleSellerSendMessage(undefined, quick)}
-                    >
-                      {quick}
-                    </button>
-                  ))}
-                </div>
+                      <div ref={sellerMessagesAreaRef} className="seller-chat-messages-area">
+                        {activeChatList.length === 0 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', padding: 30, textAlign: 'center' }}>
+                            <MessageSquare size={36} style={{ opacity: 0.3, marginBottom: 10 }} />
+                            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>เริ่มการสนทนากับลูกค้า</div>
+                            <div style={{ fontSize: 12 }}>พิมพ์ข้อความตอบกลับหรือเลือกข้อความด่วนด้านล่างเพื่อเริ่มการสนทนา</div>
+                          </div>
+                        ) : (
+                          activeChatList.map((msg, mIdx) => (
+                            <div
+                              key={msg.id || mIdx}
+                              className={`seller-chat-bubble-wrap ${msg.sender === 'store' ? 'seller-chat-bubble-wrap--seller' : 'seller-chat-bubble-wrap--customer'}`}
+                            >
+                              <div className="seller-chat-bubble">
+                                {msg.text}
+                              </div>
+                              <span className="seller-chat-time">
+                                {msg.time || '10:00'} • {msg.sender === 'store' ? 'ร้านค้า (คุณ)' : 'ลูกค้า'}
+                              </span>
+                            </div>
+                          ))
+                        )}
+                      </div>
 
-                {/* Send Input Bar */}
-                <form className="seller-chat-input-row" onSubmit={handleSellerSendMessage}>
-                  <input
-                    type="text"
-                    className="seller-chat-input"
-                    placeholder="พิมพ์ข้อความตอบกลับลูกค้าในนามร้านค้า..."
-                    value={sellerInputVal}
-                    onChange={e => setSellerInputVal(e.target.value)}
-                  />
-                  <button type="submit" className="seller-chat-send-btn">
-                    <Send size={14} />
-                    <span>ตอบกลับ</span>
-                  </button>
-                </form>
+                      {/* Quick Merchant Replies */}
+                      <div className="seller-chat-quick-replies">
+                        {[
+                          '📦 สินค้ามีพร้อมส่งสต็อกแน่น จัดส่งรอบวันนี้ทันทีครับ 🚀',
+                          '🧾 ทางร้านสามารถออกใบกำกับภาษีเต็มรูปแบบได้ครับ 📑',
+                          '🎟️ มอบโค้ดส่วนลด 10% พิเศษสำหรับคำสั่งซื้อนี้ครับ 🎁',
+                          '✨ สินค้าของแท้ 100% มีประกันศูนย์ไทย 1 ปีเต็มครับ 🛡️',
+                        ].map((quick, qIdx) => (
+                          <button
+                            key={qIdx}
+                            type="button"
+                            className="seller-chat-quick-btn"
+                            onClick={() => handleSellerSendMessage(undefined, quick)}
+                          >
+                            {quick}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Send Input Bar */}
+                      <form className="seller-chat-input-row" onSubmit={handleSellerSendMessage}>
+                        <input
+                          type="text"
+                          className="seller-chat-input"
+                          placeholder="พิมพ์ข้อความตอบกลับลูกค้าในนามร้านค้า..."
+                          value={sellerInputVal}
+                          onChange={e => setSellerInputVal(e.target.value)}
+                        />
+                        <button type="submit" className="seller-chat-send-btn">
+                          <Send size={14} />
+                          <span>ตอบกลับ</span>
+                        </button>
+                      </form>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>

@@ -67,13 +67,17 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
       decodedId === 'store-my-live' ||
       decodedId === 'store-custom';
 
+    const savedStoreLogo = localStorage.getItem('movemall_store_logo') || currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=300&q=80';
+    const savedStoreBanner = localStorage.getItem('movemall_store_banner') || 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)';
+    const savedStoreBio = localStorage.getItem('movemall_store_bio') || 'ร้านค้าทางการในระบบ Movemall การันตีสินค้าแท้ 100% จัดส่งรวดเร็ว';
+
     if (isMatchCustom || (customName && decodedId.includes(customName))) {
       return {
         id: customId || `store-${currentUser?.id || 'my-shop'}`,
         slug: customSlug || generateSlug(customName || 'my-shop'),
         name: customName || decodedId.replace(/-/g, ' '),
-        logo: currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=300&q=80',
-        banner: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
+        logo: savedStoreLogo,
+        banner: savedStoreBanner,
         badge: 'verified',
         rating: 5.0,
         reviewCount: 48,
@@ -83,7 +87,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
         productCount: 3,
         followerCount: 12,
         location: 'กรุงเทพมหานคร',
-        description: 'ร้านค้าทางการในระบบ Movemall การันตีสินค้าแท้ 100% จัดส่งรวดเร็ว',
+        description: savedStoreBio,
       };
     }
 
