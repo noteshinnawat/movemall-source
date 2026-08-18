@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Plus, Package, DollarSign, TrendingUp, Star, Trash2, X, Store, CheckCircle,
@@ -203,6 +203,11 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('guest_user');
   const [sellerInputVal, setSellerInputVal] = useState('');
   const [isSellerSocketConnected, setIsSellerSocketConnected] = useState(false);
+  const sellerChatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    sellerChatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [sellerMessages, selectedCustomerId, activeTab]);
 
   useEffect(() => {
     const socket = getChatSocket();
@@ -3986,6 +3991,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                       </span>
                     </div>
                   ))}
+                  <div ref={sellerChatEndRef} />
                 </div>
 
                 {/* Quick Merchant Replies */}
