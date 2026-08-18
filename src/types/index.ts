@@ -265,3 +265,54 @@ export interface TaxInvoiceRequest {
   email: string;
 }
 
+// ── Trust, Moderation & Anti-Fraud Protection ──
+export type UserStatusType = 'ACTIVE' | 'WARNING' | 'COD_RESTRICTED' | 'SUSPENDED' | 'BANNED';
+export type StoreStatusType = 'ACTIVE' | 'WARNING' | 'RESTRICTED' | 'SUSPENDED' | 'BANNED';
+
+export interface ModeratedUser {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  role: string;
+  status: UserStatusType;
+  trustScore: number;
+  codSuccessRate: number;
+  codRejectedCount: number;
+  fraudRefundCount: number;
+  suspensionReason?: string | null;
+  createdAt: string;
+}
+
+export interface ModeratedStore {
+  id: string;
+  name: string;
+  status: StoreStatusType;
+  healthScore: number;
+  penaltyPoints: number;
+  penaltyReason?: string | null;
+  isLiveRestricted: boolean;
+  isSearchRestricted: boolean;
+  rating: number;
+  lateShipmentRate: number;
+  cancellationRate: number;
+}
+
+export interface ViolationReport {
+  id: string;
+  reporterName: string;
+  reporterType: 'BUYER' | 'SELLER' | 'SYSTEM';
+  reportedName: string;
+  reportedType: 'BUYER' | 'STORE';
+  orderId?: string;
+  type: 'COD_REJECTED' | 'FAKE_ORDER' | 'REFUND_ABUSE' | 'FAKE_PRODUCT' | 'MISLEADING_SPECS' | 'SCAM_OFFPLATFORM' | 'HARASSMENT' | 'NO_FDA_TISI' | 'REFUND_DENIED';
+  description: string;
+  evidenceUrl?: string;
+  requestRefund?: boolean;
+  status: 'PENDING' | 'INVESTIGATING' | 'ACTION_TAKEN' | 'DISMISSED';
+  adminNotes?: string;
+  createdAt: string;
+  resolvedAt?: string;
+}
+
+

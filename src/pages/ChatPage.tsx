@@ -9,21 +9,30 @@ import {
   Search,
   Image as ImageIcon,
   Smile,
-  ExternalLink,
-  MoreVertical,
-  Check,
-  Sparkles
+  Sparkles,
+  Radio
 } from 'lucide-react';
 import { stores } from '../data/stores';
 import { fetchApi } from '../utils/api';
+import {
+  getChatSocket,
+  joinChatRoom,
+  emitChatMessage,
+  emitTypingStatus,
+  getStoredChatHistory,
+  saveStoredChatHistory,
+} from '../utils/chatSocket';
 import './ChatPage.css';
 
 interface Message {
   id: string;
   sender: 'me' | 'store';
+  senderId?: string;
+  recipientId?: string;
   text: string;
   time: string;
   image?: string;
+  createdAt?: string;
 }
 
 interface ConversationMeta {
@@ -38,15 +47,38 @@ export function ChatPage() {
   const storeParam = searchParams.get('store');
   const initialStoreId = stores.find(s => s.id === storeParam)?.id || stores[0].id;
 
+  // Resolve current active user or persistent guest ID
+  const currentUser = (() => {
+    try {
+      const uStr = localStorage.getItem('movemall_user');
+      return uStr ? JSON.parse(uStr) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const [myUserId] = useState<string>(() => {
+    if (currentUser?.id) return currentUser.id;
+    let storedGuest = localStorage.getItem('movemall_guest_user_id');
+    if (!storedGuest) {
+      storedGuest = `guest_${Math.random().toString(36).substring(2, 9)}`;
+      localStorage.setItem('movemall_guest_user_id', storedGuest);
+    }
+    return storedGuest;
+  });
+
   const [selectedStoreId, setSelectedStoreId] = useState(initialStoreId);
   const [mobileView, setMobileView] = useState<'list' | 'chat'>(storeParam ? 'chat' : 'list');
   const [filterTab, setFilterTab] = useState<'all' | 'unread' | 'official'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [inputVal, setInputVal] = useState('');
+  const [isStoreTyping, setIsStoreTyping] = useState(false);
+  const [isSocketConnected, setIsSocketConnected] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<any>(null);
 
-  // Initial messages across multiple shops
-  const [messages, setMessages] = useState<Record<string, Message[]>>({
+  // Default seed messages across multiple shops
+  const initialSeedMessages: Record<string, Message[]> = {
     'store-techpro': [
       { id: 'm1', sender: 'store', text: 'สวัสดีครับ! ยินดีต้อนรับสู่ TechPro Official Store มีอะไรให้แอดมินดูแลสอบถามได้เลยครับ 😊', time: '10:15' },
       { id: 'm2', sender: 'me', text: 'หูฟัง Premium Pro X มีของพร้อมส่งไหมครับ?', time: '10:16' },
@@ -62,6 +94,12 @@ export function ChatPage() {
     'store-sportmax': [
       { id: 'm7', sender: 'store', text: 'SportMax Thailand สวัสดีครับ รองเท้าวิ่งรุ่นใหม่เข้าสต็อกครบทุกไซส์แล้วนะครับ 🏃‍♂️', time: '2 วันที่แล้ว' },
     ],
+  };
+
+  // Messages State (Merge LocalStorage + Seed)
+  const [messages, setMessages] = useState<Record<string, Message[]>>(() => {
+    const saved = getStoredChatHistory();
+    return { ...initialSeedMessages, ...saved };
   });
 
   // Conversation status (unread count, online status)
@@ -72,6 +110,106 @@ export function ChatPage() {
     'store-sportmax': { unreadCount: 0, lastActive: 'ออนไลน์เมื่อ 3 ชม. ที่แล้ว', isOnline: false },
   });
 
+  // Save to LocalStorage whenever messages change
+  useEffect(() => {
+    saveStoredChatHistory(messages);
+  }, [messages]);
+
+  // Connect WebSocket & Register Socket listeners
+  useEffect(() => {
+    const socket = getChatSocket();
+
+    const handleConnect = () => {
+      setIsSocketConnected(true);
+      joinChatRoom(selectedStoreId, myUserId);
+    };
+
+    const handleDisconnect = () => {
+      setIsSocketConnected(false);
+    };
+
+    const handleReceiveMessage = (msg: any) => {
+      if (!msg || !msg.text) return;
+      const targetStoreId = msg.storeId || selectedStoreId;
+
+      const formattedMsg: Message = {
+        id: msg.id || `msg-${Date.now()}`,
+        sender: msg.sender === 'store' || msg.senderId === targetStoreId ? 'store' : 'me',
+        senderId: msg.senderId,
+        recipientId: msg.recipientId,
+        text: msg.text,
+        time: msg.time || new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+        createdAt: msg.createdAt,
+      };
+
+      setMessages(prev => {
+        const storeMsgs = prev[targetStoreId] || [];
+        // Prevent duplicate message IDs
+        if (storeMsgs.some(m => m.id === formattedMsg.id)) return prev;
+        return {
+          ...prev,
+          [targetStoreId]: [...storeMsgs, formattedMsg],
+        };
+      });
+
+      setIsStoreTyping(false);
+    };
+
+    const handleUserTyping = (data: { storeId: string; userId: string; isTyping: boolean; sender: string }) => {
+      if (data.storeId === selectedStoreId && data.sender === 'store') {
+        setIsStoreTyping(data.isTyping);
+      }
+    };
+
+    if (socket.connected) {
+      setIsSocketConnected(true);
+      joinChatRoom(selectedStoreId, myUserId);
+    }
+
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+    socket.on('receive_chat_message', handleReceiveMessage);
+    socket.on('user_typing', handleUserTyping);
+
+    return () => {
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+      socket.off('receive_chat_message', handleReceiveMessage);
+      socket.off('user_typing', handleUserTyping);
+    };
+  }, [selectedStoreId, myUserId]);
+
+  // Fetch real historical messages from Backend API whenever active store changes
+  useEffect(() => {
+    joinChatRoom(selectedStoreId, myUserId);
+
+    async function loadApiMessages() {
+      try {
+        const res = await fetchApi<{ success: boolean; messages: any[] }>(
+          `/api/chat/messages?storeId=${selectedStoreId}&userId=${myUserId}`
+        );
+        if (res?.messages && res.messages.length > 0) {
+          setMessages(prev => {
+            const currentList = prev[selectedStoreId] || [];
+            // Merge unique messages
+            const existingIds = new Set(currentList.map(m => m.id));
+            const newFromApi = res.messages.filter((m: any) => !existingIds.has(m.id));
+            if (newFromApi.length === 0) return prev;
+            return {
+              ...prev,
+              [selectedStoreId]: [...currentList, ...newFromApi],
+            };
+          });
+        }
+      } catch (err) {
+        // Backend API offline or local mode — fallback gracefully
+        console.debug('Backend chat API offline, operating in local sync mode');
+      }
+    }
+
+    loadApiMessages();
+  }, [selectedStoreId, myUserId]);
+
   // Handle URL param changes
   useEffect(() => {
     if (storeParam) {
@@ -79,7 +217,6 @@ export function ChatPage() {
       if (found) {
         setSelectedStoreId(found.id);
         setMobileView('chat');
-        // Clear unread
         setConvMeta(prev => ({
           ...prev,
           [found.id]: { ...prev[found.id], unreadCount: 0 }
@@ -93,12 +230,12 @@ export function ChatPage() {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
   }, [mobileView]);
 
-  // Auto-scroll to bottom of message list isolated within the chat box (never scrolls window/page)
+  // Auto-scroll to bottom of message list
   useEffect(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
-  }, [messages, selectedStoreId, mobileView]);
+  }, [messages, selectedStoreId, mobileView, isStoreTyping]);
 
   const activeStore = stores.find(s => s.id === selectedStoreId) || stores[0];
 
@@ -106,7 +243,6 @@ export function ChatPage() {
     setSelectedStoreId(storeId);
     setMobileView('chat');
     setSearchParams({ store: storeId });
-    // Mark as read
     setConvMeta(prev => ({
       ...prev,
       [storeId]: { ...prev[storeId], unreadCount: 0 }
@@ -117,18 +253,43 @@ export function ChatPage() {
     setMobileView('list');
   }
 
-  function handleSend(e?: React.FormEvent, customText?: string) {
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setInputVal(e.target.value);
+
+    // Emit user typing status via WebSocket
+    emitTypingStatus({
+      storeId: selectedStoreId,
+      userId: myUserId,
+      isTyping: true,
+      sender: 'me',
+    });
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      emitTypingStatus({
+        storeId: selectedStoreId,
+        userId: myUserId,
+        isTyping: false,
+        sender: 'me',
+      });
+    }, 1500);
+  }
+
+  async function handleSend(e?: React.FormEvent, customText?: string) {
     if (e) e.preventDefault();
     const textToSend = customText || inputVal;
     if (!textToSend.trim()) return;
 
     const newMsg: Message = {
-      id: `msg-${Date.now()}`,
+      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       sender: 'me',
+      senderId: myUserId,
+      recipientId: selectedStoreId,
       text: textToSend.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
     };
 
+    // 1. Optimistic Local State Update
     const currentStoreMsgs = messages[selectedStoreId] || [];
     setMessages(prev => ({
       ...prev,
@@ -136,32 +297,75 @@ export function ChatPage() {
     }));
     setInputVal('');
 
-    // Automated simulated smart reply
-    setTimeout(() => {
-      let replyText = `ขอบคุณสำหรับข้อความครับ ร้าน ${activeStore.name} ได้รับคำถามแล้ว แอดมินจะรีบดูแลให้ทันทีครับ! 😊`;
+    // 2. Real-time WebSocket Broadcast
+    emitChatMessage({
+      storeId: selectedStoreId,
+      userId: myUserId,
+      text: textToSend.trim(),
+      sender: 'me',
+    });
 
-      if (textToSend.includes('พร้อมส่ง') || textToSend.includes('ของไหม')) {
-        replyText = `มีสินค้าพร้อมส่งสต็อกแน่นๆ เลยครับผม สั่งซื้อตอนนี้จัดส่งรอบวันนี้ได้ทันทีครับ 📦⚡`;
-      } else if (textToSend.includes('รูป') || textToSend.includes('ขอดู')) {
-        replyText = `ภาพถ่ายสินค้าจริงจากสต็อกตามรูปนี้เลยครับ มั่นใจได้เลยว่าของแท้ 100% สวยตรงปกแน่นอนครับ ✨`;
-      } else if (textToSend.includes('ภาษี')) {
-        replyText = `ทางร้านสามารถออกใบกำกับภาษีเต็มรูปแบบได้ครับ เพียงกรอกข้อมูล Tax ID ในขั้นตอนชำระเงินได้เลยครับ 🧾`;
-      } else if (textToSend.includes('โค้ด') || textToSend.includes('ส่วนลด')) {
-        replyText = `มีโค้ดลดพิเศษ 10% หน้าร้านค้า เก็บโค้ดหน้าร้านแล้วนำมากดสั่งซื้อได้เลยครับผม 🎟️`;
-      }
+    // 3. Persist to Backend REST API (Async)
+    try {
+      fetchApi('/api/chat/messages', {
+        method: 'POST',
+        headers: { 'x-user-id': myUserId },
+        body: JSON.stringify({
+          storeId: selectedStoreId,
+          recipientId: selectedStoreId,
+          text: textToSend.trim(),
+          senderRole: 'buyer',
+        }),
+      }).catch(() => {});
+    } catch {
+      // ignore
+    }
 
-      const autoReply: Message = {
-        id: `reply-${Date.now()}`,
-        sender: 'store',
-        text: replyText,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      };
+    // 4. Intelligent Smart Assistant Reply (Triggered when chatting with default demo stores)
+    const isStandardDemoStore = ['store-techpro', 'store-fashionista', 'store-beautyglow', 'store-sportmax'].includes(selectedStoreId);
+    if (isStandardDemoStore) {
+      setTimeout(() => {
+        setIsStoreTyping(true);
+      }, 500);
 
-      setMessages(prev => ({
-        ...prev,
-        [selectedStoreId]: [...(prev[selectedStoreId] || []), autoReply],
-      }));
-    }, 1100);
+      setTimeout(() => {
+        setIsStoreTyping(false);
+
+        let replyText = `ขอบคุณสำหรับข้อความครับ ร้าน ${activeStore.name} ได้รับคำถามแล้ว แอดมินจะรีบดูแลให้ทันทีครับ! 😊`;
+
+        if (textToSend.includes('พร้อมส่ง') || textToSend.includes('ของไหม')) {
+          replyText = `มีสินค้าพร้อมส่งสต็อกแน่นๆ เลยครับผม สั่งซื้อตอนนี้จัดส่งรอบวันนี้ได้ทันทีครับ 📦⚡`;
+        } else if (textToSend.includes('รูป') || textToSend.includes('ขอดู')) {
+          replyText = `ภาพถ่ายสินค้าจริงจากสต็อกตามรูปนี้เลยครับ มั่นใจได้เลยว่าของแท้ 100% สวยตรงปกแน่นอนครับ ✨`;
+        } else if (textToSend.includes('ภาษี')) {
+          replyText = `ทางร้านสามารถออกใบกำกับภาษีเต็มรูปแบบได้ครับ เพียงกรอกข้อมูล Tax ID ในขั้นตอนชำระเงินได้เลยครับ 🧾`;
+        } else if (textToSend.includes('โค้ด') || textToSend.includes('ส่วนลด')) {
+          replyText = `มีโค้ดลดพิเศษ 10% หน้าร้านค้า เก็บโค้ดหน้าร้านแล้วนำมากดสั่งซื้อได้เลยครับผม 🎟️`;
+        }
+
+        const autoReply: Message = {
+          id: `reply-${Date.now()}`,
+          sender: 'store',
+          senderId: selectedStoreId,
+          recipientId: myUserId,
+          text: replyText,
+          time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+        };
+
+        setMessages(prev => ({
+          ...prev,
+          [selectedStoreId]: [...(prev[selectedStoreId] || []), autoReply],
+        }));
+
+        // Broadcast reply to socket so seller center also syncs
+        emitChatMessage({
+          storeId: selectedStoreId,
+          userId: myUserId,
+          text: replyText,
+          sender: 'store',
+        });
+      }, 1200);
+    }
   }
 
   const quickQuestions = [
@@ -212,6 +416,11 @@ export function ChatPage() {
                 💬 กล่องข้อความแชท
                 {totalUnread > 0 && <span className="chat-badge-count">{totalUnread}</span>}
               </h1>
+              {isSocketConnected && (
+                <span className="chat-live-badge" title="WebSocket Live Connected">
+                  <Radio size={10} className="chat-live-icon" /> สด
+                </span>
+              )}
             </div>
 
             {/* Search Input */}
@@ -325,6 +534,11 @@ export function ChatPage() {
                   {activeStore.badge === 'official' && (
                     <span className="chat-badge-official">Official Mall</span>
                   )}
+                  {isSocketConnected && (
+                    <span className="chat-live-badge">
+                      <Radio size={9} /> เชื่อมต่อสด
+                    </span>
+                  )}
                 </div>
                 <div className="chat-header-sub">
                   <span className="chat-response-rate">● ตอบแชท {activeStore.responseRate}</span>
@@ -362,6 +576,17 @@ export function ChatPage() {
                 </span>
               </div>
             ))}
+
+            {isStoreTyping && (
+              <div className="chat-bubble-wrap chat-bubble-wrap--them">
+                <div className="chat-typing-bubble">
+                  <span className="chat-typing-dot" />
+                  <span className="chat-typing-dot" />
+                  <span className="chat-typing-dot" />
+                </div>
+                <span className="chat-time">กำลังพิมพ์...</span>
+              </div>
+            )}
           </div>
 
           {/* Quick Questions Strip */}
@@ -385,10 +610,20 @@ export function ChatPage() {
 
           {/* Input Bar */}
           <form className="chat-input-bar" onSubmit={handleSend}>
-            <button type="button" className="chat-tool-btn" title="แนบรูปภาพ" onClick={() => handleSend(undefined, '📸 [ส่งรูปภาพสินค้าตัวอย่าง]')}>
+            <button
+              type="button"
+              className="chat-tool-btn"
+              title="แนบรูปภาพ"
+              onClick={() => handleSend(undefined, '📸 [ส่งรูปภาพสินค้าตัวอย่าง]')}
+            >
               <ImageIcon size={18} />
             </button>
-            <button type="button" className="chat-tool-btn" title="อีโมจิ" onClick={() => setInputVal(prev => prev + ' 😊')}>
+            <button
+              type="button"
+              className="chat-tool-btn"
+              title="อีโมจิ"
+              onClick={() => setInputVal(prev => prev + ' 😊')}
+            >
               <Smile size={18} />
             </button>
             <input
@@ -396,7 +631,7 @@ export function ChatPage() {
               className="chat-input"
               placeholder={`พิมพ์ข้อความถึง ${activeStore.name}...`}
               value={inputVal}
-              onChange={e => setInputVal(e.target.value)}
+              onChange={handleInputChange}
             />
             <button type="submit" className="chat-send-btn">
               <Send size={15} />
@@ -410,4 +645,3 @@ export function ChatPage() {
 }
 
 export default ChatPage;
-

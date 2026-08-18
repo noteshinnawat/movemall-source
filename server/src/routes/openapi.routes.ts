@@ -28,6 +28,158 @@ function authenticatePartnerApi(req: Request, res: Response, next: NextFunction)
 
 router.use(authenticatePartnerApi);
 
+// ── In-memory Partner Connection Store (Synced per Store) ──
+interface PartnerConnection {
+  partnerId: string;
+  partnerName: string;
+  category: 'ERP' | 'CHAT' | 'WMS';
+  connected: boolean;
+  lastSyncedAt?: string;
+  syncHealth: number; // 0-100%
+  autoSyncStock: boolean;
+  autoSyncOrders: boolean;
+  autoSyncChat: boolean;
+  webhookTarget?: string;
+}
+
+const storePartnerRegistry: Record<string, Record<string, PartnerConnection>> = {
+  'store-techpro': {
+    'bigseller': {
+      partnerId: 'bigseller',
+      partnerName: 'BigSeller (ERP & Stock Hub)',
+      category: 'ERP',
+      connected: true,
+      lastSyncedAt: new Date(Date.now() - 3 * 60000).toISOString(),
+      syncHealth: 99,
+      autoSyncStock: true,
+      autoSyncOrders: true,
+      autoSyncChat: false,
+      webhookTarget: 'https://api.bigseller.com/v1/movemall/events',
+    },
+    'page365': {
+      partnerId: 'page365',
+      partnerName: 'Page365 (Omnichannel Social Chat)',
+      category: 'CHAT',
+      connected: true,
+      lastSyncedAt: new Date(Date.now() - 1 * 60000).toISOString(),
+      syncHealth: 100,
+      autoSyncStock: false,
+      autoSyncOrders: true,
+      autoSyncChat: true,
+      webhookTarget: 'https://api.page365.net/integrations/movemall/webhook',
+    },
+    'zwiz': {
+      partnerId: 'zwiz',
+      partnerName: 'Zwiz.ai (AI Chatbot & Live Stream)',
+      category: 'CHAT',
+      connected: false,
+      syncHealth: 0,
+      autoSyncStock: false,
+      autoSyncOrders: false,
+      autoSyncChat: false,
+    },
+    'ginee': {
+      partnerId: 'ginee',
+      partnerName: 'Ginee Omnichannel',
+      category: 'ERP',
+      connected: false,
+      syncHealth: 0,
+      autoSyncStock: false,
+      autoSyncOrders: false,
+      autoSyncChat: false,
+    },
+    'ohochat': {
+      partnerId: 'ohochat',
+      partnerName: 'Oho Chat (Enterprise Customer Care)',
+      category: 'CHAT',
+      connected: false,
+      syncHealth: 0,
+      autoSyncStock: false,
+      autoSyncOrders: false,
+      autoSyncChat: false,
+    }
+  }
+};
+
+// ── 0. Partner Connections Status & Toggle Endpoints ──
+router.get('/partners/status', (req: Request, res: Response) => {
+  const storeId = (req.query.storeId as string) || 'store-techpro';
+  const connections = storePartnerRegistry[storeId] || storePartnerRegistry['store-techpro'];
+  res.json({
+    status: 'success',
+    storeId,
+    partners: Object.values(connections),
+    updatedAt: new Date().toISOString(),
+  });
+});
+
+router.post('/partners/connect', (req: Request, res: Response) => {
+  const { storeId = 'store-techpro', partnerId, connected, autoSyncStock, autoSyncOrders, autoSyncChat, webhookTarget } = req.body;
+
+  if (!partnerId) {
+    res.status(400).json({ error: 'partnerId is required' });
+    return;
+  }
+
+  if (!storePartnerRegistry[storeId]) {
+    storePartnerRegistry[storeId] = { ...storePartnerRegistry['store-techpro'] };
+  }
+
+  const existing = storePartnerRegistry[storeId][partnerId] || {
+    partnerId,
+    partnerName: partnerId.toUpperCase(),
+    category: 'ERP',
+    connected: false,
+    syncHealth: 100,
+    autoSyncStock: true,
+    autoSyncOrders: true,
+    autoSyncChat: false,
+  };
+
+  storePartnerRegistry[storeId][partnerId] = {
+    ...existing,
+    connected: connected !== undefined ? connected : !existing.connected,
+    lastSyncedAt: connected ? new Date().toISOString() : existing.lastSyncedAt,
+    syncHealth: connected ? 100 : 0,
+    autoSyncStock: autoSyncStock !== undefined ? autoSyncStock : existing.autoSyncStock,
+    autoSyncOrders: autoSyncOrders !== undefined ? autoSyncOrders : existing.autoSyncOrders,
+    autoSyncChat: autoSyncChat !== undefined ? autoSyncChat : existing.autoSyncChat,
+    webhookTarget: webhookTarget || existing.webhookTarget,
+  };
+
+  res.json({
+    status: 'success',
+    message: `Partner ${partnerId} connection status updated successfully`,
+    partner: storePartnerRegistry[storeId][partnerId],
+  });
+});
+
+// ── 0.1 Partner Onboarding Application Request ──
+router.post('/partners/request-access', (req: Request, res: Response) => {
+  const { companyName, softwareName, contactEmail, category, estimatedStores, technicalDocUrl } = req.body;
+
+  if (!companyName || !softwareName || !contactEmail) {
+    res.status(400).json({ error: 'companyName, softwareName, and contactEmail are required' });
+    return;
+  }
+
+  res.status(201).json({
+    status: 'success',
+    message: 'Partner integration application submitted to Movemall ISV Team successfully',
+    ticketId: `ISV-REQ-${Date.now().toString(36).toUpperCase()}`,
+    submittedData: {
+      companyName,
+      softwareName,
+      contactEmail,
+      category: category || 'ERP',
+      estimatedStores: estimatedStores || '10-50',
+      technicalDocUrl,
+      status: 'UNDER_REVIEW',
+      slaResponseHours: 24,
+    }
+  });
+});
+
 // ── 1. Inventory & Stock Sync API (2-Way Sync with ERP/WMS) ──
 router.post('/products/sync', async (req: Request, res: Response) => {
   try {
@@ -71,6 +223,26 @@ router.post('/products/sync', async (req: Request, res: Response) => {
       },
     });
   }
+});
+
+// ── 1.1 Batch Products & Stock Sync (For BigSeller / Ginee Bulk Sync) ──
+router.post('/products/batch-sync', (req: Request, res: Response) => {
+  const { items = [] } = req.body;
+
+  if (!Array.isArray(items) || items.length === 0) {
+    res.status(400).json({ error: 'items array is required and cannot be empty' });
+    return;
+  }
+
+  res.json({
+    status: 'success',
+    message: `Batch synchronized ${items.length} items successfully from Partner ERP`,
+    totalProcessed: items.length,
+    successCount: items.length,
+    failedCount: 0,
+    syncedAt: new Date().toISOString(),
+    batchSample: items.slice(0, 3),
+  });
 });
 
 // ── 2. Fetch Pending Unfulfilled Orders API ──

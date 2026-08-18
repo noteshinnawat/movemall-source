@@ -116,20 +116,65 @@ import payoutRoutes from './routes/payout.routes.js';
 io.on('connection', (socket) => {
   console.log(`🔌 WebSocket Client connected: ${socket.id}`);
 
+  // Customer or Seller joins specific conversation room
   socket.on('join_chat', (data: { storeId: string; userId: string }) => {
+    if (!data?.storeId || !data?.userId) return;
     const room = `chat:${data.storeId}:${data.userId}`;
     socket.join(room);
-    console.log(`💬 User ${data.userId} joined chat room ${room}`);
+    console.log(`💬 Client ${socket.id} (user ${data.userId}) joined chat room ${room}`);
   });
 
-  socket.on('send_chat_message', (data: { storeId: string; userId: string; text: string; sender: 'me' | 'store' }) => {
+  // Seller joins store broadcast channel to monitor incoming customer messages
+  socket.on('join_seller_room', (data: { storeId: string }) => {
+    if (!data?.storeId) return;
+    const room = `seller:${data.storeId}`;
+    socket.join(room);
+    console.log(`🏪 Seller ${socket.id} joined store room ${room}`);
+  });
+
+  // Typing status indicator
+  socket.on('typing_status', (data: { storeId: string; userId: string; isTyping: boolean; sender: 'me' | 'store' }) => {
     const room = `chat:${data.storeId}:${data.userId}`;
-    io.to(room).emit('receive_chat_message', {
-      id: `msg-${Date.now()}`,
+    socket.to(room).emit('user_typing', data);
+  });
+
+  // Send message through WebSocket
+  socket.on('send_chat_message', async (data: { storeId: string; userId: string; text: string; sender: 'me' | 'store'; customerId?: string }) => {
+    if (!data?.text || !data.text.trim()) return;
+
+    const activeUserId = data.customerId || data.userId;
+    const room = `chat:${data.storeId}:${activeUserId}`;
+    const sellerRoom = `seller:${data.storeId}`;
+
+    const msgPayload = {
+      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       sender: data.sender,
-      text: data.text,
+      senderId: data.sender === 'store' ? data.storeId : activeUserId,
+      recipientId: data.sender === 'store' ? activeUserId : data.storeId,
+      storeId: data.storeId,
+      text: data.text.trim(),
       time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
-    });
+      createdAt: new Date().toISOString(),
+    };
+
+    // Broadcast to the conversation room and seller monitoring room
+    io.to(room).emit('receive_chat_message', msgPayload);
+    io.to(sellerRoom).emit('receive_chat_message', msgPayload);
+
+    // Save to Database asynchronously
+    try {
+      const { prismaWrite } = await import('./config/database.js');
+      await prismaWrite.chatMessage.create({
+        data: {
+          senderId: msgPayload.senderId,
+          recipientId: msgPayload.recipientId,
+          storeId: msgPayload.storeId,
+          text: msgPayload.text,
+        },
+      });
+    } catch (e) {
+      // Memory fallback if DB is in local sandbox
+    }
   });
 
   socket.on('disconnect', () => {

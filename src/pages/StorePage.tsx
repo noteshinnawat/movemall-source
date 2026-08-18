@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MessageSquare, UserPlus, Check, Star, MapPin, ShieldCheck, Radio, Play, Ticket, Sparkles } from 'lucide-react';
+import { MessageSquare, UserPlus, Check, Star, MapPin, ShieldCheck, Radio, Play, Ticket, Sparkles, Flag, AlertTriangle } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
+import { ReportStoreModal } from '../components/ReportStoreModal';
 import { stores } from '../data/stores';
 import { products } from '../data/products';
 import { mockLiveStreams } from '../data/liveStreams';
@@ -25,6 +26,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist }: Store
   const [isFollowing, setIsFollowing] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'popular' | 'sale'>('all');
   const [claimedVouchers, setClaimedVouchers] = useState<Record<string, boolean>>({});
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Filter products belonging to this store
   const storeProducts = products.filter(p => p.storeId === store.id);
@@ -93,6 +95,20 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist }: Store
               >
                 <MessageSquare size={14} />
                 <span>แชทกับร้านค้า</span>
+              </button>
+              <button
+                type="button"
+                className="store-chat-btn"
+                style={{
+                  background: '#FEF2F2',
+                  color: '#DC2626',
+                  borderColor: '#FECACA',
+                }}
+                onClick={() => setIsReportModalOpen(true)}
+                title="รายงานร้านค้านี้ กรณีขายสินค้าปลอม ละเมิดลิขสิทธิ์ หรือหลอกลวง"
+              >
+                <Flag size={14} />
+                <span>รายงานร้านค้านี้</span>
               </button>
             </div>
           </div>
@@ -282,6 +298,16 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist }: Store
           )}
         </div>
       </section>
+
+      {/* Customer Anti-Counterfeit & Scam Report Modal */}
+      <ReportStoreModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        targetType="STORE"
+        targetId={store.id}
+        targetName={store.name}
+        storeName={store.name}
+      />
     </main>
   );
 }

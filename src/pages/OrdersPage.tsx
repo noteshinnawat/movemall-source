@@ -1,13 +1,13 @@
-// src/pages/OrdersPage.tsx — Customer Order History Hub
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, Calendar, MapPin, Truck, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Package, Calendar, MapPin, Truck, ShoppingBag, ArrowRight, Flag, ShieldAlert } from 'lucide-react';
 import { mockOrders, STATUS_LABEL, STATUS_COLOR } from '../data/orders';
+import { ReportStoreModal } from '../components/ReportStoreModal';
 import './OrdersPage.css';
 
 export function OrdersPage() {
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [reportingOrder, setReportingOrder] = useState<any | null>(null);
 
   const filteredOrders = activeTab === 'all'
     ? mockOrders
@@ -115,10 +115,33 @@ export function OrdersPage() {
                         <MapPin size={14} style={{ display: 'inline', marginRight: 4 }} />
                         {order.address}
                       </span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                         <span className="order-card__total" style={{ fontWeight: 800, fontSize: 14 }}>
                           ยอดสุทธิ: ฿{order.total.toLocaleString()}
                         </span>
+                        
+                        <button
+                          type="button"
+                          onClick={() => setReportingOrder(order)}
+                          style={{
+                            padding: '7px 12px',
+                            background: '#FEF2F2',
+                            color: '#DC2626',
+                            border: '1px solid #FECACA',
+                            fontSize: 12,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            borderRadius: 6,
+                          }}
+                          title="ร้องเรียนสินค้าปลอม ไม่ตรงปก หรือมิจฉาชีพ เพื่อขอเงินคืน"
+                        >
+                          <Flag size={13} />
+                          <span>ร้องเรียน / แจ้งของปลอม</span>
+                        </button>
+
                         <Link
                           to={`/tracking/${order.id}`}
                           style={{
@@ -128,7 +151,7 @@ export function OrdersPage() {
                             fontSize: 12,
                             fontWeight: 800,
                             textDecoration: 'none',
-                            borderRadius: 0,
+                            borderRadius: 6,
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: 6,
@@ -176,6 +199,19 @@ export function OrdersPage() {
           )}
         </div>
       </div>
+
+      {/* Customer Anti-Counterfeit & Scam Report Modal */}
+      {reportingOrder && (
+        <ReportStoreModal
+          isOpen={!!reportingOrder}
+          onClose={() => setReportingOrder(null)}
+          targetType="ORDER"
+          targetId={reportingOrder.id}
+          targetName={`คำสั่งซื้อ #${reportingOrder.id} (${reportingOrder.items?.map((i: any) => i.name).join(', ')})`}
+          storeName={reportingOrder.storeName || 'ร้านค้าบน Movemall'}
+          orderId={reportingOrder.id}
+        />
+      )}
     </main>
   );
 }

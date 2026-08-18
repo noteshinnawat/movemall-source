@@ -1,12 +1,12 @@
-// src/pages/SellerCenterPage.tsx — Merchant / Seller Portal & Management
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Plus, Package, DollarSign, TrendingUp, Star, Trash2, X, Store, CheckCircle,
   Printer, Target, Eye, MousePointerClick, Wallet, ArrowUpRight, Play, Pause,
   AlertCircle, RefreshCw, Zap, ShieldCheck, Pencil, Upload, Image as ImageIcon, Video,
-  User, MapPin, FileText, Download, Send, Search, Check, Building2, SlidersHorizontal
+  User, MapPin, FileText, Download, Send, Search, Check, Building2, SlidersHorizontal,
+  MessageSquare, Radio, Layers, Globe, ExternalLink, Lock, Cpu, CheckCircle2, Sliders, ArrowRight,
+  AlertTriangle
 } from 'lucide-react';
 import { stores } from '../data/stores';
 import { categories } from '../data/products';
@@ -15,6 +15,13 @@ import { ShippingLabelModal, type ShippingLabelProps } from '../components/Shipp
 import { RichTextEditor } from '../components/RichTextEditor';
 import type { Product, AdCampaign, AdType, AdWallet, AdKeyword, ProductCompliance, ComplianceType, TaxDocument, StoreTaxProfile, TaxDocType } from '../types';
 import { fetchApi } from '../utils/api';
+import {
+  getChatSocket,
+  joinSellerChatRoom,
+  emitChatMessage,
+  getStoredChatHistory,
+  saveStoredChatHistory,
+} from '../utils/chatSocket';
 import './SellerCenterPage.css';
 
 interface SellerCenterPageProps {
@@ -62,7 +69,150 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 
   const storeProducts = products.filter(p => p.storeId === currentStore.id);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'api' | 'ads' | 'tax' | 'flash'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'api' | 'ads' | 'tax' | 'flash' | 'chat' | 'health'>('overview');
+
+  // ── Shop Health & Buyer Report State ──
+  const [storeHealthScore, setStoreHealthScore] = useState(100);
+  const [storePenaltyPoints, setStorePenaltyPoints] = useState(0);
+  const [showBuyerReportModal, setShowBuyerReportModal] = useState(false);
+  const [reportForm, setReportForm] = useState({
+    orderId: 'ORD-9841',
+    customerName: 'กิตติศักดิ์ สั่งเล่น',
+    type: 'COD_REJECTED' as 'COD_REJECTED' | 'REFUND_ABUSE' | 'FAKE_ORDER' | 'HARASSMENT',
+    description: 'ลูกค้าปฏิเสธไม่ยอมรับพัสดุเก็บเงินปลายทาง (COD) ขนส่งนำจ่าย 3 ครั้งไม่สำเร็จและติดต่อไม่ได้ ทำให้ร้านค้าเสียหายค่าบรรจุภัณฑ์และค่าขนส่ง',
+    evidenceUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=400&q=80',
+  });
+
+  const [myFiledReports, setMyFiledReports] = useState<any[]>([
+    {
+      id: 'rep-filed-01',
+      orderId: 'ORD-9841',
+      customerName: 'กิตติศักดิ์ สั่งเล่น',
+      type: 'COD_REJECTED',
+      description: 'ลูกค้าปฏิเสธไม่ยอมรับพัสดุเก็บเงินปลายทาง (COD) ขนส่งนำจ่าย 3 ครั้งไม่สำเร็จ',
+      status: 'ACTION_TAKEN',
+      compensationStatus: 'COMPENSATED_50THB',
+      createdAt: '2026-08-16T10:00:00.000Z',
+    },
+    {
+      id: 'rep-filed-02',
+      orderId: 'ORD-7712',
+      customerName: 'ธนากร สั่งเล่น',
+      type: 'FAKE_ORDER',
+      description: 'สั่งสินค้าชิ้นใหญ่ 5 ชิ้น แล้วยกเลิกทันทีขณะรถขนส่งเข้ารับพัสดุ',
+      status: 'INVESTIGATING',
+      compensationStatus: 'PENDING',
+      createdAt: '2026-08-17T15:30:00.000Z',
+    }
+  ]);
+
+  function handleSubmitBuyerReport(e: React.FormEvent) {
+    e.preventDefault();
+    const newReport = {
+      id: `rep-filed-${Date.now()}`,
+      orderId: reportForm.orderId,
+      customerName: reportForm.customerName,
+      type: reportForm.type,
+      description: reportForm.description,
+      status: 'PENDING',
+      compensationStatus: 'PENDING',
+      createdAt: new Date().toISOString(),
+    };
+
+    setMyFiledReports(prev => [newReport, ...prev]);
+    setShowBuyerReportModal(false);
+    alert(`ส่งรายงานพฤติกรรมลูกค้าออเดอร์ ${reportForm.orderId} เรียบร้อยแล้ว ทีมงาน CS Admin จะตรวจสอบและชดเชยค่าขนส่งให้ภายใน 24 ชม.`);
+  }
+
+  // ── Live Seller Chat State ──
+  const [sellerMessages, setSellerMessages] = useState<Record<string, any[]>>(() => {
+    return getStoredChatHistory();
+  });
+
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('guest_user');
+  const [sellerInputVal, setSellerInputVal] = useState('');
+  const [isSellerSocketConnected, setIsSellerSocketConnected] = useState(false);
+
+  useEffect(() => {
+    const socket = getChatSocket();
+    joinSellerChatRoom(currentStore.id);
+    if (socket.connected) setIsSellerSocketConnected(true);
+
+    const handleConnect = () => {
+      setIsSellerSocketConnected(true);
+      joinSellerChatRoom(currentStore.id);
+    };
+
+    const handleReceiveMsg = (msg: any) => {
+      if (!msg) return;
+      const storeTargetId = msg.storeId || currentStore.id;
+      setSellerMessages(prev => {
+        const list = prev[storeTargetId] || [];
+        if (list.some(m => m.id === msg.id)) return prev;
+        const updated = {
+          ...prev,
+          [storeTargetId]: [...list, msg],
+        };
+        saveStoredChatHistory(updated);
+        return updated;
+      });
+    };
+
+    socket.on('connect', handleConnect);
+    socket.on('receive_chat_message', handleReceiveMsg);
+
+    return () => {
+      socket.off('connect', handleConnect);
+      socket.off('receive_chat_message', handleReceiveMsg);
+    };
+  }, [currentStore.id]);
+
+  function handleSellerSendMessage(e?: React.FormEvent, customText?: string) {
+    if (e) e.preventDefault();
+    const textToSend = customText || sellerInputVal;
+    if (!textToSend.trim()) return;
+
+    const newMsg = {
+      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      sender: 'store',
+      senderId: currentStore.id,
+      recipientId: selectedCustomerId,
+      storeId: currentStore.id,
+      text: textToSend.trim(),
+      time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setSellerMessages(prev => {
+      const list = prev[currentStore.id] || [];
+      const updated = {
+        ...prev,
+        [currentStore.id]: [...list, newMsg],
+      };
+      saveStoredChatHistory(updated);
+      return updated;
+    });
+    setSellerInputVal('');
+
+    // Emit live to WebSocket
+    emitChatMessage({
+      storeId: currentStore.id,
+      userId: selectedCustomerId,
+      text: textToSend.trim(),
+      sender: 'store',
+      customerId: selectedCustomerId,
+    });
+
+    // Also persist via REST API
+    fetchApi('/api/chat/messages', {
+      method: 'POST',
+      body: JSON.stringify({
+        storeId: currentStore.id,
+        recipientId: selectedCustomerId,
+        text: textToSend.trim(),
+        senderRole: 'store',
+      }),
+    }).catch(() => {});
+  }
 
   // ── Flash Sale Nomination State ──
   interface FlashNomination {
@@ -132,6 +282,147 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 
   const currentApiKey = apiEnv === 'live' ? liveApiKey : sandboxApiKey;
   const currentApiSecret = apiEnv === 'live' ? liveApiSecret : sandboxApiSecret;
+
+  // ── Certified ISV Partners State ──
+  interface PartnerItem {
+    id: string;
+    name: string;
+    logoColor: string;
+    category: 'ERP' | 'CHAT' | 'WMS';
+    categoryLabel: string;
+    description: string;
+    connected: boolean;
+    syncHealth: number;
+    lastSyncedAt: string;
+    features: string[];
+    autoSyncStock: boolean;
+    autoSyncOrders: boolean;
+    autoSyncChat: boolean;
+    webhookTarget: string;
+    partnerToken: string;
+  }
+
+  const [partners, setPartners] = useState<PartnerItem[]>([
+    {
+      id: 'bigseller',
+      name: 'BigSeller',
+      logoColor: '#7C3AED',
+      category: 'ERP',
+      categoryLabel: 'ERP & ซิงค์สต็อกหลายช่องทาง',
+      description: 'ซิงค์สต็อกสินค้าอัตโนมัติ 2 ทิศทาง ดึงออเดอร์ไปจัดส่ง พิมพ์ใบปะหน้า Flash/Kerry และคัดลอกสินค้าข้ามร้านค้าได้ในคลิกเดียว',
+      connected: true,
+      syncHealth: 99.8,
+      lastSyncedAt: '2 นาทีที่แล้ว',
+      features: ['2-Way Real-time Stock Sync', 'Auto Order Pulling', 'Bulk Product Listing', 'พิมพ์ใบปะหน้าพัสดุ'],
+      autoSyncStock: true,
+      autoSyncOrders: true,
+      autoSyncChat: false,
+      webhookTarget: 'https://api.bigseller.com/v1/movemall/events',
+      partnerToken: 'bs_tok_live_8849b2ef4c6790a1827364',
+    },
+    {
+      id: 'page365',
+      name: 'Page365',
+      logoColor: '#10B981',
+      category: 'CHAT',
+      categoryLabel: 'Omnichannel Social Chat & CRM',
+      description: 'รวมแชทลูกค้า Movemall เข้าสู่หน้าจอเดียวกับ Facebook, LINE OA, TikTok Shop มีบอทตรวจสลิปโอนเงิน และระบบบันทึกประวัติลูกค้า CRM',
+      connected: true,
+      syncHealth: 100,
+      lastSyncedAt: '1 นาทีที่แล้ว',
+      features: ['รวมแชทลูกค้าทุกช่องทาง', 'ระบบตอบแชทอัตโนมัติ', 'บอทอ่านสลิปธนาคาร', 'ระบบ CRM ข้อมูลลูกค้า'],
+      autoSyncStock: false,
+      autoSyncOrders: true,
+      autoSyncChat: true,
+      webhookTarget: 'https://api.page365.net/integrations/movemall/webhook',
+      partnerToken: 'p365_tok_9912a7f04c6790a182736',
+    },
+    {
+      id: 'zwiz',
+      name: 'Zwiz.ai',
+      logoColor: '#2563EB',
+      category: 'CHAT',
+      categoryLabel: 'AI Live Shopping & Chatbot',
+      description: 'ผู้ช่วย AI อัจฉริยะตอบแทนแอดมิน 24 ชม. พร้อมระบบดูดคอมเมนต์ CF อัตโนมัติใน Movemall Live Stream และส่งเข้าแชทปิดการขายทันที',
+      connected: false,
+      syncHealth: 0,
+      lastSyncedAt: 'ยังไม่เคยซิงค์',
+      features: ['AI ตอบแชทอัตโนมัติ 24 ชม.', 'ดูดคอมเมนต์ CF ในไลฟ์สด', 'บรอดแคสต์โปรโมชั่น', 'ระบบคูปองพิเศษในแชท'],
+      autoSyncStock: false,
+      autoSyncOrders: false,
+      autoSyncChat: true,
+      webhookTarget: 'https://api.zwiz.ai/v2/movemall/chat-events',
+      partnerToken: 'zwiz_tok_unlinked_3391b',
+    },
+    {
+      id: 'ginee',
+      name: 'Ginee Omnichannel',
+      logoColor: '#0284C7',
+      category: 'ERP',
+      categoryLabel: 'Omnichannel ERP & Warehouse WMS',
+      description: 'ระบบบริหารจัดการคลังสินค้าหลายสาขา จัดการสต็อกข้ามแพลตฟอร์มระดับ Enterprise และวิเคราะห์ผลกำไรแม่นยำ',
+      connected: false,
+      syncHealth: 0,
+      lastSyncedAt: 'ยังไม่เคยซิงค์',
+      features: ['Multi-Warehouse WMS', 'Real-time Stock Deduct', 'การกระจายสินค้าตามสาขา', 'รายงานวิเคราะห์กำไรขั้นต้น'],
+      autoSyncStock: true,
+      autoSyncOrders: true,
+      autoSyncChat: false,
+      webhookTarget: 'https://api.ginee.com/v1/partners/movemall',
+      partnerToken: 'gn_tok_unlinked_7718c',
+    },
+    {
+      id: 'ohochat',
+      name: 'Oho Chat',
+      logoColor: '#EC4899',
+      category: 'CHAT',
+      categoryLabel: 'Enterprise Customer Care & SLA',
+      description: 'แพลตฟอร์มบริการลูกค้าสำหรับทีมขนาดใหญ่ กระจายแชทตามแผนก วัดเวลาตอบกลับ SLA และเก็บบันทึกประวัติการเคลมสินค้า',
+      connected: false,
+      syncHealth: 0,
+      lastSyncedAt: 'ยังไม่เคยซิงค์',
+      features: ['ระบบกระจายแชทตามทีม', 'วัดผล SLA แอดมิน', 'ระบบเคสและเคลมสินค้า', 'แดชบอร์ดความพึงพอใจ CSAT'],
+      autoSyncStock: false,
+      autoSyncOrders: false,
+      autoSyncChat: true,
+      webhookTarget: 'https://api.ohochat.com/webhook/movemall',
+      partnerToken: 'oho_tok_unlinked_5521a',
+    },
+    {
+      id: 'bentoweb',
+      name: 'BentoWeb & Shipnity',
+      logoColor: '#F59E0B',
+      category: 'WMS',
+      categoryLabel: 'Local Thai POS & Logistics',
+      description: 'เชื่อมต่อสต็อกหน้าร้าน POS เข้ากับ Movemall และระบบรวมค่ายขนส่ง Flash, Kerry, J&T และไปรษณีย์ไทยเพื่อออกเลขแทร็กกิ้งอัตโนมัติ',
+      connected: false,
+      syncHealth: 0,
+      lastSyncedAt: 'ยังไม่เคยซิงค์',
+      features: ['เชื่อมต่อระบบ POS หน้าร้าน', 'ออกเลขพัสดุอัตโนมัติ 5 ขนส่ง', 'ระบบเรียกรถเข้ารับพัสดุ', 'แจ้งเตือนสถานะส่งพัสดุทาง SMS'],
+      autoSyncStock: true,
+      autoSyncOrders: true,
+      autoSyncChat: false,
+      webhookTarget: 'https://api.bentoweb.com/v1/shipnity/movemall',
+      partnerToken: 'bw_tok_unlinked_4412d',
+    },
+  ]);
+
+  const [selectedPartnerModal, setSelectedPartnerModal] = useState<PartnerItem | null>(null);
+  const [isPartnerRequestModalOpen, setIsPartnerRequestModalOpen] = useState(false);
+  const [partnerApplicationForm, setPartnerApplicationForm] = useState({
+    companyName: '',
+    softwareName: '',
+    contactEmail: '',
+    category: 'ERP',
+    estimatedStores: '10-50',
+    technicalDocUrl: '',
+  });
+  const [partnerAppSubmitted, setPartnerAppSubmitted] = useState<string | null>(null);
+
+  // OmniChat Simulation State
+  const [omniSimChannel, setOmniSimChannel] = useState<'page365' | 'zwiz' | 'ohochat'>('page365');
+  const [omniSimType, setOmniSimType] = useState<'incoming' | 'outgoing'>('incoming');
+  const [omniSimResult, setOmniSimResult] = useState<string | null>(null);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -946,7 +1237,18 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             onClick={() => setActiveTab('api')}
           >
             <span style={{ fontSize: 14 }}>🔌</span>
-            Open API & เชื่อมสต็อก ERP
+            พาร์ทเนอร์ ERP & รวมแชท (BigSeller / Page365)
+            <span style={{
+              background: '#2563EB',
+              color: 'white',
+              fontSize: 9,
+              fontWeight: 900,
+              padding: '2px 6px',
+              marginLeft: 6,
+              letterSpacing: '0.3px',
+            }}>
+              ISV HUB
+            </span>
           </button>
           <button
             className={`seller-tab-btn${activeTab === 'tax' ? ' seller-tab-btn--active' : ''}`}
@@ -971,6 +1273,44 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
               letterSpacing: '0.3px',
             }}>
               HOT
+            </span>
+          </button>
+          <button
+            className={`seller-tab-btn${activeTab === 'chat' ? ' seller-tab-btn--active' : ''}`}
+            onClick={() => setActiveTab('chat')}
+          >
+            <MessageSquare size={15} />
+            แชทลูกค้า (Customer Live Chat)
+            {isSellerSocketConnected && (
+              <span style={{
+                background: '#10B981',
+                color: 'white',
+                fontSize: 9,
+                fontWeight: 900,
+                padding: '2px 5px',
+                marginLeft: 6,
+                letterSpacing: '0.3px',
+              }}>
+                LIVE
+              </span>
+            )}
+          </button>
+          <button
+            className={`seller-tab-btn${activeTab === 'health' ? ' seller-tab-btn--active' : ''}`}
+            onClick={() => setActiveTab('health')}
+          >
+            <ShieldCheck size={15} style={{ color: '#10B981' }} />
+            สุขภาพร้าน & ปกป้องผู้ขาย (Shop Health)
+            <span style={{
+              background: '#10B981',
+              color: 'white',
+              fontSize: 9,
+              fontWeight: 900,
+              padding: '2px 6px',
+              marginLeft: 6,
+              letterSpacing: '0.3px',
+            }}>
+              100/100
             </span>
           </button>
         </div>
@@ -1451,69 +1791,401 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
           </div>
         )}
 
-        {/* ── 3. Open API, Security & ERP Sync Tab ── */}
+        {/* ── 3. Movemall Partner & Omnichannel Integration Hub Tab ── */}
         {activeTab === 'api' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
             
-            {/* 1. Environment Switcher & Status Banner */}
+            {/* 1. Closed ISV Partner Program Header & Environment Switcher */}
             <div style={{ background: '#FFFFFF', border: '1px solid var(--border)', padding: 'var(--space-5)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
+                <div style={{ maxWidth: 720 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <h3 style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-primary)', margin: 0 }}>
-                      🔌 Movemall Open API & Enterprise Security Hub
+                      🔌 Movemall Partner & Omnichannel Integration Hub
                     </h3>
+                    <span style={{ background: '#EFF6FF', color: '#1D4ED8', fontSize: 11, fontWeight: 900, padding: '2px 8px', border: '1px solid #BFDBFE' }}>
+                      🔐 CLOSED ISV PARTNER PROGRAM
+                    </span>
                     <span style={{ background: apiEnv === 'live' ? '#DCFCE7' : '#FEF3C7', color: apiEnv === 'live' ? '#15803D' : '#D97706', fontSize: 11, fontWeight: 900, padding: '2px 8px', border: `1px solid ${apiEnv === 'live' ? '#86EFAC' : '#FCD34D'}` }}>
                       {apiEnv === 'live' ? '● PRODUCTION LIVE' : '▲ SANDBOX TESTNET'}
                     </span>
                   </div>
-                  <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0' }}>
-                    จัดการกุญแจเชื่อมต่อ ERP/POS, ควบคุมความปลอดภัย IP Whitelist, สิทธิ์ API Scopes, และทดสอบ Webhook HMAC
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '6px 0 0', lineHeight: 1.5 }}>
+                    เชื่อมต่อคลังสินค้า สต็อก ออเดอร์ และระบบแชทกับผู้ให้บริการระดับพันธมิตรที่ได้รับการรับรอง (Certified ISVs) เช่น <strong>BigSeller, Ginee, Page365, Zwiz.ai, Oho Chat</strong> ได้ทันที ช่วยให้ร้านค้าจัดการทุกอย่างจากหน้าจอเดียวโดยไม่ต้องสลับแอป
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', border: '1.5px solid var(--border)', background: '#F8FAFC' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <button
-                    onClick={() => setApiEnv('live')}
+                    onClick={() => {
+                      setPartnerAppSubmitted(null);
+                      setIsPartnerRequestModalOpen(true);
+                    }}
                     style={{
-                      padding: '8px 16px',
+                      padding: '8px 14px',
                       fontSize: 12,
                       fontWeight: 800,
-                      border: 'none',
+                      background: '#F1F5F9',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-primary)',
                       cursor: 'pointer',
-                      background: apiEnv === 'live' ? 'var(--primary)' : 'transparent',
-                      color: apiEnv === 'live' ? 'white' : 'var(--text-secondary)'
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6
                     }}
                   >
-                    🟢 Production (ใช้งานจริง)
+                    <span>🏢</span> ยื่นขอเชื่อมต่อระบบ (ISV Onboarding)
                   </button>
-                  <button
-                    onClick={() => setApiEnv('sandbox')}
-                    style={{
-                      padding: '8px 16px',
-                      fontSize: 12,
-                      fontWeight: 800,
-                      border: 'none',
-                      cursor: 'pointer',
-                      background: apiEnv === 'sandbox' ? '#F59E0B' : 'transparent',
-                      color: apiEnv === 'sandbox' ? 'white' : 'var(--text-secondary)'
-                    }}
-                  >
-                    🟠 Sandbox (ทดสอบระบบ)
-                  </button>
+
+                  <div style={{ display: 'flex', border: '1.5px solid var(--border)', background: '#F8FAFC' }}>
+                    <button
+                      onClick={() => setApiEnv('live')}
+                      style={{
+                        padding: '8px 16px',
+                        fontSize: 12,
+                        fontWeight: 800,
+                        border: 'none',
+                        cursor: 'pointer',
+                        background: apiEnv === 'live' ? 'var(--primary)' : 'transparent',
+                        color: apiEnv === 'live' ? 'white' : 'var(--text-secondary)'
+                      }}
+                    >
+                      🟢 Production
+                    </button>
+                    <button
+                      onClick={() => setApiEnv('sandbox')}
+                      style={{
+                        padding: '8px 16px',
+                        fontSize: 12,
+                        fontWeight: 800,
+                        border: 'none',
+                        cursor: 'pointer',
+                        background: apiEnv === 'sandbox' ? '#F59E0B' : 'transparent',
+                        color: apiEnv === 'sandbox' ? 'white' : 'var(--text-secondary)'
+                      }}
+                    >
+                      🟠 Sandbox
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* 2. API Credentials Card (Dual-Key & Secret) */}
+            {/* 2. Partner Directory (1-Click Integrations) */}
             <div style={{ background: '#FFFFFF', border: '1px solid var(--border)', padding: 'var(--space-6)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
                 <div>
-                  <h4 style={{ fontSize: 15, fontWeight: 900, color: 'var(--text-primary)', margin: 0 }}>
-                    🔑 กุญแจยืนยันตัวตน (API Key & Secret Key)
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <h4 style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)', margin: 0 }}>
+                      🚀 ผู้ให้บริการระบบที่ผ่านการรับรอง (Certified ISV Partners)
+                    </h4>
+                    <span style={{ background: '#DCFCE7', color: '#166534', fontSize: 10, fontWeight: 800, padding: '2px 6px' }}>
+                      {partners.filter(p => p.connected).length} เชื่อมต่อแล้ว
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '3px 0 0' }}>
+                    เปิดใช้งานการเชื่อมต่อสำเร็จรูป สต็อกสินค้าและแชทจะถูกซิงค์อัตโนมัติ 24 ชั่วโมง
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button
+                    onClick={() => {
+                      alert('⚡ ส่งสัญญาณทดสอบ Health Check ไปยังทุกพาร์ทเนอร์สำเร็จ! ระบบทำงานปกติ 100%');
+                    }}
+                    style={{
+                      padding: '6px 12px',
+                      background: '#F8FAFC',
+                      border: '1px solid var(--border)',
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4
+                    }}
+                  >
+                    <RefreshCw size={12} /> ตรวจสอบสัญญาณทุกระบบ (Health Check)
+                  </button>
+                </div>
+              </div>
+
+              {/* Partners Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 14 }}>
+                {partners.map(partner => (
+                  <div
+                    key={partner.id}
+                    style={{
+                      border: partner.connected ? '1.5px solid #93C5FD' : '1px solid var(--border)',
+                      background: partner.connected ? '#F0F7FF' : '#FFFFFF',
+                      padding: 16,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      position: 'relative'
+                    }}
+                  >
+                    <div>
+                      {/* Card Header */}
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div
+                            style={{
+                              width: 36,
+                              height: 36,
+                              background: partner.logoColor,
+                              color: 'white',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 900,
+                              fontSize: 15,
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                            }}
+                          >
+                            {partner.id === 'bigseller' ? 'BS' : partner.id === 'page365' ? '365' : partner.id === 'zwiz' ? 'ZW' : partner.id === 'ginee' ? 'GN' : partner.id === 'ohochat' ? 'OH' : 'BW'}
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--text-primary)' }}>
+                              {partner.name}
+                            </div>
+                            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)' }}>
+                              {partner.categoryLabel}
+                            </span>
+                          </div>
+                        </div>
+
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 900,
+                            padding: '3px 8px',
+                            background: partner.connected ? '#DCFCE7' : '#F1F5F9',
+                            color: partner.connected ? '#15803D' : '#64748B',
+                            border: `1px solid ${partner.connected ? '#86EFAC' : '#CBD5E1'}`
+                          }}
+                        >
+                          {partner.connected ? '● กำลังเชื่อมต่อ' : '○ ยังไม่เชื่อมต่อ'}
+                        </span>
+                      </div>
+
+                      {/* Description */}
+                      <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.45, minHeight: 48 }}>
+                        {partner.description}
+                      </p>
+
+                      {/* Feature Tags */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 14 }}>
+                        {partner.features.map((feat, idx) => (
+                          <span
+                            key={idx}
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 700,
+                              background: '#FFFFFF',
+                              border: '1px solid var(--border)',
+                              padding: '2px 6px',
+                              color: 'var(--text-secondary)'
+                            }}
+                          >
+                            ✓ {feat}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Live Sync Status Info (If connected) */}
+                      {partner.connected && (
+                        <div style={{ background: '#FFFFFF', border: '1px solid #BFDBFE', padding: '8px 10px', marginBottom: 14, fontSize: 11 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#1E40AF', fontWeight: 800 }}>
+                            <span>สถานะสัญญาณ (Uptime): {partner.syncHealth}%</span>
+                            <span>ซิงค์ล่าสุด: {partner.lastSyncedAt}</span>
+                          </div>
+                          <div style={{ display: 'flex', gap: 10, marginTop: 4, color: 'var(--text-muted)', fontSize: 10 }}>
+                            {partner.autoSyncStock && <span>📦 ซิงค์สต็อก (เปิด)</span>}
+                            {partner.autoSyncOrders && <span>🛒 ดึงออเดอร์ (เปิด)</span>}
+                            {partner.autoSyncChat && <span>💬 ส่งต่อแชทสด (เปิด)</span>}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Card Actions */}
+                    <div style={{ display: 'flex', gap: 8, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
+                      {partner.connected ? (
+                        <>
+                          <button
+                            onClick={() => setSelectedPartnerModal(partner)}
+                            style={{
+                              flex: 1,
+                              padding: '8px',
+                              background: 'var(--primary)',
+                              color: 'white',
+                              border: 'none',
+                              fontSize: 11,
+                              fontWeight: 800,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            ⚙️ จัดการ / แก้ไขการซิงค์
+                          </button>
+                          <button
+                            onClick={() => {
+                              alert(`⚡ สั่งซิงค์สต็อกและข้อมูลด่วนกับ ${partner.name} สำเร็จ! ข้อมูลอัปเดตตรงกัน 100%`);
+                              setPartners(partners.map(p => p.id === partner.id ? { ...p, lastSyncedAt: 'เมื่อสักครู่' } : p));
+                            }}
+                            style={{
+                              padding: '8px 12px',
+                              background: '#EFF6FF',
+                              border: '1px solid #BFDBFE',
+                              color: '#1D4ED8',
+                              fontSize: 11,
+                              fontWeight: 800,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            ⚡ ซิงค์ทันที
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => setSelectedPartnerModal(partner)}
+                          style={{
+                            width: '100%',
+                            padding: '9px',
+                            background: '#0F172A',
+                            color: 'white',
+                            border: 'none',
+                            fontSize: 12,
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 6
+                          }}
+                        >
+                          🔗 เชื่อมต่อกับ {partner.name}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. Interactive OmniChat & Stock Webhook Test Bench */}
+            <div style={{ background: '#FFFFFF', border: '1px solid var(--border)', padding: 'var(--space-6)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 14 }}>
+                <div>
+                  <h4 style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)', margin: 0 }}>
+                    🧪 เครื่องมือทดสอบจำลองสัญญาณ (Interactive OmniChat & Webhook Test Bench)
                   </h4>
                   <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '3px 0 0' }}>
-                    ใช้สำหรับการตรวจสอบสิทธิ์ผ่าน Authorization Header (เก็บบันทึกเฉพาะค่า SHA-256 Hash ในฐานข้อมูล)
+                    ทดสอบการส่งข้อความแชทสดระหว่าง Movemall และระบบรวมแชท (Page365 / Zwiz.ai / Oho Chat) รวมถึงการจำลอง Webhook คำสั่งซื้อ
+                  </p>
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#166534', background: '#DCFCE7', padding: '3px 8px' }}>
+                  HMAC-SHA256 SIGNED
+                </span>
+              </div>
+
+              {/* Simulation Selector Bar */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: 12, background: '#F8FAFC', border: '1px solid var(--border)', marginBottom: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-secondary)' }}>แพลตฟอร์มปลายทาง:</label>
+                  <select
+                    value={omniSimChannel}
+                    onChange={e => setOmniSimChannel(e.target.value as 'page365' | 'zwiz' | 'ohochat')}
+                    style={{ padding: '6px 10px', fontSize: 12, fontWeight: 700, border: '1px solid var(--border)', background: '#FFFFFF' }}
+                  >
+                    <option value="page365">Page365 (ระบบรวมแชท Social)</option>
+                    <option value="zwiz">Zwiz.ai (AI Chatbot & Live Stream)</option>
+                    <option value="ohochat">Oho Chat (Enterprise Support)</option>
+                  </select>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-secondary)' }}>ทิศทางข้อมูล:</label>
+                  <select
+                    value={omniSimType}
+                    onChange={e => setOmniSimType(e.target.value as 'incoming' | 'outgoing')}
+                    style={{ padding: '6px 10px', fontSize: 12, fontWeight: 700, border: '1px solid var(--border)', background: '#FFFFFF' }}
+                  >
+                    <option value="incoming">1. ลูกค้า Movemall แชทเข้ามา ➔ ส่งต่อ Webhook ให้แอดมินใน {omniSimChannel.toUpperCase()}</option>
+                    <option value="outgoing">2. แอดมินใน {omniSimChannel.toUpperCase()} ตอบกลับผ่าน API ➔ แสดงผลในแชท Movemall</option>
+                  </select>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const timestamp = Math.floor(Date.now() / 1000);
+                    if (omniSimType === 'incoming') {
+                      const payload = {
+                        eventId: `chat_evt_${Date.now()}`,
+                        eventType: 'chat.message_received',
+                        timestamp,
+                        data: {
+                          storeId: currentStore.id,
+                          buyerId: 'user-buyer-771',
+                          buyerName: 'คุณกิตติศักดิ์ ช้อปไว',
+                          buyerAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80',
+                          message: 'สวัสดีครับ สนใจสินค้านี้ มีของพร้อมส่งเลยไหมครับ?',
+                          productId: storeProducts[0]?.id || 'prod-1',
+                          productTitle: storeProducts[0]?.name || 'สินค้าแนะนำ Movemall',
+                        }
+                      };
+                      const fakeSig = `t=${timestamp},sha256=9f83acb381014ef2981bc89456201a`;
+                      setOmniSimResult(`[DISPATCH SUCCESS -> 200 OK]\nEndpoint: https://api.${omniSimChannel}.com/v1/webhook/movemall\nHeaders:\n  X-Movemall-Signature: ${fakeSig}\n  X-Movemall-Timestamp: ${timestamp}\n  Content-Type: application/json\n\nPayload Body:\n${JSON.stringify(payload, null, 2)}`);
+                    } else {
+                      const payload = {
+                        storeId: currentStore.id,
+                        userId: 'user-buyer-771',
+                        messageText: 'สวัสดีครับ มีของพร้อมส่งทันทีครับ สั่งซื้อตอนนี้แถมโค้ดลดเพิ่ม 50 บาทครับผม 😊',
+                        agentName: `Admin ${omniSimChannel.toUpperCase()}`,
+                      };
+                      setOmniSimResult(`[API CALL SUCCESS -> 201 CREATED]\nPOST https://api.movemall.com/api/v1/open/chat/reply\nAuthorization: Bearer ${currentApiKey}\nContent-Type: application/json\n\nRequest Payload:\n${JSON.stringify(payload, null, 2)}\n\nResponse:\n{\n  "status": "success",\n  "message": "Reply sent from OmniChat to buyer successfully",\n  "deliveredAt": "${new Date().toISOString()}"\n}`);
+                    }
+                  }}
+                  style={{
+                    padding: '6px 14px',
+                    background: 'var(--primary)',
+                    color: 'white',
+                    border: 'none',
+                    fontSize: 12,
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                >
+                  🚀 รันการทดสอบ (Execute Simulation)
+                </button>
+              </div>
+
+              {omniSimResult && (
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: '#15803D', marginBottom: 4 }}>
+                    ✓ ผลการทำงานของระบบทดสอบ:
+                  </div>
+                  <pre style={{ margin: 0, padding: 14, background: '#0F172A', color: '#38BDF8', fontSize: 11, overflowX: 'auto', border: '1px solid #1E293B', fontFamily: 'monospace', lineHeight: 1.45 }}>
+                    {omniSimResult}
+                  </pre>
+                </div>
+              )}
+            </div>
+
+            {/* 4. API Credentials Card (Dual-Key & Secret) */}
+            <div style={{ background: '#FFFFFF', border: '1px solid var(--border)', padding: 'var(--space-6)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 10 }}>
+                <div>
+                  <h4 style={{ fontSize: 15, fontWeight: 900, color: 'var(--text-primary)', margin: 0 }}>
+                    🔑 กุญแจยืนยันตัวตนระดับ Enterprise (API Key & Secret Key)
+                  </h4>
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '3px 0 0' }}>
+                    ใช้สำหรับการเชื่อมต่อระบบ ERP หรือใส่ในหน้าตั้งค่าของ Partner (เก็บบันทึกเฉพาะค่า SHA-256 Hash ในฐานข้อมูล)
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
@@ -1573,7 +2245,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                     <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-secondary)' }}>
-                      API SECRET ({apiEnv.toUpperCase()}) — <span style={{ color: '#DC2626' }}>ห้ามเปิดเผยให้ผู้อื่นเด็ดขาด</span>
+                      API SECRET ({apiEnv.toUpperCase()}) — <span style={{ color: '#DC2626' }}>ห้ามเปิดเผยให้บุคคลอื่น</span>
                     </label>
                     <button
                       onClick={() => setIsSecretVisible(!isSecretVisible)}
@@ -1605,11 +2277,11 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 
               <div style={{ marginTop: 12, padding: '8px 12px', background: '#EFF6FF', border: '1px solid #BFDBFE', fontSize: 11, color: '#1E40AF', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span>🔒</span>
-                <span><strong>Header รูปแบบมาตรฐาน:</strong> <code>Authorization: Bearer {currentApiKey}</code></span>
+                <span><strong>Header รูปแบบมาตรฐานสำหรับ Partner:</strong> <code>Authorization: Bearer {currentApiKey}</code></span>
               </div>
             </div>
 
-            {/* 3. Security Settings: IP Whitelist & Scopes Grid */}
+            {/* 5. Security Settings: IP Whitelist & Scopes Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--space-5)' }}>
               
               {/* IP Whitelisting Card */}
@@ -1621,7 +2293,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                   </h4>
                 </div>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>
-                  อนุญาตให้เฉพาะเซิร์ฟเวอร์ที่มี IP เหล่านี้ยิงเข้ามาได้ (หากไม่ระบุ IP ใดๆ จะถูกบล็อกด้วย 403)
+                  อนุญาตให้เฉพาะเซิร์ฟเวอร์ BigSeller, Ginee หรือ IP ของระบบร้านค้าที่ระบุยิงเข้ามาได้
                 </p>
 
                 <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
@@ -1662,7 +2334,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                   ))}
                   {ipList.length === 0 && (
                     <div style={{ fontSize: 11, color: '#DC2626', padding: 8, background: '#FEE2E2', textAlign: 'center' }}>
-                      ⚠️ ยังไม่ได้ระบุ IP Whitelist (API จะไม่ยอมรับ Request)
+                      ⚠️ ยังไม่ได้ระบุ IP Whitelist (API จะไม่ยอมรับ Request จากภายนอก)
                     </div>
                   )}
                 </div>
@@ -1677,16 +2349,16 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                   </h4>
                 </div>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>
-                  หลักการ Least Privilege กำหนดเฉพาะสิทธิ์ที่จำเป็นต่อการทำงานของระบบ
+                  กำหนดเฉพาะสิทธิ์ที่อนุญาตให้ระบบภายนอกเข้าถึง (Least Privilege)
                 </p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {[
-                    { id: 'inventory:sync', label: 'inventory:sync', desc: 'อัปเดตสต็อกสินค้า Real-time จาก POS' },
+                    { id: 'inventory:sync', label: 'inventory:sync', desc: 'อัปเดตสต็อกสินค้า Real-time จาก BigSeller/ERP' },
                     { id: 'orders:read', label: 'orders:read', desc: 'ดึงข้อมูลคำสั่งซื้อใหม่และรายละเอียดผู้รับ' },
                     { id: 'orders:dispatch', label: 'orders:dispatch', desc: 'ส่งเลขพัสดุและตัดรอบจัดส่งออเดอร์' },
-                    { id: 'products:write', label: 'products:write', desc: 'เพิ่ม/แก้ไขรายการสินค้าและราคา' },
-                    { id: 'finance:read', label: 'finance:read', desc: 'ดึงรายงานการเงินและยอดโอนรายวัน' },
+                    { id: 'chat:omnichannel', label: 'chat:omnichannel', desc: 'ส่งต่อและตอบข้อความแชทลูกค้าข้ามแพลตฟอร์ม' },
+                    { id: 'products:write', label: 'products:write', desc: 'เพิ่ม/แก้ไขรายการสินค้าและราคาแบบชุด (Bulk)' },
                   ].map(item => (
                     <label key={item.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer', fontSize: 12 }}>
                       <input
@@ -1705,172 +2377,76 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
               </div>
             </div>
 
-            {/* 4. Endpoints Documentation & cURL Snippets */}
+            {/* 6. Partner Endpoints & cURL Snippets */}
             <div style={{ background: '#FFFFFF', border: '1px solid var(--border)', padding: 'var(--space-6)' }}>
               <h3 style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 14 }}>
-                ⚡ ตัวอย่าง API ยอดนิยม (Open API Endpoints & cURL)
+                ⚡ ตัวอย่าง API สำหรับผู้ให้บริการระบบ (Partner Endpoints & cURL)
               </h3>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {/* Endpoint 1: Update Stock */}
+                {/* Endpoint 1: Batch Sync Stock */}
                 <div style={{ background: '#0F172A', color: '#F8FAFC', padding: 14, borderLeft: '4px solid #10B981' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ background: '#10B981', color: 'black', padding: '2px 6px', fontWeight: 900, fontSize: 10 }}>PATCH</span>
-                      <strong style={{ fontSize: 13 }}>/v1/seller/inventory</strong>
+                      <span style={{ background: '#10B981', color: 'black', padding: '2px 6px', fontWeight: 900, fontSize: 10 }}>POST</span>
+                      <strong style={{ fontSize: 13 }}>/api/v1/open/products/batch-sync</strong>
                     </div>
-                    <span style={{ fontSize: 11, color: '#94A3B8' }}>อัปเดตสต็อกสินค้า Real-time จาก POS/ERP</span>
+                    <span style={{ fontSize: 11, color: '#94A3B8' }}>BigSeller / Ginee ซิงค์สต็อกแบบชุด (Bulk Sync)</span>
                   </div>
                   <pre style={{ margin: 0, fontSize: 11, color: '#A7F3D0', overflowX: 'auto', padding: '6px 0' }}>
-{`curl -X PATCH https://api.movemall.com/v1/seller/inventory \\
+{`curl -X POST https://api.movemall.com/api/v1/open/products/batch-sync \\
   -H "Authorization: Bearer ${currentApiKey}" \\
   -H "Content-Type: application/json" \\
   -d '{
     "items": [
-      { "sku": "EL-001", "stock": 45 },
-      { "sku": "EL-002", "stock": 120 }
+      { "productId": "prod-1", "sku": "TECH-001", "stock": 50, "price": 1290 },
+      { "productId": "prod-2", "sku": "TECH-002", "stock": 100, "price": 890 }
     ]
   }'`}
                   </pre>
                 </div>
 
-                {/* Endpoint 2: Fetch Orders */}
+                {/* Endpoint 2: OmniChat Reply */}
                 <div style={{ background: '#0F172A', color: '#F8FAFC', padding: 14, borderLeft: '4px solid #3B82F6' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ background: '#3B82F6', color: 'white', padding: '2px 6px', fontWeight: 900, fontSize: 10 }}>GET</span>
-                      <strong style={{ fontSize: 13 }}>/v1/seller/orders?status=PENDING_DISPATCH</strong>
+                      <span style={{ background: '#3B82F6', color: 'white', padding: '2px 6px', fontWeight: 900, fontSize: 10 }}>POST</span>
+                      <strong style={{ fontSize: 13 }}>/api/v1/open/chat/reply</strong>
                     </div>
-                    <span style={{ fontSize: 11, color: '#94A3B8' }}>ดึงรายการออเดอร์ใหม่ไปแพ็กของ</span>
+                    <span style={{ fontSize: 11, color: '#94A3B8' }}>Page365 / Zwiz ตอบกลับแชทส่งถึงผู้ซื้อ Movemall</span>
                   </div>
                   <pre style={{ margin: 0, fontSize: 11, color: '#BFDBFE', overflowX: 'auto', padding: '6px 0' }}>
-{`curl -X GET https://api.movemall.com/v1/seller/orders?status=PENDING_DISPATCH \\
-  -H "Authorization: Bearer ${currentApiKey}"`}
+{`curl -X POST https://api.movemall.com/api/v1/open/chat/reply \\
+  -H "Authorization: Bearer ${currentApiKey}" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "storeId": "${currentStore.id}",
+    "userId": "user-buyer-101",
+    "messageText": "สวัสดีครับ มีสินค้าพร้อมจัดส่งวันนี้ครับ"
+  }'`}
                   </pre>
                 </div>
 
-                {/* Endpoint 3: Fulfill Order with Idempotency Key */}
+                {/* Endpoint 3: Fulfill Order */}
                 <div style={{ background: '#0F172A', color: '#F8FAFC', padding: 14, borderLeft: '4px solid #F59E0B' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ background: '#F59E0B', color: 'black', padding: '2px 6px', fontWeight: 900, fontSize: 10 }}>POST</span>
-                      <strong style={{ fontSize: 13 }}>/v1/seller/orders/MM-2026-0816/fulfill</strong>
+                      <strong style={{ fontSize: 13 }}>/api/v1/open/orders/ship</strong>
                     </div>
-                    <span style={{ fontSize: 11, color: '#94A3B8' }}>ส่งเลขแทร็กกิ้งพัสดุ + Idempotency-Key</span>
+                    <span style={{ fontSize: 11, color: '#94A3B8' }}>ส่งเลขพัสดุและพิมพ์ใบปะหน้าจาก ERP</span>
                   </div>
                   <pre style={{ margin: 0, fontSize: 11, color: '#FDE68A', overflowX: 'auto', padding: '6px 0' }}>
-{`curl -X POST https://api.movemall.com/v1/seller/orders/MM-2026-0816/fulfill \\
+{`curl -X POST https://api.movemall.com/api/v1/open/orders/ship \\
   -H "Authorization: Bearer ${currentApiKey}" \\
-  -H "Idempotency-Key: ${Date.now()}-req-9912" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "courierCode": "FLASH_EXPRESS",
+    "orderId": "MM-2026-9921",
     "trackingNumber": "TH029384729182",
-    "awbLabelBase64": "..."
+    "courierProvider": "Flash Express"
   }'`}
                   </pre>
                 </div>
-              </div>
-            </div>
-
-            {/* 5. Webhook Configuration & HMAC-SHA256 Signature Simulator */}
-            <div className="seller-api-card">
-              <div className="seller-api-card__header">
-                <div>
-                  <h3 className="seller-api-card__title">
-                    🔔 Webhook & ระบบตรวจสอบลายเซ็นดิจิทัล (HMAC-SHA256)
-                  </h3>
-                  <p className="seller-api-card__sub">
-                    เมื่อมีคำสั่งซื้อใหม่ (<code>order.paid</code>) Movemall จะส่งแจ้งเตือนพร้อมลายเซ็นเพื่อป้องกันการปลอมแปลงคำขอ
-                  </p>
-                </div>
-                <span className="seller-api-card__badge">
-                  HMAC-SHA256 SECURED
-                </span>
-              </div>
-
-              {/* Webhook Endpoint & Secret */}
-              <div className="seller-webhook-fields-grid">
-                <div>
-                  <label className="seller-api-field-label">
-                    WEBHOOK ENDPOINT URL
-                  </label>
-                  <input
-                    type="url"
-                    value={webhookUrl}
-                    onChange={e => setWebhookUrl(e.target.value)}
-                    placeholder="https://erp.techpro.co.th/api/movemall/webhook"
-                    className="seller-api-field-input"
-                  />
-                </div>
-                <div>
-                  <label className="seller-api-field-label">
-                    WEBHOOK SIGNING SECRET (ใช้ตรวจ Signature)
-                  </label>
-                  <div className="seller-api-secret-row">
-                    <input
-                      type="text"
-                      readOnly
-                      value={webhookSecret}
-                      className="seller-api-field-input seller-api-field-input--mono"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setWebhookSecret(`whsec_${Math.random().toString(36).substring(2)}${Date.now().toString(36)}`);
-                        alert('สร้าง Webhook Secret ใหม่แล้ว!');
-                      }}
-                      className="seller-api-secret-regen-btn"
-                    >
-                      🔄 สร้างใหม่
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Interactive Webhook Simulator */}
-              <div className="seller-webhook-simulator-box">
-                <div className="seller-webhook-simulator-header">
-                  <strong className="seller-webhook-simulator-title">
-                    🧪 เครื่องมือทดสอบยิง Webhook จำลอง (Signature Simulator)
-                  </strong>
-                  <div className="seller-webhook-simulator-controls">
-                    <select
-                      value={webhookTestEvent}
-                      onChange={e => setWebhookTestEvent(e.target.value as 'order.paid' | 'inventory.low')}
-                      className="seller-webhook-select"
-                    >
-                      <option value="order.paid">Event: order.paid (ชำระเงินสำเร็จ)</option>
-                      <option value="inventory.low">Event: inventory.low (สต็อกสินค้าต่ำ)</option>
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const timestamp = Math.floor(Date.now() / 1000);
-                        const fakePayload = webhookTestEvent === 'order.paid'
-                          ? JSON.stringify({ event: 'order.paid', orderId: 'MM-2026-9941', amount: 3590, storeId: currentStore.id, paidAt: new Date().toISOString() }, null, 2)
-                          : JSON.stringify({ event: 'inventory.low', sku: 'EL-001', remainingStock: 3, alertThreshold: 5 }, null, 2);
-                        
-                        const fakeSig = `t=${timestamp},v1=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`;
-                        setWebhookSimResult(`POST ${webhookUrl || 'https://erp.techpro.co.th/api/movemall/webhook'}\nHeaders:\n  X-Movemall-Signature: ${fakeSig}\n  X-Movemall-Timestamp: ${timestamp}\n  Content-Type: application/json\n\nPayload:\n${fakePayload}`);
-                      }}
-                      className="seller-webhook-test-btn"
-                    >
-                      🚀 ทดสอบยิง Webhook
-                    </button>
-                  </div>
-                </div>
-
-                {webhookSimResult && (
-                  <div style={{ marginTop: 10 }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: '#15803D', marginBottom: 4 }}>
-                      ✓ คำนวณ Payload & ลายเซ็น HMAC เรียบร้อย:
-                    </div>
-                    <pre style={{ margin: 0, padding: 12, background: '#0F172A', color: '#38BDF8', fontSize: 11, overflowX: 'auto', borderRadius: 6 }}>
-                      {webhookSimResult}
-                    </pre>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -3170,7 +3746,415 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             </div>
           </div>
         )}
+
+        {/* ── Seller Live Customer Chat Tab ── */}
+        {activeTab === 'chat' && (
+          <div className="seller-chat-wrapper">
+            <div className="seller-chat-layout">
+              {/* Customer List Sidebar */}
+              <div className="seller-chat-sidebar">
+                <div className="seller-chat-sidebar__header">
+                  <h3 className="seller-chat-sidebar__title">
+                    <span>💬 รายการลูกค้าที่ทักแชท</span>
+                    {isSellerSocketConnected && (
+                      <span style={{ fontSize: 11, color: '#10B981', display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <Radio size={10} /> ออนไลน์
+                      </span>
+                    )}
+                  </h3>
+                </div>
+
+                <div className="seller-chat-customer-list">
+                  {['guest_user', 'user-buyer-1', 'user-buyer-2'].map((cId, idx) => {
+                    const isSelected = selectedCustomerId === cId;
+                    const lastMsg = (sellerMessages[currentStore.id] || [])[sellerMessages[currentStore.id]?.length - 1];
+                    const customerNames: Record<string, string> = {
+                      guest_user: 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)',
+                      'user-buyer-1': 'คุณสมชาย มุ่งมั่น (Movemall VIP)',
+                      'user-buyer-2': 'คุณอารียา พรรณดี (ผู้ซื้อยืนยันตัวตน)',
+                    };
+
+                    return (
+                      <div
+                        key={cId}
+                        className={`seller-chat-customer-item${isSelected ? ' seller-chat-customer-item--active' : ''}`}
+                        onClick={() => setSelectedCustomerId(cId)}
+                      >
+                        <div className="seller-chat-customer-avatar">
+                          {idx === 0 ? '👤' : idx === 1 ? '👨' : '👩'}
+                        </div>
+                        <div className="seller-chat-customer-meta">
+                          <div className="seller-chat-customer-name-row">
+                            <span className="seller-chat-customer-name">{customerNames[cId] || cId}</span>
+                            <span className="seller-chat-customer-time">{lastMsg?.time || '10:30'}</span>
+                          </div>
+                          <p className="seller-chat-customer-preview">
+                            {isSelected && lastMsg ? lastMsg.text : (idx === 0 ? 'สอบถามข้อมูลสินค้าและสต็อก...' : 'ขอบคุณสำหรับบริการค่ะ')}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Chat Thread */}
+              <div className="seller-chat-main">
+                <div className="seller-chat-header">
+                  <div>
+                    <strong style={{ fontSize: 14, color: 'var(--text-primary)' }}>
+                      {selectedCustomerId === 'guest_user' ? 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)' : selectedCustomerId}
+                    </strong>
+                    <div style={{ fontSize: 11, color: '#10B981', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                      <span>● กำลังสนทนาผ่าน WebSocket สด</span>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)', background: '#F3F4F6', padding: '4px 8px', borderRadius: 4 }}>
+                    🔒 ปลอดภัยด้วย Movemall Merchant Shield
+                  </span>
+                </div>
+
+                <div className="seller-chat-messages-area">
+                  {(sellerMessages[currentStore.id] || [
+                    { id: 'init-1', sender: 'store', text: `สวัสดีครับ ยินดีต้อนรับสู่ ${currentStore.name} มีอะไรให้ร้านค้าดูแลสอบถามได้เลยครับ!`, time: '10:00' }
+                  ]).map((msg, mIdx) => (
+                    <div
+                      key={msg.id || mIdx}
+                      className={`seller-chat-bubble-wrap ${msg.sender === 'store' ? 'seller-chat-bubble-wrap--seller' : 'seller-chat-bubble-wrap--customer'}`}
+                    >
+                      <div className="seller-chat-bubble">
+                        {msg.text}
+                      </div>
+                      <span className="seller-chat-time">
+                        {msg.time || '10:00'} • {msg.sender === 'store' ? 'ร้านค้า (คุณ)' : 'ลูกค้า'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Quick Merchant Replies */}
+                <div className="seller-chat-quick-replies">
+                  {[
+                    '📦 สินค้ามีพร้อมส่งสต็อกแน่น จัดส่งรอบวันนี้ทันทีครับ 🚀',
+                    '🧾 ทางร้านสามารถออกใบกำกับภาษีเต็มรูปแบบได้ครับ 📑',
+                    '🎟️ มอบโค้ดส่วนลด 10% พิเศษสำหรับคำสั่งซื้อนี้ครับ 🎁',
+                    '✨ สินค้าของแท้ 100% มีประกันศูนย์ไทย 1 ปีเต็มครับ 🛡️',
+                  ].map((quick, qIdx) => (
+                    <button
+                      key={qIdx}
+                      type="button"
+                      className="seller-chat-quick-btn"
+                      onClick={() => handleSellerSendMessage(undefined, quick)}
+                    >
+                      {quick}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Send Input Bar */}
+                <form className="seller-chat-input-row" onSubmit={handleSellerSendMessage}>
+                  <input
+                    type="text"
+                    className="seller-chat-input"
+                    placeholder="พิมพ์ข้อความตอบกลับลูกค้าในนามร้านค้า..."
+                    value={sellerInputVal}
+                    onChange={e => setSellerInputVal(e.target.value)}
+                  />
+                  <button type="submit" className="seller-chat-send-btn">
+                    <Send size={14} />
+                    <span>ตอบกลับ</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 🛡️ Tab: Shop Health & Buyer Protection Shield */}
+        {activeTab === 'health' && (
+          <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* Top Score Summary Banner */}
+            <div style={{
+              background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+              color: 'white',
+              borderRadius: 6,
+              padding: '1.5rem',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '1.5rem',
+              alignItems: 'center'
+            }}>
+              <div>
+                <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <ShieldCheck size={16} color="#10b981" /> สุขภาพร้านค้าโดยรวม (Overall Shop Health)
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                  <span style={{ fontSize: '2.25rem', fontWeight: 900, color: '#10b981' }}>{storeHealthScore}</span>
+                  <span style={{ fontSize: '1rem', color: '#64748b' }}>/ 100 คะแนน</span>
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#cbd5e1', marginTop: 4 }}>
+                  ✓ ระดับยอดเยี่ยม: ร้านค้าของคุณมีสิทธิ์เข้าร่วมทุกแคมเปญ ไลฟ์สด และรับประกันการมองเห็น 100%
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1rem', borderRadius: 6, border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>แต้มตัดสะสม (Penalty Points)</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: storePenaltyPoints === 0 ? '#10b981' : '#ef4444', margin: '4px 0' }}>
+                  {storePenaltyPoints} แต้ม
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>โควต้าปลอดภัย: ต่ำกว่า 3 แต้ม</div>
+              </div>
+
+              <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1rem', borderRadius: 6, border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>อัตราจัดส่งล่าช้า (Late Shipment)</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981', margin: '4px 0' }}>
+                  0.6%
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>เกณฑ์มาตรฐาน: ไม่เกิน 10%</div>
+              </div>
+
+              <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1rem', borderRadius: 6, border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>อัตราการยกเลิกโดยร้าน (Cancellation)</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981', margin: '4px 0' }}>
+                  0.2%
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>เกณฑ์มาตรฐาน: ไม่เกิน 5%</div>
+              </div>
+            </div>
+
+            {/* Buyer Protection Shield & Report Section */}
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 6, padding: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    🛡️ ระบบปกป้องผู้ขาย & รายงานผู้ซื้อที่กระทำผิดกฎ (Seller Shield & Abuse Report)
+                  </h3>
+                  <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '4px 0 0 0' }}>
+                    พบเจอลูกค้าสั่งของเล่น, ปฏิเสธไม่รับพัสดุเก็บเงินปลายทาง (COD), หรือขอเงินคืนโดยไม่ส่งของจริงคืนร้านค้า แจ้งรายงานได้ทันที
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="admin-btn-sm"
+                  style={{
+                    background: '#dc2626',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.6rem 1.25rem',
+                    borderRadius: 6,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                  onClick={() => setShowBuyerReportModal(true)}
+                >
+                  <AlertTriangle size={16} /> 🚨 แจ้งรายงานผู้ซื้อ / เคลมค่าเสียหาย COD
+                </button>
+              </div>
+
+              {/* Protection Guarantees */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: 6, borderLeft: '4px solid #2563eb' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.875rem', color: '#1e293b' }}>📦 ชดเชยค่าส่งพัสดุ COD ตีกลับ 100%</div>
+                  <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: 4 }}>
+                    หากลูกค้าปฏิเสธรับสินค้า COD ขนส่งนำจ่าย 3 ครั้งไม่สำเร็จ Movemall คืนเงินค่าธรรมเนียมจัดส่งเข้า Seller Wallet ทันที
+                  </div>
+                </div>
+                <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: 6, borderLeft: '4px solid #dc2626' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.875rem', color: '#1e293b' }}>🚫 แบล็กลิสต์ & ตัดสิทธิ์ COD ลูกค้าเสี่ยง</div>
+                  <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: 4 }}>
+                    ลูกค้าที่มีสถิติปฏิเสธรับสินค้าจะถูกระบบลด Trust Score และปิดช่องทางเก็บเงินปลายทางอัตโนมัติ เพื่อป้องกันการสั่งเล่นซ้ำ
+                  </div>
+                </div>
+                <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: 6, borderLeft: '4px solid #10b981' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.875rem', color: '#1e293b' }}>⚖️ ป้องกันการขอเงินคืนฉ้อโกง (Fraud Refund Shield)</div>
+                  <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: 4 }}>
+                    ทีมงาน CS ตรวจสอบหลักฐานวิดีโอแกะพัสดุ หากลูกค้าส่งกล่องเปล่าคืน ร้านค้าจะได้รับเงินค่าสินค้าเต็มจำนวน
+                  </div>
+                </div>
+              </div>
+
+              {/* My Filed Reports Table */}
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#334155', marginBottom: '0.75rem' }}>
+                📋 ประวัติการยื่นรายงานลูกค้าของคุณ ({myFiledReports.length})
+              </h4>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                  <thead>
+                    <tr style={{ background: '#f1f5f9', textAlign: 'left', borderBottom: '1px solid #cbd5e1' }}>
+                      <th style={{ padding: '0.75rem 1rem', color: '#475569' }}>เลขที่ออเดอร์</th>
+                      <th style={{ padding: '0.75rem 1rem', color: '#475569' }}>ชื่อลูกค้าที่ถูกร้องเรียน</th>
+                      <th style={{ padding: '0.75rem 1rem', color: '#475569' }}>ประเภทความผิด</th>
+                      <th style={{ padding: '0.75rem 1rem', color: '#475569' }}>รายละเอียด</th>
+                      <th style={{ padding: '0.75rem 1rem', color: '#475569' }}>สถานะการพิจารณา</th>
+                      <th style={{ padding: '0.75rem 1rem', color: '#475569' }}>การชดเชยร้านค้า</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {myFiledReports.map(rep => (
+                      <tr key={rep.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#2563eb' }}>{rep.orderId}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#1e293b' }}>{rep.customerName}</td>
+                        <td style={{ padding: '0.75rem 1rem' }}>
+                          <span style={{
+                            padding: '2px 8px',
+                            borderRadius: 4,
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            background: rep.type === 'COD_REJECTED' ? '#fee2e2' : '#fef3c7',
+                            color: rep.type === 'COD_REJECTED' ? '#b91c1c' : '#b45309'
+                          }}>
+                            {rep.type === 'COD_REJECTED' && '🚨 ปฏิเสธรับ COD'}
+                            {rep.type === 'REFUND_ABUSE' && '⚠️ ขอคืนเงินเท็จ'}
+                            {rep.type === 'FAKE_ORDER' && '📦 สั่งเล่นสแปม'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.75rem 1rem', color: '#64748b', maxWidth: 280 }}>{rep.description}</td>
+                        <td style={{ padding: '0.75rem 1rem' }}>
+                          {rep.status === 'ACTION_TAKEN' ? (
+                            <span style={{ color: '#15803d', fontWeight: 700, background: '#dcfce7', padding: '2px 8px', borderRadius: 4 }}>
+                              ✓ ลงโทษผู้ซื้อแล้ว
+                            </span>
+                          ) : (
+                            <span style={{ color: '#b45309', fontWeight: 600, background: '#fef3c7', padding: '2px 8px', borderRadius: 4 }}>
+                              ⏳ กำลังตรวจสอบ
+                            </span>
+                          )}
+                        </td>
+                        <td style={{ padding: '0.75rem 1rem' }}>
+                          {rep.compensationStatus === 'COMPENSATED_50THB' ? (
+                            <span style={{ color: '#10b981', fontWeight: 700 }}>💰 ชดเชย ฿50 แล้ว</span>
+                          ) : (
+                            <span style={{ color: '#94a3b8' }}>รออนุมัติ</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* ── Modal: Seller Report Buyer Form ── */}
+      {showBuyerReportModal && (
+        <div className="seller-modal-backdrop" onClick={() => setShowBuyerReportModal(false)}>
+          <div className="seller-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 540 }}>
+            <div className="seller-modal__header">
+              <h2 className="seller-modal__title" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#dc2626' }}>
+                <AlertTriangle size={20} /> แจ้งรายงานลูกค้าทำผิดกฎ / เคลมค่าเสียหาย
+              </h2>
+              <button className="seller-modal__close" onClick={() => setShowBuyerReportModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleSubmitBuyerReport} style={{ padding: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: 4 }}>
+                    เลขที่คำสั่งซื้อ (Order ID)
+                  </label>
+                  <input
+                    type="text"
+                    style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.85rem' }}
+                    value={reportForm.orderId}
+                    onChange={e => setReportForm(prev => ({ ...prev, orderId: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: 4 }}>
+                    ชื่อลูกค้า
+                  </label>
+                  <input
+                    type="text"
+                    style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.85rem' }}
+                    value={reportForm.customerName}
+                    onChange={e => setReportForm(prev => ({ ...prev, customerName: e.target.value }))}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: 4 }}>
+                  ประเภทการกระทำผิด (Violation Type)
+                </label>
+                <select
+                  style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.85rem' }}
+                  value={reportForm.type}
+                  onChange={e => setReportForm(prev => ({ ...prev, type: e.target.value as any }))}
+                >
+                  <option value="COD_REJECTED">🚨 ลูกค้าปฏิเสธไม่ยอมรับพัสดุเก็บเงินปลายทาง (COD Rejected)</option>
+                  <option value="REFUND_ABUSE">⚠️ ขอเงินคืนเท็จ / คืนกล่องเปล่า / สลับสินค้า</option>
+                  <option value="FAKE_ORDER">📦 สั่งซื้อเล่น สแปมออเดอร์แล้วกดยกเลิกกลั่นแกล้ง</option>
+                  <option value="HARASSMENT">💬 ส่งข้อความคุกคาม ข่มขู่ หรือใช้ถ้อยคำหยาบคายในแชท</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: 4 }}>
+                  รายละเอียดเหตุการณ์ & ความเสียหาย
+                </label>
+                <textarea
+                  rows={3}
+                  style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.85rem' }}
+                  value={reportForm.description}
+                  onChange={e => setReportForm(prev => ({ ...prev, description: e.target.value }))}
+                  required
+                />
+              </div>
+
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: 4 }}>
+                  URL รูปภาพหลักฐาน (ใบปะหน้าขนส่ง / สภาพพัสดุตีกลับ / แชท)
+                </label>
+                <input
+                  type="text"
+                  style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.85rem' }}
+                  value={reportForm.evidenceUrl}
+                  onChange={e => setReportForm(prev => ({ ...prev, evidenceUrl: e.target.value }))}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button
+                  type="submit"
+                  style={{
+                    flex: 1,
+                    background: '#dc2626',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.65rem',
+                    borderRadius: 6,
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  ยื่นรายงาน & ขอรับการชดเชย
+                </button>
+                <button
+                  type="button"
+                  style={{
+                    padding: '0.65rem 1rem',
+                    background: '#f1f5f9',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: 6,
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => setShowBuyerReportModal(false)}
+                >
+                  ยกเลิก
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Nomination Form Modal */}
       {isNominateModalOpen && (
@@ -3970,6 +4954,326 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                   </button>
                 </div>
               </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Partner Manage & Configuration Modal ── */}
+      {selectedPartnerModal && (
+        <div className="seller-modal-backdrop" onClick={() => setSelectedPartnerModal(null)}>
+          <div className="seller-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 580 }}>
+            <div className="seller-modal__header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    background: selectedPartnerModal.logoColor,
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 900,
+                    fontSize: 14
+                  }}
+                >
+                  {selectedPartnerModal.id === 'bigseller' ? 'BS' : selectedPartnerModal.id === 'page365' ? '365' : selectedPartnerModal.id === 'zwiz' ? 'ZW' : selectedPartnerModal.id === 'ginee' ? 'GN' : selectedPartnerModal.id === 'ohochat' ? 'OH' : 'BW'}
+                </div>
+                <div>
+                  <h2 className="seller-modal__title" style={{ margin: 0, fontSize: 16 }}>
+                    ตั้งค่าการเชื่อมต่อ: {selectedPartnerModal.name}
+                  </h2>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                    {selectedPartnerModal.categoryLabel}
+                  </div>
+                </div>
+              </div>
+              <button className="seller-modal__close" onClick={() => setSelectedPartnerModal(null)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Connection Toggle & Status */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, background: selectedPartnerModal.connected ? '#EFF6FF' : '#F8FAFC', border: '1px solid var(--border)' }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 900, color: 'var(--text-primary)' }}>
+                    สถานะการเชื่อมต่อ: {selectedPartnerModal.connected ? '🟢 กำลังซิงค์ข้อมูล (Active)' : '⚪ ปิดการเชื่อมต่อ (Disabled)'}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                    {selectedPartnerModal.connected ? `สัญญาณเสถียร ${selectedPartnerModal.syncHealth}% | ซิงค์ล่าสุด ${selectedPartnerModal.lastSyncedAt}` : 'คลิกเปิดสวิตช์เพื่อเริ่มรับส่งข้อมูลอัตโนมัติ'}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextStatus = !selectedPartnerModal.connected;
+                    setPartners(partners.map(p => p.id === selectedPartnerModal.id ? { ...p, connected: nextStatus, syncHealth: nextStatus ? 100 : 0, lastSyncedAt: nextStatus ? 'เมื่อสักครู่' : p.lastSyncedAt } : p));
+                    setSelectedPartnerModal({ ...selectedPartnerModal, connected: nextStatus, syncHealth: nextStatus ? 100 : 0, lastSyncedAt: nextStatus ? 'เมื่อสักครู่' : selectedPartnerModal.lastSyncedAt });
+                    alert(`อัปเดตสถานะ ${selectedPartnerModal.name} เป็น ${nextStatus ? '🟢 เปิดใช้งานเรียบร้อย' : '⚪ ปิดการเชื่อมต่อแล้ว'}`);
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    background: selectedPartnerModal.connected ? '#DC2626' : 'var(--primary)',
+                    color: 'white',
+                    border: 'none',
+                    fontSize: 12,
+                    fontWeight: 800,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {selectedPartnerModal.connected ? 'ตัดการเชื่อมต่อ (Disconnect)' : '🔗 เชื่อมต่อทันที (Connect)'}
+                </button>
+              </div>
+
+              {/* Partner Token to paste on BigSeller/Page365 */}
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>
+                  MOVEMALL STORE AUTHORIZATION TOKEN (นำไปวางในระบบ {selectedPartnerModal.name})
+                </label>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <input
+                    type="text"
+                    readOnly
+                    value={selectedPartnerModal.partnerToken}
+                    style={{ flex: 1, padding: '8px 10px', fontSize: 12, fontFamily: 'monospace', background: '#F8FAFC', border: '1px solid var(--border)' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedPartnerModal.partnerToken);
+                      alert('คัดลอก Token เรียบร้อย! นำไปวางในช่อง Movemall Store Auth บนระบบพาร์ทเนอร์ได้ทันที');
+                    }}
+                    style={{ padding: '8px 14px', background: '#334155', color: 'white', border: 'none', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}
+                  >
+                    คัดลอก Token
+                  </button>
+                </div>
+              </div>
+
+              {/* Sync Options Toggles */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, border: '1px solid var(--border)', padding: 12, background: '#FFFFFF' }}>
+                <div style={{ fontSize: 12, fontWeight: 900, color: 'var(--text-primary)' }}>
+                  ⚙️ ตัวเลือกการซิงค์ข้อมูล (Sync Features):
+                </div>
+
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: 12 }}>
+                  <div>
+                    <strong>📦 ซิงค์สต็อกสินค้าอัตโนมัติ (Real-time Stock Deduct)</strong>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>เมื่อมีการสั่งซื้อใน Movemall สต็อกบน {selectedPartnerModal.name} จะถูกตัดทันที</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={selectedPartnerModal.autoSyncStock}
+                    onChange={e => {
+                      const val = e.target.checked;
+                      setSelectedPartnerModal({ ...selectedPartnerModal, autoSyncStock: val });
+                      setPartners(partners.map(p => p.id === selectedPartnerModal.id ? { ...p, autoSyncStock: val } : p));
+                    }}
+                  />
+                </label>
+
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: 12 }}>
+                  <div>
+                    <strong>🛒 ดึงคำสั่งซื้อใหม่อัตโนมัติ (Auto Order Dispatch)</strong>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>ส่งออเดอร์ไปแพ็กของและพิมพ์ใบปะหน้าพัสดุในระบบพาร์ทเนอร์</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={selectedPartnerModal.autoSyncOrders}
+                    onChange={e => {
+                      const val = e.target.checked;
+                      setSelectedPartnerModal({ ...selectedPartnerModal, autoSyncOrders: val });
+                      setPartners(partners.map(p => p.id === selectedPartnerModal.id ? { ...p, autoSyncOrders: val } : p));
+                    }}
+                  />
+                </label>
+
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: 12 }}>
+                  <div>
+                    <strong>💬 ส่งต่อข้อความแชทสด (OmniChat Live Stream Webhook)</strong>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>ส่งต่อแชทลูกค้า Movemall ไปให้แอดมินตอบจากหน้าจอเดียว</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={selectedPartnerModal.autoSyncChat}
+                    onChange={e => {
+                      const val = e.target.checked;
+                      setSelectedPartnerModal({ ...selectedPartnerModal, autoSyncChat: val });
+                      setPartners(partners.map(p => p.id === selectedPartnerModal.id ? { ...p, autoSyncChat: val } : p));
+                    }}
+                  />
+                </label>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPartnerModal(null)}
+                  style={{ padding: '8px 16px', background: '#F1F5F9', border: '1px solid var(--border)', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                >
+                  ปิดหน้าต่าง
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    alert(`บันทึกการตั้งค่า ${selectedPartnerModal.name} เรียบร้อยแล้ว!`);
+                    setSelectedPartnerModal(null);
+                  }}
+                  style={{ padding: '8px 20px', background: 'var(--primary)', color: 'white', border: 'none', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
+                >
+                  💾 บันทึกการตั้งค่า
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Partner ISV Onboarding Request Modal ── */}
+      {isPartnerRequestModalOpen && (
+        <div className="seller-modal-backdrop" onClick={() => setIsPartnerRequestModalOpen(false)}>
+          <div className="seller-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 540 }}>
+            <div className="seller-modal__header">
+              <div>
+                <h2 className="seller-modal__title" style={{ margin: 0, fontSize: 16 }}>
+                  🏢 ยื่นขอเชื่อมต่อสำหรับผู้ให้บริการระบบ (ISV Onboarding)
+                </h2>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  Movemall Closed Partner Program สำหรับผู้พัฒนา ERP, POS, WMS, และแอปตอบรวมแชท
+                </div>
+              </div>
+              <button className="seller-modal__close" onClick={() => setIsPartnerRequestModalOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            {partnerAppSubmitted ? (
+              <div style={{ padding: 'var(--space-6)', textAlign: 'center' }}>
+                <div style={{ width: 50, height: 50, background: '#DCFCE7', color: '#166534', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', fontSize: 24 }}>
+                  ✓
+                </div>
+                <h3 style={{ fontSize: 17, fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 6px' }}>
+                  ยื่นเอกสารขอเชื่อมต่อระบบสำเร็จ!
+                </h3>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 16px' }}>
+                  หมายเลขคำขอ: <strong style={{ fontFamily: 'monospace', color: 'var(--primary)' }}>{partnerAppSubmitted}</strong>
+                </p>
+                <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 12, fontSize: 12, color: 'var(--text-secondary)', textAlign: 'left', marginBottom: 20 }}>
+                  ทีม Movemall ISV Partnerships จะตรวจสอบเอกสารและส่งมอบ <strong>Dedicated Partner App Key & Sandbox Environment</strong> ให้ทางอีเมลติดต่อภายใน 24 ชั่วโมงทำการ
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsPartnerRequestModalOpen(false)}
+                  style={{ padding: '9px 24px', background: 'var(--primary)', color: 'white', border: 'none', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
+                >
+                  เสร็จสิ้น
+                </button>
+              </div>
+            ) : (
+              <form
+                onSubmit={e => {
+                  e.preventDefault();
+                  if (!partnerApplicationForm.companyName || !partnerApplicationForm.softwareName || !partnerApplicationForm.contactEmail) {
+                    alert('กรุณากรอกข้อมูลสำคัญให้ครบถ้วน');
+                    return;
+                  }
+                  const ticketId = `ISV-REQ-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+                  setPartnerAppSubmitted(ticketId);
+                }}
+                style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 12 }}
+              >
+                <div>
+                  <label className="seller-modal__label">ชื่อบริษัท / นิติบุคคลผู้พัฒนา *</label>
+                  <input
+                    type="text"
+                    className="seller-modal__input"
+                    placeholder="เช่น บริษัท ซอฟต์แวร์ ออมนิ จำกัด"
+                    value={partnerApplicationForm.companyName}
+                    onChange={e => setPartnerApplicationForm({ ...partnerApplicationForm, companyName: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label className="seller-modal__label">ชื่อระบบ / ซอฟต์แวร์ *</label>
+                    <input
+                      type="text"
+                      className="seller-modal__input"
+                      placeholder="เช่น FastSeller ERP"
+                      value={partnerApplicationForm.softwareName}
+                      onChange={e => setPartnerApplicationForm({ ...partnerApplicationForm, softwareName: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="seller-modal__label">หมวดหมู่ระบบ *</label>
+                    <select
+                      className="seller-modal__select"
+                      value={partnerApplicationForm.category}
+                      onChange={e => setPartnerApplicationForm({ ...partnerApplicationForm, category: e.target.value })}
+                    >
+                      <option value="ERP">ERP & สต็อกสินค้า</option>
+                      <option value="CHAT">ระบบรวมแชท Social Chat</option>
+                      <option value="WMS">คลังสินค้า WMS & โลจิสติกส์</option>
+                      <option value="POS">ระบบขายหน้าร้าน POS</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label className="seller-modal__label">อีเมลทีมเทคนิค (Tech Contact) *</label>
+                    <input
+                      type="email"
+                      className="seller-modal__input"
+                      placeholder="tech-partner@company.com"
+                      value={partnerApplicationForm.contactEmail}
+                      onChange={e => setPartnerApplicationForm({ ...partnerApplicationForm, contactEmail: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="seller-modal__label">จำนวนร้านค้าที่ดูแลอยู่</label>
+                    <select
+                      className="seller-modal__select"
+                      value={partnerApplicationForm.estimatedStores}
+                      onChange={e => setPartnerApplicationForm({ ...partnerApplicationForm, estimatedStores: e.target.value })}
+                    >
+                      <option value="10-50">10 – 50 ร้านค้า</option>
+                      <option value="51-200">51 – 200 ร้านค้า</option>
+                      <option value="200+">มากกว่า 200 ร้านค้า (High Volume)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="seller-modal__label">ลิงก์เอกสาร API / Website บริษัท (ถ้ามี)</label>
+                  <input
+                    type="url"
+                    className="seller-modal__input"
+                    placeholder="https://developer.yourcompany.com"
+                    value={partnerApplicationForm.technicalDocUrl}
+                    onChange={e => setPartnerApplicationForm({ ...partnerApplicationForm, technicalDocUrl: e.target.value })}
+                  />
+                </div>
+
+                <div className="seller-modal__actions" style={{ marginTop: 8 }}>
+                  <button
+                    type="button"
+                    className="review-form__cancel-btn"
+                    onClick={() => setIsPartnerRequestModalOpen(false)}
+                  >
+                    ยกเลิก
+                  </button>
+                  <button type="submit" className="seller-modal__submit">
+                    🚀 ส่งข้อมูลขอเป็น Partner
+                  </button>
+                </div>
+              </form>
             )}
           </div>
         </div>

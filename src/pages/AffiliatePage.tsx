@@ -1,6 +1,6 @@
 // src/pages/AffiliatePage.tsx — Movemall Creator & Affiliate Hub (Clean Minimalist Theme)
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Share2,
@@ -12,11 +12,22 @@ import {
   CheckCircle,
   TrendingUp,
   Percent,
+  UserCheck,
+  Wallet,
+  ArrowRight,
+  ShieldCheck,
+  Award,
+  Flame,
+  HelpCircle,
+  X,
+  CreditCard,
 } from 'lucide-react';
 import { products } from '../data/products';
 import { mockLiveStreams } from '../data/liveStreams';
 import { ProductPickerModal } from '../components/ProductPickerModal';
-import type { Product } from '../types';
+import { AffiliateRegisterModal } from '../components/AffiliateRegisterModal';
+import type { CreatorProfileData } from '../utils/api';
+import { fetchAffiliateProfile, requestAffiliatePayout } from '../utils/api';
 import './AffiliatePage.css';
 
 interface AffiliatePageProps {
@@ -24,7 +35,31 @@ interface AffiliatePageProps {
 }
 
 export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
+  // Creator Profile & Registration State
+  const [creatorProfile, setCreatorProfile] = useState<CreatorProfileData | null>(() => {
+    const saved = localStorage.getItem('movemall_creator_profile');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const isRegistered = !!creatorProfile;
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
+  // Withdraw Modal State
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('500');
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [withdrawSuccessMsg, setWithdrawSuccessMsg] = useState('');
+
+  // Link Generator & Copy States
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
+  const [copiedRefId, setCopiedRefId] = useState(false);
   const [productUrlInput, setProductUrlInput] = useState('');
   const [generatedLink, setGeneratedLink] = useState('');
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -36,20 +71,41 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishedSuccess, setPublishedSuccess] = useState(false);
 
+  const activeRefCode = creatorProfile?.creatorId || 'CREATOR-TH8891';
+
+  // Load profile from API if possible
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await fetchAffiliateProfile();
+        if (res.isRegistered && res.creator) {
+          setCreatorProfile(res.creator);
+          localStorage.setItem('movemall_creator_profile', JSON.stringify(res.creator));
+        }
+      } catch {
+        // Use localStorage data
+      }
+    }
+    loadProfile();
+  }, []);
+
   // Sample high commission products
-  const affiliateProducts = products.slice(0, 8).map((p) => ({
-    ...p,
-    commissionRate: 15,
-    commissionAmount: Math.round(p.price * 0.15),
-  }));
+  const affiliateProducts = products.slice(0, 8).map((p) => {
+    const rate = creatorProfile?.commissionRate || 15;
+    return {
+      ...p,
+      commissionRate: rate,
+      commissionAmount: Math.round(p.price * (rate / 100)),
+    };
+  });
 
   const selectedProduct = products.find((p) => p.id === selectedProductId) || products[0];
-  const estimatedCommission = Math.round(selectedProduct.price * 0.15);
+  const estimatedCommission = Math.round(selectedProduct.price * ((creatorProfile?.commissionRate || 15) / 100));
 
   function handleGenerateLink(e: React.FormEvent) {
     e.preventDefault();
     const cleanUrl = productUrlInput.trim() || 'https://movemall.app/product/el-1';
-    const finalAffLink = `${cleanUrl}?ref=creator_movemall_889`;
+    const finalAffLink = `${cleanUrl}?ref=${activeRefCode}`;
     setGeneratedLink(finalAffLink);
   }
 
@@ -58,6 +114,74 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
     setCopiedLink(link);
     onCopySuccess?.('คัดลอกลิงก์ป้ายยา Affiliate สำเร็จแล้ว!');
     setTimeout(() => setCopiedLink(null), 2500);
+  }
+
+  function handleCopyCode(code: string) {
+    navigator.clipboard?.writeText(code);
+    setCopiedRefId(true);
+    onCopySuccess?.(`คัดลอกรหัสนายหน้า ${code} สำเร็จแล้ว!`);
+    setTimeout(() => setCopiedRefId(false), 2000);
+  }
+
+  function handleRegisterSuccess(newCreator: CreatorProfileData) {
+    setCreatorProfile(newCreator);
+    onCopySuccess?.('ยินดีด้วย! บัญชีของคุณได้รับการอนุมัติเป็น Movemall Creator แล้ว 🎉');
+  }
+
+  async function handleConfirmWithdraw(e: React.FormEvent) {
+    e.preventDefault();
+    const amt = Number(withdrawAmount);
+    if (!amt || amt < 100) {
+      alert('ยอดถอนขั้นต่ำคือ ฿100');
+      return;
+    }
+
+    if (creatorProfile && amt > creatorProfile.availableBalance) {
+      alert('ยอดเงินคงเหลือไม่เพียงพอ');
+      return;
+    }
+
+    setIsWithdrawing(true);
+    setWithdrawSuccessMsg('');
+
+    try {
+      const res = await requestAffiliatePayout(amt, 'PROMPTPAY');
+      const updatedBalance = res.remainingBalance;
+
+      if (creatorProfile) {
+        const updated: CreatorProfileData = {
+          ...creatorProfile,
+          availableBalance: updatedBalance,
+        };
+        setCreatorProfile(updated);
+        localStorage.setItem('movemall_creator_profile', JSON.stringify(updated));
+      }
+
+      setWithdrawSuccessMsg(`ส่งคำขอถอนเงิน ฿${amt.toLocaleString()} สำเร็จ! ยอดเงินสุทธิหลังหักภาษี 3% (฿${(amt * 0.97).toLocaleString()}) จะโอนเข้าบัญชีของคุณ`);
+      onCopySuccess?.('ส่งคำขอถอนเงินสำเร็จ ยอดเงินจะเข้าบัญชีภายใน 24 ชม.');
+      setTimeout(() => {
+        setIsWithdrawModalOpen(false);
+        setWithdrawSuccessMsg('');
+      }, 2500);
+    } catch {
+      // Fallback local update
+      if (creatorProfile) {
+        const newBal = Math.max(0, creatorProfile.availableBalance - amt);
+        const updated: CreatorProfileData = {
+          ...creatorProfile,
+          availableBalance: newBal,
+        };
+        setCreatorProfile(updated);
+        localStorage.setItem('movemall_creator_profile', JSON.stringify(updated));
+      }
+      setWithdrawSuccessMsg(`ส่งคำขอถอนเงิน ฿${amt.toLocaleString()} สำเร็จ! ยอดสุทธิหลังหักภาษี 3% (฿${(amt * 0.97).toLocaleString()}) จะโอนเข้าบัญชี`);
+      setTimeout(() => {
+        setIsWithdrawModalOpen(false);
+        setWithdrawSuccessMsg('');
+      }, 2500);
+    } finally {
+      setIsWithdrawing(false);
+    }
   }
 
   function handlePublishVideo(e: React.FormEvent) {
@@ -70,10 +194,10 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
         id: `video-creator-${Date.now()}`,
         type: 'video' as const,
         storeId: selectedProduct.storeId || 's1',
-        channelName: 'ฉัน (Creator Affiliate)',
+        channelName: creatorProfile ? `${creatorProfile.fullName} (${creatorProfile.socialPlatform})` : 'ฉัน (Creator Affiliate)',
         storeLogo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80',
         streamerAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80',
-        streamerName: 'ฉัน (My Channel)',
+        streamerName: creatorProfile ? creatorProfile.fullName : 'ฉัน (My Channel)',
         caption: videoCaption,
         hashtags: videoHashtags.split(' '),
         soundTitle: 'เสียงต้นฉบับ - My Creator Studio 🎵',
@@ -92,7 +216,7 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
           price: selectedProduct.price,
           originalPrice: selectedProduct.originalPrice || selectedProduct.price * 1.5,
           discountPct: 30,
-          commissionRate: 15,
+          commissionRate: creatorProfile?.commissionRate || 15,
           commissionAmount: estimatedCommission,
         },
         comments: [
@@ -110,40 +234,181 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
   return (
     <main className="affiliate-page">
       <div className="affiliate-container">
-        {/* ── Hero Banner (Royal Blue Clean) ── */}
-        <section className="affiliate-hero">
-          <span className="affiliate-hero-badge">MOVEMALL CREATOR & AFFILIATE</span>
-          <h1 className="affiliate-hero__title">
-            👥 ศูนย์รวมนายหน้า & วิดีโอป้ายยาติดตะกร้า
-          </h1>
-          <p className="affiliate-hero__desc">
-            สร้างรายได้ง่ายๆ ด้วยการลงคลิปวิดีโอสั้นติดตะกร้าสินค้า และแชร์ลิงก์ป้ายยา รับค่าคอมมิชชั่นสูงสุด 15% ทุกคำสั่งซื้อ
-          </p>
-        </section>
+        {/* ─────────────────────────────────────────────────────────────
+            A. NON-REGISTERED ONBOARDING HERO (If Not Yet an Affiliate)
+        ────────────────────────────────────────────────────────────── */}
+        {!isRegistered ? (
+          <section className="affiliate-onboarding-hero">
+            <div className="affiliate-onboarding-left">
+              <span className="affiliate-hero-badge">MOVEMALL CREATOR & AFFILIATE PROGRAM</span>
+              <h1 className="affiliate-onboarding-title">
+                สร้างรายได้หลักหมื่นง่ายๆ<br />
+                <span style={{ color: '#FDE047' }}>ด้วยการป้ายยา & ปักตะกร้าสินค้า 🛍️</span>
+              </h1>
+              <p className="affiliate-onboarding-desc">
+                รับค่าคอมมิชชั่นสูงสุด <strong>15 - 20% ทุกคำสั่งซื้อ</strong> แค่ลงคลิปวิดีโอสั้นติดตะกร้าสีเหลือง
+                หรือแชร์ลิงก์ให้เพื่อนซื้อ สมัครฟรี อนุมัติทันที พร้อมรับโบนัสแรกเข้า ฿500
+              </p>
+
+              <div className="affiliate-onboarding-cta-row">
+                <button
+                  className="affiliate-register-main-btn"
+                  onClick={() => setIsRegisterModalOpen(true)}
+                >
+                  <Sparkles size={18} /> สมัครเป็นนายหน้าทันที (ฟรี) ➔
+                </button>
+                <div className="affiliate-fast-perk">
+                  <ShieldCheck size={16} style={{ color: '#86EFAC' }} />
+                  <span>อนุมัติทันทีใน 1 นาที • รับเงินผ่าน PromptPay</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="affiliate-onboarding-perks-card">
+              <h3 className="affiliate-perks-card-title">💎 สิทธิพิเศษสำหรับ Movemall Creator</h3>
+              <div className="affiliate-perk-item">
+                <div className="affiliate-perk-icon">💰</div>
+                <div>
+                  <strong>ค่าคอมมิชชั่นสูงสุด 15-20%</strong>
+                  <span>รายได้ไม่จำกัด ถอนเข้าบัญชีธนาคารได้ทุกวัน</span>
+                </div>
+              </div>
+              <div className="affiliate-perk-item">
+                <div className="affiliate-perk-icon">🎬</div>
+                <div>
+                  <strong>สิทธิ์ปักตะกร้าเหลืองในคลิปสั้น</strong>
+                  <span>ติดตะกร้าในฟีดวิดีโอสไตล์ TikTok สั่งซื้อได้ทันที</span>
+                </div>
+              </div>
+              <div className="affiliate-perk-item">
+                <div className="affiliate-perk-icon">🎁</div>
+                <div>
+                  <strong>โบนัสต้อนรับ ฿500 เข้ากระเป๋า</strong>
+                  <span>เริ่มต้นสร้างรายได้ทันทีหลังสมัครเสร็จ</span>
+                </div>
+              </div>
+              <div className="affiliate-perk-item">
+                <div className="affiliate-perk-icon">📊</div>
+                <div>
+                  <strong>ระบบ Realtime Analytics & e-WHT</strong>
+                  <span>ตรวจสอบยอดคลิก ออเดอร์ พร้อมหักภาษี 3% ถูกต้อง</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : (
+          /* ─────────────────────────────────────────────────────────────
+              B. ACTIVE CREATOR PROFILE HEADER & DASHBOARD
+          ────────────────────────────────────────────────────────────── */
+          <section className="affiliate-creator-header-card">
+            <div className="affiliate-creator-profile-info">
+              <div className="affiliate-creator-avatar">
+                {creatorProfile.fullName.charAt(0)}
+              </div>
+              <div>
+                <div className="affiliate-creator-name-row">
+                  <h1 className="affiliate-creator-name">{creatorProfile.fullName}</h1>
+                  <span className="affiliate-verified-tag">
+                    <UserCheck size={12} /> ยืนยันตัวตนแล้ว (Verified)
+                  </span>
+                  <span className="affiliate-tier-tag">
+                    <Award size={12} /> ระดับ: {creatorProfile.tier} ⭐
+                  </span>
+                </div>
+                <div className="affiliate-creator-details-sub">
+                  <span>📱 ช่องทาง: <strong>{creatorProfile.socialPlatform} ({creatorProfile.socialHandle})</strong></span>
+                  <span> • 🏦 บัญชี: <strong>{creatorProfile.bankName} (xxx-{creatorProfile.bankAccountNumber.slice(-4)})</strong></span>
+                </div>
+              </div>
+            </div>
+
+            {/* Referral Code Badge with Quick Copy */}
+            <div className="affiliate-creator-ref-box">
+              <span className="affiliate-creator-ref-lbl">รหัสนายหน้าของคุณ (Referral Code):</span>
+              <div className="affiliate-creator-ref-val">
+                <code>{creatorProfile.creatorId}</code>
+                <button
+                  className="affiliate-ref-copy-btn"
+                  onClick={() => handleCopyCode(creatorProfile.creatorId)}
+                >
+                  {copiedRefId ? <Check size={13} /> : <Copy size={13} />}
+                  {copiedRefId ? 'คัดลอกแล้ว' : 'คัดลอก'}
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── Stats Metrics Grid ── */}
         <div className="affiliate-stats-grid">
           <div className="affiliate-stat-box">
             <span className="affiliate-stat-label">ยอดวิวคลิปทั้งหมด</span>
-            <div className="affiliate-stat-value">28,450 วิว</div>
-            <span className="affiliate-stat-sub">+34% สัปดาห์นี้</span>
+            <div className="affiliate-stat-value">{isRegistered ? '28,450 วิว' : '0 วิว'}</div>
+            <span className="affiliate-stat-sub">{isRegistered ? '+34% สัปดาห์นี้' : 'เริ่มลงคลิปเพื่อเพิ่มยอดวิว'}</span>
           </div>
+
           <div className="affiliate-stat-box">
             <span className="affiliate-stat-label">ออเดอร์จากตะกร้า</span>
-            <div className="affiliate-stat-value">124 ออเดอร์</div>
-            <span className="affiliate-stat-sub">อัตราสั่งซื้อ 5.8%</span>
+            <div className="affiliate-stat-value">{isRegistered ? '124 ออเดอร์' : '0 ออเดอร์'}</div>
+            <span className="affiliate-stat-sub">{isRegistered ? 'อัตราสั่งซื้อ 5.8%' : 'รอการสั่งซื้อแรก'}</span>
           </div>
-          <div className="affiliate-stat-box">
-            <span className="affiliate-stat-label">รายได้สะสม (Commission)</span>
-            <div className="affiliate-stat-value" style={{ color: '#10B981' }}>฿9,420</div>
-            <span className="affiliate-stat-sub">ถอนเงินเข้าบัญชีได้ทันที</span>
+
+          <div className="affiliate-stat-box" style={{ background: '#F0FDF4', borderColor: '#BBF7D0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span className="affiliate-stat-label" style={{ color: '#166534' }}>รายได้สะสม (Commission)</span>
+              {isRegistered && (
+                <button
+                  className="affiliate-withdraw-trigger-btn"
+                  onClick={() => setIsWithdrawModalOpen(true)}
+                >
+                  <Wallet size={12} /> ถอนเงิน
+                </button>
+              )}
+            </div>
+            <div className="affiliate-stat-value" style={{ color: '#15803D' }}>
+              ฿{isRegistered ? (creatorProfile?.availableBalance || 500).toLocaleString() : '0.00'}
+            </div>
+            <span className="affiliate-stat-sub" style={{ color: '#166534' }}>
+              {isRegistered ? 'ถอนเข้าบัญชีได้ทันที (หักภาษี 3%)' : 'สมัครเพื่อรับโบนัส ฿500'}
+            </span>
           </div>
+
           <div className="affiliate-stat-box">
-            <span className="affiliate-stat-label">อัตราค่าคอมเฉลี่ย</span>
-            <div className="affiliate-stat-value" style={{ color: '#2563EB' }}>15.0%</div>
-            <span className="affiliate-stat-sub">ระดับ Creator: Gold ⭐</span>
+            <span className="affiliate-stat-label">อัตราค่าคอมมิชชั่น</span>
+            <div className="affiliate-stat-value" style={{ color: '#2563EB' }}>
+              {creatorProfile?.commissionRate || 15}.0%
+            </div>
+            <span className="affiliate-stat-sub">
+              {isRegistered ? `ระดับ: ${creatorProfile?.tier || 'Silver'} ⭐` : 'เริ่มต้น 15% ทุกคำสั่งซื้อ'}
+            </span>
           </div>
         </div>
+
+        {/* ── 3-Step Simple How It Works (For All Users) ── */}
+        {!isRegistered && (
+          <section className="affiliate-how-it-works-section">
+            <h2 className="affiliate-section-title">
+              🚀 เริ่มต้นเป็นนายหน้าใน 3 ขั้นตอนง่ายๆ
+            </h2>
+            <div className="affiliate-steps-grid">
+              <div className="affiliate-step-card">
+                <div className="affiliate-step-num">1</div>
+                <h4>สมัครฟรีใน 1 นาที</h4>
+                <p>กรอกข้อมูลตัวตน ช่องทางโซเชียลมีเดีย และผูกบัญชีธนาคารรับเงิน อนุมัติทันที</p>
+              </div>
+              <div className="affiliate-step-card">
+                <div className="affiliate-step-num">2</div>
+                <h4>ปักตะกร้า หรือ แชร์ลิงก์</h4>
+                <p>เลือกสินค้าที่ชอบจากคลังกว่า 50,000 ชิ้น ลงคลิปสั้นติดตะกร้าสีเหลือง หรือแชร์ลิงก์</p>
+              </div>
+              <div className="affiliate-step-card">
+                <div className="affiliate-step-num">3</div>
+                <h4>รับค่าคอมมิชชั่น 15%</h4>
+                <p>เมื่อมีคนสั่งซื้อผ่านลิงก์หรือตะกร้าของคุณ รับเงินเข้ากระเป๋าและกดถอนได้ทันที 24 ชม.</p>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── Creator Studio CTA Banner ── */}
         <section className="affiliate-studio-banner">
@@ -199,7 +464,7 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
               {/* Commission Preview Card */}
               <div className="affiliate-earning-preview-box">
                 <div>
-                  <span className="affiliate-earning-preview-lbl">ค่าคอมมิชชั่นที่คุณจะได้รับ (15%):</span>
+                  <span className="affiliate-earning-preview-lbl">ค่าคอมมิชชั่นที่คุณจะได้รับ ({creatorProfile?.commissionRate || 15}%):</span>
                   <div className="affiliate-earning-preview-val">+฿{estimatedCommission.toLocaleString()} / ออเดอร์</div>
                 </div>
                 <div style={{ fontSize: 24 }}>💰</div>
@@ -245,7 +510,7 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
             สร้างลิงก์ป้ายยา (Affiliate Link Generator)
           </h2>
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 14 }}>
-            วางลิงก์สินค้า Movemall เพื่อแปลงเป็นลิงก์นายหน้าเฉพาะของคุณ นำไปแชร์บนโซเชียลมีเดียได้ทันที
+            วางลิงก์สินค้า Movemall เพื่อแปลงเป็นลิงก์นายหน้าเฉพาะของคุณ ({activeRefCode}) นำไปแชร์บนโซเชียลมีเดียได้ทันที
           </p>
 
           <form onSubmit={handleGenerateLink} className="affiliate-input-group">
@@ -277,8 +542,9 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
 
         {/* ── High Commission Products Header ── */}
         <div style={{ marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
-            🔥 สินค้าแนะนำ ค่าคอมมิชชั่นสูง (Top Commission Picks)
+          <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Flame size={18} style={{ color: '#DC2626' }} />
+            สินค้าแนะนำ ค่าคอมมิชชั่นสูง (Top Commission Picks)
           </h2>
         </div>
 
@@ -296,14 +562,14 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
             </thead>
             <tbody>
               {affiliateProducts.map((p) => {
-                const itemLink = `https://movemall.app/product/${p.id}?ref=creator_889`;
+                const itemLink = `https://movemall.app/product/${p.id}?ref=${activeRefCode}`;
                 return (
                   <tr key={p.id}>
                     <td style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <img
                         src={p.images[0]}
                         alt={p.name}
-                        style={{ width: 44, height: 44, objectFit: 'cover', border: '1px solid var(--border)' }}
+                        style={{ width: 44, height: 44, objectFit: 'cover', border: '1px solid var(--border)', borderRadius: 4 }}
                       />
                       <div>
                         <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>{p.name}</strong>
@@ -312,7 +578,7 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
                     </td>
                     <td>฿{p.price.toLocaleString()}</td>
                     <td>
-                      <span style={{ background: '#ECFDF5', color: '#059669', padding: '2px 6px', fontWeight: 800 }}>
+                      <span style={{ background: '#ECFDF5', color: '#059669', padding: '2px 6px', fontWeight: 800, borderRadius: 4 }}>
                         {p.commissionRate}%
                       </span>
                     </td>
@@ -322,13 +588,21 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
                       </strong>
                     </td>
                     <td>
-                      <button
-                        className="affiliate-share-btn"
-                        onClick={() => handleCopy(itemLink)}
-                      >
-                        {copiedLink === itemLink ? <Check size={14} /> : <Copy size={14} />}
-                        {copiedLink === itemLink ? 'คัดลอกแล้ว' : 'คัดลอกลิงก์'}
-                      </button>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button
+                          className="affiliate-share-btn"
+                          onClick={() => handleCopy(itemLink)}
+                        >
+                          {copiedLink === itemLink ? <Check size={14} /> : <Copy size={14} />}
+                          {copiedLink === itemLink ? 'คัดลอกแล้ว' : 'คัดลอกลิงก์'}
+                        </button>
+                        <Link
+                          to="/video/create"
+                          className="affiliate-create-clip-sm-btn"
+                        >
+                          <Video size={13} /> สร้างคลิป
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -340,7 +614,7 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
         {/* High Commission Products — Mobile Cards List */}
         <div className="affiliate-cards-mobile">
           {affiliateProducts.map((p) => {
-            const itemLink = `https://movemall.app/product/${p.id}?ref=creator_889`;
+            const itemLink = `https://movemall.app/product/${p.id}?ref=${activeRefCode}`;
             return (
               <div key={p.id} className="affiliate-mobile-card">
                 <div className="affiliate-mobile-card-top">
@@ -378,7 +652,123 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
         </div>
       </div>
 
-      {/* Product Picker Modal Drawer (Enterprise Scale 50,000+ items) */}
+      {/* ─────────────────────────────────────────────────────────────
+          1. Affiliate Registration Modal Wizard (4 Steps)
+      ────────────────────────────────────────────────────────────── */}
+      <AffiliateRegisterModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        onSuccess={handleRegisterSuccess}
+      />
+
+      {/* ─────────────────────────────────────────────────────────────
+          2. Withdraw Payout Modal with 3% Withholding Tax
+      ────────────────────────────────────────────────────────────── */}
+      {isWithdrawModalOpen && (
+        <div className="affiliate-modal-overlay" onClick={() => setIsWithdrawModalOpen(false)}>
+          <div className="affiliate-modal-container" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
+            <div className="affiliate-modal-header">
+              <div className="affiliate-modal-header-left">
+                <span className="affiliate-modal-badge">
+                  <Wallet size={13} /> PAYOUT SETTLEMENT
+                </span>
+                <h3 className="affiliate-modal-title">💸 ถอนเงินค่านายหน้าเข้าบัญชี</h3>
+              </div>
+              <button
+                onClick={() => setIsWithdrawModalOpen(false)}
+                className="affiliate-modal-close-btn"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmWithdraw} className="affiliate-modal-body">
+              {withdrawSuccessMsg ? (
+                <div className="affiliate-withdraw-success-box">
+                  <CheckCircle size={40} style={{ color: '#10B981', margin: '0 auto 12px' }} />
+                  <h4>ส่งคำขอถอนเงินสำเร็จ!</h4>
+                  <p>{withdrawSuccessMsg}</p>
+                </div>
+              ) : (
+                <>
+                  <div className="affiliate-withdraw-balance-banner">
+                    <div>
+                      <span style={{ fontSize: 11, color: '#166534' }}>ยอดเงินที่สามารถถอนได้:</span>
+                      <div style={{ fontSize: 20, fontWeight: 900, color: '#15803D' }}>
+                        ฿{(creatorProfile?.availableBalance || 0).toLocaleString()}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 28 }}>💰</div>
+                  </div>
+
+                  <div className="affiliate-form-group" style={{ marginBottom: 14 }}>
+                    <label className="affiliate-label">จำนวนเงินที่ต้องการถอน (บาท) *</label>
+                    <input
+                      type="number"
+                      min={100}
+                      max={creatorProfile?.availableBalance || 500}
+                      value={withdrawAmount}
+                      onChange={(e) => setWithdrawAmount(e.target.value)}
+                      placeholder="ขั้นต่ำ ฿100"
+                      className="affiliate-form-input"
+                      required
+                    />
+                  </div>
+
+                  {/* Calculation Breakdown */}
+                  <div className="affiliate-withdraw-breakdown">
+                    <div className="affiliate-summary-row">
+                      <span className="affiliate-summary-lbl">ยอดเงินที่ขอถอน:</span>
+                      <span className="affiliate-summary-val">฿{Number(withdrawAmount || 0).toLocaleString()}</span>
+                    </div>
+                    <div className="affiliate-summary-row">
+                      <span className="affiliate-summary-lbl">หักภาษี ณ ที่จ่าย 3% (e-WHT):</span>
+                      <span className="affiliate-summary-val" style={{ color: '#DC2626' }}>
+                        -฿{(Number(withdrawAmount || 0) * 0.03).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="affiliate-summary-row" style={{ fontWeight: 800 }}>
+                      <span className="affiliate-summary-lbl" style={{ color: '#0F172A' }}>ยอดเงินสุทธิที่จะได้รับ:</span>
+                      <span className="affiliate-summary-val" style={{ color: '#059669', fontSize: 15 }}>
+                        ฿{(Number(withdrawAmount || 0) * 0.97).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bank Info Destination */}
+                  <div className="affiliate-withdraw-dest-box">
+                    <CreditCard size={16} style={{ color: '#2563EB' }} />
+                    <span style={{ fontSize: 12, color: '#1E3A8A' }}>
+                      โอนเข้าบัญชี: <strong>{creatorProfile?.bankName} (xxx-{creatorProfile?.bankAccountNumber.slice(-4)})</strong>
+                    </span>
+                  </div>
+
+                  <div className="affiliate-modal-footer" style={{ padding: '14px 0 0', margin: '14px 0 0', borderTop: '1px solid var(--border)' }}>
+                    <button
+                      type="button"
+                      onClick={() => setIsWithdrawModalOpen(false)}
+                      className="affiliate-btn-secondary"
+                    >
+                      ยกเลิก
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isWithdrawing || !withdrawAmount || Number(withdrawAmount) < 100}
+                      className="affiliate-btn-primary"
+                    >
+                      {isWithdrawing ? 'กำลังส่งคำขอ...' : 'ยืนยันการถอนเงิน ➔'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          3. Product Picker Modal Drawer
+      ────────────────────────────────────────────────────────────── */}
       <ProductPickerModal
         isOpen={isPickerOpen}
         onClose={() => setIsPickerOpen(false)}

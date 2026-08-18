@@ -1,0 +1,558 @@
+/* src/components/AffiliateRegisterModal.css — Clean Minimalist Theme (border-radius: 6px) */
+
+.affiliate-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: var(--space-4);
+  animation: affModalFadeIn 0.2s ease-out;
+}
+
+@keyframes affModalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.affiliate-modal-container {
+  background: #FFFFFF;
+  border: 1px solid var(--border, #E5E7EB);
+  border-radius: 6px !important;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.affiliate-modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border, #E5E7EB);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FAFAFA;
+}
+
+.affiliate-modal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #EFF6FF;
+  color: #2563EB;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+
+.affiliate-modal-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+}
+
+.affiliate-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary, #6B7280);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.affiliate-modal-close-btn:hover {
+  background: #F1F5F9;
+  color: #0F172A;
+}
+
+/* ── Stepper ── */
+.affiliate-modal-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: #FFFFFF;
+  border-bottom: 1px solid var(--border, #E5E7EB);
+}
+
+.affiliate-step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.affiliate-step-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: #F1F5F9;
+  color: #64748B;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.affiliate-step-item.active .affiliate-step-circle {
+  background: #2563EB;
+  color: #FFFFFF;
+}
+
+.affiliate-step-item.completed .affiliate-step-circle {
+  background: #10B981;
+  color: #FFFFFF;
+}
+
+.affiliate-step-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748B;
+}
+
+.affiliate-step-item.active .affiliate-step-text {
+  color: #2563EB;
+  font-weight: 800;
+}
+
+.affiliate-step-line {
+  flex: 1;
+  height: 2px;
+  background: #E2E8F0;
+  margin: 0 8px;
+}
+
+.affiliate-step-line.active {
+  background: #2563EB;
+}
+
+/* ── Error Banner ── */
+.affiliate-modal-error {
+  margin: 16px 24px 0;
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  color: #B91C1C;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Body ── */
+.affiliate-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.affiliate-form-section-header {
+  margin-bottom: 16px;
+}
+
+.affiliate-form-section-header h3 {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 4px;
+}
+
+.affiliate-form-section-header p {
+  font-size: 12px;
+  color: var(--text-secondary, #6B7280);
+  margin: 0;
+}
+
+/* Account Type Tabs */
+.affiliate-type-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.affiliate-type-tab {
+  background: #FFFFFF;
+  border: 1.5px solid var(--border, #E5E7EB);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.affiliate-type-tab:hover {
+  border-color: #93C5FD;
+}
+
+.affiliate-type-tab.active {
+  border-color: #2563EB;
+  background: #EFF6FF;
+}
+
+.affiliate-type-tab strong {
+  display: block;
+  font-size: 13px;
+  color: #0F172A;
+  margin-bottom: 2px;
+}
+
+.affiliate-type-tab span {
+  display: block;
+  font-size: 11px;
+  color: var(--text-secondary, #6B7280);
+}
+
+/* Inputs & Form Groups */
+.affiliate-input-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.affiliate-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.affiliate-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.affiliate-form-input,
+.affiliate-form-select {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border, #E5E7EB);
+  border-radius: 6px;
+  font-size: 13px;
+  color: #0F172A;
+  background: #FFFFFF;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.affiliate-form-input:focus,
+.affiliate-form-select:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.affiliate-form-hint {
+  font-size: 10px;
+  color: var(--text-secondary, #6B7280);
+}
+
+/* Social Platforms Grid */
+.affiliate-platforms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.affiliate-platform-btn {
+  background: #FFFFFF;
+  border: 1px solid var(--border, #E5E7EB);
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.affiliate-platform-btn:hover {
+  border-color: #93C5FD;
+}
+
+.affiliate-platform-btn.active {
+  border-color: #2563EB;
+  background: #EFF6FF;
+  font-weight: 800;
+}
+
+.affiliate-platform-name {
+  font-size: 12px;
+  color: #0F172A;
+}
+
+/* Tax Notice */
+.affiliate-tax-notice {
+  margin-top: 16px;
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 6px;
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+}
+
+.affiliate-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.affiliate-checkbox-row input {
+  margin-top: 2px;
+  accent-color: #2563EB;
+  cursor: pointer;
+}
+
+/* Summary Card */
+.affiliate-summary-card {
+  background: #F8FAFC;
+  border: 1px solid var(--border, #E5E7EB);
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+
+.affiliate-summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed #E2E8F0;
+  font-size: 12px;
+}
+
+.affiliate-summary-row:last-child {
+  border-bottom: none;
+}
+
+.affiliate-summary-lbl {
+  color: var(--text-secondary, #6B7280);
+}
+
+.affiliate-summary-val {
+  font-weight: 700;
+  color: #0F172A;
+  text-align: right;
+}
+
+.affiliate-terms-box {
+  background: #FFFFFF;
+  border: 1px solid var(--border, #E5E7EB);
+  border-radius: 6px;
+  padding: 14px;
+}
+
+/* Step 5: Success */
+.affiliate-success-pane {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.affiliate-success-icon-wrap {
+  margin-bottom: 12px;
+}
+
+.affiliate-success-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: #0F172A;
+  margin: 0 0 6px;
+}
+
+.affiliate-success-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary, #6B7280);
+  margin: 0 0 20px;
+}
+
+.affiliate-id-showcase {
+  background: #EFF6FF;
+  border: 1.5px dashed #2563EB;
+  border-radius: 6px;
+  padding: 14px;
+  margin-bottom: 18px;
+}
+
+.affiliate-id-showcase-label {
+  font-size: 11px;
+  color: #1E40AF;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.affiliate-id-showcase-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.affiliate-id-showcase-code span {
+  font-size: 20px;
+  font-weight: 900;
+  color: #1E3A8A;
+  letter-spacing: 1px;
+}
+
+.affiliate-copy-badge-btn {
+  background: #2563EB;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.affiliate-starter-perks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.affiliate-starter-perk-item {
+  background: #F8FAFC;
+  border: 1px solid var(--border, #E5E7EB);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.affiliate-starter-perk-item strong {
+  display: block;
+  font-size: 12px;
+  color: #0F172A;
+}
+
+.affiliate-starter-perk-item span {
+  display: block;
+  font-size: 10px;
+  color: var(--text-secondary, #6B7280);
+}
+
+.affiliate-enter-dashboard-btn {
+  width: 100%;
+  height: 44px;
+  background: #2563EB;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.affiliate-enter-dashboard-btn:hover {
+  background: #1D4ED8;
+}
+
+/* ── Footer ── */
+.affiliate-modal-footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--border, #E5E7EB);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FAFAFA;
+}
+
+.affiliate-btn-secondary {
+  background: #FFFFFF;
+  border: 1px solid var(--border, #E5E7EB);
+  border-radius: 6px;
+  height: 38px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.affiliate-btn-primary {
+  background: #2563EB;
+  border: none;
+  border-radius: 6px;
+  height: 38px;
+  padding: 0 20px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s ease;
+}
+
+.affiliate-btn-primary:hover {
+  background: #1D4ED8;
+}
+
+.affiliate-btn-primary:disabled {
+  background: #94A3B8;
+  cursor: not-allowed;
+}
+
+/* ── Mobile Optimization ── */
+@media (max-width: 640px) {
+  .affiliate-modal-container {
+    max-height: 96vh;
+  }
+  .affiliate-input-grid {
+    grid-template-columns: 1fr;
+  }
+  .affiliate-type-tabs {
+    grid-template-columns: 1fr;
+  }
+  .affiliate-platforms-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .affiliate-starter-perks {
+    grid-template-columns: 1fr;
+  }
+  .affiliate-modal-stepper {
+    padding: 10px 14px;
+  }
+  .affiliate-step-text {
+    display: none;
+  }
+}

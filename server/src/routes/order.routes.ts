@@ -3,6 +3,7 @@ import { prismaWrite, prismaRead } from '../config/database.js';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.middleware.js';
 import { OrderStatus, PaymentMethod } from '@prisma/client';
 import { invalidateCachePattern } from '../config/redis.js';
+import { sendNotificationToUser } from './notification.routes.js';
 
 const router = Router();
 
@@ -154,6 +155,19 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
     // Invalidate product cache
     await invalidateCachePattern('products:*');
     await invalidateCachePattern('product:detail:*');
+
+    // Trigger Order Notification to Buyer
+    try {
+      await sendNotificationToUser({
+        userId,
+        category: 'orders',
+        title: `📦 คำสั่งซื้อ #${result.id.slice(0, 8).toUpperCase()} สำเร็จแล้ว!`,
+        body: `คำสั่งซื้อยอด ฿${Number(result.totalAmount).toLocaleString()} ได้รับการยืนยันแล้ว ร้านค้ากำลังเตรียมจัดส่ง`,
+        link: `/orders`,
+      });
+    } catch (notifErr) {
+      console.warn('Failed to send order notification:', notifErr);
+    }
 
     res.status(201).json({
       message: 'Order created successfully',

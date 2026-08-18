@@ -17,6 +17,7 @@ import {
   Camera,
   LogOut,
 } from 'lucide-react';
+import { fetchUnreadNotificationCount } from '../utils/api';
 import './Navbar.css';
 
 interface NavbarProps {
@@ -65,6 +66,37 @@ export function Navbar({
       return null;
     }
   });
+
+  // Notification Unread Count State
+  const [unreadNotifCount, setUnreadNotifCount] = useState<number>(() => {
+    return currentUser ? 1 : 0;
+  });
+
+  useEffect(() => {
+    async function loadNotifCount() {
+      const token = localStorage.getItem('movemall_jwt_token');
+      if (!token) {
+        setUnreadNotifCount(0);
+        return;
+      }
+      try {
+        const res = await fetchUnreadNotificationCount();
+        if (typeof res?.unreadCount === 'number') {
+          setUnreadNotifCount(res.unreadCount);
+        }
+      } catch {
+        // Fallback default
+      }
+    }
+
+    loadNotifCount();
+    window.addEventListener('movemall_auth_change', loadNotifCount);
+    window.addEventListener('movemall_notif_change', loadNotifCount);
+    return () => {
+      window.removeEventListener('movemall_auth_change', loadNotifCount);
+      window.removeEventListener('movemall_notif_change', loadNotifCount);
+    };
+  }, [currentUser]);
 
   // Sync Auth Changes across tabs and actions
   useEffect(() => {
@@ -136,17 +168,20 @@ export function Navbar({
             <Link to="/notifications" className="navbar__top-link" style={{ position: 'relative' }}>
               <Bell size={12} />
               <span>การแจ้งเตือน</span>
-              <span
-                style={{
-                  background: '#EF4444',
-                  color: 'white',
-                  fontSize: 9,
-                  padding: '0 4px',
-                  fontWeight: 900,
-                }}
-              >
-                3
-              </span>
+              {unreadNotifCount > 0 && (
+                <span
+                  style={{
+                    background: '#EF4444',
+                    color: 'white',
+                    fontSize: 9,
+                    padding: '0 5px',
+                    borderRadius: 'var(--radius-sm, 4px)',
+                    fontWeight: 900,
+                  }}
+                >
+                  {unreadNotifCount > 99 ? '99+' : unreadNotifCount}
+                </span>
+              )}
             </Link>
             <span className="navbar__top-divider" />
             <Link to="/chat" className="navbar__top-link">

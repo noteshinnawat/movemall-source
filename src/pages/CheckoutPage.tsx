@@ -32,6 +32,15 @@ const STEPS = ['ที่อยู่', 'จัดส่ง', 'ชำระเ�
 
 export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPageProps) {
   const navigate = useNavigate();
+  const currentUser = (() => {
+    try {
+      const uStr = localStorage.getItem('movemall_user');
+      return uStr ? JSON.parse(uStr) : null;
+    } catch {
+      return null;
+    }
+  })();
+
   const [step] = useState(0);
   const [shipping, setShipping] = useState('standard');
   const [paymentMethod, setPaymentMethod] = useState('promptpay');
@@ -217,26 +226,48 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
             <div className="checkout__form-section">
               <h2 className="checkout__section-title">💳 วิธีการชำระเงิน</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-                {PAYMENT_METHODS.map(pay => (
-                  <div key={pay.id}>
-                    <label
-                      className={`checkout__shipping-option${paymentMethod === pay.id ? ' checkout__shipping-option--active' : ''}`}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value={pay.id}
-                        checked={paymentMethod === pay.id}
-                        onChange={() => setPaymentMethod(pay.id)}
-                        className="sr-only"
-                      />
-                      <span className="checkout__shipping-icon">{pay.icon}</span>
-                      <div className="checkout__shipping-info">
-                        <p className="checkout__shipping-name">{pay.name}</p>
-                        <p className="checkout__shipping-desc">{pay.desc}</p>
-                      </div>
-                    </label>
+                {PAYMENT_METHODS.map(pay => {
+                  const isCodRestricted = pay.id === 'cod' && (currentUser?.status === 'COD_RESTRICTED' || (currentUser?.trustScore !== undefined && currentUser?.trustScore < 60));
+
+                  return (
+                    <div key={pay.id}>
+                      <label
+                        className={`checkout__shipping-option ${paymentMethod === pay.id ? 'checkout__shipping-option--selected' : ''}`}
+                        style={{
+                          opacity: isCodRestricted ? 0.6 : 1,
+                          cursor: isCodRestricted ? 'not-allowed' : 'pointer',
+                          background: isCodRestricted ? '#FEF2F2' : undefined,
+                          border: isCodRestricted ? '1.5px dashed #FCA5A5' : undefined
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value={pay.id}
+                          disabled={isCodRestricted}
+                          checked={paymentMethod === pay.id}
+                          onChange={() => {
+                            if (!isCodRestricted) setPaymentMethod(pay.id);
+                          }}
+                          className="sr-only"
+                        />
+                        <span className="checkout__shipping-icon">{pay.icon}</span>
+                        <div className="checkout__shipping-info">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                            <p className="checkout__shipping-name">{pay.name}</p>
+                            {isCodRestricted && (
+                              <span style={{ fontSize: 10, background: '#DC2626', color: 'white', fontWeight: 800, padding: '1px 6px', borderRadius: 4 }}>
+                                🚫 ถูกระงับสิทธิ์ COD (Trust Score ต่ำ)
+                              </span>
+                            )}
+                          </div>
+                          <p className="checkout__shipping-desc">
+                            {isCodRestricted
+                              ? 'คุณถูกระงับการสั่งแบบเก็บเงินปลายทางเนื่องจากมีประวัติปฏิเสธรับพัสดุ กรุณาชำระผ่าน PromptPay หรือ PayLater'
+                              : pay.desc}
+                          </p>
+                        </div>
+                      </label>
 
                     {/* PayLater Installment Options Box */}
                     {paymentMethod === 'paylater' && pay.id === 'paylater' && (
@@ -308,7 +339,8 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                       </div>
                     )}
                   </div>
-                ))}
+                );
+              })}
               </div>
             </div>
 

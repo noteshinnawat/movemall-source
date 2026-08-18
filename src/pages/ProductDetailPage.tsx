@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, ShoppingBag, Heart, Minus, Plus, Store as StoreIcon, MessageSquare, ShieldCheck, ChevronLeft, ChevronRight, Play, Video, Share2, Scale, Check, X, CreditCard, Sparkles, Flame, Zap, Loader2 } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Heart, Minus, Plus, Store as StoreIcon, MessageSquare, ShieldCheck, ChevronLeft, ChevronRight, Play, Video, Share2, Scale, Check, X, CreditCard, Sparkles, Flame, Zap, Loader2, Flag, AlertTriangle } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { ReviewsSection } from '../components/ReviewsSection';
+import { ReportStoreModal } from '../components/ReportStoreModal';
 import { products as staticProducts } from '../data/products';
 import { getStoreById, stores } from '../data/stores';
 import { mockLiveStreams } from '../data/liveStreams';
@@ -40,6 +41,7 @@ export function ProductDetailPage({
   const navigate = useNavigate();
   const sourceProducts = propProducts || staticProducts;
   const product = sourceProducts.find(p => p.id === id);
+  const store = (product?.storeId && getStoreById(product.storeId)) || stores[0];
   const activeLive = mockLiveStreams.find(s => s.storeId === product?.storeId && s.type === 'live');
 
   const [qty, setQty] = useState(1);
@@ -48,6 +50,7 @@ export function ProductDetailPage({
   const [drawerAction, setDrawerAction] = useState<'cart' | 'buy'>('cart');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [selectedInstallment, setSelectedInstallment] = useState<string>('full');
+  const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
   const [recommendedTab, setRecommendedTab] = useState<'foryou' | 'bestseller' | 'deals'>('foryou');
   const [visibleRecommendedCount, setVisibleRecommendedCount] = useState(12);
   const [isLoadingMoreRecommended, setIsLoadingMoreRecommended] = useState(false);
@@ -159,7 +162,6 @@ export function ProductDetailPage({
 
   const storeProducts = sourceProducts.filter(p => p.storeId === product.storeId && p.id !== product.id).slice(0, 8);
   const related = sourceProducts.filter(p => p.category === product.category && p.id !== product.id && p.storeId !== product.storeId).slice(0, 8);
-  const store = (product.storeId && getStoreById(product.storeId)) || stores[0];
   const fullStars = Math.floor(product.rating);
   const stars = '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
   const discount = product.originalPrice
@@ -365,6 +367,17 @@ export function ProductDetailPage({
                 </button>
 
                 <div className="product-float-right-group">
+                  <button
+                    type="button"
+                    className="product-float-btn"
+                    onClick={() => setIsReportModalOpen(true)}
+                    aria-label="รายงานสินค้าหรือร้านค้านี้"
+                    title="รายงานสินค้าหรือร้านค้านี้ (แจ้งของปลอม/หลอกลวง)"
+                    style={{ color: '#DC2626' }}
+                  >
+                    <Flag size={18} />
+                  </button>
+
                   <button
                     type="button"
                     className="product-float-btn"
@@ -767,11 +780,7 @@ export function ProductDetailPage({
         </div>
 
         {/* Marketplace Store Widget */}
-        {(() => {
-          const store = (product.storeId && getStoreById(product.storeId)) || stores[0];
-          return (
-            <>
-            {/* Store Live Stream Alert Banner (ถ้าทางร้านกำลังไลฟ์อยู่) */}
+        {/* Store Live Stream Alert Banner (ถ้าทางร้านกำลังไลฟ์อยู่) */}
             {activeLive && (
               <div
                 style={{
@@ -880,6 +889,27 @@ export function ProductDetailPage({
                     <StoreIcon size={14} />
                     เข้าชมร้านค้า
                   </Link>
+                  <button
+                    type="button"
+                    onClick={() => setIsReportModalOpen(true)}
+                    style={{
+                      padding: '6px 10px',
+                      background: '#FEF2F2',
+                      color: '#DC2626',
+                      border: '1px solid #FECACA',
+                      borderRadius: 6,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4,
+                    }}
+                    title="รายงานร้านค้านี้ กรณีพบสินค้าปลอม เลียนแบบ หรือหลอกลวง"
+                  >
+                    <Flag size={12} />
+                    รายงาน
+                  </button>
                 </div>
               </div>
 
@@ -964,9 +994,6 @@ export function ProductDetailPage({
                 </div>
               )}
             </div>
-            </>
-          );
-        })()}
 
         {/* Description */}
         <div className="product-detail__section">
@@ -1318,6 +1345,18 @@ export function ProductDetailPage({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Customer Anti-Counterfeit & Scam Report Modal */}
+      {product && (
+        <ReportStoreModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          targetType="PRODUCT"
+          targetId={product.id}
+          targetName={product.name}
+          storeName={(product.storeId && getStoreById(product.storeId)?.name) || 'ร้านค้าทางการ'}
+        />
       )}
     </main>
   );

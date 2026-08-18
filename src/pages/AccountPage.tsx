@@ -548,6 +548,54 @@ export function AccountPage() {
                 )}
               </div>
 
+              {/* 🛡️ Buyer Trust Score & Fairness Shield Card */}
+              <div className="account-card" style={{
+                border: '1.5px solid #e2e8f0',
+                borderRadius: 6,
+                padding: '1.25rem',
+                background: '#ffffff',
+                marginBottom: '1.5rem',
+                display: 'grid',
+                gridTemplateColumns: 'auto 1fr',
+                gap: '1.25rem',
+                alignItems: 'center'
+              }}>
+                <div style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: '50%',
+                  background: '#ecfdf5',
+                  border: '3px solid #10b981',
+                  color: '#10b981',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 900
+                }}>
+                  <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>100</span>
+                  <span style={{ fontSize: '0.6rem', color: '#059669', fontWeight: 700 }}>แต้ม</span>
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <ShieldCheck size={18} color="#10b981" /> คะแนนความน่าเชื่อถือผู้ซื้อ (Buyer Trust Score)
+                    </h3>
+                    <span style={{ fontSize: '0.75rem', background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: 4, fontWeight: 700 }}>
+                      ✓ ระดับ: ผู้ซื้อคุณภาพสูงสุด (Excellent)
+                    </span>
+                  </div>
+                  <p style={{ margin: '4px 0 8px 0', fontSize: '0.8rem', color: '#64748b' }}>
+                    สถิติการรับพัสดุ COD <strong>100%</strong> • ไม่มีประวัติปฏิเสธรับสินค้าหรือสั่งเล่น • สิทธิ์ช้อปปลอดภัยสูงสุด
+                  </p>
+                  <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', color: '#475569', flexWrap: 'wrap' }}>
+                    <span>✅ สิทธิ์เก็บเงินปลายทาง (COD) ไม่จำกัดวงเงิน</span>
+                    <span>✅ ได้รับความสำคัญในการจัดส่งพัสดุด่วน</span>
+                    <span>✅ อนุมัติการคืนเงินด่วนพิเศษ (Fast Refund)</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="account-card">
                 <div className="account-grid-2">
                   <div className="account-field">

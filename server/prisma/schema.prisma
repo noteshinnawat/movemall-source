@@ -23,59 +23,97 @@ enum Role {
   MODERATOR
 }
 
-model User {
-  id            String         @id @default(uuid())
-  googleId      String?        @unique
-  email         String?        @unique
-  phone         String?        @unique
-  passwordHash  String
-  name          String
-  avatarUrl     String?
-  role          Role           @default(BUYER)
-  coinsBalance  Int            @default(0)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+enum UserStatus {
+  ACTIVE
+  WARNING
+  COD_RESTRICTED
+  SUSPENDED
+  BANNED
+}
 
-  stores        Store[]
-  orders        Order[]
-  wishlists     WishlistItem[]
-  coinLedgers   CoinLedger[]
-  voucherClaims VoucherClaim[]
-  notifications Notification[]
-  reviews       Review[]
-  affiliateLogs AffiliateReferral[]
-  sentMessages  ChatMessage[]  @relation("SentMessages")
+enum StoreStatus {
+  ACTIVE
+  WARNING
+  RESTRICTED
+  SUSPENDED
+  BANNED
+}
+
+model User {
+  id                String         @id @default(uuid())
+  googleId          String?        @unique
+  email             String?        @unique
+  phone             String?        @unique
+  passwordHash      String
+  name              String
+  avatarUrl         String?
+  role              Role           @default(BUYER)
+  status            UserStatus     @default(ACTIVE)
+  trustScore        Int            @default(100)
+  codSuccessRate    Float          @default(100.0)
+  codRejectedCount  Int            @default(0)
+  fraudRefundCount  Int            @default(0)
+  suspensionReason  String?
+  suspendedUntil    DateTime?
+  coinsBalance      Int            @default(0)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  stores             Store[]
+  orders             Order[]
+  wishlists          WishlistItem[]
+  coinLedgers        CoinLedger[]
+  voucherClaims      VoucherClaim[]
+  notifications      Notification[]
+  reviews            Review[]
+  affiliateLogs      AffiliateReferral[]
+  sentMessages       ChatMessage[]  @relation("SentMessages")
+  reportedViolations UserViolationReport[] @relation("ReportedUser")
+  filedReports       UserViolationReport[] @relation("ReporterUser")
 
   @@index([role])
+  @@index([status])
+  @@index([trustScore])
   @@index([createdAt(sort: Desc)])
 }
 
 // ── 2. ร้านค้า (Multi-Vendor) ──
 model Store {
-  id          String    @id @default(uuid())
-  ownerId     String
-  name        String
-  logo        String?
-  banner      String?
-  description String?
-  isMall          Boolean   @default(false)
-  isVerified      Boolean   @default(false)
-  isVatRegistered Boolean   @default(false)
+  id              String         @id @default(uuid())
+  ownerId         String
+  name            String
+  logo            String?
+  banner          String?
+  description     String?
+  isMall          Boolean        @default(false)
+  isVerified      Boolean        @default(false)
+  isVatRegistered Boolean        @default(false)
+  status          StoreStatus    @default(ACTIVE)
+  healthScore     Int            @default(100)
+  penaltyPoints   Int            @default(0)
+  penaltyReason   String?
+  isLiveRestricted Boolean       @default(false)
+  isSearchRestricted Boolean     @default(false)
   taxId           String?
   taxCompanyName  String?
-  taxBranchCode   String?   @default("00000")
+  taxBranchCode   String?        @default("00000")
   taxAddress      String?
-  eTaxAutoEmail   Boolean   @default(true)
-  rating          Float     @default(5.0)
-  followers       Int       @default(0)
-  createdAt       DateTime  @default(now())
+  eTaxAutoEmail   Boolean        @default(true)
+  rating          Float          @default(5.0)
+  followers       Int            @default(0)
+  createdAt       DateTime       @default(now())
 
-  owner       User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  products    Product[]
-  vouchers    Voucher[]
-  liveStreams LiveSession[]
+  owner               User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products            Product[]
+  vouchers            Voucher[]
+  liveStreams         LiveSession[]
+  penaltyLogs         StorePenaltyLog[]
+  reportsAgainstStore UserViolationReport[]
 
   @@index([isMall])
+  @@index([status])
+  @@index([healthScore])
+  @@index([penaltyPoints])
   @@index([isVatRegistered])
   @@index([rating(sort: Desc)])
   @@index([followers(sort: Desc)])
@@ -481,4 +519,47 @@ model TaxDocument {
   @@index([storeId, createdAt(sort: Desc)])
   @@index([docNumber])
 }
+
+// ── 14. ระบบรายงานพฤติกรรม & ความน่าเชื่อถือ (Trust & Violation Reports) ──
+model UserViolationReport {
+  id              String    @id @default(uuid())
+  reporterId      String
+  reportedUserId  String?
+  reportedStoreId String?
+  orderId         String?
+  type            String    // 'COD_REJECTED' | 'FAKE_ORDER' | 'REFUND_ABUSE' | 'FAKE_PRODUCT' | 'HARASSMENT'
+  description     String
+  evidenceUrl     String?
+  status          String    @default("PENDING") // 'PENDING', 'INVESTIGATING', 'ACTION_TAKEN', 'DISMISSED'
+  adminNotes      String?
+  createdAt       DateTime  @default(now())
+  resolvedAt      DateTime?
+
+  reporter        User      @relation("ReporterUser", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUser    User?     @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  reportedStore   Store?    @relation(fields: [reportedStoreId], references: [id], onDelete: Cascade)
+
+  @@index([reporterId])
+  @@index([reportedUserId])
+  @@index([reportedStoreId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt(sort: Desc)])
+}
+
+// ── 15. ประวัติการตัดแต้ม & สุขภาพร้านค้า (Store Penalty Logs) ──
+model StorePenaltyLog {
+  id            String    @id @default(uuid())
+  storeId       String
+  points        Int
+  violationType String    // 'LATE_SHIPMENT', 'CANCEL_BY_SELLER', 'FAKE_PRODUCT', 'POLICY_BREACH'
+  reason        String
+  actionTaken   String    // 'WARNING', 'RESTRICT_LIVE', 'RESTRICT_SEARCH', 'SUSPEND_STORE'
+  createdAt     DateTime  @default(now())
+
+  store         Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId, createdAt(sort: Desc)])
+}
+
 
