@@ -362,6 +362,61 @@ export function AccountPage() {
     navigate('/login');
   }
 
+  // ── Membership Tier Calculation (Classic -> Silver -> Gold -> Platinum VIP) ──
+  const totalSpent = Number(savedUser?.totalSpent) || 0;
+  const currentTier = (() => {
+    if (totalSpent >= 20000) {
+      return {
+        key: 'vip',
+        name: 'Platinum VIP',
+        icon: '👑',
+        badgeTitle: '👑 MOVEMALL PLATINUM VIP',
+        roleLabel: 'สมาชิก Platinum VIP',
+        progressPct: 100,
+        nextTierName: null,
+        neededAmount: 0,
+        perks: 'รับ Coins คืน 2x + Flash Sale VIP + สิทธิ์ส่งฟรีก่อนใคร',
+      };
+    }
+    if (totalSpent >= 5000) {
+      return {
+        key: 'gold',
+        name: 'Gold Member',
+        icon: '🥇',
+        badgeTitle: '🥇 MOVEMALL GOLD MEMBER',
+        roleLabel: 'สมาชิก Gold Member',
+        progressPct: Math.min(100, Math.round(((totalSpent - 5000) / 15000) * 100)),
+        nextTierName: 'Platinum VIP',
+        neededAmount: 20000 - totalSpent,
+        perks: 'รับ Coins คืน 1.5x + โค้ดส่งฟรี 4 ใบ/เดือน',
+      };
+    }
+    if (totalSpent >= 1000) {
+      return {
+        key: 'silver',
+        name: 'Silver Member',
+        icon: '🥈',
+        badgeTitle: '🥈 MOVEMALL SILVER MEMBER',
+        roleLabel: 'สมาชิก Silver Member',
+        progressPct: Math.min(100, Math.round(((totalSpent - 1000) / 4000) * 100)),
+        nextTierName: 'Gold Member',
+        neededAmount: 5000 - totalSpent,
+        perks: 'รับ Coins คืน 1.2x + โค้ดส่วนลดวันเกิด',
+      };
+    }
+    return {
+      key: 'classic',
+      name: 'Classic Member',
+      icon: '🥉',
+      badgeTitle: '🥉 MOVEMALL CLASSIC MEMBER',
+      roleLabel: 'สมาชิกทั่วไป (Classic)',
+      progressPct: Math.min(100, Math.round((totalSpent / 1000) * 100)),
+      nextTierName: 'Silver Member',
+      neededAmount: 1000 - totalSpent,
+      perks: 'รับ 100 Coins ต้อนรับ + โค้ดส่งฟรีช้อปครั้งแรก',
+    };
+  })();
+
   return (
     <main className="account-page">
       <div className="account-container">
@@ -371,7 +426,7 @@ export function AccountPage() {
             <img src={avatarUrl} alt={name} className="account-avatar" />
             <div>
               <h2 className="account-name">{name}</h2>
-              <span className="account-badge-role">สมาชิก Movemall VIP</span>
+              <span className="account-badge-role">{currentTier.icon} {currentTier.roleLabel}</span>
             </div>
           </div>
 
@@ -437,11 +492,11 @@ export function AccountPage() {
           {activeTab === 'profile' && (
             <div>
               <h1 className="account-section-title">โปรไฟล์ส่วนตัว (Personal Profile)</h1>
-              <p className="account-section-sub">จัดการข้อมูลส่วนตัวและตรวจสอบยอดสะสม Movemall Coins</p>
+              <p className="account-section-sub">จัดการข้อมูลส่วนตัว ระดับสมาชิก และตรวจสอบยอดสะสม Movemall Coins</p>
 
               <div className="account-card account-vip-card">
                 <div className="account-vip-card__header">
-                  <div className="account-vip-badge">👑 MOVEMALL VIP MEMBER</div>
+                  <div className="account-vip-badge">{currentTier.badgeTitle}</div>
                   <Sparkles size={20} className="account-vip-sparkle" />
                 </div>
                 <div className="account-vip-card__body">
@@ -449,6 +504,10 @@ export function AccountPage() {
                     <span className="account-vip-label">ยอดเหรียญสะสม Movemall Coins</span>
                     <h2 className="account-vip-val">🪙 {coins.toLocaleString()} <span className="account-vip-unit">Coins</span></h2>
                     <span className="account-vip-sub">💡 ใช้เป็นส่วนลดเงินสด 1 Coin = 1 บาท ในขั้นตอนชำระเงิน</span>
+                    <div style={{ marginTop: 10, fontSize: '0.8rem', color: '#DBEAFE', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span>🎁 สิทธิประโยชน์ระดับปัจจุบัน:</span>
+                      <strong>{currentTier.perks}</strong>
+                    </div>
                   </div>
                   <div className="account-vip-actions">
                     <Link to="/games" className="account-vip-btn">
@@ -456,6 +515,37 @@ export function AccountPage() {
                     </Link>
                   </div>
                 </div>
+
+                {/* Tier Progress Bar */}
+                {currentTier.nextTierName && (
+                  <div style={{
+                    marginTop: 14,
+                    paddingTop: 12,
+                    borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+                    fontSize: '0.8rem',
+                    color: 'white',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span>สะสมยอดช้อปอีก <strong>฿{currentTier.neededAmount.toLocaleString()}</strong> เพื่อเลื่อนเป็น <strong>{currentTier.nextTierName}</strong></span>
+                      <span>ยอดช้อปสะสม ฿{totalSpent.toLocaleString()}</span>
+                    </div>
+                    <div style={{
+                      width: '100%',
+                      height: 6,
+                      background: 'rgba(255, 255, 255, 0.25)',
+                      borderRadius: 3,
+                      overflow: 'hidden',
+                    }}>
+                      <div style={{
+                        width: `${Math.max(8, currentTier.progressPct)}%`,
+                        height: '100%',
+                        background: '#FDE047',
+                        borderRadius: 3,
+                        transition: 'width 0.3s ease',
+                      }} />
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="account-card">
