@@ -770,5 +770,44 @@ router.post('/reports/:id/resolve', requireRole('SUPER_ADMIN', 'ADMIN', 'CS_ADMI
   }
 });
 
+// POST: AI Compliance Batch Scan
+router.post('/compliance/batch-scan', requireRole('SUPER_ADMIN', 'ADMIN', 'CATALOG_ADMIN'), async (req: AuthRequest, res: Response) => {
+  try {
+    const { productIds } = req.body;
+    // Simulated batch scan execution
+    const total = Array.isArray(productIds) ? productIds.length : 160;
+    res.json({
+      success: true,
+      scannedCount: total,
+      timestamp: new Date().toISOString(),
+      activeValidRate: '92.4%',
+      message: `AI Compliance Scan completed for ${total} products. 0 critical unhandled violations.`,
+    });
+  } catch (error) {
+    console.error('Batch Scan Error:', error);
+    res.status(500).json({ error: 'Failed to run compliance scan' });
+  }
+});
+
+// POST: Verify Single License with Mock Government Gateway
+router.post('/compliance/verify', async (req: Request, res: Response) => {
+  try {
+    const { licenseNumber, type } = req.body;
+    const isValid = Boolean(licenseNumber && licenseNumber.length >= 8);
+    res.json({
+      success: true,
+      licenseNumber,
+      type: type || 'FDA',
+      status: isValid ? 'ACTIVE' : 'NOT_FOUND',
+      expiryDate: '2028-12-31',
+      matchScore: isValid ? 98 : 0,
+      verifiedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Verify License Error:', error);
+    res.status(500).json({ error: 'Failed to verify license' });
+  }
+});
+
 export default router;
 

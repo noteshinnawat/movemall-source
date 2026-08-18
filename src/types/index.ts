@@ -44,6 +44,9 @@ export interface ProductCompliance {
   verificationStatus: 'verified' | 'pending' | 'unverified' | 'rejected';
   verifiedAt?: string;
   rejectionReason?: string;
+  aiConfidenceScore?: number;  // คะแนนความเชื่อมั่นจาก AI (0-100%)
+  officialStatus?: 'ACTIVE' | 'EXPIRED' | 'REVOKED'; // สถานะจากฐานข้อมูล อย./มอก.
+  officialName?: string;       // ชื่อผลิตภัณฑ์ทางการค้าที่จดแจ้งไว้
 }
 
 export interface Product {

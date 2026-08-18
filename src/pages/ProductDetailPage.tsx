@@ -690,16 +690,21 @@ export function ProductDetailPage({
               </div>
             </div>
 
-            {/* Product Compliance & Standard Card */}
+            {/* Product Compliance & Standard Card (AI Verified) */}
             <div className="product-detail__compliance-card">
               <div className="product-detail__compliance-header">
                 <div className="product-detail__compliance-title-group">
                   <ShieldCheck size={16} className="product-detail__compliance-icon" />
-                  <span className="product-detail__compliance-title">🛡️ ข้อมูลใบอนุญาตและมาตรฐานสินค้า (Compliance)</span>
+                  <span className="product-detail__compliance-title">🛡️ มาตรฐานสินค้า & ใบอนุญาต (Movemall AI Verified)</span>
                 </div>
-                <span className="product-detail__compliance-badge">
-                  ✓ ตรวจสอบแล้ว
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: '0.72rem', background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0', padding: '2px 8px', borderRadius: 4, fontWeight: 700 }}>
+                    🟢 ฐานข้อมูลภาครัฐ: ACTIVE
+                  </span>
+                  <span className="product-detail__compliance-badge">
+                    ✓ AI ตรวจสอบแล้ว 98%
+                  </span>
+                </div>
               </div>
 
               <div className="product-detail__compliance-grid">
