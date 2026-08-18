@@ -48,6 +48,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
   const [payLaterPlan, setPayLaterPlan] = useState<'1month' | '3month' | '6month'>('3month');
   const [showPromptPayModal, setShowPromptPayModal] = useState(false);
   const [useCoins, setUseCoins] = useState(false);
+  const [notifyViaLine, setNotifyViaLine] = useState(true);
   const userCoins = 120; // 120 Movemall Coins
 
   // Tax Invoice States
@@ -516,8 +517,28 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
 
             <div className="checkout__summary-divider" />
 
+            {/* LINE Official Realtime Shipping Alert Opt-in */}
+            <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, borderRadius: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ background: '#06C755', color: '#fff', fontSize: 10, fontWeight: 900, padding: '2px 5px', borderRadius: 3 }}>LINE</span>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#166534' }}>รับใบเสร็จและแจ้งเตือนพัสดุผ่าน LINE</div>
+                  <div style={{ fontSize: 11, color: '#15803D' }}>แจ้งเตือน Flash Express สดเข้าแชท</div>
+                </div>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 12, fontWeight: 700, color: '#166534' }}>
+                <input
+                  type="checkbox"
+                  checked={notifyViaLine}
+                  onChange={e => setNotifyViaLine(e.target.checked)}
+                  style={{ width: 16, height: 16, accentColor: '#06C755', cursor: 'pointer' }}
+                />
+                เปิดรับ
+              </label>
+            </div>
+
             {/* Movemall Coins Point Redemption */}
-            <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, borderRadius: 6 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 20 }}>🪙</span>
                 <div>

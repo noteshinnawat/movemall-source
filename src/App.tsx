@@ -638,7 +638,7 @@ function App() {
   });
   const [customClips, setCustomClips] = useState<VideoClip[]>([]);
   const cart = useCart();
-  const wishlist = useWishlist();
+  const wishlist = useWishlist(productList);
   const { toasts, addToast, removeToast } = useToast();
 
   // ── Sync Products Live from Supabase / Railway Backend ──

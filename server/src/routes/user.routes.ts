@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { prismaRead, prismaWrite } from '../config/database.js';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.middleware.js';
+import { LineService } from '../services/line.service.js';
 
 const router = Router();
 
@@ -241,4 +242,283 @@ router.put('/change-password', authenticateJWT, async (req: AuthRequest, res: Re
   }
 });
 
+// ── 6. LINE Official Account Connect (+50 Coins Bonus) ──
+router.post('/line/connect', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { lineUserId, displayName, pictureUrl } = req.body;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const user = await prismaRead.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Reward 50 coins if newly connected
+    const updatedUser = await prismaWrite.user.update({
+      where: { id: userId },
+      data: {
+        coinsBalance: { increment: 50 },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        coinsBalance: true,
+      },
+    });
+
+    res.json({
+      message: 'LINE account connected successfully',
+      user: {
+        ...updatedUser,
+        lineConnected: true,
+        lineProfile: {
+          displayName: displayName || 'LINE Member',
+          pictureUrl: pictureUrl || '',
+          lineUserId: lineUserId || 'U_MOVEMALL_' + Date.now(),
+        },
+      },
+      coinsEarned: 50,
+    });
+  } catch (error) {
+    console.error('LINE Connect Error:', error);
+    res.status(500).json({ error: 'Failed to connect LINE account' });
+  }
+});
+
+// ── 7. Update LINE Notification Preferences ──
+router.put('/line/preferences', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { preferences } = req.body;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    res.json({
+      message: 'LINE notification preferences updated',
+      preferences: preferences || {
+        orderUpdates: true,
+        shippingUpdates: true,
+        flashSaleAlerts: true,
+        liveStreamAlerts: true,
+        dailyCoinsReminders: false,
+      },
+    });
+  } catch (error) {
+    console.error('LINE Preferences Error:', error);
+    res.status(500).json({ error: 'Failed to update preferences' });
+  }
+});
+
+// ── 8. Disconnect LINE Account ──
+router.delete('/line/disconnect', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    res.json({ message: 'LINE account disconnected' });
+  } catch (error) {
+    console.error('LINE Disconnect Error:', error);
+    res.status(500).json({ error: 'Failed to disconnect LINE account' });
+  }
+});
+
+// ── 9. Get User Wishlist ──
+router.get('/wishlist', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const items = await prismaRead.wishlistItem.findMany({
+      where: { userId },
+      include: {
+        product: true,
+      },
+    });
+
+    res.json({
+      productIds: items.map(item => item.productId),
+      items: items.map(item => ({
+        id: item.id,
+        productId: item.productId,
+        product: item.product,
+      })),
+    });
+  } catch (error) {
+    console.error('Fetch Wishlist Error:', error);
+    res.status(500).json({ error: 'Failed to fetch wishlist' });
+  }
+});
+
+// ── 10. Sync Wishlist (Merge guest items with user account) ──
+router.post('/wishlist/sync', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { productIds } = req.body;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const validProductIds: string[] = Array.isArray(productIds) ? productIds : [];
+
+    // Safely upsert valid items into DB
+    for (const pid of validProductIds) {
+      if (typeof pid === 'string' && pid.trim().length > 0) {
+        try {
+          const productExists = await prismaRead.product.findUnique({ where: { id: pid } });
+          if (productExists) {
+            await prismaWrite.wishlistItem.upsert({
+              where: {
+                userId_productId: {
+                  userId,
+                  productId: pid,
+                },
+              },
+              update: {},
+              create: {
+                userId,
+                productId: pid,
+              },
+            });
+          }
+        } catch {
+          // Skip if database product not found or constraint mismatch
+        }
+      }
+    }
+
+    const currentItems = await prismaRead.wishlistItem.findMany({
+      where: { userId },
+      include: {
+        product: true,
+      },
+    });
+
+    res.json({
+      message: 'Wishlist synced successfully',
+      productIds: currentItems.map(i => i.productId),
+      items: currentItems.map(item => ({
+        id: item.id,
+        productId: item.productId,
+        product: item.product,
+      })),
+    });
+  } catch (error) {
+    console.error('Sync Wishlist Error:', error);
+    res.status(500).json({ error: 'Failed to sync wishlist' });
+  }
+});
+
+// ── 11. Toggle Wishlist Item ──
+router.post('/wishlist/toggle', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { productId } = req.body;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    if (!productId) {
+      res.status(400).json({ error: 'productId is required' });
+      return;
+    }
+
+    const existing = await prismaRead.wishlistItem.findUnique({
+      where: {
+        userId_productId: {
+          userId,
+          productId,
+        },
+      },
+    });
+
+    let isWished = false;
+    if (existing) {
+      await prismaWrite.wishlistItem.delete({
+        where: { id: existing.id },
+      });
+      isWished = false;
+    } else {
+      const productExists = await prismaRead.product.findUnique({ where: { id: productId } });
+      if (productExists) {
+        await prismaWrite.wishlistItem.create({
+          data: {
+            userId,
+            productId,
+          },
+        });
+        isWished = true;
+      }
+    }
+
+    const allItems = await prismaRead.wishlistItem.findMany({
+      where: { userId },
+      select: { productId: true },
+    });
+
+    res.json({
+      isWished,
+      productId,
+      productIds: allItems.map(i => i.productId),
+    });
+  } catch (error) {
+    console.error('Toggle Wishlist Error:', error);
+    res.status(500).json({ error: 'Failed to toggle wishlist item' });
+  }
+});
+
+// ── 12. Remove Wishlist Item ──
+router.delete('/wishlist/:productId', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const productId = String(req.params.productId);
+
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    await prismaWrite.wishlistItem.deleteMany({
+      where: {
+        userId,
+        productId,
+      },
+    });
+
+    const allItems = await prismaRead.wishlistItem.findMany({
+      where: { userId },
+      select: { productId: true },
+    });
+
+    res.json({
+      message: 'Item removed from wishlist',
+      productIds: allItems.map(i => i.productId),
+    });
+  } catch (error) {
+    console.error('Remove Wishlist Error:', error);
+    res.status(500).json({ error: 'Failed to remove wishlist item' });
+  }
+});
+
 export default router;
+

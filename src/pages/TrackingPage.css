@@ -860,7 +860,83 @@
   font-weight: 700;
 }
 
+/* 📲 LINE Official Realtime Shipping Alert Card */
+.tracking-line-alert-card {
+  background: #F0FDF4;
+  border: 1.5px solid #86EFAC;
+  border-radius: var(--radius-md, 6px);
+  padding: 14px 18px;
+  margin-bottom: var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  box-shadow: 0 1px 3px rgba(6, 199, 85, 0.08);
+}
+
+.tracking-line-alert-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.tracking-line-badge {
+  background: #06C755;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.tracking-line-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #166534;
+  line-height: 1.3;
+}
+
+.tracking-line-subtitle {
+  font-size: 12px;
+  color: #15803D;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.tracking-line-alert-btn {
+  background: #06C755;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-md, 6px);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(6, 199, 85, 0.2);
+}
+
+.tracking-line-alert-btn:hover {
+  background: #05B34C;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 768px) {
+  .tracking-line-alert-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .tracking-line-alert-btn {
+    width: 100%;
+    justify-content: center;
+  }
   .real-leaflet-map-wrapper { height: 320px; }
   .proof-delivery-grid { grid-template-columns: 1fr; }
   .tracking-address-summary { grid-template-columns: 1fr; }

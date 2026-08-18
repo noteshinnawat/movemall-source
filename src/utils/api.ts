@@ -130,3 +130,35 @@ export async function requestAffiliatePayout(amount: number, payoutMethod: strin
   });
 }
 
+// ── Wishlist API Types & Helpers ──
+export interface ApiWishlistResponse {
+  productIds: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  items?: Array<{ id: string; productId: string; product: any }>;
+}
+
+export async function fetchUserWishlist(): Promise<ApiWishlistResponse> {
+  return fetchApi<ApiWishlistResponse>('/api/user/wishlist');
+}
+
+export async function syncUserWishlist(productIds: string[]): Promise<ApiWishlistResponse> {
+  return fetchApi<ApiWishlistResponse>('/api/user/wishlist/sync', {
+    method: 'POST',
+    body: JSON.stringify({ productIds }),
+  });
+}
+
+export async function toggleUserWishlistItem(productId: string): Promise<{ isWished: boolean; productId: string; productIds: string[] }> {
+  return fetchApi<{ isWished: boolean; productId: string; productIds: string[] }>('/api/user/wishlist/toggle', {
+    method: 'POST',
+    body: JSON.stringify({ productId }),
+  });
+}
+
+export async function removeUserWishlistItem(productId: string): Promise<{ message: string; productIds: string[] }> {
+  return fetchApi<{ message: string; productIds: string[] }>(`/api/user/wishlist/${productId}`, {
+    method: 'DELETE',
+  });
+}
+
+

@@ -18,14 +18,18 @@ import {
   Trash2,
   Pencil,
   Store,
-  LogOut
+  LogOut,
+  Smartphone,
+  Truck,
+  Check,
 } from 'lucide-react';
 import { fetchApi } from '../utils/api';
+import { LineConnectModal } from '../components/LineConnectModal';
 import './AccountPage.css';
 
 export function AccountPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'addresses' | 'paylater'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'addresses' | 'paylater' | 'line'>('profile');
 
   // Load Saved User from LocalStorage as Initial State
   const savedUser = (() => {
@@ -47,6 +51,8 @@ export function AccountPage() {
   );
   const [coins, setCoins] = useState(savedUser?.coinsBalance ?? 100);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
+  const [isLineModalOpen, setIsLineModalOpen] = useState(false);
+  const [isLineConnected, setIsLineConnected] = useState<boolean>(() => !!savedUser?.lineConnected);
 
   // Sync state when auth changes
   useEffect(() => {
@@ -60,6 +66,7 @@ export function AccountPage() {
           if (u.phone) setPhone(u.phone);
           if (u.avatarUrl) setAvatarUrl(u.avatarUrl);
           if (typeof u.coinsBalance === 'number') setCoins(u.coinsBalance);
+          setIsLineConnected(!!u.lineConnected);
         }
       } catch {
         // Ignore
@@ -454,6 +461,35 @@ export function AccountPage() {
               onClick={() => setActiveTab('paylater')}
             >
               <CreditCard size={18} /> Movemall PayLater
+            </button>
+            <button
+              className={`account-nav-btn ${activeTab === 'line' ? 'account-nav-btn--active' : ''}`}
+              onClick={() => setActiveTab('line')}
+            >
+              <span style={{
+                background: '#06C755',
+                color: '#ffffff',
+                fontSize: '10px',
+                fontWeight: 900,
+                padding: '2px 5px',
+                borderRadius: '3px',
+                marginRight: '2px',
+                letterSpacing: '0.3px',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}>LINE</span>
+              การแจ้งเตือน LINE Official
+              {!isLineConnected && (
+                <span style={{
+                  marginLeft: 'auto',
+                  background: '#FEF3C7',
+                  color: '#D97706',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                }}>+50 Coins</span>
+              )}
             </button>
             <div style={{ height: 1, background: '#E2E8F0', margin: '8px 0' }} />
             <Link
@@ -871,6 +907,87 @@ export function AccountPage() {
               </div>
             </div>
           )}
+
+          {activeTab === 'line' && (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '10px' }}>
+                <div>
+                  <h1 className="account-section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ background: '#06C755', color: '#fff', fontSize: '12px', fontWeight: 900, padding: '3px 7px', borderRadius: '4px' }}>LINE</span>
+                    การแจ้งเตือนและบริการ Movemall x LINE Official
+                  </h1>
+                  <p className="account-section-sub">รับใบเสร็จ, แจ้งเตือนสถานะพัสดุ Flash Express, และดีลลดแรงผ่าน LINE แบบเรียลไทม์</p>
+                </div>
+                <button
+                  type="button"
+                  className="account-btn-primary"
+                  style={{ background: '#06C755', borderColor: '#06C755' }}
+                  onClick={() => setIsLineModalOpen(true)}
+                >
+                  <Smartphone size={16} />
+                  {isLineConnected ? '📱 เปิดศูนย์ควบคุม & ดูตัวอย่าง LINE' : '🟢 เชื่อมต่อ LINE (+50 Coins)'}
+                </button>
+              </div>
+
+              {/* Status Card */}
+              <div className="account-card" style={{ borderLeft: isLineConnected ? '4px solid #06C755' : '4px solid #F59E0B' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>สถานะการเชื่อมต่อ LINE Official</span>
+                    <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: isLineConnected ? '#06C755' : '#D97706', margin: '0.25rem 0' }}>
+                      {isLineConnected ? '🟢 เชื่อมต่อกับ Movemall เรียบร้อยแล้ว' : '⚠️ ยังไม่ได้เชื่อมต่อบัญชี LINE'}
+                    </h2>
+                    <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>
+                      {isLineConnected
+                        ? 'คุณจะได้รับข้อความแจ้งเตือนคำสั่งซื้อและการจัดส่งพัสดุสดผ่าน LINE Official Account'
+                        : 'เชื่อมต่อบัญชี LINE ตอนนี้เพื่อรับโบนัสฟรี +50 Coins และรับเลขแทร็กกิ้งพัสดุทันทีเมื่อของออกจากร้าน'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="account-btn-primary"
+                    style={{ background: isLineConnected ? '#2563EB' : '#06C755' }}
+                    onClick={() => setIsLineModalOpen(true)}
+                  >
+                    {isLineConnected ? 'จัดการการแจ้งเตือน' : 'เชื่อมต่อทันที'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Feature Highlights Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+                <div className="account-card" style={{ padding: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', color: '#2563EB', fontWeight: 700, fontSize: '14px' }}>
+                    <Truck size={18} />
+                    <span>แจ้งเตือนพัสดุเรียลไทม์</span>
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#6B7280', margin: 0, lineHeight: 1.4 }}>
+                    รับเลข Tracking No. Flash Express พร้อมลิงก์กดเปิดดูแผนที่สด GPS ทันทีเมื่อคนขับใกล้ถึงบ้าน
+                  </p>
+                </div>
+
+                <div className="account-card" style={{ padding: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', color: '#059669', fontWeight: 700, fontSize: '14px' }}>
+                    <Check size={18} />
+                    <span>ใบเสร็จดิจิทัล (E-Receipt)</span>
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#6B7280', margin: 0, lineHeight: 1.4 }}>
+                    สรุปยอดเงิน รายการสินค้า และประวัติการชำระเงินในรูปแบบ Flex Card สวยงาม เก็บเป็นหลักฐานได้
+                  </p>
+                </div>
+
+                <div className="account-card" style={{ padding: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', color: '#D97706', fontWeight: 700, fontSize: '14px' }}>
+                    <Coins size={18} />
+                    <span>แจ้งเตือน Coins & Flash Sale</span>
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#6B7280', margin: 0, lineHeight: 1.4 }}>
+                    สะกิดเช็คอินรับ Coins ทุกวัน และเตือนทันทีเมื่อสินค้าใน Wishlist จัดโปรลดแรง 50%
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
       </div>
 
@@ -1041,6 +1158,12 @@ export function AccountPage() {
           </div>
         </div>
       )}
+
+      {/* LINE Connect Modal */}
+      <LineConnectModal
+        isOpen={isLineModalOpen}
+        onClose={() => setIsLineModalOpen(false)}
+      />
     </main>
   );
 }

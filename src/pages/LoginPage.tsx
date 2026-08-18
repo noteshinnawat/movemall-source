@@ -67,6 +67,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
       if (res.token) {
         localStorage.setItem('movemall_jwt_token', res.token);
+        window.dispatchEvent(new Event('movemall_auth_change'));
       }
 
       onLoginSuccess?.(res.user?.name || identifier, role);
@@ -136,6 +137,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
       if (res.token) {
         localStorage.setItem('movemall_jwt_token', res.token);
+        window.dispatchEvent(new Event('movemall_auth_change'));
       }
 
       onLoginSuccess?.(res.user?.name || `ผู้ใช้ ${otpPhone.slice(-4)}`, 'buyer');
@@ -172,6 +174,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
         if (res.token) {
           localStorage.setItem('movemall_jwt_token', res.token);
+          window.dispatchEvent(new Event('movemall_auth_change'));
         }
 
         const finalUser = {
@@ -209,6 +212,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
       if (res.token) {
         localStorage.setItem('movemall_jwt_token', res.token);
+        window.dispatchEvent(new Event('movemall_auth_change'));
       }
 
       onLoginSuccess?.(res.user?.name || providerNames[provider], 'buyer');

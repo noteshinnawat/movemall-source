@@ -14,7 +14,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   padding: var(--space-8) var(--space-6);
-  max-width: 520px;
+  max-width: 540px;
   margin: 0 auto;
   text-align: center;
   box-shadow: var(--shadow-sm);
@@ -58,7 +58,93 @@
   font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.5;
+  margin-bottom: var(--space-5);
+}
+
+/* High-Converting LINE Connect Card */
+.order-success__line-card {
+  background: #F0FDF4;
+  border: 1.5px solid #86EFAC;
+  border-radius: 6px;
+  padding: 16px;
   margin-bottom: var(--space-6);
+  text-align: left;
+}
+
+.order-success__line-header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.order-success__line-badge-icon {
+  background: #06C755;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.order-success__line-texts {
+  flex: 1;
+}
+
+.order-success__line-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #166534;
+  line-height: 1.3;
+}
+
+.order-success__line-desc {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #15803D;
+  line-height: 1.4;
+}
+
+.order-success__line-actions {
+  display: flex;
+}
+
+.order-success__line-btn {
+  width: 100%;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.order-success__line-btn--connect {
+  background: #06C755;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(6, 199, 85, 0.25);
+}
+
+.order-success__line-btn--connect:hover {
+  background: #05B34C;
+}
+
+.order-success__line-btn--view {
+  background: #ffffff;
+  color: #166534;
+  border: 1px solid #86EFAC;
+}
+
+.order-success__line-btn--view:hover {
+  background: #DCFCE7;
 }
 
 .order-success__info {
