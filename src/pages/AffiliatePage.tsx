@@ -32,9 +32,11 @@ import './AffiliatePage.css';
 
 interface AffiliatePageProps {
   onCopySuccess?: (msg: string) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onPublishClip?: (clip: any) => void;
 }
 
-export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
+export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePageProps) {
   // Creator Profile & Registration State
   const [creatorProfile, setCreatorProfile] = useState<CreatorProfileData | null>(() => {
     const saved = localStorage.getItem('movemall_creator_profile');
@@ -224,7 +226,11 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
         ],
       };
 
-      mockLiveStreams.unshift(newVideo);
+      if (onPublishClip) {
+        onPublishClip(newVideo);
+      } else {
+        mockLiveStreams.unshift(newVideo);
+      }
       setIsPublishing(false);
       setPublishedSuccess(true);
       onCopySuccess?.('เผยแพร่วิดีโอสั้นติดตะกร้าสินค้าสำเร็จแล้ว! ไปดูในฟีดวิดีโอได้เลย');
@@ -342,15 +348,29 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
         {/* ── Stats Metrics Grid ── */}
         <div className="affiliate-stats-grid">
           <div className="affiliate-stat-box">
-            <span className="affiliate-stat-label">ยอดวิวคลิปทั้งหมด</span>
-            <div className="affiliate-stat-value">{isRegistered ? '28,450 วิว' : '0 วิว'}</div>
-            <span className="affiliate-stat-sub">{isRegistered ? '+34% สัปดาห์นี้' : 'เริ่มลงคลิปเพื่อเพิ่มยอดวิว'}</span>
+            <span className="affiliate-stat-label">ยอดคลิกลิงก์ & วิวทั้งหมด</span>
+            <div className="affiliate-stat-value">
+              {isRegistered ? `${(creatorProfile?.totalClicks ?? 0).toLocaleString()} ครั้ง` : '0 ครั้ง'}
+            </div>
+            <span className="affiliate-stat-sub">
+              {isRegistered
+                ? (creatorProfile && creatorProfile.totalClicks > 0 ? '+12% สัปดาห์นี้' : 'เริ่มแชร์ลิงก์หรือลงคลิปเพื่อสร้างยอดคลิก')
+                : 'เริ่มลงคลิป/แชร์ลิงก์เพื่อสร้างยอดคลิก'}
+            </span>
           </div>
 
           <div className="affiliate-stat-box">
-            <span className="affiliate-stat-label">ออเดอร์จากตะกร้า</span>
-            <div className="affiliate-stat-value">{isRegistered ? '124 ออเดอร์' : '0 ออเดอร์'}</div>
-            <span className="affiliate-stat-sub">{isRegistered ? 'อัตราสั่งซื้อ 5.8%' : 'รอการสั่งซื้อแรก'}</span>
+            <span className="affiliate-stat-label">ออเดอร์จากตะกร้า/ลิงก์</span>
+            <div className="affiliate-stat-value">
+              {isRegistered ? `${(creatorProfile?.totalOrders ?? 0).toLocaleString()} ออเดอร์` : '0 ออเดอร์'}
+            </div>
+            <span className="affiliate-stat-sub">
+              {isRegistered
+                ? (creatorProfile && creatorProfile.totalOrders > 0
+                    ? `อัตราสั่งซื้อ ${((creatorProfile.totalOrders / Math.max(1, creatorProfile.totalClicks)) * 100).toFixed(1)}%`
+                    : 'รอคำสั่งซื้อแรกจากลูกค้า')
+                : 'รอการสั่งซื้อแรก'}
+            </span>
           </div>
 
           <div className="affiliate-stat-box" style={{ background: '#F0FDF4', borderColor: '#BBF7D0' }}>
@@ -366,7 +386,7 @@ export function AffiliatePage({ onCopySuccess }: AffiliatePageProps) {
               )}
             </div>
             <div className="affiliate-stat-value" style={{ color: '#15803D' }}>
-              ฿{isRegistered ? (creatorProfile?.availableBalance || 500).toLocaleString() : '0.00'}
+              ฿{isRegistered ? (creatorProfile?.availableBalance ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
             </div>
             <span className="affiliate-stat-sub" style={{ color: '#166534' }}>
               {isRegistered ? 'ถอนเข้าบัญชีได้ทันที (หักภาษี 3%)' : 'สมัครเพื่อรับโบนัส ฿500'}

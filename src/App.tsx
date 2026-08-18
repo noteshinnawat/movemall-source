@@ -254,6 +254,7 @@ function AppLayout({
             element={
               <AffiliatePage
                 onCopySuccess={msg => addToast(msg, 'success', '🔗')}
+                onPublishClip={handlePublishClip}
               />
             }
           />
