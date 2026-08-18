@@ -1572,54 +1572,95 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
 
           <div className="admin-workspace-inner">
 
-      {/* 🎯 1. Marketing & Campaign Department (Enhanced Deep Features) */}
+      {/* 🎯 1. Marketing & Campaign Department */}
       {activeTab === 'marketing' && (
         <div className="admin-card">
           <div className="admin-card-header">
             <div>
-              <h2 className="admin-card-title">🎯 Movemall Campaign Hub & Marketing Automation</h2>
-              <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+              <h2 className="admin-card-title">🎯 ศูนย์บริหารการตลาด & แคมเปญ (Marketing & Campaign Hub)</h2>
+              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
                 บริหารจัดการแคมเปญ Super Brand Day, บรอดแคสต์แจ้งเตือน, โค้ดส่วนลดกลาง และรอบ Flash Sale
               </span>
             </div>
-            {marketingSubTab === 'campaigns' && (
-              <button className="admin-btn-sm admin-btn-primary" onClick={() => setShowCampaignModal(true)}>
-                <Plus size={14} /> + สร้างแคมเปญใหม่
-              </button>
-            )}
-            {marketingSubTab === 'vouchers' && (
-              <button className="admin-btn-sm admin-btn-primary" onClick={() => setShowVoucherModal(true)}>
-                <Plus size={14} /> + สร้างคูปองส่วนลดกลาง
-              </button>
-            )}
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {marketingSubTab === 'campaigns' && (
+                <button type="button" className="admin-btn-sm admin-btn-primary" onClick={() => setShowCampaignModal(true)}>
+                  <Plus size={14} /> + สร้างแคมเปญใหม่
+                </button>
+              )}
+              {marketingSubTab === 'vouchers' && (
+                <button type="button" className="admin-btn-sm admin-btn-primary" onClick={() => setShowVoucherModal(true)}>
+                  <Plus size={14} /> + สร้างคูปองส่วนลดกลาง
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Marketing Subtabs */}
-          <div className="marketing-subtabs">
-            <button
-              className={`marketing-subtab-btn ${marketingSubTab === 'campaigns' ? 'marketing-subtab-btn--active' : ''}`}
-              onClick={() => setMarketingSubTab('campaigns')}
-            >
-              <Sparkles size={16} /> 👑 Super Brand Day & Mega Sales ({campaigns.length})
-            </button>
-            <button
-              className={`marketing-subtab-btn ${marketingSubTab === 'broadcast' ? 'marketing-subtab-btn--active' : ''}`}
-              onClick={() => setMarketingSubTab('broadcast')}
-            >
-              <BellRing size={16} /> 📢 Push Notification Broadcaster
-            </button>
-            <button
-              className={`marketing-subtab-btn ${marketingSubTab === 'vouchers' ? 'marketing-subtab-btn--active' : ''}`}
-              onClick={() => setMarketingSubTab('vouchers')}
-            >
-              <Ticket size={16} /> 🎟️ โค้ดคูปองกลางแพลตฟอร์ม ({vouchers.length})
-            </button>
-            <button
-              className={`marketing-subtab-btn ${marketingSubTab === 'flashsale' ? 'marketing-subtab-btn--active' : ''}`}
-              onClick={() => setMarketingSubTab('flashsale')}
-            >
-              <Flame size={16} /> ⚡ Flash Sale & Coin Rates
-            </button>
+          {/* 4 Summary Stats */}
+          <div className="admin-stats-grid">
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #2563eb' }}>
+              <span className="admin-stat-label">👑 แคมเปญ Super Brand Day Active</span>
+              <div className="admin-stat-val" style={{ color: '#2563eb' }}>
+                {campaigns.filter(c => c.status === 'active').length} แคมเปญ
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>ยอดขายสร้างได้ ฿1,240,000</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #10b981' }}>
+              <span className="admin-stat-label">📢 บรอดแคสต์ Push ส่งสำเร็จ</span>
+              <div className="admin-stat-val" style={{ color: '#059669' }}>
+                {broadcastLogs.reduce((sum, l) => sum + l.sentCount, 0).toLocaleString()} เครื่อง
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>อัตราเปิดอ่านเฉลี่ย 42.8%</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+              <span className="admin-stat-label">🎟️ คูปองส่วนลดกลาง Active</span>
+              <div className="admin-stat-val" style={{ color: '#d97706' }}>
+                {vouchers.filter(v => v.status === 'active').length} โค้ด
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>ใช้ไปแล้ว 4,280 / 12,000 สิทธิ์</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #ef4444' }}>
+              <span className="admin-stat-label">⚡ Flash Sale สินค้าลดแรง</span>
+              <div className="admin-stat-val" style={{ color: '#dc2626' }}>8 รายการ</div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>รอบเวลา 20:00 - 24:00 น.</span>
+            </div>
+          </div>
+
+          {/* Marketing Subtabs Segmented Strip */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <div className="admin-segmented-strip">
+              <button
+                type="button"
+                className={`admin-segmented-btn ${marketingSubTab === 'campaigns' ? 'admin-segmented-btn--active' : ''}`}
+                onClick={() => setMarketingSubTab('campaigns')}
+              >
+                <Sparkles size={14} /> 👑 Super Brand Day & Mega Sales ({campaigns.length})
+              </button>
+              <button
+                type="button"
+                className={`admin-segmented-btn ${marketingSubTab === 'broadcast' ? 'admin-segmented-btn--active' : ''}`}
+                onClick={() => setMarketingSubTab('broadcast')}
+              >
+                <BellRing size={14} /> 📢 Push Notification Broadcaster
+              </button>
+              <button
+                type="button"
+                className={`admin-segmented-btn ${marketingSubTab === 'vouchers' ? 'admin-segmented-btn--active' : ''}`}
+                onClick={() => setMarketingSubTab('vouchers')}
+              >
+                <Ticket size={14} /> 🎟️ โค้ดคูปองกลางแพลตฟอร์ม ({vouchers.length})
+              </button>
+              <button
+                type="button"
+                className={`admin-segmented-btn ${marketingSubTab === 'flashsale' ? 'admin-segmented-btn--active' : ''}`}
+                onClick={() => setMarketingSubTab('flashsale')}
+              >
+                <Flame size={14} /> ⚡ Flash Sale & Coin Rates
+              </button>
+            </div>
           </div>
 
           {/* 1.1 Super Brand Day & Campaigns Subtab */}
@@ -1827,49 +1868,51 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
 
               {/* Broadcast History Logs */}
               <div style={{ marginTop: '2rem' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem' }}>📋 ประวัติการยิง Broadcast ล่าสุด (Broadcast Logs)</h3>
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>หัวข้อข้อความ</th>
-                      <th>หมวดหมู่</th>
-                      <th>กลุ่มเป้าหมาย</th>
-                      <th>ยอดส่งสำเร็จ</th>
-                      <th>ปลายทาง</th>
-                      <th>เวลาที่ยิง</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {broadcastLogs.map(log => (
-                      <tr key={log.id}>
-                        <td>
-                          <strong>{log.title}</strong>
-                          <div style={{ fontSize: '0.775rem', color: '#6b7280' }}>{log.body}</div>
-                        </td>
-                        <td>
-                          <span style={{ background: '#f3f4f6', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem' }}>
-                            {log.category}
-                          </span>
-                        </td>
-                        <td>
-                          <span style={{ fontWeight: 600, color: '#2563eb', fontSize: '0.8rem' }}>
-                            {log.audience === 'all' ? 'สมาชิกทุกคน' : log.audience === 'new_users' ? 'สมาชิกใหม่' : 'VIP'}
-                          </span>
-                        </td>
-                        <td style={{ fontWeight: 700, color: '#10b981' }}>{log.sentCount.toLocaleString()} เครื่อง</td>
-                        <td style={{ fontSize: '0.8rem', color: '#6b7280' }}>{log.targetUrl}</td>
-                        <td style={{ fontSize: '0.8rem', color: '#6b7280' }}>{new Date(log.sentAt).toLocaleTimeString('th-TH')}</td>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0f172a' }}>📋 ประวัติการยิง Broadcast ล่าสุด (Broadcast Logs)</h3>
+                <div className="admin-table-container">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>หัวข้อข้อความ</th>
+                        <th>หมวดหมู่</th>
+                        <th>กลุ่มเป้าหมาย</th>
+                        <th>ยอดส่งสำเร็จ</th>
+                        <th>ปลายทาง</th>
+                        <th>เวลาที่ยิง</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {broadcastLogs.map(log => (
+                        <tr key={log.id}>
+                          <td>
+                            <strong>{log.title}</strong>
+                            <div style={{ fontSize: '0.775rem', color: '#6b7280' }}>{log.body}</div>
+                          </td>
+                          <td>
+                            <span style={{ background: '#f3f4f6', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem' }}>
+                              {log.category}
+                            </span>
+                          </td>
+                          <td>
+                            <span style={{ fontWeight: 600, color: '#2563eb', fontSize: '0.8rem' }}>
+                              {log.audience === 'all' ? 'สมาชิกทุกคน' : log.audience === 'new_users' ? 'สมาชิกใหม่' : 'VIP'}
+                            </span>
+                          </td>
+                          <td style={{ fontWeight: 700, color: '#10b981' }}>{log.sentCount.toLocaleString()} เครื่อง</td>
+                          <td style={{ fontSize: '0.8rem', color: '#6b7280' }}>{log.targetUrl}</td>
+                          <td style={{ fontSize: '0.8rem', color: '#6b7280' }}>{new Date(log.sentAt).toLocaleTimeString('th-TH')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
 
           {/* 1.3 Platform Vouchers Engine Subtab */}
           {marketingSubTab === 'vouchers' && (
-            <div>
+            <div className="admin-table-container">
               <table className="admin-table">
                 <thead>
                   <tr>
@@ -2684,99 +2727,324 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
         </div>
       )}
 
-      {/* 💳 Finance Admin */}
+      {/* 💳 Finance & Seller Payout Approvals */}
       {activeTab === 'finance' && (
         <div className="admin-card">
           <div className="admin-card-header">
-            <h2 className="admin-card-title">💳 อนุมัติการถอนเงินของร้านค้า (Seller Payout Approvals)</h2>
+            <div>
+              <h2 className="admin-card-title">💳 ศูนย์การเงิน & อนุมัติถอนเงินร้านค้า (Finance & Seller Payouts)</h2>
+              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                ตรวจสอบคำขอถอนเงินรายได้ หักภาษี ณ ที่จ่าย 3% (e-WHT) และอนุมัติโอนเงินผ่านระบบธนาคารอัตโนมัติ
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button type="button" className="admin-btn-sm admin-btn-outline" onClick={() => alert('🔄 ซิงค์ข้อมูลกับ Payment Gateway เรียบร้อย')}>
+                🔄 ซิงค์ Gateway
+              </button>
+              <button type="button" className="admin-btn-sm admin-btn-primary" onClick={() => alert('📥 ดาวน์โหลดรายงานภาษีและสรุปยอดโอนเงิน (CSV) สำเร็จ')}>
+                📥 Export Payout CSV
+              </button>
+            </div>
           </div>
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>ชื่อร้านค้า</th>
-                <th>ธนาคาร & บัญชี</th>
-                <th>ชื่อบัญชี</th>
-                <th>จำนวนเงินถอน</th>
-                <th>สถานะ</th>
-                <th>ดำเนินการ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payouts.map(p => (
-                <tr key={p.id}>
-                  <td>{p.id}</td>
-                  <td style={{ fontWeight: 600 }}>{p.storeName}</td>
-                  <td>{p.bankName}<br /><span style={{ fontSize: '0.8rem', color: '#6b7280' }}>{p.bankAccountNo}</span></td>
-                  <td>{p.accountName}</td>
-                  <td style={{ fontWeight: 800, color: '#10b981' }}>฿{p.amount.toLocaleString()}</td>
-                  <td>
-                    {p.status === 'pending' ? (
-                      <span style={{ background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem', fontWeight: 600 }}>
-                        ⏳ รออนุมัติ
-                      </span>
-                    ) : (
-                      <span style={{ background: '#d1fae5', color: '#047857', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem', fontWeight: 600 }}>
-                        ✓ โอนเงินสำเร็จ
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    {p.status === 'pending' ? (
-                      <button className="admin-btn-sm admin-btn-success" onClick={() => handleApprovePayout(p.id)}>
-                        อนุมัติโอนเงิน
-                      </button>
-                    ) : (
-                      <CheckCircle size={20} color="#10b981" />
-                    )}
-                  </td>
+
+          {/* 4 Summary Stats */}
+          <div className="admin-stats-grid">
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+              <span className="admin-stat-label">⏳ ยอดถอนรออนุมัติ</span>
+              <div className="admin-stat-val" style={{ color: '#d97706' }}>
+                ฿{payouts.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0).toLocaleString()}
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{payouts.filter(p => p.status === 'pending').length} รายการรอดำเนินการ</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #10b981' }}>
+              <span className="admin-stat-label">✓ ยอดโอนสำเร็จเดือนนี้</span>
+              <div className="admin-stat-val" style={{ color: '#059669' }}>฿1,850,000</div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>โอนผ่าน PromptPay/SCB Open API</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #2563eb' }}>
+              <span className="admin-stat-label">🏛️ ภาษีหัก ณ ที่จ่าย 3% (e-WHT)</span>
+              <div className="admin-stat-val" style={{ color: '#2563eb' }}>฿55,500</div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>นำส่งกรมสรรพากร ภ.ง.ด. 53</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #7c3aed' }}>
+              <span className="admin-stat-label">📈 รายได้ค่าคอมมิชชั่นแพลตฟอร์ม</span>
+              <div className="admin-stat-val" style={{ color: '#6d28d9' }}>฿92,500</div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Take Rate เฉลี่ย 5% GMV</span>
+            </div>
+          </div>
+
+          {/* Table Container */}
+          <div className="admin-table-container">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>รหัสคำขอ</th>
+                  <th>ร้านค้า / ผู้ขาย</th>
+                  <th>ธนาคาร & เลขบัญชี</th>
+                  <th>ชื่อบัญชีรับเงิน</th>
+                  <th>ยอดเงินถอนสุทธิ</th>
+                  <th>สถานะการโอน</th>
+                  <th style={{ textAlign: 'right' }}>ดำเนินการ</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {payouts.map(p => (
+                  <tr key={p.id}>
+                    <td>
+                      <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#2563eb' }}>{p.id}</span>
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 700, color: '#0f172a' }}>{p.storeName}</div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>ร้านค้าทางการ Movemall</div>
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600, fontSize: '0.82rem', color: '#334155' }}>{p.bankName}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontFamily: 'monospace' }}>{p.bankAccountNo}</div>
+                    </td>
+                    <td style={{ fontSize: '0.82rem', color: '#0f172a' }}>{p.accountName}</td>
+                    <td>
+                      <strong style={{ color: '#059669', fontSize: '0.95rem' }}>฿{p.amount.toLocaleString()}</strong>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b' }}>หัก WHT 3%: ฿{(p.amount * 0.03).toFixed(0)}</div>
+                    </td>
+                    <td>
+                      {p.status === 'pending' ? (
+                        <span style={{ background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
+                          ⏳ รออนุมัติ
+                        </span>
+                      ) : (
+                        <span style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
+                          ✓ โอนเงินสำเร็จ
+                        </span>
+                      )}
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      {p.status === 'pending' ? (
+                        <button
+                          type="button"
+                          className="admin-btn-sm admin-btn-primary"
+                          onClick={() => handleApprovePayout(p.id)}
+                        >
+                          ✓ อนุมัติโอนเงิน
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', color: '#15803d', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                          <CheckCircle size={14} color="#10b981" /> สำเร็จ
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
-      {/* 💬 CS Admin */}
+      {/* 💬 CS & Customer Dispute Resolution */}
       {activeTab === 'cs' && (
         <div className="admin-card">
           <div className="admin-card-header">
-            <h2 className="admin-card-title">💬 คำร้องขอคืนเงิน & เคสพิพาท (Dispute Resolution)</h2>
-          </div>
-          {disputes.map(d => (
-            <div key={d.id} style={{ border: '1px solid #e5e7eb', padding: '1.25rem', borderRadius: 6, marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <span style={{ fontWeight: 700 }}>คำสั่งซื้อ #{d.orderId} (ผู้ซื้อ: {d.buyerName} | ร้านค้า: {d.storeName})</span>
-                <span style={{ fontSize: '0.85rem', color: '#dc2626', fontWeight: 700 }}>ยอดขอคืนเงิน ฿{d.refundAmount.toLocaleString()}</span>
-              </div>
-              <p style={{ fontSize: '0.875rem', color: '#374151', margin: '0.5rem 0' }}>เหตุผล: {d.reason}</p>
-              {d.status === 'open' ? (
-                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-                  <button className="admin-btn-sm admin-btn-success" onClick={() => handleResolveDispute(d.id, 'refund_buyer')}>
-                    อนุมัติคืนเงินเข้าผู้ซื้อ (Refund Buyer)
-                  </button>
-                  <button className="admin-btn-sm admin-btn-outline" onClick={() => handleResolveDispute(d.id, 'payout_seller')}>
-                    ยกเลิกคำร้อง & โอนเงินเข้าร้านค้า (Payout Seller)
-                  </button>
-                </div>
-              ) : (
-                <span style={{ fontSize: '0.8rem', background: '#e0e7ff', color: '#3730a3', padding: '2px 8px', borderRadius: 4, fontWeight: 600 }}>
-                  ✓ ตัดสินเคสเรียบร้อยแล้ว ({d.status})
-                </span>
-              )}
+            <div>
+              <h2 className="admin-card-title">💬 ฝ่ายบริการลูกค้า & ไกล่เกลี่ยข้อพิพาทคืนเงิน (Dispute Resolution)</h2>
+              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                ศูนย์กลางพิจารณาข้อพิพาทผู้ซื้อและร้านค้า: สินค้าไม่ตรงปก, ชำรุดแตกหัก, ได้รับของปลอม และไม่ได้รับสินค้า
+              </span>
             </div>
-          ))}
+          </div>
+
+          {/* 4 Summary Stats */}
+          <div className="admin-stats-grid">
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #ef4444' }}>
+              <span className="admin-stat-label">🚨 ข้อพิพาทรอตัดสิน</span>
+              <div className="admin-stat-val" style={{ color: '#dc2626' }}>
+                {disputes.filter(d => d.status === 'open').length} เคส
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>ผู้ซื้อและร้านค้ารอคำตัดสิน</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+              <span className="admin-stat-label">💰 ยอดเงินข้อพิพาทรวม</span>
+              <div className="admin-stat-val" style={{ color: '#d97706' }}>
+                ฿{disputes.reduce((sum, d) => sum + d.refundAmount, 0).toLocaleString()}
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>อยู่ในระบบ Escrow Platform</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #10b981' }}>
+              <span className="admin-stat-label">⏱️ ระยะเวลาไกล่เกลี่ยเฉลี่ย</span>
+              <div className="admin-stat-val" style={{ color: '#059669' }}>2.4 ชม.</div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>เป้าหมาย SLA &lt; 24 ชม.</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #2563eb' }}>
+              <span className="admin-stat-label">⭐ ความพึงพอใจการบริการ (CSAT)</span>
+              <div className="admin-stat-val" style={{ color: '#2563eb' }}>99.2%</div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>อัตราพึงพอใจฝ่ายบริการลูกค้า</span>
+            </div>
+          </div>
+
+          {/* Dispute Cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {disputes.map(d => (
+              <div
+                key={d.id}
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 6,
+                  padding: '1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#2563eb', fontSize: '0.9rem' }}>
+                        คำสั่งซื้อ #{d.orderId}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', background: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5', padding: '1px 6px', borderRadius: 4, fontWeight: 700 }}>
+                        ⚠️ ขอเงินคืน
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                      👤 ผู้ซื้อ: <strong>{d.buyerName}</strong> &bull; 🏪 ร้านค้า: <strong>{d.storeName}</strong>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '1rem', fontWeight: 800, color: '#dc2626' }}>
+                      ฿{d.refundAmount.toLocaleString()}
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>ยอดขอรับเงินคืน</span>
+                  </div>
+                </div>
+
+                <div className="admin-insight-box" style={{ borderLeftColor: '#f59e0b' }}>
+                  <span style={{ fontWeight: 700, color: '#0f172a' }}>เหตุผลที่ขอคืนเงิน:</span> {d.reason}
+                </div>
+
+                {d.status === 'open' ? (
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', justifyContent: 'flex-end' }}>
+                    <button
+                      type="button"
+                      className="admin-btn-sm admin-btn-primary"
+                      onClick={() => handleResolveDispute(d.id, 'refund_buyer')}
+                    >
+                      ✓ อนุมัติคืนเงินเข้าผู้ซื้อ (Refund Buyer)
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-btn-sm admin-btn-outline"
+                      onClick={() => handleResolveDispute(d.id, 'payout_seller')}
+                    >
+                      ยกเลิกคำร้อง &amp; โอนเงินเข้าร้านค้า (Payout Seller)
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <span style={{ fontSize: '0.78rem', background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '3px 8px', borderRadius: 4, fontWeight: 700 }}>
+                      ✓ ตัดสินเคสเรียบร้อยแล้ว ({d.status})
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* 🚚 Logistics Admin */}
+      {/* 🚚 Logistics & Courier SLA Control */}
       {activeTab === 'logistics' && (
         <div className="admin-card">
-          <h2 className="admin-card-title" style={{ marginBottom: '1rem' }}>🚚 ติดตามพัสดุ & พิกัดรถส่งของเรียลไทม์ (Logistics Control)</h2>
-          <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>ประสานงานขนส่ง Flash Express, SPX Express, และ Kerry Express ตรวจสอบพัสดุตกค้าง</p>
-          <div style={{ background: '#f9fafb', padding: '1rem', borderRadius: 6, marginTop: '1rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>สถานะการส่งพัสดุวันนี้:</span>
-            <p style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: 700, margin: '4px 0 0 0' }}>✓ จัดส่งสำเร็จตามกำหนด 99.4% (เฉลี่ย 1.8 วัน)</p>
+          <div className="admin-card-header">
+            <div>
+              <h2 className="admin-card-title">🚚 ศูนย์ควบคุมระบบขนส่ง &amp; โลจิสติกส์ (Logistics &amp; Courier SLA Control)</h2>
+              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                ติดตามสถานะนำจ่ายพัสดุแบบ Realtime, ประสานงานพาร์ทเนอร์ขนส่ง และตรวจสอบ SLA การจัดส่งทั่วประเทศ
+              </span>
+            </div>
+          </div>
+
+          {/* 4 Summary Stats */}
+          <div className="admin-stats-grid">
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #2563eb' }}>
+              <span className="admin-stat-label">🚚 พัสดุกำลังนำจ่ายวันนี้</span>
+              <div className="admin-stat-val" style={{ color: '#2563eb' }}>342 ชิ้น</div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>กระจายส่งทั่ว 77 จังหวัด</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #10b981' }}>
+              <span className="admin-stat-label">⏱️ อัตราจัดส่งตรงเวลา (SLA)</span>
+              <div className="admin-stat-val" style={{ color: '#059669' }}>99.4%</div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>เฉลี่ย 1.8 วันทำการ</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #7c3aed' }}>
+              <span className="admin-stat-label">📦 พัสดุระหว่างทาง (In-Transit)</span>
+              <div className="admin-stat-val" style={{ color: '#6d28d9' }}>1,280 ชิ้น</div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>เชื่อมต่อ Realtime GPS Tracking</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+              <span className="admin-stat-label">⚠️ พัสดุติดปัญหา (Exception)</span>
+              <div className="admin-stat-val" style={{ color: '#d97706' }}>0 ชิ้น</div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>ไม่มีรายงานพัสดุสูญหาย</span>
+            </div>
+          </div>
+
+          {/* Courier Partners Table */}
+          <div className="admin-table-container">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>พาร์ทเนอร์ขนส่ง</th>
+                  <th>พัสดุในระบบวันนี้</th>
+                  <th>อัตราส่งตรงเวลา (SLA)</th>
+                  <th>ความเร็วเฉลี่ย</th>
+                  <th>สถานะ API Gateway</th>
+                  <th style={{ textAlign: 'right' }}>ประสิทธิภาพ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { name: '⚡ Flash Express', parcels: '142 ชิ้น', sla: 99.6, speed: '1.6 วัน', status: 'ONLINE', badge: '#2563eb' },
+                  { name: '📦 Kerry Express (KEX)', parcels: '98 ชิ้น', sla: 99.2, speed: '1.8 วัน', status: 'ONLINE', badge: '#f97316' },
+                  { name: '🔴 SPX Express (Shopee Logistics)', parcels: '68 ชิ้น', sla: 99.5, speed: '1.7 วัน', status: 'ONLINE', badge: '#ef4444' },
+                  { name: '📮 Thailand Post EMS', parcels: '34 ชิ้น', sla: 98.9, speed: '2.1 วัน', status: 'ONLINE', badge: '#dc2626' },
+                ].map(courier => (
+                  <tr key={courier.name}>
+                    <td>
+                      <div style={{ fontWeight: 700, color: '#0f172a' }}>{courier.name}</div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Integrated Courier Partner</div>
+                    </td>
+                    <td>
+                      <strong style={{ color: '#0f172a' }}>{courier.parcels}</strong>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ width: 60, height: 6, background: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
+                          <div style={{ width: `${courier.sla}%`, height: '100%', background: '#10b981' }} />
+                        </div>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#059669' }}>{courier.sla}%</span>
+                      </div>
+                    </td>
+                    <td style={{ fontSize: '0.82rem', color: '#475569' }}>{courier.speed}</td>
+                    <td>
+                      <span style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: 4, fontSize: '0.72rem', fontWeight: 700 }}>
+                        ● {courier.status}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 700 }}>ดีเยี่ยม (Top Tier)</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
