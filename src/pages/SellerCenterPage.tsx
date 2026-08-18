@@ -25,7 +25,44 @@ interface SellerCenterPageProps {
 }
 
 export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDeleteProduct }: SellerCenterPageProps) {
-  const currentStore = stores[0]; // "TechPro Official Store"
+  // User Authentication & Personal Store Management
+  const currentUser = (() => {
+    try {
+      const uStr = localStorage.getItem('movemall_user');
+      return uStr ? JSON.parse(uStr) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const [storeMode, setStoreMode] = useState<'my_store' | 'demo_store'>('my_store');
+
+  const [customStoreName, setCustomStoreName] = useState(() => {
+    return localStorage.getItem('movemall_my_store_name') || (currentUser?.name ? `ร้านค้าของ ${currentUser.name}` : 'ร้านค้าของฉัน (Live Store)');
+  });
+
+  const [isEditingStoreName, setIsEditingStoreName] = useState(false);
+  const [storeNameInput, setStoreNameInput] = useState(customStoreName);
+
+  function handleSaveStoreName(e: React.FormEvent) {
+    e.preventDefault();
+    if (!storeNameInput.trim()) return;
+    setCustomStoreName(storeNameInput.trim());
+    localStorage.setItem('movemall_my_store_name', storeNameInput.trim());
+    setIsEditingStoreName(false);
+  }
+
+  const myStore = {
+    id: currentUser?.id ? `store-${currentUser.id}` : 'store-my-live',
+    name: customStoreName,
+    logo: currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80',
+    rating: 5.0,
+    responseRate: '100%',
+    followers: 1,
+    isMall: false,
+  };
+
+  const currentStore = storeMode === 'my_store' ? myStore : stores[0];
   const storeProducts = products.filter(p => p.storeId === currentStore.id);
 
   const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'api' | 'ads' | 'tax' | 'flash'>('overview');
@@ -723,30 +760,157 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
               <div style={{
                 width: 44,
                 height: 44,
-                background: 'var(--primary)',
+                background: storeMode === 'my_store' ? '#10B981' : 'var(--primary)',
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 20,
+                borderRadius: '6px',
               }}>
-                🏪
+                {storeMode === 'my_store' ? '🟢' : '🏪'}
               </div>
               <div>
-                <h1 className="seller-header__title">
-                  ศูนย์ผู้ขาย (Seller Centre)
-                  <span className="seller-header__store-badge">{currentStore.name}</span>
-                </h1>
-                <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                  จัดการร้านค้า สินค้า และคำสั่งซื้อของคุณได้ในที่เดียว
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <h1 className="seller-header__title" style={{ margin: 0 }}>
+                    ศูนย์ผู้ขาย (Seller Centre)
+                  </h1>
+                  {isEditingStoreName ? (
+                    <form onSubmit={handleSaveStoreName} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <input
+                        type="text"
+                        value={storeNameInput}
+                        onChange={e => setStoreNameInput(e.target.value)}
+                        style={{
+                          padding: '2px 8px',
+                          fontSize: 12,
+                          fontWeight: 700,
+                          border: '1.5px solid #2563EB',
+                          borderRadius: 4,
+                          outline: 'none',
+                        }}
+                        autoFocus
+                      />
+                      <button
+                        type="submit"
+                        style={{
+                          background: '#2563EB',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: 4,
+                          padding: '3px 8px',
+                          fontSize: 11,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        บันทึก
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingStoreName(false)}
+                        style={{
+                          background: '#E2E8F0',
+                          border: 'none',
+                          borderRadius: 4,
+                          padding: '3px 8px',
+                          fontSize: 11,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ยกเลิก
+                      </button>
+                    </form>
+                  ) : (
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <span className="seller-header__store-badge" style={{
+                        background: storeMode === 'my_store' ? '#ECFDF5' : '#EFF6FF',
+                        color: storeMode === 'my_store' ? '#047857' : '#1E40AF',
+                        border: storeMode === 'my_store' ? '1px solid #A7F3D0' : '1px solid #BFDBFE',
+                      }}>
+                        {currentStore.name}
+                      </span>
+                      {storeMode === 'my_store' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setStoreNameInput(customStoreName);
+                            setIsEditingStoreName(true);
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#64748B',
+                            cursor: 'pointer',
+                            fontSize: 12,
+                            padding: '2px 4px',
+                          }}
+                          title="เปลี่ยนชื่อร้านค้า"
+                        >
+                          ✏️ แก้ไขชื่อร้าน
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+                  {storeMode === 'my_store'
+                    ? 'โหมดร้านค้าจริงของคุณ: จัดการสินค้าและออเดอร์เฉพาะร้านของคุณ'
+                    : 'โหมดร้านค้าตัวอย่าง (Demo): แสดงข้อมูลจำลองของ TechPro Official Store'}
                 </p>
               </div>
             </div>
 
-            <button className="seller-header__add-btn" onClick={() => setIsAddModalOpen(true)}>
-              <Plus size={16} />
-              + ลงขายสินค้าใหม่
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              {/* Store Switcher */}
+              <div style={{
+                display: 'inline-flex',
+                background: '#F1F5F9',
+                padding: '3px',
+                borderRadius: '6px',
+                border: '1px solid #CBD5E1',
+              }}>
+                <button
+                  type="button"
+                  onClick={() => setStoreMode('my_store')}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: 12,
+                    fontWeight: storeMode === 'my_store' ? 700 : 500,
+                    background: storeMode === 'my_store' ? '#FFFFFF' : 'transparent',
+                    color: storeMode === 'my_store' ? '#047857' : '#64748B',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    boxShadow: storeMode === 'my_store' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  }}
+                >
+                  🟢 ร้านค้าของฉัน ({products.filter(p => p.storeId === myStore.id).length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStoreMode('demo_store')}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: 12,
+                    fontWeight: storeMode === 'demo_store' ? 700 : 500,
+                    background: storeMode === 'demo_store' ? '#FFFFFF' : 'transparent',
+                    color: storeMode === 'demo_store' ? '#1E40AF' : '#64748B',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    boxShadow: storeMode === 'demo_store' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  }}
+                >
+                  🏢 ร้านตัวอย่าง TechPro
+                </button>
+              </div>
+
+              <button className="seller-header__add-btn" onClick={() => setIsAddModalOpen(true)}>
+                <Plus size={16} />
+                + ลงขายสินค้าใหม่
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -760,7 +924,9 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             </div>
             <div className="seller-metric-info">
               <span className="seller-metric-label">ยอดขายเดือนนี้</span>
-              <span className="seller-metric-val">฿148,920</span>
+              <span className="seller-metric-val">
+                {storeMode === 'my_store' ? '฿0.00' : '฿148,920'}
+              </span>
             </div>
           </div>
 
@@ -770,7 +936,9 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             </div>
             <div className="seller-metric-info">
               <span className="seller-metric-label">คำสั่งซื้อที่ต้องจัดส่ง</span>
-              <span className="seller-metric-val">4 ออเดอร์</span>
+              <span className="seller-metric-val">
+                {storeMode === 'my_store' ? '0 ออเดอร์' : '4 ออเดอร์'}
+              </span>
             </div>
           </div>
 
@@ -867,104 +1035,148 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
         {/* Products Table (Desktop) & Mobile Card List */}
         {activeTab === 'overview' && (
           <>
-            {/* Desktop Table View */}
-            <div className="seller-table-container seller-desktop-table">
-              <table className="seller-table">
-                <thead>
-                  <tr>
-                    <th>สินค้า</th>
-                    <th>หมวดหมู่</th>
-                    <th>ราคาขาย</th>
-                    <th>คงเหลือ (สต็อก)</th>
-                    <th>คะแนน / รีวิว</th>
-                    <th>ใบอนุญาต & มอก.</th>
-                    <th>การจัดการ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {storeProducts.map(product => (
-                    <tr key={product.id}>
-                      <td>
-                        <div className="seller-product-cell">
-                          <img
-                            src={product.images[0]}
-                            alt={product.name}
-                            className="seller-product-img"
-                          />
-                          <div>
-                            <div className="seller-product-name">{product.name}</div>
-                            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>ID: {product.id}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span style={{ textTransform: 'capitalize' }}>{product.category}</span></td>
-                      <td>
-                        <strong style={{ color: 'var(--primary-dark)' }}>฿{product.price.toLocaleString()}</strong>
-                        {product.originalPrice && (
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                            ฿{product.originalPrice.toLocaleString()}
-                          </div>
-                        )}
-                      </td>
-                      <td>
-                        {product.stock > 10 ? (
-                          <span style={{ color: 'var(--success)', fontWeight: 600 }}>{product.stock} ชิ้น</span>
-                        ) : (
-                          <span style={{ color: 'var(--error)', fontWeight: 700 }}>เหลือน้อย ({product.stock} ชิ้น)</span>
-                        )}
-                      </td>
-                      <td>⭐ {product.rating} ({product.reviewCount})</td>
-                      <td>
-                        {product.compliance ? (
-                          <div style={{ fontSize: 11, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                            {product.compliance.fdaNumber && (
-                              <span style={{ color: '#059669', fontWeight: 600 }}>
-                                🛡️ อย. {product.compliance.fdaNumber}
-                              </span>
+            {storeProducts.length === 0 ? (
+              <div style={{
+                background: '#FFFFFF',
+                border: '1.5px dashed #CBD5E1',
+                borderRadius: '8px',
+                padding: '48px 24px',
+                textAlign: 'center',
+                margin: '20px 0',
+              }}>
+                <div style={{ fontSize: 48, marginBottom: 12 }}>📦</div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#1E293B', marginBottom: 6 }}>
+                  {storeMode === 'my_store' ? 'ยังไม่มีสินค้าในร้านค้าของคุณ' : 'ไม่มีสินค้าในหมวดหมู่นี้'}
+                </h3>
+                <p style={{ fontSize: 14, color: '#64748B', maxWidth: 460, margin: '0 auto 20px auto', lineHeight: 1.5 }}>
+                  {storeMode === 'my_store'
+                    ? 'เริ่มต้นลงขายสินค้าชิ้นแรกเพื่อสร้างรายได้และโปรโมตผ่าน Movemall Live และฟีดวิดีโอสั้นติดตะกร้าได้ทันที!'
+                    : 'ยังไม่มีสินค้าในร้านค้านี้'}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(true)}
+                  style={{
+                    background: '#2563EB',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '10px 20px',
+                    fontSize: 14,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    boxShadow: '0 2px 4px rgba(37,99,235,0.2)',
+                  }}
+                >
+                  <Plus size={16} />
+                  + ลงขายสินค้าชิ้นแรกเลย
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Desktop Table View */}
+                <div className="seller-table-container seller-desktop-table">
+                  <table className="seller-table">
+                    <thead>
+                      <tr>
+                        <th>สินค้า</th>
+                        <th>หมวดหมู่</th>
+                        <th>ราคาขาย</th>
+                        <th>คงเหลือ (สต็อก)</th>
+                        <th>คะแนน / รีวิว</th>
+                        <th>ใบอนุญาต & มอก.</th>
+                        <th>การจัดการ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {storeProducts.map(product => (
+                        <tr key={product.id}>
+                          <td>
+                            <div className="seller-product-cell">
+                              <img
+                                src={product.images[0]}
+                                alt={product.name}
+                                className="seller-product-img"
+                              />
+                              <div>
+                                <div className="seller-product-name">{product.name}</div>
+                                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>ID: {product.id}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td><span style={{ textTransform: 'capitalize' }}>{product.category}</span></td>
+                          <td>
+                            <strong style={{ color: 'var(--primary-dark)' }}>฿{product.price.toLocaleString()}</strong>
+                            {product.originalPrice && (
+                              <div style={{ fontSize: 11, color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                                ฿{product.originalPrice.toLocaleString()}
+                              </div>
                             )}
-                            {product.compliance.tisiNumber && (
-                              <span style={{ color: '#2563EB', fontWeight: 600 }}>
-                                ⚡ {product.compliance.tisiNumber}
-                              </span>
+                          </td>
+                          <td>
+                            {product.stock > 10 ? (
+                              <span style={{ color: 'var(--success)', fontWeight: 600 }}>{product.stock} ชิ้น</span>
+                            ) : (
+                              <span style={{ color: 'var(--error)', fontWeight: 700 }}>เหลือน้อย ({product.stock} ชิ้น)</span>
                             )}
-                            {product.compliance.countryOfOrigin && (
-                              <span style={{ color: 'var(--text-muted)' }}>
-                                🌐 {product.compliance.countryOfOrigin}
-                              </span>
+                          </td>
+                          <td>⭐ {product.rating} ({product.reviewCount})</td>
+                          <td>
+                            {product.compliance ? (
+                              <div style={{ fontSize: 11, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                {product.compliance.fdaNumber && (
+                                  <span style={{ color: '#059669', fontWeight: 600 }}>
+                                    🛡️ อย. {product.compliance.fdaNumber}
+                                  </span>
+                                )}
+                                {product.compliance.tisiNumber && (
+                                  <span style={{ color: '#2563EB', fontWeight: 600 }}>
+                                    ⚡ {product.compliance.tisiNumber}
+                                  </span>
+                                )}
+                                {product.compliance.countryOfOrigin && (
+                                  <span style={{ color: 'var(--text-muted)' }}>
+                                    🌐 {product.compliance.countryOfOrigin}
+                                  </span>
+                                )}
+                                <span className="seller-compliance-status-chip">
+                                  ✓ ตรวจสอบแล้ว
+                                </span>
+                              </div>
+                            ) : (
+                              <span style={{ fontSize: 11, color: '#9CA3AF' }}>- ไม่มีข้อมูล -</span>
                             )}
-                            <span className="seller-compliance-status-chip">
-                              ✓ ตรวจสอบแล้ว
-                            </span>
-                          </div>
-                        ) : (
-                          <span style={{ fontSize: 11, color: '#9CA3AF' }}>- ไม่มีข้อมูล -</span>
-                        )}
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                          <button
-                            className="seller-edit-btn"
-                            onClick={() => handleOpenEditModal(product)}
-                            aria-label={`แก้ไข ${product.name}`}
-                          >
-                            <Pencil size={13} />
-                            แก้ไข
-                          </button>
-                          <button
-                            className="seller-delete-btn"
-                            onClick={() => onDeleteProduct(product.id)}
-                            aria-label={`ลบ ${product.name}`}
-                          >
-                            <Trash2 size={13} />
-                            ลบ
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                              <button
+                                className="seller-edit-btn"
+                                onClick={() => handleOpenEditModal(product)}
+                                aria-label={`แก้ไข ${product.name}`}
+                              >
+                                <Pencil size={13} />
+                                แก้ไข
+                              </button>
+                              <button
+                                className="seller-delete-btn"
+                                onClick={() => onDeleteProduct(product.id)}
+                                aria-label={`ลบ ${product.name}`}
+                              >
+                                <Trash2 size={13} />
+                                ลบ
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
 
             {/* Mobile Card List View (Shopee / TikTok Seller Style) */}
             <div className="seller-mobile-card-list">

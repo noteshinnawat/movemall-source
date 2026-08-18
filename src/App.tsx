@@ -598,7 +598,21 @@ function AppLayout({
 }
 
 function App() {
-  const [productList, setProductList] = useState<Product[]>(initialProducts);
+  const [productList, setProductList] = useState<Product[]>(() => {
+    try {
+      const savedCustom = localStorage.getItem('movemall_user_custom_products');
+      if (savedCustom) {
+        const parsed = JSON.parse(savedCustom);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const customIds = new Set(parsed.map((p: Product) => p.id));
+          return [...parsed, ...initialProducts.filter(p => !customIds.has(p.id))];
+        }
+      }
+    } catch {
+      // Ignore parse error
+    }
+    return initialProducts;
+  });
   const [customClips, setCustomClips] = useState<VideoClip[]>([]);
   const cart = useCart();
   const wishlist = useWishlist();
@@ -615,14 +629,13 @@ function App() {
           if (data && Array.isArray(data.products) && data.products.length > 0) {
             setProductList(prev => {
               const liveIds = new Set(data.products.map((p: Product) => p.id));
-              const remainingMock = prev.filter(p => !liveIds.has(p.id));
-              return [...data.products, ...remainingMock];
+              const remaining = prev.filter(p => !liveIds.has(p.id));
+              return [...data.products, ...remaining];
             });
             console.log(`[Movemall DB] ✅ Synced ${data.products.length} products live from Supabase Database!`);
           }
         }
       } catch {
-        // Fallback gracefully to offline cache/mock data
         console.info('[Movemall DB] Backend offline or using local product cache');
       }
     }
@@ -651,17 +664,44 @@ function App() {
   }
 
   function handleAddProduct(newProduct: Product) {
-    setProductList(prev => [newProduct, ...prev]);
+    setProductList(prev => {
+      const updated = [newProduct, ...prev];
+      try {
+        const customProds = updated.filter(p => p.storeId?.startsWith('store-') || p.id.startsWith('p-custom-'));
+        localStorage.setItem('movemall_user_custom_products', JSON.stringify(customProds));
+      } catch {
+        // Ignore storage full
+      }
+      return updated;
+    });
     addToast(`ลงขายสินค้า "${newProduct.name}" สำเร็จแล้ว!`, 'success', '📦');
   }
 
   function handleDeleteProduct(id: string) {
-    setProductList(prev => prev.filter(p => p.id !== id));
+    setProductList(prev => {
+      const updated = prev.filter(p => p.id !== id);
+      try {
+        const customProds = updated.filter(p => p.storeId?.startsWith('store-') || p.id.startsWith('p-custom-'));
+        localStorage.setItem('movemall_user_custom_products', JSON.stringify(customProds));
+      } catch {
+        // Ignore
+      }
+      return updated;
+    });
     addToast('ลบสินค้าออกจากร้านค้าแล้ว', 'info', '🗑️');
   }
 
   function handleUpdateProduct(updatedProduct: Product) {
-    setProductList(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+    setProductList(prev => {
+      const updated = prev.map(p => p.id === updatedProduct.id ? updatedProduct : p);
+      try {
+        const customProds = updated.filter(p => p.storeId?.startsWith('store-') || p.id.startsWith('p-custom-'));
+        localStorage.setItem('movemall_user_custom_products', JSON.stringify(customProds));
+      } catch {
+        // Ignore
+      }
+      return updated;
+    });
     addToast(`อัปเดตข้อมูลสินค้า "${updatedProduct.name}" สำเร็จแล้ว!`, 'success', '✏️');
   }
 
