@@ -1,6 +1,18 @@
 // ── Centralized API Service Client for Movemall Frontend ──
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+export const API_BASE_URL = (() => {
+  let url = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+  if (!url) {
+    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:4000'
+      : 'https://movemall-source-production.up.railway.app';
+  }
+  if (url.endsWith('/')) url = url.slice(0, -1);
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = `https://${url}`;
+  }
+  return url;
+})();
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem('movemall_jwt_token');

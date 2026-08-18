@@ -651,8 +651,8 @@ function App() {
   useEffect(() => {
     async function loadProductsLive() {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-        const res = await fetch(`${apiUrl}/api/products?limit=200`);
+        const { API_BASE_URL } = await import('./utils/api');
+        const res = await fetch(`${API_BASE_URL}/api/products?limit=200`);
         if (res.ok) {
           const data = await res.json();
           if (data && Array.isArray(data.products) && data.products.length > 0) {
