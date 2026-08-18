@@ -342,15 +342,18 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
     setAdminLoginError('');
     try {
       const authRes = await promptGoogleAuth();
-      if (authRes.credential || authRes.accessToken || authRes.googleUser) {
-        const payload: any = {};
-        if (authRes.credential) payload.idToken = authRes.credential;
-        if (authRes.accessToken) payload.accessToken = authRes.accessToken;
-        if (authRes.googleUser) payload.googleUser = authRes.googleUser;
-
-        const res = await fetchApi<{ token: string; user: any }>('/api/auth/google/callback', {
+      if (authRes.credential || authRes.accessToken || authRes.googleUser || authRes.mockUser) {
+        const res = await fetchApi<{
+          token: string;
+          user: { id: string; name: string; email?: string; role?: string; avatarUrl?: string; coinsBalance?: number };
+        }>('/api/auth/google', {
           method: 'POST',
-          body: JSON.stringify(payload),
+          body: JSON.stringify({
+            credential: authRes.credential,
+            accessToken: authRes.accessToken,
+            googleUser: authRes.googleUser,
+            mockUser: authRes.mockUser,
+          }),
         });
 
         if (!res.token || !res.user) {

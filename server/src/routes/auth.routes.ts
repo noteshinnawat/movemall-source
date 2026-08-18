@@ -320,7 +320,7 @@ router.post('/login-otp', async (req: AuthRequest, res: Response) => {
 });
 
 // ── 5. Google Sign-In / Sign-Up Verification ──
-router.post('/google', async (req: AuthRequest, res: Response) => {
+router.post(['/google', '/google/callback'], async (req: AuthRequest, res: Response) => {
   try {
     const { credential, accessToken, googleUser, referralCode, mockUser } = req.body;
 
