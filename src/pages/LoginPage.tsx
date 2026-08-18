@@ -1,7 +1,7 @@
 // src/pages/LoginPage.tsx — Authentication Page (Password Login / Fast SMS OTP Login / Social Login)
 
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { User, Store, KeyRound, Phone, ArrowRight, Sparkles, AlertCircle } from 'lucide-react';
 import { fetchApi } from '../utils/api';
 import { promptGoogleAuth } from '../utils/googleAuth';
@@ -13,7 +13,11 @@ interface LoginPageProps {
 
 export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const navigate = useNavigate();
-  const [role, setRole] = useState<'buyer' | 'seller'>('buyer');
+  const [searchParams] = useSearchParams();
+  const paramRole = searchParams.get('role');
+  const redirectParam = searchParams.get('redirect');
+
+  const [role, setRole] = useState<'buyer' | 'seller'>(paramRole === 'seller' ? 'seller' : 'buyer');
   
   // Login Type: 'password' vs 'otp'
   const [loginType, setLoginType] = useState<'password' | 'otp'>('password');
@@ -30,6 +34,12 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
+
+  function getRedirectTarget(userRole?: string) {
+    if (redirectParam) return redirectParam;
+    if (role === 'seller' || userRole?.toUpperCase() === 'SELLER') return '/seller';
+    return '/account';
+  }
 
   // Countdown timer helper
   function startOtpCountdown() {
@@ -71,21 +81,12 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       }
 
       onLoginSuccess?.(res.user?.name || identifier, role);
-
-      if (role === 'seller' || res.user?.role === 'SELLER') {
-        navigate('/seller');
-      } else {
-        navigate('/account');
-      }
+      navigate(getRedirectTarget(res.user?.role));
     } catch (err: any) {
       console.warn('API Login note (offline fallback):', err);
       // Fallback for testing/offline
       onLoginSuccess?.(identifier || 'ผู้ใช้งาน Movemall', role);
-      if (role === 'seller') {
-        navigate('/seller');
-      } else {
-        navigate('/account');
-      }
+      navigate(getRedirectTarget());
     } finally {
       setLoading(false);
     }
@@ -140,11 +141,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         window.dispatchEvent(new Event('movemall_auth_change'));
       }
 
-      onLoginSuccess?.(res.user?.name || `ผู้ใช้ ${otpPhone.slice(-4)}`, 'buyer');
-      navigate('/account');
+      onLoginSuccess?.(res.user?.name || `ผู้ใช้ ${otpPhone.slice(-4)}`, role);
+      navigate(getRedirectTarget(res.user?.role));
     } catch (err) {
-      onLoginSuccess?.(`ผู้ใช้ ${otpPhone.slice(-4)}`, 'buyer');
-      navigate('/account');
+      onLoginSuccess?.(`ผู้ใช้ ${otpPhone.slice(-4)}`, role);
+      navigate(getRedirectTarget());
     } finally {
       setLoading(false);
     }
@@ -182,7 +183,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
           name: res.user?.name || authRes.googleUser?.name || 'สมาชิก Google',
           email: res.user?.email || authRes.googleUser?.email,
           avatarUrl: res.user?.avatarUrl || authRes.googleUser?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(res.user?.name || 'Google')}`,
-          role: res.user?.role || 'BUYER',
+          role: res.user?.role || (role === 'seller' ? 'SELLER' : 'BUYER'),
           coinsBalance: res.user?.coinsBalance ?? 100,
         };
 
@@ -190,8 +191,8 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         window.dispatchEvent(new Event('movemall_auth_change'));
 
         const userName = finalUser.name;
-        onLoginSuccess?.(userName, (finalUser.role?.toLowerCase() as 'buyer' | 'seller') || 'buyer');
-        navigate('/account');
+        onLoginSuccess?.(userName, (finalUser.role?.toLowerCase() as 'buyer' | 'seller') || role);
+        navigate(getRedirectTarget(finalUser.role));
         return;
       }
 
@@ -215,22 +216,22 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         window.dispatchEvent(new Event('movemall_auth_change'));
       }
 
-      onLoginSuccess?.(res.user?.name || providerNames[provider], 'buyer');
-      navigate('/account');
+      onLoginSuccess?.(res.user?.name || providerNames[provider], role);
+      navigate(getRedirectTarget(res.user?.role));
     } catch (err) {
       console.warn('Social login error, using fallback:', err);
       const fallbackName = provider === 'google' ? 'Google User' : `${provider.toUpperCase()} User`;
       const fallbackUser = {
         name: fallbackName,
         email: `${provider}_user@movemall.com`,
-        role: 'BUYER',
+        role: role === 'seller' ? 'SELLER' : 'BUYER',
         coinsBalance: 100,
         avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(fallbackName)}`,
       };
       localStorage.setItem('movemall_user', JSON.stringify(fallbackUser));
       window.dispatchEvent(new Event('movemall_auth_change'));
-      onLoginSuccess?.(fallbackName, 'buyer');
-      navigate('/account');
+      onLoginSuccess?.(fallbackName, role);
+      navigate(getRedirectTarget(fallbackUser.role));
     } finally {
       setLoading(false);
     }

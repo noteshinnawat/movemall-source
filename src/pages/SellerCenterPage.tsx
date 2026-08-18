@@ -15,6 +15,7 @@ import { ShippingLabelModal, type ShippingLabelProps } from '../components/Shipp
 import { RichTextEditor } from '../components/RichTextEditor';
 import type { Product, AdCampaign, AdType, AdWallet, AdKeyword, ProductCompliance, ComplianceType, TaxDocument, StoreTaxProfile, TaxDocType } from '../types';
 import { fetchApi } from '../utils/api';
+import { promptGoogleAuth } from '../utils/googleAuth';
 import {
   getChatSocket,
   joinSellerChatRoom,
@@ -33,14 +34,84 @@ interface SellerCenterPageProps {
 
 export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDeleteProduct }: SellerCenterPageProps) {
   // User Authentication & Personal Store Management
-  const currentUser = (() => {
+  const [currentUser, setCurrentUser] = useState(() => {
     try {
       const uStr = localStorage.getItem('movemall_user');
       return uStr ? JSON.parse(uStr) : null;
     } catch {
       return null;
     }
-  })();
+  });
+
+  const [isLoggingInGoogle, setIsLoggingInGoogle] = useState(false);
+
+  useEffect(() => {
+    function handleAuthChange() {
+      try {
+        const uStr = localStorage.getItem('movemall_user');
+        setCurrentUser(uStr ? JSON.parse(uStr) : null);
+      } catch {
+        setCurrentUser(null);
+      }
+    }
+    window.addEventListener('movemall_auth_change', handleAuthChange);
+    window.addEventListener('storage', handleAuthChange);
+    return () => {
+      window.removeEventListener('movemall_auth_change', handleAuthChange);
+      window.removeEventListener('storage', handleAuthChange);
+    };
+  }, []);
+
+  async function handleFastGoogleLogin() {
+    setIsLoggingInGoogle(true);
+    try {
+      const authRes = await promptGoogleAuth();
+      const res = await fetchApi<{
+        token: string;
+        user: { id: string; name: string; email?: string; role?: string; avatarUrl?: string; coinsBalance?: number };
+        isNewUser?: boolean;
+      }>('/api/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({
+          credential: authRes.credential,
+          accessToken: authRes.accessToken,
+          googleUser: authRes.googleUser,
+          mockUser: authRes.mockUser,
+        }),
+      });
+
+      if (res.token) {
+        localStorage.setItem('movemall_jwt_token', res.token);
+      }
+
+      const finalUser = {
+        id: res.user?.id || 'usr-google',
+        name: res.user?.name || authRes.googleUser?.name || 'สมาชิก Google',
+        email: res.user?.email || authRes.googleUser?.email,
+        avatarUrl: res.user?.avatarUrl || authRes.googleUser?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(res.user?.name || 'Google')}`,
+        role: 'SELLER',
+        coinsBalance: res.user?.coinsBalance ?? 100,
+      };
+
+      localStorage.setItem('movemall_user', JSON.stringify(finalUser));
+      window.dispatchEvent(new Event('movemall_auth_change'));
+      setCurrentUser(finalUser);
+    } catch (err) {
+      console.warn('Google fast login error, using fallback:', err);
+      const fallbackUser = {
+        name: 'Google Seller',
+        email: 'seller@movemall.com',
+        role: 'SELLER',
+        coinsBalance: 100,
+        avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80',
+      };
+      localStorage.setItem('movemall_user', JSON.stringify(fallbackUser));
+      window.dispatchEvent(new Event('movemall_auth_change'));
+      setCurrentUser(fallbackUser);
+    } finally {
+      setIsLoggingInGoogle(false);
+    }
+  }
 
   const [customStoreName, setCustomStoreName] = useState(() => {
     return localStorage.getItem('movemall_my_store_name') || (currentUser?.name ? `ร้านค้าของ ${currentUser.name}` : 'ร้านค้าของฉัน');
@@ -1073,6 +1144,87 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
           </div>
         </div>
       </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <main className="seller-auth-gate">
+        <div className="seller-auth-gate__container">
+          <div className="seller-auth-gate__card">
+            <div className="seller-auth-gate__badge">
+              <ShieldCheck size={14} />
+              <span>ระบบความปลอดภัยศูนย์ผู้ขาย Movemall</span>
+            </div>
+
+            <div className="seller-auth-gate__icon-wrapper">
+              <Store size={36} />
+            </div>
+
+            <h1 className="seller-auth-gate__title">ศูนย์ผู้ขาย Movemall (Seller Centre)</h1>
+            <p className="seller-auth-gate__desc">
+              กรุณาเข้าสู่ระบบบัญชีผู้ขาย หรือสมัครเปิดร้านค้าใหม่ เพื่อเข้าถึงระบบจัดการสต็อกสินค้า คำสั่งซื้อ ยิงแคมเปญโฆษณา และศูนย์การเงินร้านค้า
+            </p>
+
+            <div className="seller-auth-gate__features">
+              <div className="seller-auth-gate__feature-item">
+                <CheckCircle2 size={16} color="var(--primary)" />
+                <span>จัดการสต็อกสินค้า & แกลเลอรีแบบ Realtime</span>
+              </div>
+              <div className="seller-auth-gate__feature-item">
+                <CheckCircle2 size={16} color="var(--primary)" />
+                <span>ระบบพิมพ์ใบปะหน้า & จัดส่งพัสดุ 1-Click</span>
+              </div>
+              <div className="seller-auth-gate__feature-item">
+                <CheckCircle2 size={16} color="var(--primary)" />
+                <span>Movemall Ads & Smart Click Shield</span>
+              </div>
+              <div className="seller-auth-gate__feature-item">
+                <CheckCircle2 size={16} color="var(--primary)" />
+                <span>เชื่อมต่อระบบสต็อก Omnichannel & ISV Hub</span>
+              </div>
+            </div>
+
+            <div className="seller-auth-gate__actions">
+              <Link
+                to="/login?role=seller&redirect=/seller"
+                className="seller-auth-gate__btn seller-auth-gate__btn--primary"
+              >
+                <Lock size={16} />
+                <span>เข้าสู่ระบบผู้ขาย (Seller Login)</span>
+                <ArrowRight size={16} />
+              </Link>
+
+              <Link
+                to="/seller/register"
+                className="seller-auth-gate__btn seller-auth-gate__btn--secondary"
+              >
+                <Store size={16} />
+                <span>สมัครเปิดร้านค้าใหม่ (Register Store)</span>
+              </Link>
+
+              <button
+                type="button"
+                onClick={handleFastGoogleLogin}
+                disabled={isLoggingInGoogle}
+                className="seller-auth-gate__btn seller-auth-gate__btn--google"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>{isLoggingInGoogle ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด่วนด้วย Google'}</span>
+              </button>
+
+              <Link to="/" className="seller-auth-gate__btn--text">
+                ← กลับสู่หน้าหลัก Movemall
+              </Link>
+            </div>
+          </div>
+        </div>
+      </main>
     );
   }
 

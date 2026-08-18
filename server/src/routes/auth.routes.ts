@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prismaWrite, prismaRead } from '../config/database.js';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.middleware.js';
+import { LineService } from '../services/line.service.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'movemall_super_secure_jwt_secret_key_2026_at_least_32_chars!';
@@ -571,6 +572,76 @@ router.get('/me', authenticateJWT, async (req: AuthRequest, res: Response) => {
   } catch (error) {
     console.error('Get Me Error:', error);
     res.status(500).json({ error: 'Failed to fetch user profile' });
+  }
+});
+
+// ── 7. LINE Login OAuth Code Exchange & Login/Register ──
+router.post('/line', async (req: AuthRequest, res: Response) => {
+  try {
+    const { code, redirectUri } = req.body;
+    if (!code) {
+      res.status(400).json({ error: 'LINE authorization code is required' });
+      return;
+    }
+
+    const lineProfile = await LineService.verifyLoginCode(code, redirectUri || 'https://movemall.pages.dev/auth/line/callback');
+    const dummyEmail = `line_${lineProfile.lineUserId.toLowerCase()}@movemall.internal`;
+
+    let user = await prismaRead.user.findFirst({
+      where: { email: dummyEmail },
+    });
+
+    let isNewUser = false;
+    if (!user) {
+      isNewUser = true;
+      const randomPassword = Math.random().toString(36).slice(-10) + 'Move!26';
+      const passwordHash = await bcrypt.hash(randomPassword, 10);
+
+      user = await prismaWrite.user.create({
+        data: {
+          email: dummyEmail,
+          passwordHash,
+          name: lineProfile.displayName || 'LINE Member',
+          avatarUrl: lineProfile.pictureUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(lineProfile.displayName)}`,
+          role: 'BUYER',
+          coinsBalance: 150, // 100 welcome + 50 line bonus
+        },
+      });
+
+      await prismaWrite.coinLedger.create({
+        data: {
+          userId: user.id,
+          amount: 150,
+          source: 'welcome_bonus_line_member',
+        },
+      });
+    }
+
+    const token = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      message: 'เข้าสู่ระบบด้วย LINE สำเร็จ',
+      token,
+      isNewUser,
+      user: {
+        id: user.id,
+        email: user.email,
+        phone: user.phone,
+        name: user.name,
+        role: user.role,
+        avatarUrl: user.avatarUrl,
+        coinsBalance: user.coinsBalance,
+        lineConnected: true,
+        lineProfile,
+      },
+    });
+  } catch (error) {
+    console.error('LINE OAuth Login Error:', error);
+    res.status(500).json({ error: 'ไม่สามารถเข้าสู่ระบบด้วย LINE ได้ กรุณาลองใหม่อีกครั้ง' });
   }
 });
 
