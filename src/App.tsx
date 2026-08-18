@@ -1,4 +1,5 @@
-import { useState, useEffect, lazy, Suspense, type ComponentType } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
+import type { ComponentType } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
