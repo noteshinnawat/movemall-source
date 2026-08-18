@@ -5,7 +5,43 @@ import { Store as StoreIcon, ShieldCheck, Star } from 'lucide-react';
 import { stores } from '../data/stores';
 import './StoresDirectoryPage.css';
 
+import { useState, useEffect } from 'react';
+import { fetchStoresApi } from '../utils/api';
+import type { Store } from '../types';
+
 export function StoresDirectoryPage() {
+  const [storeList, setStoreList] = useState<Store[]>(stores);
+
+  useEffect(() => {
+    async function loadStores() {
+      try {
+        const res = await fetchStoresApi();
+        if (res && Array.isArray(res.stores) && res.stores.length > 0) {
+          const mapped: Store[] = res.stores.map(s => ({
+            id: s.id,
+            name: s.name,
+            logo: s.logo || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&q=80',
+            banner: s.banner || 'linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%)',
+            badge: s.isMall ? 'official' : 'preferred',
+            rating: s.rating || 4.8,
+            reviewCount: 1200,
+            responseRate: '98%',
+            responseTime: 'ภายในไม่กี่นาที',
+            joinedDate: '1 ปีที่แล้ว',
+            productCount: s._count?.products || 20,
+            followerCount: s.followers || 15000,
+            location: 'กรุงเทพมหานคร',
+            description: s.description || 'ร้านค้าทางการ Movemall ของแท้ 100%',
+          }));
+          setStoreList(mapped);
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    loadStores();
+  }, []);
+
   return (
     <main className="stores-page">
       <section className="stores-hero">
@@ -19,7 +55,7 @@ export function StoresDirectoryPage() {
 
       <div className="container">
         <div className="stores-grid">
-          {stores.map(store => (
+          {storeList.map(store => (
             <div key={store.id} className="store-card">
               <div className="store-card__top">
                 <img src={store.logo} alt={store.name} className="store-card__logo" />
@@ -27,7 +63,7 @@ export function StoresDirectoryPage() {
                   <h2 className="store-card__name">
                     {store.name}
                     {store.badge === 'official' && (
-                      <span style={{ fontSize: 10, background: 'var(--primary)', color: 'white', padding: '1px 5px' }}>
+                      <span style={{ fontSize: 10, background: 'var(--primary)', color: 'white', padding: '1px 5px', marginLeft: 6 }}>
                         Official
                       </span>
                     )}

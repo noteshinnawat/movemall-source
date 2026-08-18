@@ -161,4 +161,73 @@ export async function removeUserWishlistItem(productId: string): Promise<{ messa
   });
 }
 
+// ── Catalog, Products & Stores API Helpers ──
+export interface FetchProductsParams {
+  category?: string;
+  search?: string;
+  brand?: string;
+  badge?: string;
+  minPrice?: number | string;
+  maxPrice?: number | string;
+  sortBy?: string;
+  page?: number;
+  limit?: number;
+}
+
+export async function fetchProductsApi(params: FetchProductsParams = {}): Promise<{ products: any[]; pagination: any }> {
+  const queryParams = new URLSearchParams();
+  if (params.category && params.category !== 'all') queryParams.set('category', params.category);
+  if (params.search) queryParams.set('search', params.search);
+  if (params.brand) queryParams.set('brand', params.brand);
+  if (params.badge && params.badge !== 'all') queryParams.set('badge', params.badge);
+  if (params.minPrice) queryParams.set('minPrice', String(params.minPrice));
+  if (params.maxPrice) queryParams.set('maxPrice', String(params.maxPrice));
+  if (params.sortBy) queryParams.set('sortBy', params.sortBy);
+  if (params.page) queryParams.set('page', String(params.page));
+  if (params.limit) queryParams.set('limit', String(params.limit));
+
+  const qs = queryParams.toString();
+  return fetchApi<{ products: any[]; pagination: any }>(`/api/products${qs ? `?${qs}` : ''}`);
+}
+
+export async function fetchProductByIdApi(id: string): Promise<{ product: any }> {
+  return fetchApi<{ product: any }>(`/api/products/${id}`);
+}
+
+export async function fetchStoresApi(params: { isMall?: boolean; search?: string } = {}): Promise<{ stores: any[] }> {
+  const queryParams = new URLSearchParams();
+  if (params.isMall !== undefined) queryParams.set('isMall', String(params.isMall));
+  if (params.search) queryParams.set('search', params.search);
+  const qs = queryParams.toString();
+  return fetchApi<{ stores: any[] }>(`/api/stores${qs ? `?${qs}` : ''}`);
+}
+
+export async function fetchStoreByIdApi(id: string): Promise<{ store: any }> {
+  return fetchApi<{ store: any }>(`/api/stores/${id}`);
+}
+
+// ── Live Streams & Media API Helpers ──
+export async function fetchActiveLiveStreamsApi(): Promise<{ streams: any[] }> {
+  return fetchApi<{ streams: any[] }>('/api/live/active-streams');
+}
+
+// ── Orders & Checkout API Helpers ──
+export async function fetchMyOrdersApi(): Promise<{ orders: any[] }> {
+  return fetchApi<{ orders: any[] }>('/api/orders/my-orders');
+}
+
+export async function createOrderApi(payload: {
+  items: Array<{ productId: string; quantity: number }>;
+  paymentMethod: string;
+  shippingAddress: any;
+  coinsUsed?: number;
+  discountAmount?: number;
+}): Promise<{ message: string; order: any }> {
+  return fetchApi<{ message: string; order: any }>('/api/orders', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+
 

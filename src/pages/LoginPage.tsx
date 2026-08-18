@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { User, Store, KeyRound, Phone, ArrowRight, Sparkles, AlertCircle } from 'lucide-react';
 import { fetchApi } from '../utils/api';
 import { promptGoogleAuth } from '../utils/googleAuth';
+import { initiateLineLogin } from '../utils/lineAuth';
 import './LoginPage.css';
 
 interface LoginPageProps {
@@ -240,9 +241,14 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         return;
       }
 
-      // LINE & Facebook
+      // LINE Login v2.1 OAuth Direct Authorization
+      if (provider === 'line') {
+        initiateLineLogin();
+        return;
+      }
+
+      // Facebook & other social providers
       const providerNames = {
-        line: 'LINE User',
         facebook: 'Facebook User',
       };
 
@@ -250,7 +256,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         method: 'POST',
         body: JSON.stringify({
           provider,
-          name: providerNames[provider],
+          name: providerNames[provider as keyof typeof providerNames] || 'Social User',
           email: `${provider}_user@movemall.social`,
         }),
       });
@@ -260,7 +266,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         window.dispatchEvent(new Event('movemall_auth_change'));
       }
 
-      onLoginSuccess?.(res.user?.name || providerNames[provider], role);
+      onLoginSuccess?.(res.user?.name || providerNames.facebook, role);
       navigate(getRedirectTarget(res.user?.role));
     } catch (err: any) {
       console.warn('Social login error:', err);

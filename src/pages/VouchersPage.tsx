@@ -1,6 +1,4 @@
-// src/pages/VouchersPage.tsx — Vouchers & Promotion Center
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Ticket, Check, Sparkles, Truck, Coins, Store } from 'lucide-react';
 import './VouchersPage.css';
 
@@ -67,25 +65,63 @@ const MOCK_VOUCHERS: Voucher[] = [
   },
 ];
 
+import { fetchApi } from '../utils/api';
+
 export function VouchersPage() {
   const [filter, setFilter] = useState<'all' | 'shipping' | 'platform' | 'cashback' | 'store'>('all');
   const [claimed, setClaimed] = useState<Record<string, boolean>>({});
+  const [voucherList, setVoucherList] = useState<Voucher[]>(MOCK_VOUCHERS);
+
+  useEffect(() => {
+    async function loadVouchersFromDb() {
+      try {
+        const res = await fetchApi<{ vouchers: any[] }>('/api/vouchers');
+        if (res && Array.isArray(res.vouchers) && res.vouchers.length > 0) {
+          const mapped: Voucher[] = res.vouchers.map(v => ({
+            id: v.id || v.code,
+            type: v.discountType === 'free_shipping' ? 'shipping' : v.storeId ? 'store' : 'platform',
+            discount: v.discountType === 'free_shipping' ? 'ส่งฟรี ฿45' : v.discountType === 'percentage' ? `ลด ${v.value}%` : `ลด ฿${v.value}`,
+            minSpend: Number(v.minSpend) > 0 ? `เมื่อช้อปครบ ฿${Number(v.minSpend).toLocaleString()}` : 'ไม่มีขั้นต่ำ',
+            expiry: `หมดอายุ ${new Date(v.expiryDate).toLocaleDateString('th-TH')}`,
+            storeName: v.store?.name,
+          }));
+          setVoucherList(prev => {
+            const apiIds = new Set(mapped.map(m => m.id));
+            const remaining = prev.filter(p => !apiIds.has(p.id));
+            return [...mapped, ...remaining];
+          });
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    loadVouchersFromDb();
+  }, []);
 
   const filteredVouchers = filter === 'all'
-    ? MOCK_VOUCHERS
-    : MOCK_VOUCHERS.filter(v => v.type === filter);
+    ? voucherList
+    : voucherList.filter(v => v.type === filter);
 
   function handleClaim(id: string) {
     setClaimed(prev => ({ ...prev, [id]: true }));
+    try {
+      fetchApi('/api/user/vouchers/claim', {
+        method: 'POST',
+        body: JSON.stringify({ voucherId: id }),
+      });
+    } catch {
+      // Ignore
+    }
   }
 
   function handleClaimAll() {
     const allClaimed: Record<string, boolean> = {};
-    MOCK_VOUCHERS.forEach(v => {
+    voucherList.forEach(v => {
       allClaimed[v.id] = true;
     });
     setClaimed(allClaimed);
   }
+
 
   return (
     <main className="vouchers-page">

@@ -6,12 +6,52 @@ import type { Order } from '../data/orders';
 import { ReportStoreModal } from '../components/ReportStoreModal';
 import './OrdersPage.css';
 
+import { fetchMyOrdersApi } from '../utils/api';
+
 export function OrdersPage() {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [reportingOrder, setReportingOrder] = useState<any | null>(null);
   const [orders, setOrders] = useState<Order[]>(() => getStoredOrders());
 
   useEffect(() => {
+    async function loadBackendOrders() {
+      try {
+        const token = localStorage.getItem('movemall_jwt_token');
+        if (token) {
+          const res = await fetchMyOrdersApi();
+          if (res && Array.isArray(res.orders) && res.orders.length > 0) {
+            const mappedOrders: Order[] = res.orders.map((o: any) => ({
+              id: o.id,
+              createdAt: o.createdAt,
+              status: (o.status?.toLowerCase() === 'paid' || o.status?.toLowerCase() === 'preparing') ? 'processing' : (o.status?.toLowerCase() || 'processing'),
+              items: (o.items || []).map((item: any) => ({
+                productId: item.productId,
+                name: item.product?.name || 'สินค้า Movemall',
+                image: item.product?.images?.[0] || '',
+                price: Number(item.price || 0),
+                quantity: item.quantity || 1,
+              })),
+              subtotal: Number(o.totalAmount || 0) - Number(o.shippingCost || 0),
+              shipping: Number(o.shippingCost || 0),
+              total: Number(o.totalAmount || 0),
+              address: typeof o.shippingAddress === 'string' ? o.shippingAddress : (o.shippingAddress?.address || 'ที่อยู่จัดส่ง'),
+            }));
+
+
+            setOrders(prev => {
+              const apiIds = new Set(mappedOrders.map(mo => mo.id));
+              const nonDuplicateLocal = prev.filter(p => !apiIds.has(p.id));
+              return [...mappedOrders, ...nonDuplicateLocal];
+            });
+          }
+        }
+      } catch (err) {
+        console.info('Using local stored orders fallback');
+      }
+    }
+
+    loadBackendOrders();
+
     function handleOrdersUpdate() {
       setOrders(getStoredOrders());
     }
@@ -22,6 +62,7 @@ export function OrdersPage() {
       window.removeEventListener('storage', handleOrdersUpdate);
     };
   }, []);
+
 
   const filteredOrders = activeTab === 'all'
     ? orders

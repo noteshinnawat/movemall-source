@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { fetchApi } from '../utils/api';
 import { promptGoogleAuth } from '../utils/googleAuth';
+import { initiateLineLogin } from '../utils/lineAuth';
 import './RegisterPage.css';
 
 interface RegisterPageProps {
@@ -290,13 +291,18 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
         return;
       }
 
-      // LINE & Facebook Handler
+      // LINE Login v2.1 OAuth Direct Authorization
+      if (provider === 'line') {
+        initiateLineLogin();
+        return;
+      }
+
+      // Facebook Handler
       const providerDefaults = {
-        line: { name: 'LINE Member', email: `line_${Date.now()}@line.me` },
         facebook: { name: 'Facebook Member', email: `fb_${Date.now()}@facebook.com` },
       };
 
-      const target = providerDefaults[provider];
+      const target = providerDefaults.facebook;
 
       const res = await fetchApi<{
         token: string;

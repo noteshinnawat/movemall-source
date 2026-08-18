@@ -82,6 +82,8 @@ const FEED_TABS = [
   },
 ];
 
+import { fetchActiveLiveStreamsApi } from '../utils/api';
+
 export function HomePage({ products: propProducts, onAddToCart, isWishlisted, onToggleWishlist }: HomePageProps) {
   const { h, m, s } = useCountdown(4 * 3600 + 32 * 60 + 15);
   const sourceProducts = propProducts || staticProducts;
@@ -92,9 +94,54 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [selectedVideoProduct, setSelectedVideoProduct] = useState<Product | null>(null);
+  const [liveStreamsList, setLiveStreamsList] = useState<any[]>(mockLiveStreams);
+
+  useEffect(() => {
+    async function loadLiveChannels() {
+      try {
+        const res = await fetchActiveLiveStreamsApi();
+        if (res && Array.isArray(res.streams) && res.streams.length > 0) {
+          const mapped = res.streams.map((s: any) => ({
+            id: s.id,
+            type: 'live',
+            storeId: s.storeId || 'store-techpro',
+            channelName: s.store?.name || 'Movemall Official Live',
+            storeLogo: s.store?.logo || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=100&q=80',
+            streamerAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80',
+            streamerName: 'Live Host',
+            caption: s.title,
+            hashtags: ['#MovemallLive', '#ลดราคา', '#ของแท้'],
+            soundTitle: 'เสียงต้นฉบับ - Movemall Live 🎵',
+            category: 'electronics',
+            viewers: `${s.viewersCount || 1200} คนดู`,
+            likesCount: s.likesCount || 10000,
+            commentsCount: 250,
+            sharesCount: 95,
+            videoUrl: s.streamUrl,
+            coverImage: s.coverImage,
+            badge: '👑 OFFICIAL MALL',
+            pinnedProduct: s.pinnedProduct || {
+              id: 'el-1',
+              name: 'ดีลพิเศษในไลฟ์',
+              image: s.coverImage,
+              price: 990,
+              originalPrice: 1990,
+              discountPct: 50,
+            },
+            comments: [],
+          }));
+          setLiveStreamsList(mapped);
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    loadLiveChannels();
+  }, []);
 
   // AI Personalized Scoring Engine based on user affinity in localStorage
   const userInterest = typeof window !== 'undefined' ? localStorage.getItem('mm_user_interest') || 'electronics' : 'electronics';
+
 
   const personalizedProducts = [...sourceProducts].sort((a, b) => {
     if (feedTab === 'foryou') {
@@ -339,7 +386,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
         </div>
 
         <div className="home-live-grid">
-          {mockLiveStreams.slice(0, 4).map(ch => (
+          {liveStreamsList.slice(0, 4).map(ch => (
             <Link
               key={ch.id}
               to="/live"

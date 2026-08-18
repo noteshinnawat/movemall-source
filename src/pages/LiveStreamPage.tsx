@@ -27,7 +27,10 @@ interface FloatingChatMsg {
   badge?: string;
 }
 
+import { fetchActiveLiveStreamsApi } from '../utils/api';
+
 export function LiveStreamPage({ onAddToCart, cartCount = 0 }: LiveStreamPageProps) {
+  const [streamsList, setStreamsList] = useState<any[]>(mockLiveStreams);
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'following' | 'foryou'>('foryou');
   const [isMuted, setIsMuted] = useState(true);
@@ -43,10 +46,62 @@ export function LiveStreamPage({ onAddToCart, cartCount = 0 }: LiveStreamPagePro
   const [inputComment, setInputComment] = useState('');
   const [floatingChats, setFloatingChats] = useState<FloatingChatMsg[]>([]);
 
+  useEffect(() => {
+    async function loadLiveStreams() {
+      try {
+        const res = await fetchActiveLiveStreamsApi();
+        if (res && Array.isArray(res.streams) && res.streams.length > 0) {
+          const mapped = res.streams.map((s: any, idx: number) => ({
+            id: s.id,
+            channelName: s.store?.name || 'Movemall Official Live',
+            avatar: s.store?.logo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
+            isMall: s.store?.isMall ?? true,
+            followers: `${Math.floor(20 + idx * 15)}K`,
+            videoUrl: s.streamUrl,
+            coverImage: s.coverImage,
+            viewers: `${s.viewersCount || 1500} คนดู`,
+            likesCount: s.likesCount || 10000,
+            caption: s.title,
+            tags: ['#MovemallLive', '#ลดราคา', '#ของแท้'],
+            voucherCode: 'LIVE50',
+            voucherDiscount: 'ลด 50%',
+            pinnedProduct: s.pinnedProduct || {
+              id: 'el-1',
+              name: 'ดีลพิเศษในไลฟ์',
+              price: 990,
+              originalPrice: 1990,
+              image: s.coverImage,
+              stock: 35,
+              rating: 4.9,
+              soldCount: 850,
+            },
+            basketProducts: [
+              s.pinnedProduct || {
+                id: 'el-1',
+                name: 'ดีลพิเศษในไลฟ์',
+                price: 990,
+                originalPrice: 1990,
+                image: s.coverImage,
+                stock: 35,
+                rating: 4.9,
+                soldCount: 850,
+              }
+            ],
+          }));
+          setStreamsList(mapped);
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    loadLiveStreams();
+  }, []);
+
   const touchStartY = useRef(0);
   const isScrolling = useRef(false);
 
-  const currentStream = mockLiveStreams[activeIndex];
+  const currentStream = streamsList[activeIndex] || mockLiveStreams[0];
+
 
   // Touch swipe handling
   function handleTouchStart(e: React.TouchEvent) {
@@ -497,9 +552,9 @@ export function LiveStreamPage({ onAddToCart, cartCount = 0 }: LiveStreamPagePro
               </div>
 
               <div className="tiktok-comments-list">
-                {currentStream.comments.map((c, i) => (
+                {(currentStream.comments || []).map((c: any, i: number) => (
                   <div key={i} className="tiktok-comment-row">
-                    <img src={currentStream.streamerAvatar} alt={c.user} className="tiktok-comment-avatar" />
+                    <img src={currentStream.streamerAvatar || currentStream.avatar} alt={c.user} className="tiktok-comment-avatar" />
                     <div className="tiktok-comment-bubble">
                       <div style={{ fontWeight: 800, fontSize: 11, color: '#93C5FD', marginBottom: 2 }}>{c.user}</div>
                       <div>{c.text}</div>

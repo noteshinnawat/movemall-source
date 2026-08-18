@@ -64,6 +64,7 @@ const TermsPage        = lazyRetry(() => import('./pages/TermsPage').then(m => (
 const AccountPage      = lazyRetry(() => import('./pages/AccountPage').then(m => ({ default: m.AccountPage })));
 const AdminPortalPage  = lazyRetry(() => import('./pages/AdminPortalPage').then(m => ({ default: m.AdminPortalPage })));
 const SellerRegisterPage = lazyRetry(() => import('./pages/SellerRegisterPage').then(m => ({ default: m.SellerRegisterPage })));
+const LineCallbackPage   = lazyRetry(() => import('./pages/LineCallbackPage').then(m => ({ default: m.LineCallbackPage })));
 import { products as initialProducts } from './data/products';
 import { useCart } from './hooks/useCart';
 import { useWishlist } from './hooks/useWishlist';
@@ -288,6 +289,9 @@ function AppLayout({
               />
             }
           />
+
+          {/* LINE OAuth Callback */}
+          <Route path="/auth/line/callback" element={<LineCallbackPage />} />
 
           {/* Customer Account & Verification Portal */}
           <Route path="/account" element={<AccountPage />} />
@@ -647,16 +651,16 @@ function App() {
     async function loadProductsLive() {
       try {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-        const res = await fetch(`${apiUrl}/api/products?limit=100`);
+        const res = await fetch(`${apiUrl}/api/products?limit=200`);
         if (res.ok) {
           const data = await res.json();
           if (data && Array.isArray(data.products) && data.products.length > 0) {
             setProductList(prev => {
               const liveIds = new Set(data.products.map((p: Product) => p.id));
-              const remaining = prev.filter(p => !liveIds.has(p.id));
-              return [...data.products, ...remaining];
+              const customUserCreated = prev.filter(p => !liveIds.has(p.id) && (p.id.startsWith('p-custom-') || p.storeId?.startsWith('store-custom-')));
+              return [...data.products, ...customUserCreated];
             });
-            console.log(`[Movemall DB] ✅ Synced ${data.products.length} products live from Supabase Database!`);
+            console.log(`[Movemall DB] ✅ Synced ${data.products.length} products live from Supabase PostgreSQL Database!`);
           }
         }
       } catch {

@@ -512,6 +512,170 @@ router.post('/google', async (req: AuthRequest, res: Response) => {
   }
 });
 
+// ── 5.1 LINE Login OAuth 2.1 Verification ──
+router.post('/line', async (req: AuthRequest, res: Response) => {
+  try {
+    const { code, redirectUri } = req.body;
+
+    if (!code || !redirectUri) {
+      res.status(400).json({ error: 'Code และ redirectUri จำเป็นสำหรับการยืนยันตัวตน LINE' });
+      return;
+    }
+
+    const channelId = process.env.LINE_LOGIN_CHANNEL_ID || '1656088534';
+    const channelSecret = process.env.LINE_LOGIN_CHANNEL_SECRET || '07bea9d436b9bc40e469e742abb321d8';
+
+    // 1. Exchange Code for Access Token & ID Token with LINE Platform
+    const tokenParams = new URLSearchParams();
+    tokenParams.append('grant_type', 'authorization_code');
+    tokenParams.append('code', code);
+    tokenParams.append('redirect_uri', redirectUri);
+    tokenParams.append('client_id', channelId);
+    tokenParams.append('client_secret', channelSecret);
+
+    const tokenRes = await fetch('https://api.line.me/oauth2/v2.1/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: tokenParams.toString(),
+    });
+
+    const tokenData = await tokenRes.json() as {
+      access_token?: string;
+      id_token?: string;
+      error?: string;
+      error_description?: string;
+    };
+
+    if (!tokenData.access_token) {
+      console.warn('LINE Token Error:', tokenData);
+      res.status(401).json({ error: tokenData.error_description || 'ไม่สามารถแลกเปลี่ยน Access Token กับ LINE ได้' });
+      return;
+    }
+
+    // 2. Fetch User Profile from LINE
+    let lineDisplayName = 'สมาชิก LINE';
+    let linePictureUrl: string | undefined;
+    let lineEmail: string | undefined;
+    let lineUserId = '';
+
+    try {
+      const profileRes = await fetch('https://api.line.me/v2/profile', {
+        headers: { Authorization: `Bearer ${tokenData.access_token}` },
+      });
+      if (profileRes.ok) {
+        const profileData = await profileRes.json() as {
+          userId: string;
+          displayName: string;
+          pictureUrl?: string;
+        };
+        lineUserId = profileData.userId;
+        lineDisplayName = profileData.displayName || lineDisplayName;
+        linePictureUrl = profileData.pictureUrl;
+      }
+    } catch (profileErr) {
+      console.warn('LINE Profile Fetch Warning:', profileErr);
+    }
+
+    // 3. Verify ID Token to extract Email if scope included openid & email
+    if (tokenData.id_token) {
+      try {
+        const verifyParams = new URLSearchParams();
+        verifyParams.append('id_token', tokenData.id_token);
+        verifyParams.append('client_id', channelId);
+
+        const verifyRes = await fetch('https://api.line.me/oauth2/v2.1/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: verifyParams.toString(),
+        });
+        if (verifyRes.ok) {
+          const verifyData = await verifyRes.json() as { email?: string; name?: string; picture?: string };
+          if (verifyData.email) lineEmail = verifyData.email;
+          if (verifyData.name) lineDisplayName = verifyData.name;
+          if (verifyData.picture) linePictureUrl = verifyData.picture;
+        }
+      } catch (verifyErr) {
+        console.warn('LINE ID Token Verify Warning:', verifyErr);
+      }
+    }
+
+    const emailToUse = lineEmail || `line_${lineUserId || Date.now()}@line.me`;
+    const isSuper = isSuperAdminEmail(emailToUse);
+
+    // 4. Find or Create User in PostgreSQL DB
+    let user = await prismaRead.user.findFirst({
+      where: {
+        OR: [
+          { email: emailToUse },
+          ...(lineEmail ? [{ email: lineEmail }] : [])
+        ]
+      }
+    });
+
+    let isNewUser = false;
+    if (!user) {
+      isNewUser = true;
+      const randomPass = Math.random().toString(36).slice(-8) + 'Mm1!';
+      const passwordHash = await bcrypt.hash(randomPass, 10);
+
+      user = await prismaWrite.user.create({
+        data: {
+          email: emailToUse,
+          passwordHash,
+          name: isSuper ? 'Note Shinnawat (Super Admin)' : lineDisplayName,
+          avatarUrl: linePictureUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(lineDisplayName)}`,
+          role: isSuper ? 'SUPER_ADMIN' : 'BUYER',
+          coinsBalance: isSuper ? 99999 : 100,
+        },
+      });
+
+      await prismaWrite.coinLedger.create({
+        data: {
+          userId: user.id,
+          amount: isSuper ? 99999 : 100,
+          source: 'welcome_bonus_line_member',
+        },
+      });
+    } else {
+      // Update existing user with latest LINE avatar & name if needed
+      const updateData: any = {};
+      if (isSuper && user.role !== 'SUPER_ADMIN') updateData.role = 'SUPER_ADMIN';
+      if (linePictureUrl && !user.avatarUrl) updateData.avatarUrl = linePictureUrl;
+
+      if (Object.keys(updateData).length > 0) {
+        user = await prismaWrite.user.update({
+          where: { id: user.id },
+          data: updateData,
+        });
+      }
+    }
+
+    const token = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      message: 'เข้าสู่ระบบผ่าน LINE สำเร็จ',
+      token,
+      isNewUser,
+      user: {
+        id: user.id,
+        email: user.email,
+        phone: user.phone,
+        name: user.name,
+        role: user.role,
+        avatarUrl: user.avatarUrl,
+        coinsBalance: user.coinsBalance,
+      },
+    });
+  } catch (error) {
+    console.error('LINE Auth Error:', error);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาดในการเชื่อมต่อกับ LINE' });
+  }
+});
+
 // ── 6. Social Login Generic (LINE / Facebook / อื่นๆ) ──
 router.post('/social-login', async (req: AuthRequest, res: Response) => {
   try {
