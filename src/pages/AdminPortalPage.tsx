@@ -2315,53 +2315,105 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
         </div>
       )}
 
-      {/* 📦 Catalog Admin */}
+      {/* 📦 Catalog & Brand Mall Management */}
       {activeTab === 'catalog' && (
         <div className="admin-card">
           <div className="admin-card-header">
-            <h2 className="admin-card-title">📦 อนุมัติตราป้ายแดง 👑 Mall การันตีของแท้ 100%</h2>
+            <div>
+              <h2 className="admin-card-title">📦 จัดการแคตตาล็อกสินค้า & อนุมัติตราป้ายแดง 👑 Official Mall</h2>
+              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                รับรองตราสินค้าทางการ การันตีของแท้ 100% คืนเงิน 2 เท่า และคืนสินค้าฟรี 30 วัน
+              </span>
+            </div>
           </div>
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>รูปสินค้า</th>
-                <th>ชื่อสินค้า</th>
-                <th>ราคา</th>
-                <th>หมวดหมู่</th>
-                <th>สถานะป้าย Mall</th>
-                <th>จัดการสิทธิ์ Mall</th>
-              </tr>
-            </thead>
-            <tbody>
-              {localProducts.slice(0, 8).map(p => (
-                <tr key={p.id}>
-                  <td>
-                    <img src={p.images[0]} alt={p.name} style={{ width: 44, height: 44, borderRadius: 6, objectFit: 'cover' }} />
-                  </td>
-                  <td style={{ fontWeight: 600 }}>{p.name}</td>
-                  <td>฿{p.price.toLocaleString()}</td>
-                  <td>{p.category}</td>
-                  <td>
-                    {p.badge === 'mall' || p.isMall ? (
-                      <span style={{ background: '#fef2f2', color: '#dc2626', fontWeight: 700, padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem' }}>
-                        👑 Official Mall
-                      </span>
-                    ) : (
-                      <span style={{ color: '#6b7280', fontSize: '0.75rem' }}>ร้านค้าทั่วไป</span>
-                    )}
-                  </td>
-                  <td>
-                    <button
-                      className={`admin-btn-sm ${p.badge === 'mall' || p.isMall ? 'admin-btn-outline' : 'admin-btn-primary'}`}
-                      onClick={() => handleToggleMallBadge(p.id)}
-                    >
-                      {p.badge === 'mall' || p.isMall ? 'ปลดป้าย Mall' : '+ มอบป้าย 👑 Mall'}
-                    </button>
-                  </td>
+
+          {/* 4 Summary Stats */}
+          <div className="admin-stats-grid">
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #dc2626' }}>
+              <span className="admin-stat-label">👑 สินค้า Official Mall (ป้ายแดง)</span>
+              <div className="admin-stat-val" style={{ color: '#dc2626' }}>
+                {localProducts.filter(p => p.badge === 'mall' || p.isMall).length} รายการ
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>ของแท้ 100% การันตี 3 ต่อ</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #2563eb' }}>
+              <span className="admin-stat-label">🛍️ สินค้า Marketplace ทั่วไป</span>
+              <div className="admin-stat-val" style={{ color: '#2563eb' }}>
+                {localProducts.filter(p => !(p.badge === 'mall' || p.isMall)).length} รายการ
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>ผู้ขายอิสระและพาร์ทเนอร์</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #10b981' }}>
+              <span className="admin-stat-label">🛡️ AI Verified (อย./มอก.)</span>
+              <div className="admin-stat-val" style={{ color: '#059669' }}>100%</div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>สแกนมาตรฐานผ่านเกณฑ์</span>
+            </div>
+
+            <div className="admin-stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+              <span className="admin-stat-label">📦 สต็อกรวมทั้งระบบ</span>
+              <div className="admin-stat-val" style={{ color: '#d97706' }}>12,850 ชิ้น</div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>พร้อมจัดส่งทันที</span>
+            </div>
+          </div>
+
+          {/* Table Container */}
+          <div className="admin-table-container">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>รูปสินค้า</th>
+                  <th>ชื่อสินค้า</th>
+                  <th>ราคา</th>
+                  <th>หมวดหมู่</th>
+                  <th>สถานะป้าย Mall</th>
+                  <th>จัดการสิทธิ์ Mall</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {localProducts.slice(0, 12).map(p => (
+                  <tr key={p.id}>
+                    <td>
+                      <img src={p.images[0]} alt={p.name} style={{ width: 44, height: 44, borderRadius: 6, objectFit: 'cover', border: '1px solid #e2e8f0' }} />
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>{p.name}</div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>ID: {p.id}</div>
+                    </td>
+                    <td>
+                      <strong style={{ color: '#059669' }}>฿{p.price.toLocaleString()}</strong>
+                    </td>
+                    <td>
+                      <span style={{ fontSize: '0.78rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: 4, color: '#475569', fontWeight: 600 }}>
+                        {p.category}
+                      </span>
+                    </td>
+                    <td>
+                      {p.badge === 'mall' || p.isMall ? (
+                        <span style={{ background: '#fef2f2', color: '#dc2626', fontWeight: 700, padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem', border: '1px solid #fecaca' }}>
+                          👑 Official Mall
+                        </span>
+                      ) : (
+                        <span style={{ color: '#64748b', fontSize: '0.75rem', background: '#f8fafc', padding: '2px 8px', borderRadius: 4, border: '1px solid #e2e8f0' }}>
+                          ร้านค้าทั่วไป
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className={`admin-btn-sm ${p.badge === 'mall' || p.isMall ? 'admin-btn-outline' : 'admin-btn-primary'}`}
+                        onClick={() => handleToggleMallBadge(p.id)}
+                      >
+                        {p.badge === 'mall' || p.isMall ? 'ปลดป้าย Mall' : '+ มอบป้าย 👑 Mall'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
