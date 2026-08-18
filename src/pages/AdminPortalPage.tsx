@@ -472,6 +472,13 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
   const [userModalTrustScore, setUserModalTrustScore] = useState<number>(100);
   const [userModalReason, setUserModalReason] = useState<string>('');
 
+  const [selectedStoreModal, setSelectedStoreModal] = useState<ModeratedStore | null>(null);
+  const [storeModalPoints, setStoreModalPoints] = useState<number>(3);
+  const [storeModalStatus, setStoreModalStatus] = useState<StoreStatusType>('RESTRICTED');
+  const [storeModalLiveRestricted, setStoreModalLiveRestricted] = useState<boolean>(false);
+  const [storeModalSearchRestricted, setStoreModalSearchRestricted] = useState<boolean>(false);
+  const [storeModalReason, setStoreModalReason] = useState<string>('');
+
   // 🛡️ Authentication & Role Guard States
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<any>(() => {
@@ -652,10 +659,10 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
         setMetrics(metricsRes.value);
       }
       if (usersRes.status === 'fulfilled' && usersRes.value?.users?.length) {
-        setUsers(usersRes.value.users);
+        setModeratedUsers(usersRes.value.users);
       }
       if (storesRes.status === 'fulfilled' && storesRes.value?.stores?.length) {
-        setStores(storesRes.value.stores);
+        setModeratedStores(storesRes.value.stores);
       }
       if (payoutsRes.status === 'fulfilled' && payoutsRes.value?.payouts?.length) {
         setPayouts(payoutsRes.value.payouts);
@@ -673,7 +680,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
         setVouchers(vouchersRes.value.vouchers);
       }
       if (reportsRes.status === 'fulfilled' && reportsRes.value?.reports?.length) {
-        setReports(reportsRes.value.reports);
+        setViolationReports(reportsRes.value.reports);
       }
       setLastSyncTime(new Date().toLocaleTimeString('th-TH'));
       if (showToast) {
