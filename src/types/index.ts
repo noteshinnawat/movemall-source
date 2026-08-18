@@ -5,6 +5,10 @@ export interface Store {
   banner?: string;
   badge?: 'official' | 'preferred' | 'verified';
   isMall?: boolean;
+  isVatRegistered?: boolean;
+  taxId?: string;
+  taxCompanyName?: string;
+  taxBranchCode?: string;
   rating: number;
   reviewCount: number;
   responseRate: string;
@@ -59,6 +63,7 @@ export interface Product {
   tags: string[];
   badge?: 'new' | 'sale' | 'hot' | 'limited' | 'mall';
   isMall?: boolean;
+  isVatRegistered?: boolean;
   compliance?: ProductCompliance;
 }
 
@@ -214,5 +219,49 @@ export interface VideoCompressionResult {
   resolution: { width: number; height: number };
   videoUrl: string;
   thumbnailUrl: string;
+}
+
+export type TaxDocType = 'TAX_INVOICE' | 'RECEIPT' | 'CREDIT_NOTE';
+
+export interface TaxDocument {
+  id: string;
+  docNumber: string;
+  docType: TaxDocType;
+  orderId: string;
+  storeId?: string;
+  buyerName: string;
+  buyerTaxId?: string;
+  buyerBranch?: string;
+  buyerAddress?: string;
+  buyerEmail?: string;
+  totalAmount: number;
+  netAmount: number;
+  vatAmount: number;
+  emailSent?: boolean;
+  status: 'ISSUED' | 'CANCELLED';
+  createdAt: string;
+  pdfUrl?: string;
+  xmlUrl?: string;
+  items?: Array<{ name: string; qty: number; price: number }>;
+}
+
+export interface StoreTaxProfile {
+  storeId: string;
+  isVatRegistered: boolean;
+  taxId: string;
+  taxCompanyName: string;
+  taxBranchCode: string;
+  taxAddress: string;
+  eTaxAutoEmail: boolean;
+  eTaxProvider?: string;
+}
+
+export interface TaxInvoiceRequest {
+  buyerType: 'individual' | 'corporate';
+  taxId: string;
+  nameOrCompany: string;
+  branchCode: string;
+  address: string;
+  email: string;
 }
 

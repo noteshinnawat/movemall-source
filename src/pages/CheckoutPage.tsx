@@ -40,6 +40,15 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
   const [useCoins, setUseCoins] = useState(false);
   const userCoins = 120; // 120 Movemall Coins
 
+  // Tax Invoice States
+  const [requestInvoice, setRequestInvoice] = useState(false);
+  const [invoiceType, setInvoiceType] = useState<'individual' | 'corporate'>('individual');
+  const [invoiceName, setInvoiceName] = useState('');
+  const [invoiceTaxId, setInvoiceTaxId] = useState('');
+  const [invoiceBranch, setInvoiceBranch] = useState('00000');
+  const [invoiceEmail, setInvoiceEmail] = useState('');
+  const [invoiceAddress, setInvoiceAddress] = useState('');
+
   const [form, setForm] = useState({
     firstName: '', lastName: '', phone: '',
     address: '', district: '', province: '', zip: '',
@@ -71,6 +80,15 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
         },
         coinsUsed: useCoins ? Math.min(userCoins, subtotal) : 0,
         discountAmount: coinDiscount,
+        invoiceRequested: requestInvoice,
+        taxInvoiceData: requestInvoice ? {
+          buyerType: invoiceType,
+          nameOrCompany: invoiceName || `${form.firstName} ${form.lastName}`.trim(),
+          taxId: invoiceTaxId,
+          branchCode: invoiceType === 'corporate' ? invoiceBranch : 'สำนักงานใหญ่',
+          email: invoiceEmail,
+          address: invoiceAddress || `${form.address} ${form.district} ${form.province} ${form.zip}`.trim(),
+        } : null,
       };
 
       const res = await fetchApi<{ order: { id: string } }>('/api/orders', {
@@ -293,6 +311,132 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                 ))}
               </div>
             </div>
+
+            {/* Tax & Invoice Request Section */}
+            <div className="checkout__form-section" style={{ marginTop: '1.5rem', border: '1.5px solid #BFDBFE', background: '#F8FAFC' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '1.25rem' }}>🧾</span>
+                  <div>
+                    <h2 className="checkout__section-title" style={{ margin: 0, fontSize: '1.05rem', color: '#1E3A8A' }}>
+                      ใบกำกับภาษี / ใบเสร็จรับเงิน (e-Tax Ready)
+                    </h2>
+                    <p style={{ fontSize: '0.8rem', color: '#64748B', margin: '2px 0 0 0' }}>
+                      ร้านค้าที่จด VAT จะออกใบกำกับภาษีเต็มรูปส่งตรงทางอีเมลของคุณทันที
+                    </p>
+                  </div>
+                </div>
+
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: '#EFF6FF', padding: '6px 12px', border: '1px solid #93C5FD' }}>
+                  <input
+                    type="checkbox"
+                    checked={requestInvoice}
+                    onChange={e => setRequestInvoice(e.target.checked)}
+                    style={{ width: '1.1rem', height: '1.1rem', accentColor: '#2563EB', cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1D4ED8' }}>ขอใบกำกับภาษีเต็มรูป</span>
+                </label>
+              </div>
+
+              {requestInvoice ? (
+                <div style={{ background: '#FFFFFF', padding: '1rem', border: '1px solid #CBD5E1', marginTop: '0.5rem' }}>
+                  {/* Buyer Type Switch */}
+                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, color: invoiceType === 'individual' ? '#2563EB' : '#475569' }}>
+                      <input
+                        type="radio"
+                        name="invoiceType"
+                        value="individual"
+                        checked={invoiceType === 'individual'}
+                        onChange={() => setInvoiceType('individual')}
+                        style={{ accentColor: '#2563EB' }}
+                      />
+                      บุคคลธรรมดา
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, color: invoiceType === 'corporate' ? '#2563EB' : '#475569' }}>
+                      <input
+                        type="radio"
+                        name="invoiceType"
+                        value="corporate"
+                        checked={invoiceType === 'corporate'}
+                        onChange={() => setInvoiceType('corporate')}
+                        style={{ accentColor: '#2563EB' }}
+                      />
+                      นิติบุคคล / บริษัท
+                    </label>
+                  </div>
+
+                  <div className="checkout__form-grid">
+                    <div className="checkout__form-group checkout__form-group--full">
+                      <label className="checkout__label">
+                        {invoiceType === 'individual' ? 'ชื่อ-นามสกุล (ตามบัตรประชาชน) *' : 'ชื่อบริษัท / องค์กร (ตาม ภ.พ.20) *'}
+                      </label>
+                      <input
+                        className="checkout__input"
+                        placeholder={invoiceType === 'individual' ? 'เช่น นายสมชาย ใจดี' : 'เช่น บริษัท มูฟมอลล์ เทรดดิ้ง จำกัด'}
+                        value={invoiceName}
+                        onChange={e => setInvoiceName(e.target.value)}
+                        required={requestInvoice}
+                      />
+                    </div>
+
+                    <div className="checkout__form-group">
+                      <label className="checkout__label">
+                        {invoiceType === 'individual' ? 'เลขประจำตัวประชาชน 13 หลัก *' : 'เลขประจำตัวผู้เสียภาษี 13 หลัก *'}
+                      </label>
+                      <input
+                        className="checkout__input"
+                        maxLength={13}
+                        placeholder="13 หลัก"
+                        value={invoiceTaxId}
+                        onChange={e => setInvoiceTaxId(e.target.value)}
+                        required={requestInvoice}
+                      />
+                    </div>
+
+                    {invoiceType === 'corporate' && (
+                      <div className="checkout__form-group">
+                        <label className="checkout__label">รหัสสาขา *</label>
+                        <input
+                          className="checkout__input"
+                          maxLength={5}
+                          placeholder="00000 (สำนักงานใหญ่)"
+                          value={invoiceBranch}
+                          onChange={e => setInvoiceBranch(e.target.value)}
+                        />
+                      </div>
+                    )}
+
+                    <div className="checkout__form-group checkout__form-group--full">
+                      <label className="checkout__label">อีเมลสำหรับรับ e-Tax Invoice (PDF & XML) *</label>
+                      <input
+                        type="email"
+                        className="checkout__input"
+                        placeholder="tax-invoicing@company.com"
+                        value={invoiceEmail}
+                        onChange={e => setInvoiceEmail(e.target.value)}
+                        required={requestInvoice}
+                      />
+                    </div>
+
+                    <div className="checkout__form-group checkout__form-group--full">
+                      <label className="checkout__label">ที่อยู่ตามทะเบียนภาษี *</label>
+                      <input
+                        className="checkout__input"
+                        placeholder="อาคาร เลขที่ ถนน แขวง เขต จังหวัด รหัสไปรษณีย์"
+                        value={invoiceAddress || (form.address ? `${form.address} ${form.district} ${form.province} ${form.zip}`.trim() : '')}
+                        onChange={e => setInvoiceAddress(e.target.value)}
+                        required={requestInvoice}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ fontSize: '0.8rem', color: '#64748B', background: '#F1F5F9', padding: '6px 10px' }}>
+                  ℹ️ หากไม่ขอใบกำกับภาษีเต็มรูป ระบบจะออกเป็นใบเสร็จรับเงิน/ใบส่งสินค้าตามปกติให้ในกล่องพัสดุ
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Summary */}
@@ -359,7 +503,12 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
             )}
             <div className="checkout__summary-divider" />
             <div className="checkout__summary-row checkout__summary-row--total">
-              <span>ยอดชำระสุทธิ</span>
+              <div>
+                <div>ยอดชำระสุทธิ</div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 400, color: '#64748B' }}>
+                  (รวมภาษีมูลค่าเพิ่ม 7% แล้ว: ฿{(grandTotal * (7 / 107)).toFixed(2)})
+                </div>
+              </div>
               <span className="checkout__total-price">฿{grandTotal.toLocaleString()}</span>
             </div>
 

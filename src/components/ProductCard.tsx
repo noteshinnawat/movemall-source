@@ -271,6 +271,11 @@ export function ProductCard({
 
         {/* Service & Trust Tags */}
         <div className="product-card__perks-row">
+          {(isMall || product.isVatRegistered || store?.isVatRegistered) && (
+            <span className="product-card__perk" style={{ background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE' }}>
+              🧾 ใบกำกับภาษี
+            </span>
+          )}
           {hasVideoReview && (
             <span className="product-card__perk product-card__perk--video-tag">
               🎥 มีคลิปป้ายยา

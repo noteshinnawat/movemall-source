@@ -27,10 +27,13 @@ export function SellerRegisterPage() {
   const [description, setDescription] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
 
-  // KYC State
+  // KYC & Tax State
   const [sellerType, setSellerType] = useState<'individual' | 'corporate'>('individual');
   const [idCardNo, setIdCardNo] = useState('');
   const [taxId, setTaxId] = useState('');
+  const [isVatRegistered, setIsVatRegistered] = useState(false);
+  const [taxCompanyName, setTaxCompanyName] = useState('');
+  const [taxBranchCode, setTaxBranchCode] = useState('00000');
 
   // Warehouse State
   const [warehouseAddress, setWarehouseAddress] = useState('');
@@ -56,7 +59,10 @@ export function SellerRegisterPage() {
           logo: logoUrl,
           sellerType,
           idCardNo,
-          taxId,
+          taxId: taxId || idCardNo,
+          isVatRegistered,
+          taxCompanyName: taxCompanyName || storeName,
+          taxBranchCode,
           bankName,
           bankAccountNo,
           accountName,
@@ -221,6 +227,62 @@ export function SellerRegisterPage() {
                     />
                   </div>
                 )}
+
+                {/* VAT Status Selection Section */}
+                <div style={{ marginTop: '1.25rem', padding: '1rem', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span>🧾 สถานะการจดทะเบียนภาษีมูลค่าเพิ่ม (VAT 7%)</span>
+                        <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: isVatRegistered ? '#DCFCE7' : '#F1F5F9', color: isVatRegistered ? '#15803D' : '#64748B', fontWeight: 600 }}>
+                          {isVatRegistered ? 'จด ภ.พ.20 แล้ว' : 'ยังไม่ได้จด VAT'}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: '#64748B', marginTop: '0.25rem' }}>
+                        {isVatRegistered
+                          ? 'ร้านค้าจะได้รับระบบ e-Tax Invoice อัตโนมัติ และแสดงป้าย "ออกใบกำกับภาษีได้" บนสินค้า'
+                          : 'ร้านค้าออกได้เฉพาะใบเสร็จรับเงิน (Receipt) ทั่วไป โดยไม่มีการคำนวณ VAT 7%'}
+                      </div>
+                    </div>
+                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '0.5rem' }}>
+                      <input
+                        type="checkbox"
+                        checked={isVatRegistered}
+                        onChange={e => setIsVatRegistered(e.target.checked)}
+                        style={{ width: '1.25rem', height: '1.25rem', accentColor: '#2563EB', cursor: 'pointer' }}
+                      />
+                      <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155' }}>ร้านนี้จด VAT</span>
+                    </label>
+                  </div>
+
+                  {isVatRegistered && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px dashed #CBD5E1' }}>
+                      <div>
+                        <label className="seller-label" style={{ fontSize: '0.8rem' }}>ชื่อจดทะเบียนภาษี / บริษัท *</label>
+                        <input
+                          type="text"
+                          className="seller-input"
+                          style={{ fontSize: '0.85rem', padding: '0.5rem 0.75rem' }}
+                          placeholder="เช่น บจก. เทคโปร ดีเวลลอปเมนท์"
+                          value={taxCompanyName}
+                          onChange={e => setTaxCompanyName(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="seller-label" style={{ fontSize: '0.8rem' }}>รหัสสาขา (Branch Code) *</label>
+                        <input
+                          type="text"
+                          maxLength={5}
+                          className="seller-input"
+                          style={{ fontSize: '0.85rem', padding: '0.5rem 0.75rem' }}
+                          placeholder="00000 (สำนักงานใหญ่)"
+                          value={taxBranchCode}
+                          onChange={e => setTaxBranchCode(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

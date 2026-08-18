@@ -25,6 +25,7 @@ enum Role {
 
 model User {
   id            String         @id @default(uuid())
+  googleId      String?        @unique
   email         String?        @unique
   phone         String?        @unique
   passwordHash  String
@@ -57,11 +58,17 @@ model Store {
   logo        String?
   banner      String?
   description String?
-  isMall      Boolean   @default(false)
-  isVerified  Boolean   @default(false)
-  rating      Float     @default(5.0)
-  followers   Int       @default(0)
-  createdAt   DateTime  @default(now())
+  isMall          Boolean   @default(false)
+  isVerified      Boolean   @default(false)
+  isVatRegistered Boolean   @default(false)
+  taxId           String?
+  taxCompanyName  String?
+  taxBranchCode   String?   @default("00000")
+  taxAddress      String?
+  eTaxAutoEmail   Boolean   @default(true)
+  rating          Float     @default(5.0)
+  followers       Int       @default(0)
+  createdAt       DateTime  @default(now())
 
   owner       User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   products    Product[]
@@ -69,6 +76,7 @@ model Store {
   liveStreams LiveSession[]
 
   @@index([isMall])
+  @@index([isVatRegistered])
   @@index([rating(sort: Desc)])
   @@index([followers(sort: Desc)])
 }
@@ -132,6 +140,13 @@ model Order {
   paymentMethod  PaymentMethod
   status         OrderStatus    @default(PENDING)
   shippingAddress Json
+  invoiceRequested Boolean      @default(false)
+  taxInvoiceData   Json?
+  documentNumber   String?
+  documentType     String?        // 'TAX_INVOICE' | 'RECEIPT'
+  documentUrl      String?
+  vatAmount        Decimal?       @db.Decimal(10, 2)
+  netAmount        Decimal?       @db.Decimal(10, 2)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
@@ -441,3 +456,29 @@ model AdCampaign {
   @@index([storeId, status])
   @@index([type, status])
 }
+
+// ── 13. เอกสารภาษี & e-Tax Invoice Hub ──
+model TaxDocument {
+  id             String    @id @default(uuid())
+  storeId        String
+  orderId        String    @unique
+  docNumber      String    @unique
+  docType        String    // 'TAX_INVOICE' | 'RECEIPT' | 'CREDIT_NOTE'
+  buyerName      String
+  buyerTaxId     String?
+  buyerBranch    String?
+  buyerAddress   String?
+  buyerEmail     String?
+  totalAmount    Decimal   @db.Decimal(10, 2)
+  netAmount      Decimal   @db.Decimal(10, 2)
+  vatAmount      Decimal   @db.Decimal(10, 2)
+  pdfUrl         String?
+  xmlUrl         String?
+  emailSent      Boolean   @default(false)
+  status         String    @default("ISSUED") // 'ISSUED', 'CANCELLED'
+  createdAt      DateTime  @default(now())
+
+  @@index([storeId, createdAt(sort: Desc)])
+  @@index([docNumber])
+}
+

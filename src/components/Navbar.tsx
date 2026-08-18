@@ -111,8 +111,12 @@ export function Navbar({
               <MessageSquare size={12} /> แชทกับร้านค้า
             </Link>
             <span className="navbar__top-divider" />
+            <Link to="/register" className="navbar__top-link" style={{ color: '#D97706', fontWeight: 700 }}>
+              🎁 สมัครสมาชิก (รับ 100.-)
+            </Link>
+            <span className="navbar__top-divider" />
             <Link to="/login" className="navbar__top-link">
-              <User size={12} /> บัญชีของฉัน
+              <User size={12} /> เข้าสู่ระบบ
             </Link>
           </div>
         </div>

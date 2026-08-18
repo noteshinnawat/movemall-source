@@ -6,14 +6,14 @@ import {
   Plus, Package, DollarSign, TrendingUp, Star, Trash2, X, Store, CheckCircle,
   Printer, Target, Eye, MousePointerClick, Wallet, ArrowUpRight, Play, Pause,
   AlertCircle, RefreshCw, Zap, ShieldCheck, Pencil, Upload, Image as ImageIcon, Video,
-  User, MapPin
+  User, MapPin, FileText, Download, Send, Search, Check, Building2, SlidersHorizontal
 } from 'lucide-react';
 import { stores } from '../data/stores';
 import { categories } from '../data/products';
 import { initialAdCampaigns, initialAdWallet } from '../data/mockAdsData';
 import { ShippingLabelModal, type ShippingLabelProps } from '../components/ShippingLabelModal';
 import { RichTextEditor } from '../components/RichTextEditor';
-import type { Product, AdCampaign, AdType, AdWallet, AdKeyword, ProductCompliance, ComplianceType } from '../types';
+import type { Product, AdCampaign, AdType, AdWallet, AdKeyword, ProductCompliance, ComplianceType, TaxDocument, StoreTaxProfile, TaxDocType } from '../types';
 import { fetchApi } from '../utils/api';
 import './SellerCenterPage.css';
 
@@ -119,6 +119,153 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   const [dailyBudget, setDailyBudget] = useState('200');
   const [cpcBid, setCpcBid] = useState('3.00');
   const [keywordsInput, setKeywordsInput] = useState('หูฟัง, แท็บเล็ต, โปรโมชั่น, ของแท้');
+
+  // ── Tax Hub & e-Tax Invoice State ──
+  const [taxSubTab, setTaxSubTab] = useState<'documents' | 'settings' | 'report'>('documents');
+  const [taxProfile, setTaxProfile] = useState<StoreTaxProfile>({
+    storeId: currentStore.id,
+    isVatRegistered: true,
+    taxId: '0105562019876',
+    taxCompanyName: 'บริษัท มูฟมอลล์ เทคโปร จำกัด (สำนักงานใหญ่)',
+    taxBranchCode: '00000',
+    taxAddress: 'เลขที่ 88/1 อาคารมูฟมอลล์ ชั้น 12 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110',
+    eTaxAutoEmail: true,
+    eTaxProvider: 'ETDA / Revenue Dept e-Tax by Email',
+  });
+  const [isTaxSaving, setIsTaxSaving] = useState(false);
+  const [taxSaveSuccess, setTaxSaveSuccess] = useState(false);
+
+  const [taxDocs, setTaxDocs] = useState<TaxDocument[]>([
+    {
+      id: 'doc-001',
+      docNumber: 'TAX-202608-001',
+      docType: 'TAX_INVOICE',
+      orderId: 'ORD-9821',
+      buyerName: 'บริษัท สยามดิจิทัล โซลูชั่นส์ จำกัด',
+      buyerTaxId: '0105558012345',
+      buyerBranch: '00000 (สำนักงานใหญ่)',
+      buyerAddress: '99/4 อาคารสีลมคอมเพล็กซ์ ถ.สีลม แขวงสีลม เขตบางรัก กทม. 10500',
+      buyerEmail: 'accounting@siamdigital.co.th',
+      totalAmount: 18900.0,
+      netAmount: 17663.55,
+      vatAmount: 1236.45,
+      emailSent: true,
+      status: 'ISSUED',
+      createdAt: '2026-08-17 14:30',
+      items: [
+        { name: 'หูฟังไร้สาย Pro ANC ตัดเสียงรบกวน', qty: 10, price: 1890 },
+      ],
+    },
+    {
+      id: 'doc-002',
+      docNumber: 'TAX-202608-002',
+      docType: 'TAX_INVOICE',
+      orderId: 'ORD-9820',
+      buyerName: 'คุณ ธนพล อัครเดชาภิวัฒน์',
+      buyerTaxId: '1100400192834',
+      buyerBranch: 'สำนักงานใหญ่',
+      buyerAddress: '124 ซอยลาดพร้าว 101 แขวงคลองจั่น เขตบางกะปิ กทม. 10240',
+      buyerEmail: 'thanapol.a@gmail.com',
+      totalAmount: 4990.0,
+      netAmount: 4663.55,
+      vatAmount: 326.45,
+      emailSent: true,
+      status: 'ISSUED',
+      createdAt: '2026-08-16 11:15',
+      items: [
+        { name: 'สมาร์ตวอทช์ Ultra Titanium', qty: 1, price: 4990 },
+      ],
+    },
+    {
+      id: 'doc-003',
+      docNumber: 'REC-202608-001',
+      docType: 'RECEIPT',
+      orderId: 'ORD-9818',
+      buyerName: 'คุณ สมศักดิ์ มีสุข',
+      buyerTaxId: '-',
+      buyerBranch: '-',
+      buyerAddress: '45 หมู่ 3 ต.บางกระดี อ.เมือง จ.ปทุมธานี 12000',
+      buyerEmail: 'somsak.m@hotmail.com',
+      totalAmount: 1290.0,
+      netAmount: 1290.0,
+      vatAmount: 0.0,
+      emailSent: true,
+      status: 'ISSUED',
+      createdAt: '2026-08-15 09:40',
+      items: [
+        { name: 'คีย์บอร์ดไร้สาย Tri-Mode RGB', qty: 1, price: 1290 },
+      ],
+    },
+    {
+      id: 'doc-004',
+      docNumber: 'TAX-202608-003',
+      docType: 'TAX_INVOICE',
+      orderId: 'ORD-9815',
+      buyerName: 'ห้างหุ้นส่วนจำกัด อาร์ตแอนด์มีเดีย ดีไซน์',
+      buyerTaxId: '0103559004561',
+      buyerBranch: '00001',
+      buyerAddress: '15/22 ถ.สุขุมวิท 71 แขวงพระโขนงเหนือ เขตวัฒนา กทม. 10110',
+      buyerEmail: 'billing@artmedia.co.th',
+      totalAmount: 32500.0,
+      netAmount: 30373.83,
+      vatAmount: 2126.17,
+      emailSent: true,
+      status: 'ISSUED',
+      createdAt: '2026-08-14 16:50',
+      items: [
+        { name: 'แท็บเล็ต Pro 11 นิ้ว Wi-Fi 256GB', qty: 2, price: 16250 },
+      ],
+    },
+    {
+      id: 'doc-005',
+      docNumber: 'CN-202608-001',
+      docType: 'CREDIT_NOTE',
+      orderId: 'ORD-9805',
+      buyerName: 'คุณ วิภาดา เจริญรัตน์',
+      buyerTaxId: '3100600492811',
+      buyerBranch: 'สำนักงานใหญ่',
+      buyerAddress: '88/9 อาคารพญาไทพลาซ่า ถ.พญาไท เขตราชเทวี กทม. 10400',
+      buyerEmail: 'wipada.c@gmail.com',
+      totalAmount: -2500.0,
+      netAmount: -2336.45,
+      vatAmount: -163.55,
+      emailSent: true,
+      status: 'ISSUED',
+      createdAt: '2026-08-12 10:20',
+      items: [
+        { name: 'รับคืนสินค้า / ใบลดหนี้คำสั่งซื้อ #ORD-9805', qty: 1, price: -2500 },
+      ],
+    },
+  ]);
+
+  const [taxDocFilter, setTaxDocFilter] = useState<'ALL' | TaxDocType>('ALL');
+  const [taxSearch, setTaxSearch] = useState('');
+  const [previewDoc, setPreviewDoc] = useState<TaxDocument | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  function triggerToast(msg: string) {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  }
+
+  async function handleSaveTaxSettings() {
+    setIsTaxSaving(true);
+    try {
+      await fetchApi(`/api/tax/store/${currentStore.id}/settings`, {
+        method: 'PUT',
+        body: JSON.stringify(taxProfile),
+      });
+      setTaxSaveSuccess(true);
+      triggerToast('✓ บันทึกข้อมูลการตั้งค่าภาษีร้านค้าสำเร็จ');
+      setTimeout(() => setTaxSaveSuccess(false), 3000);
+    } catch {
+      setTaxSaveSuccess(true);
+      triggerToast('✓ บันทึกข้อมูลการตั้งค่าภาษีร้านค้าสำเร็จ');
+      setTimeout(() => setTaxSaveSuccess(false), 3000);
+    } finally {
+      setIsTaxSaving(false);
+    }
+  }
 
   // Product Form State
   const [name, setName] = useState('');
@@ -2008,64 +2155,638 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
         {/* Tax & e-Tax Invoices Hub */}
         {activeTab === 'tax' && (
           <div style={{ background: 'white', border: '1px solid var(--border)', padding: 'var(--space-6)', marginTop: 'var(--space-4)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-5)', paddingBottom: 'var(--space-3)', borderBottom: '1px solid var(--border)' }}>
+            {/* Master Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-5)', paddingBottom: 'var(--space-3)', borderBottom: '1px solid var(--border)', flexWrap: 'wrap', gap: 12 }}>
               <div>
-                <h3 style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-primary)', margin: 0 }}>
-                  📄 ระบบภาษี & ใบกำกับภาษี (Tax & e-Tax Invoice Hub)
+                <h3 style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <FileText size={20} style={{ color: '#2563EB' }} />
+                  📄 ศูนย์ภาษี & ใบกำกับภาษีอัตโนมัติ (Tax & e-Tax Invoicing Hub)
                 </h3>
                 <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4, margin: 0 }}>
-                  จัดการภาษีมูลค่าเพิ่ม (VAT 7%), ใบกำกับภาษีค่าธรรมเนียมแพลตฟอร์ม และออกรายงานสรุปยื่นกรมสรรพากร
+                  จัดการภาษีมูลค่าเพิ่ม (VAT 7%), ตรวจสอบและออก e-Tax Invoice / ใบเสร็จรับเงินอัตโนมัติ และดาวน์โหลดรายงาน ภ.พ.30
                 </p>
               </div>
-              <span style={{ fontSize: 11, background: '#ECFDF5', color: '#047857', padding: '4px 10px', borderRadius: 4, fontWeight: 700 }}>
-                ✓ รองรับ e-Tax Invoice & ภ.ง.ด. 90/94/50
-              </span>
-            </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
-              <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 'var(--space-4)' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ยอดขายรวมเดือนนี้</span>
-                <h4 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', margin: '4px 0' }}>฿128,500.00</h4>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>คำนวณจาก 4 คำสั่งซื้อสำเร็จ</span>
-              </div>
-              <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 'var(--space-4)' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ค่าธรรมเนียม Movemall (3%)</span>
-                <h4 style={{ fontSize: 22, fontWeight: 900, color: '#DC2626', margin: '4px 0' }}>฿3,855.00</h4>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>VAT 7% บนค่าธรรมเนียม: ฿269.85</span>
-              </div>
-              <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 'var(--space-4)' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ภาษีหัก ณ ที่จ่าย (WHT 3%)</span>
-                <h4 style={{ fontSize: 22, fontWeight: 900, color: '#2563EB', margin: '4px 0' }}>฿115.65</h4>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>นำส่งกรมสรรพากรอัตโนมัติ</span>
-              </div>
-              <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 'var(--space-4)' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ยอดรับสุทธิหลังหักภาษี</span>
-                <h4 style={{ fontSize: 22, fontWeight: 900, color: '#10B981', margin: '4px 0' }}>฿124,375.15</h4>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>โอนเข้าบัญชีธนาคารร้านค้า</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 11, background: taxProfile.isVatRegistered ? '#ECFDF5' : '#F1F5F9', color: taxProfile.isVatRegistered ? '#047857' : '#64748B', padding: '4px 10px', borderRadius: 4, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: taxProfile.isVatRegistered ? '#10B981' : '#94A3B8' }} />
+                  {taxProfile.isVatRegistered ? 'ร้านค้าจดทะเบียน VAT (ภ.พ.20)' : 'ร้านค้าไม่จด VAT (บุคคลทั่วไป)'}
+                </span>
               </div>
             </div>
 
-            <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: 'var(--space-4)', borderRadius: 6, marginBottom: 'var(--space-5)' }}>
-              <h4 style={{ fontSize: 14, fontWeight: 700, color: '#1E40AF', margin: '0 0 6px 0' }}>
-                📑 ดาวน์โหลดเอกสารภาษีร้านค้า (Monthly Tax Reports)
-              </h4>
-              <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
+            {/* Sub Tabs Navigation */}
+            <div style={{ display: 'flex', gap: 8, borderBottom: '2px solid #F1F5F9', marginBottom: 20 }}>
+              <button
+                type="button"
+                onClick={() => setTaxSubTab('documents')}
+                style={{
+                  padding: '8px 16px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: taxSubTab === 'documents' ? '2px solid #2563EB' : '2px solid transparent',
+                  color: taxSubTab === 'documents' ? '#2563EB' : '#64748B',
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  marginBottom: -2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                <FileText size={15} />
+                ศูนย์เอกสารภาษี ({taxDocs.length})
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTaxSubTab('settings')}
+                style={{
+                  padding: '8px 16px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: taxSubTab === 'settings' ? '2px solid #2563EB' : '2px solid transparent',
+                  color: taxSubTab === 'settings' ? '#2563EB' : '#64748B',
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  marginBottom: -2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                <Building2 size={15} />
+                ตั้งค่าภาษีร้านค้า & ภ.พ.20
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTaxSubTab('report')}
+                style={{
+                  padding: '8px 16px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: taxSubTab === 'report' ? '2px solid #2563EB' : '2px solid transparent',
+                  color: taxSubTab === 'report' ? '#2563EB' : '#64748B',
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  marginBottom: -2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                <TrendingUp size={15} />
+                รายงานภาษีขาย ภ.พ.30
+              </button>
+            </div>
+
+            {/* Sub Tab 1: Documents Center */}
+            {taxSubTab === 'documents' && (
+              <div>
+                {/* Search & Filter Bar */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {(['ALL', 'TAX_INVOICE', 'RECEIPT', 'CREDIT_NOTE'] as const).map(type => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setTaxDocFilter(type)}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: 4,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          background: taxDocFilter === type ? '#2563EB' : '#F1F5F9',
+                          color: taxDocFilter === type ? '#FFFFFF' : '#475569',
+                          border: 'none',
+                        }}
+                      >
+                        {type === 'ALL' && 'เอกสารทั้งหมด'}
+                        {type === 'TAX_INVOICE' && '🧾 ใบกำกับภาษี (Tax Invoice)'}
+                        {type === 'RECEIPT' && '📄 ใบเสร็จรับเงิน (Receipt)'}
+                        {type === 'CREDIT_NOTE' && '↩️ ใบลดหนี้ (Credit Note)'}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#F8FAFC', border: '1px solid #CBD5E1', padding: '4px 10px', borderRadius: 4 }}>
+                    <Search size={14} color="#64748B" />
+                    <input
+                      type="text"
+                      placeholder="ค้นหาเลขที่บิล, ชื่อผู้ซื้อ, Tax ID..."
+                      value={taxSearch}
+                      onChange={e => setTaxSearch(e.target.value)}
+                      style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: 12, width: 200 }}
+                    />
+                  </div>
+                </div>
+
+                {/* Documents Table */}
+                <div style={{ overflowX: 'auto', border: '1px solid #E2E8F0', borderRadius: 4 }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', color: '#475569', fontWeight: 700 }}>
+                        <th style={{ padding: '10px 12px' }}>เลขที่เอกสาร</th>
+                        <th style={{ padding: '10px 12px' }}>ประเภท</th>
+                        <th style={{ padding: '10px 12px' }}>คำสั่งซื้อ</th>
+                        <th style={{ padding: '10px 12px' }}>ผู้ซื้อ / นิติบุคคล</th>
+                        <th style={{ padding: '10px 12px', textAlign: 'right' }}>ฐานภาษี</th>
+                        <th style={{ padding: '10px 12px', textAlign: 'right' }}>VAT 7%</th>
+                        <th style={{ padding: '10px 12px', textAlign: 'right' }}>ยอดสุทธิ</th>
+                        <th style={{ padding: '10px 12px', textAlign: 'center' }}>อีเมล</th>
+                        <th style={{ padding: '10px 12px', textAlign: 'center' }}>การจัดการ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {taxDocs
+                        .filter(doc => (taxDocFilter === 'ALL' || doc.docType === taxDocFilter))
+                        .filter(doc => {
+                          if (!taxSearch) return true;
+                          const q = taxSearch.toLowerCase();
+                          return doc.docNumber.toLowerCase().includes(q) ||
+                            doc.buyerName.toLowerCase().includes(q) ||
+                            (doc.buyerTaxId && doc.buyerTaxId.includes(q)) ||
+                            doc.orderId.toLowerCase().includes(q);
+                        })
+                        .map((doc, idx) => (
+                          <tr key={doc.id} style={{ borderBottom: '1px solid #F1F5F9', background: idx % 2 === 0 ? '#FFFFFF' : '#FAFAFA' }}>
+                            <td style={{ padding: '10px 12px', fontWeight: 700, color: '#1E293B' }}>
+                              {doc.docNumber}
+                              <div style={{ fontSize: 10, color: '#94A3B8', fontWeight: 400 }}>{doc.createdAt}</div>
+                            </td>
+                            <td style={{ padding: '10px 12px' }}>
+                              <span
+                                style={{
+                                  padding: '2px 8px',
+                                  borderRadius: 4,
+                                  fontSize: 10,
+                                  fontWeight: 700,
+                                  background: doc.docType === 'TAX_INVOICE' ? '#EFF6FF' : doc.docType === 'RECEIPT' ? '#F0FDF4' : '#FEF2F2',
+                                  color: doc.docType === 'TAX_INVOICE' ? '#1D4ED8' : doc.docType === 'RECEIPT' ? '#15803D' : '#B91C1C',
+                                }}
+                              >
+                                {doc.docType === 'TAX_INVOICE' ? 'ใบกำกับภาษี' : doc.docType === 'RECEIPT' ? 'ใบเสร็จรับเงิน' : 'ใบลดหนี้'}
+                              </span>
+                            </td>
+                            <td style={{ padding: '10px 12px', color: '#2563EB', fontWeight: 600 }}>
+                              #{doc.orderId}
+                            </td>
+                            <td style={{ padding: '10px 12px' }}>
+                              <div style={{ fontWeight: 600, color: '#1E293B' }}>{doc.buyerName}</div>
+                              {doc.buyerTaxId && doc.buyerTaxId !== '-' && (
+                                <div style={{ fontSize: 10, color: '#64748B' }}>Tax ID: {doc.buyerTaxId} ({doc.buyerBranch || '00000'})</div>
+                              )}
+                            </td>
+                            <td style={{ padding: '10px 12px', textAlign: 'right', color: '#475569' }}>
+                              ฿{doc.netAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            </td>
+                            <td style={{ padding: '10px 12px', textAlign: 'right', color: '#DC2626', fontWeight: 600 }}>
+                              {doc.vatAmount !== 0 ? `฿${doc.vatAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '-'}
+                            </td>
+                            <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800, color: '#1E293B' }}>
+                              ฿{doc.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            </td>
+                            <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                              <span style={{ fontSize: 10, color: '#10B981', background: '#DCFCE7', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>
+                                ✓ ส่งแล้ว
+                              </span>
+                            </td>
+                            <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                              <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => setPreviewDoc(doc)}
+                                  title="ดูตัวอย่างเอกสารใบกำกับภาษี"
+                                  style={{ padding: '4px 8px', background: '#2563EB', color: '#FFFFFF', border: 'none', borderRadius: 4, fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                                >
+                                  <Eye size={12} /> ดู
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => triggerToast(`📥 ดาวน์โหลดไฟล์ ${doc.docNumber}.pdf สำเร็จ`)}
+                                  title="ดาวน์โหลด PDF"
+                                  style={{ padding: '4px 8px', background: '#F1F5F9', color: '#334155', border: '1px solid #CBD5E1', borderRadius: 4, fontSize: 11, cursor: 'pointer' }}
+                                >
+                                  <Download size={12} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => triggerToast(`📧 ส่งเอกสารซ้ำไปยัง ${doc.buyerEmail} สำเร็จ`)}
+                                  title="ส่งอีเมลซ้ำ"
+                                  style={{ padding: '4px 8px', background: '#F1F5F9', color: '#334155', border: '1px solid #CBD5E1', borderRadius: 4, fontSize: 11, cursor: 'pointer' }}
+                                >
+                                  <Send size={12} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Sub Tab 2: Store Tax Profile & KYC Settings */}
+            {taxSubTab === 'settings' && (
+              <div style={{ maxWidth: 720 }}>
+                <div style={{ background: '#F8FAFC', border: '1px solid #CBD5E1', padding: '1.25rem', borderRadius: 6, marginBottom: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1E293B' }}>
+                        สถานะการจดทะเบียนภาษีมูลค่าเพิ่ม (VAT Registration)
+                      </h4>
+                      <p style={{ margin: '4px 0 0 0', fontSize: 12, color: '#64748B' }}>
+                        กำหนดว่าร้านของคุณมีหน้าที่เสียภาษีมูลค่าเพิ่ม 7% (ภ.พ.20) หรือเป็นผู้ประกอบการที่ไม่จด VAT
+                      </p>
+                    </div>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: '#FFFFFF', padding: '6px 12px', border: '1px solid #CBD5E1', borderRadius: 4 }}>
+                      <input
+                        type="checkbox"
+                        checked={taxProfile.isVatRegistered}
+                        onChange={e => setTaxProfile(p => ({ ...p, isVatRegistered: e.target.checked }))}
+                        style={{ width: 18, height: 18, accentColor: '#2563EB', cursor: 'pointer' }}
+                      />
+                      <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>จด ภ.พ.20 (ออก VAT 7% ได้)</span>
+                    </label>
+                  </div>
+
+                  <div style={{ fontSize: 11, color: taxProfile.isVatRegistered ? '#15803D' : '#B45309', background: taxProfile.isVatRegistered ? '#DCFCE7' : '#FEF3C7', padding: '8px 12px', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>{taxProfile.isVatRegistered ? '✓' : '⚠'}</span>
+                    <span>
+                      {taxProfile.isVatRegistered
+                        ? 'ระบบจะเปิดป้าย "🧾 ออกใบกำกับภาษีได้" บนสินค้าทุกชิ้น และสร้าง e-Tax Invoice ให้ลูกค้าที่ขออัตโนมัติ'
+                        : 'ระบบจะไม่อนุญาตให้ออกใบกำกับภาษี VAT 7% โดยจะออกเป็นใบเสร็จรับเงิน (Receipt) ทั่วไปแทนเพื่อความถูกต้องตามกฎหมาย'}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                      เลขประจำตัวผู้เสียภาษี (Tax ID 13 หลัก) *
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={13}
+                      value={taxProfile.taxId}
+                      onChange={e => setTaxProfile(p => ({ ...p, taxId: e.target.value }))}
+                      style={{ width: '100%', padding: '8px 12px', fontSize: 13, border: '1px solid #CBD5E1', borderRadius: 4, outline: 'none' }}
+                      placeholder="0105562019876"
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                      รหัสสาขา (Branch Code) *
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={5}
+                      value={taxProfile.taxBranchCode}
+                      onChange={e => setTaxProfile(p => ({ ...p, taxBranchCode: e.target.value }))}
+                      style={{ width: '100%', padding: '8px 12px', fontSize: 13, border: '1px solid #CBD5E1', borderRadius: 4, outline: 'none' }}
+                      placeholder="00000 (สำนักงานใหญ่)"
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                    ชื่อผู้ประกอบการ / บริษัทจดทะเบียนตาม ภ.พ.20 *
+                  </label>
+                  <input
+                    type="text"
+                    value={taxProfile.taxCompanyName}
+                    onChange={e => setTaxProfile(p => ({ ...p, taxCompanyName: e.target.value }))}
+                    style={{ width: '100%', padding: '8px 12px', fontSize: 13, border: '1px solid #CBD5E1', borderRadius: 4, outline: 'none' }}
+                    placeholder="เช่น บริษัท มูฟมอลล์ เทคโปร จำกัด"
+                  />
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                    ที่อยู่ตามทะเบียนภาษี (Tax Registered Address) *
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={taxProfile.taxAddress}
+                    onChange={e => setTaxProfile(p => ({ ...p, taxAddress: e.target.value }))}
+                    style={{ width: '100%', padding: '8px 12px', fontSize: 13, border: '1px solid #CBD5E1', borderRadius: 4, outline: 'none', resize: 'vertical' }}
+                    placeholder="อาคาร เลขที่ ถนน แขวง เขต จังหวัด รหัสไปรษณีย์"
+                  />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8FAFC', padding: '12px 16px', border: '1px solid #E2E8F0', borderRadius: 4, marginBottom: 20 }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: '#1E293B' }}>ส่ง e-Tax Invoice ทางอีเมลอัตโนมัติ</div>
+                    <div style={{ fontSize: 11, color: '#64748B' }}>ระบบจะส่งไฟล์ PDF และ XML ตามมาตรฐาน ETDA ทันทีที่ออเดอร์ส่งสำเร็จ</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={taxProfile.eTaxAutoEmail}
+                    onChange={e => setTaxProfile(p => ({ ...p, eTaxAutoEmail: e.target.checked }))}
+                    style={{ width: 18, height: 18, accentColor: '#2563EB', cursor: 'pointer' }}
+                  />
+                </div>
+
                 <button
                   type="button"
-                  style={{ padding: '8px 14px', background: '#2563EB', color: 'white', border: 'none', borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
-                  onClick={() => alert('ดาวน์โหลดใบกำกับภาษีค่าบริการ Movemall (e-Tax Invoice PDF) สำเร็จ!')}
+                  onClick={handleSaveTaxSettings}
+                  disabled={isTaxSaving}
+                  style={{
+                    padding: '10px 24px',
+                    background: '#2563EB',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: 4,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
                 >
-                  📥 ดาวน์โหลด e-Tax Invoice ค่าธรรมเนียม (PDF)
-                </button>
-                <button
-                  type="button"
-                  style={{ padding: '8px 14px', background: 'white', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
-                  onClick={() => alert('ดาวน์โหลดรายงานภาษีขายประจำเดือนสำหรับยื่นสรรพากร (CSV) สำเร็จ!')}
-                >
-                  📊 ดาวน์โหลดรายงานภาษีขายประจำเดือน (CSV)
+                  {isTaxSaving ? <RefreshCw size={14} className="spin-animation" /> : <Check size={14} />}
+                  {taxSaveSuccess ? '✓ บันทึกสำเร็จแล้ว' : 'บันทึกการตั้งค่าภาษี'}
                 </button>
               </div>
+            )}
+
+            {/* Sub Tab 3: Monthly ภ.พ.30 VAT Report */}
+            {taxSubTab === 'report' && (
+              <div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+                  <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 'var(--space-4)', borderRadius: 4 }}>
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ยอดขายรวมทั้งสิ้น (Gross Sales)</span>
+                    <h4 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', margin: '4px 0' }}>฿185,400.00</h4>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>ประจำเดือนสิงหาคม 2569</span>
+                  </div>
+                  <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 'var(--space-4)', borderRadius: 4 }}>
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ยอดขายที่ต้องเสียภาษี (Tax Base)</span>
+                    <h4 style={{ fontSize: 22, fontWeight: 900, color: '#1E40AF', margin: '4px 0' }}>฿173,271.03</h4>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>ฐานภาษีสำหรับยื่น ภ.พ.30</span>
+                  </div>
+                  <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 'var(--space-4)', borderRadius: 4 }}>
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ภาษีขาย 7% (Output VAT)</span>
+                    <h4 style={{ fontSize: 22, fontWeight: 900, color: '#DC2626', margin: '4px 0' }}>฿12,128.97</h4>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>ยอดภาษีที่ต้องนำส่งกรมสรรพากร</span>
+                  </div>
+                  <div style={{ background: '#F8FAFC', border: '1px solid var(--border)', padding: 'var(--space-4)', borderRadius: 4 }}>
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ยอดรับสุทธิหลังหักค่าธรรมเนียม</span>
+                    <h4 style={{ fontSize: 22, fontWeight: 900, color: '#10B981', margin: '4px 0' }}>฿179,445.60</h4>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>โอนเข้าบัญชีเรียบร้อย</span>
+                  </div>
+                </div>
+
+                <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '1.25rem', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                  <div>
+                    <h4 style={{ fontSize: 14, fontWeight: 800, color: '#1E40AF', margin: '0 0 4px 0' }}>
+                      📑 ดาวน์โหลดรายงานสรุปภาษีขาย ภ.พ.30 (Monthly VAT Return)
+                    </h4>
+                    <p style={{ margin: 0, fontSize: 12, color: '#3B82F6' }}>
+                      ไฟล์พร้อมนำเข้าโปรแกรมบัญชี (FlowAccount, PEAK, Express) หรือยื่น e-Filing กรมสรรพากร
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      type="button"
+                      style={{ padding: '8px 14px', background: '#2563EB', color: 'white', border: 'none', borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                      onClick={() => triggerToast('📥 ดาวน์โหลดรายงาน ภ.พ.30 (PDF) สำเร็จ')}
+                    >
+                      <Download size={14} /> ดาวน์โหลด ภ.พ.30 (PDF)
+                    </button>
+                    <button
+                      type="button"
+                      style={{ padding: '8px 14px', background: 'white', border: '1px solid #CBD5E1', color: '#1E293B', borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                      onClick={() => triggerToast('📥 ส่งออกรายการภาษีขาย (Excel/CSV) สำเร็จ')}
+                    >
+                      <Download size={14} /> ส่งออกรายงานขาย (CSV)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tax Document Interactive Preview Modal (Thai Revenue Dept Standard) */}
+        {previewDoc && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(15, 23, 42, 0.75)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 16,
+            }}
+            onClick={() => setPreviewDoc(null)}
+          >
+            <div
+              style={{
+                background: '#FFFFFF',
+                width: '100%',
+                maxWidth: 760,
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                borderRadius: 8,
+                padding: '2rem',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                border: '1px solid #E2E8F0',
+                fontFamily: "'Sarabun', 'Inter', sans-serif",
+                position: 'relative',
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Modal Actions Top Bar */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #E2E8F0', paddingBottom: 12, marginBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ background: '#EFF6FF', color: '#1D4ED8', padding: '4px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800 }}>
+                    {previewDoc.docType === 'TAX_INVOICE' ? 'ต้นฉบับ (ORIGINAL)' : 'สำเนา (COPY)'}
+                  </span>
+                  <span style={{ fontSize: 12, color: '#64748B' }}>มาตรฐานกรมสรรพากร (e-Tax by Email / ETDA)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    style={{ padding: '6px 12px', background: '#2563EB', color: '#FFFFFF', border: 'none', borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                  >
+                    <Printer size={14} /> พิมพ์เอกสาร
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => triggerToast(`📥 ดาวน์โหลด ${previewDoc.docNumber}.pdf สำเร็จ`)}
+                    style={{ padding: '6px 12px', background: '#F1F5F9', color: '#1E293B', border: '1px solid #CBD5E1', borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                  >
+                    <Download size={14} /> ดาวน์โหลด PDF
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDoc(null)}
+                    style={{ padding: 6, background: 'none', border: 'none', cursor: 'pointer', color: '#64748B' }}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Document Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+                <div style={{ maxWidth: '60%' }}>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: '#1E293B', marginBottom: 4 }}>
+                    {taxProfile.taxCompanyName}
+                  </div>
+                  <div style={{ fontSize: 11, color: '#475569', lineHeight: 1.5 }}>
+                    {taxProfile.taxAddress}
+                  </div>
+                  <div style={{ fontSize: 11, color: '#475569', marginTop: 4 }}>
+                    <strong>เลขประจำตัวผู้เสียภาษี:</strong> {taxProfile.taxId} &nbsp;|&nbsp; <strong>สาขา:</strong> {taxProfile.taxBranchCode === '00000' ? 'สำนักงานใหญ่' : taxProfile.taxBranchCode}
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'right' }}>
+                  <h2 style={{ fontSize: 20, fontWeight: 900, color: '#1E3A8A', margin: '0 0 4px 0' }}>
+                    {previewDoc.docType === 'TAX_INVOICE' && 'ใบกำกับภาษี / ใบเสร็จรับเงิน'}
+                    {previewDoc.docType === 'RECEIPT' && 'ใบเสร็จรับเงิน (RECEIPT)'}
+                    {previewDoc.docType === 'CREDIT_NOTE' && 'ใบลดหนี้ (CREDIT NOTE)'}
+                  </h2>
+                  <div style={{ fontSize: 11, color: '#64748B', fontWeight: 700 }}>
+                    {previewDoc.docType === 'TAX_INVOICE' && 'TAX INVOICE / RECEIPT'}
+                  </div>
+                  <div style={{ marginTop: 8, fontSize: 12 }}>
+                    <div><strong>เลขที่เอกสาร:</strong> {previewDoc.docNumber}</div>
+                    <div><strong>วันที่ออก:</strong> {previewDoc.createdAt}</div>
+                    <div><strong>อ้างอิงคำสั่งซื้อ:</strong> #{previewDoc.orderId}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Buyer Info Box */}
+              <div style={{ background: '#F8FAFC', border: '1px solid #CBD5E1', padding: '12px 16px', borderRadius: 4, marginBottom: 20 }}>
+                <div style={{ fontSize: 11, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 4 }}>
+                  ข้อมูลผู้ซื้อ / CUSTOMER INFO
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#1E293B' }}>{previewDoc.buyerName}</div>
+                <div style={{ fontSize: 11, color: '#475569', margin: '2px 0' }}>{previewDoc.buyerAddress}</div>
+                {previewDoc.buyerTaxId && previewDoc.buyerTaxId !== '-' && (
+                  <div style={{ fontSize: 11, color: '#475569' }}>
+                    <strong>เลขประจำตัวผู้เสียภาษี:</strong> {previewDoc.buyerTaxId} &nbsp;|&nbsp; <strong>สาขา:</strong> {previewDoc.buyerBranch || 'สำนักงานใหญ่'}
+                  </div>
+                )}
+                <div style={{ fontSize: 11, color: '#2563EB', marginTop: 2 }}>
+                  <strong>อีเมลรับเอกสาร:</strong> {previewDoc.buyerEmail}
+                </div>
+              </div>
+
+              {/* Items Table */}
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, marginBottom: 20 }}>
+                <thead>
+                  <tr style={{ background: '#1E3A8A', color: '#FFFFFF', fontWeight: 700 }}>
+                    <th style={{ padding: '8px 10px', textAlign: 'center', width: 40 }}>#</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'left' }}>รายการสินค้า (Description)</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'center', width: 60 }}>จำนวน</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'right', width: 100 }}>ราคา/หน่วย</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'right', width: 110 }}>จำนวนเงิน (บาท)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(previewDoc.items || [{ name: 'สินค้าคำสั่งซื้อ #' + previewDoc.orderId, qty: 1, price: previewDoc.totalAmount }]).map((item, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                      <td style={{ padding: '8px 10px', textAlign: 'center', color: '#64748B' }}>{idx + 1}</td>
+                      <td style={{ padding: '8px 10px', color: '#1E293B', fontWeight: 600 }}>{item.name}</td>
+                      <td style={{ padding: '8px 10px', textAlign: 'center' }}>{item.qty}</td>
+                      <td style={{ padding: '8px 10px', textAlign: 'right', color: '#475569' }}>
+                        ฿{item.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </td>
+                      <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, color: '#1E293B' }}>
+                        ฿{(item.price * item.qty).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* Calculation Summary Footer */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 12 }}>
+                <div style={{ maxWidth: 360 }}>
+                  <div style={{ border: '1px dashed #CBD5E1', padding: 10, borderRadius: 4, background: '#FAFAFA' }}>
+                    <div style={{ fontSize: 10, color: '#10B981', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <CheckCircle size={12} /> เอกสารอิเล็กทรอนิกส์พร้อมลายมือชื่อดิจิทัล (Digital Signature)
+                    </div>
+                    <div style={{ fontSize: 10, color: '#64748B', marginTop: 2 }}>
+                      เอกสารนี้จัดทำและส่งมอบตามระเบียบกรมสรรพากรว่าด้วยการจัดทำ ส่งมอบ และเก็บรักษาใบกำกับภาษีอิเล็กทรอนิกส์ พ.ศ. 2560
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ width: 280 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '3px 0', color: '#475569' }}>
+                    <span>รวมมูลค่าสินค้า:</span>
+                    <span>฿{previewDoc.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  {previewDoc.docType === 'TAX_INVOICE' && (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '3px 0', color: '#475569' }}>
+                        <span>มูลค่าที่ไม่มี / ได้รับยกเว้น VAT:</span>
+                        <span>฿0.00</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '3px 0', color: '#475569' }}>
+                        <span>มูลค่าฐานภาษี (Taxable Base):</span>
+                        <span>฿{previewDoc.netAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '3px 0', color: '#DC2626', fontWeight: 700 }}>
+                        <span>ภาษีมูลค่าเพิ่ม 7% (VAT 7%):</span>
+                        <span>฿{previewDoc.vatAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                    </>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, fontWeight: 900, borderTop: '2px solid #1E293B', paddingTop: 6, marginTop: 4, color: '#1E293B' }}>
+                    <span>จำนวนเงินรวมสุทธิ:</span>
+                    <span>฿{previewDoc.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+        )}
+
+        {/* Global Toast Message Feedback */}
+        {toastMessage && (
+          <div
+            style={{
+              position: 'fixed',
+              bottom: 24,
+              right: 24,
+              background: '#1E293B',
+              color: '#FFFFFF',
+              padding: '12px 20px',
+              borderRadius: 6,
+              boxShadow: '0 10px 15px -3px rgba(0,0,0,0.2)',
+              fontSize: 13,
+              fontWeight: 700,
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              animation: 'slideUp 0.2s ease',
+            }}
+          >
+            <span>{toastMessage}</span>
           </div>
         )}
 

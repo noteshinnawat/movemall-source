@@ -75,6 +75,11 @@ export function ShopPage({ products: propProducts, onAddToCart, isWishlisted, on
       result = result.filter(p => p.badge && filters.badges.includes(p.badge));
     }
 
+    // Tax / e-Tax Ready filter
+    if (filters.onlyTaxReady) {
+      result = result.filter(p => p.isMall || p.isVatRegistered || (p.badge === 'mall'));
+    }
+
     // Sort
     switch (sort) {
       case 'price-asc':

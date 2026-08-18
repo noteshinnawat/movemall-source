@@ -28,6 +28,7 @@ const FlashSalePage    = lazy(() => import('./pages/FlashSalePage').then(m => ({
 const StoresDirectoryPage = lazy(() => import('./pages/StoresDirectoryPage').then(m => ({ default: m.StoresDirectoryPage })));
 const ChatPage         = lazy(() => import('./pages/ChatPage').then(m => ({ default: m.ChatPage })));
 const LoginPage        = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const RegisterPage     = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
 const LiveStreamPage   = lazy(() => import('./pages/LiveStreamPage').then(m => ({ default: m.LiveStreamPage })));
 const VideoFeedPage    = lazy(() => import('./pages/VideoFeedPage').then(m => ({ default: m.VideoFeedPage })));
 const VideoStudioPage  = lazy(() => import('./pages/VideoStudioPage').then(m => ({ default: m.VideoStudioPage })));
@@ -248,6 +249,18 @@ function AppLayout({
               <LoginPage
                 onLoginSuccess={name => {
                   addToast(`ยินดีต้อนรับคุณ ${name} เข้าสู่ระบบ!`, 'success', '👋');
+                }}
+              />
+            }
+          />
+
+          {/* Customer Registration */}
+          <Route
+            path="/register"
+            element={
+              <RegisterPage
+                onRegisterSuccess={name => {
+                  addToast(`ยินดีต้อนรับคุณ ${name}! สมัครสมาชิกและรับเหรียญต้อนรับสำเร็จ 🎉`, 'success', '🎁');
                 }}
               />
             }

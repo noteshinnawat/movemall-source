@@ -11,6 +11,7 @@ export interface FilterState {
   maxPrice: string;
   rating: number | null;
   badges: string[];
+  onlyTaxReady?: boolean;
 }
 
 interface FilterSidebarProps {
@@ -178,6 +179,29 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Tax & Invoice Filter */}
+      <div className="filter-group" style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #E5E7EB' }}>
+        <div className="filter-group__label">
+          ใบกำกับภาษี / e-Tax <ChevronDown size={14} />
+        </div>
+        <label className="filter-option" style={{ cursor: 'pointer' }}>
+          <div className="filter-option__left">
+            <div className={`filter-option__check${filters.onlyTaxReady ? ' filter-option__check--active' : ''}`}>
+              {filters.onlyTaxReady && <span style={{ color: 'white', fontSize: 11, fontWeight: 700 }}>✓</span>}
+            </div>
+            <span className="filter-option__icon">🧾</span>
+            <span className="filter-option__name" style={{ fontWeight: 600, color: '#1E40AF' }}>ออกใบกำกับภาษีได้</span>
+          </div>
+          <input
+            type="checkbox"
+            className="sr-only"
+            checked={!!filters.onlyTaxReady}
+            onChange={() => onChange({ ...filters, onlyTaxReady: !filters.onlyTaxReady })}
+            aria-label="ร้านค้าที่ออกใบกำกับภาษีได้"
+          />
+        </label>
       </div>
     </aside>
   );

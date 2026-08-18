@@ -582,6 +582,16 @@ export function ProductDetailPage({
               ))}
             </div>
 
+            {/* e-Tax Guarantee Banner */}
+            {(store?.badge === 'official' || store?.isMall || product.isMall || product.isVatRegistered) && (
+              <div style={{ marginTop: '0.75rem', padding: '0.6rem 0.85rem', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.825rem', color: '#1E40AF' }}>
+                <span style={{ fontSize: '1.1rem' }}>🧾</span>
+                <div>
+                  <strong>ร้านค้านี้ออกใบกำกับภาษีเต็มรูปได้ (e-Tax Ready)</strong> — เลือกขอใบกำกับภาษีในขั้นตอนชำระเงินเพื่อรับเอกสารทางอีเมลได้ทันที
+                </div>
+              </div>
+            )}
+
             {/* Desktop Actions & Quantity Controls (Visible on Desktop / Tablets) */}
             <div className="product-detail__desktop-purchase-card">
               {/* Color / Variant Selector */}

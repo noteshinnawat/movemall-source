@@ -50,6 +50,7 @@
 | **กล่องข้อความแชทสด (Chat)** | `/chat` | แชทระหว่างผู้ซื้อและร้านค้า เลือกร้านค้าอัตโนมัติตาม URL params, บอทตอบกลับอัตโนมัติใน 1.2 วินาที |
 | **ระบบหลังบ้าน & REST API Hub** | `server/` (Port 4000) | **Express + Prisma + PostgreSQL + Redis + Socket.io (17 Endpoints): Auth, Products, Stores, Orders (Atomic Transaction), Chat, Ads, Admin, Open API, Tax, Payment (PromptPay QR/Webhook/Refund), Media (S3/R2 Presigned URLs), Live Ingest, AI Lens Search, Logistics GPS, Notifications, Payout)** |
 | **ระบบชำระเงิน, พร้อมเพย์ & BNPL** | `/checkout` | **Movemall PayLater (ผ่อน 0% สูงสุด 3 เดือน วงเงิน ฿15,000)**, **แลกเหรียญ Movemall Coins ลดเงินสด**, PromptPay QR จริง 5 นาที, เชื่อมต่อ `POST /api/orders` |
+| **สมัครสมาชิก & เข้าสู่ระบบ (Auth & Google Sign-In)** | `/register`, `/login` | **ระบบสมัครสมาชิกครบวงจร: สลับเบอร์โทรศัพท์ (SMS OTP) / อีเมล (Email OTP), สมัครด้วย Google (Google OAuth / GIS Verification), Password Strength Meter, สิทธิ์ต้อนรับ 3 ต่อ (100 Coins + ส่งฟรี + ลด 50%), โค้ดแนะนำเพื่อน (+50 Coins), Social Sign-Up, และป๊อปอัปเฉลิมฉลองพร้อม Auto-login** |
 | **PWA & Mobile Optimization** | ทั่วทั้งเว็บ | `MobileBottomNav` 5 ปุ่ม, **ปรับตำแหน่ง Pop-up ปลอดภัยไม่ชนกัน (Ticker ด้านบนซ้าย, Live PiP ด้านล่างขวา)**, ซ่อน Footer 4 คอลัมน์บนมือถือ |
 
 ---
