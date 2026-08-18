@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Plus, Package, DollarSign, TrendingUp, Star, Trash2, X, Store, CheckCircle,
   Printer, Target, Eye, MousePointerClick, Wallet, ArrowUpRight, Play, Pause,
   AlertCircle, RefreshCw, Zap, ShieldCheck, Pencil, Upload, Image as ImageIcon, Video,
   User, MapPin, FileText, Download, Send, Search, Check, Building2, SlidersHorizontal,
   MessageSquare, Radio, Layers, Globe, ExternalLink, Lock, Cpu, CheckCircle2, Sliders, ArrowRight,
-  AlertTriangle, Settings, CreditCard, Truck, Phone, Mail, Save
+  AlertTriangle, Settings, CreditCard, Truck, Phone, Mail, Save, Home, LogOut
 } from 'lucide-react';
 import { categories } from '../data/products';
 import { ShippingLabelModal, type ShippingLabelProps } from '../components/ShippingLabelModal';
@@ -45,6 +45,8 @@ interface SellerCenterPageProps {
 }
 
 export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDeleteProduct }: SellerCenterPageProps) {
+  const navigate = useNavigate();
+
   // User Authentication & Personal Store Management
   const [currentUser, setCurrentUser] = useState(() => {
     try {
@@ -56,6 +58,18 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   });
 
   const [isLoggingInGoogle, setIsLoggingInGoogle] = useState(false);
+
+  function handleLogout() {
+    if (window.confirm('คุณต้องการออกจากระบบศูนย์ผู้ขาย Movemall ใช่หรือไม่?')) {
+      localStorage.removeItem('movemall_jwt_token');
+      localStorage.removeItem('movemall_user');
+      localStorage.removeItem('movemall_seller_store_id');
+      localStorage.removeItem('movemall_custom_store_name');
+      setCurrentUser(null);
+      window.dispatchEvent(new Event('movemall_auth_change'));
+      navigate('/');
+    }
+  }
 
   useEffect(() => {
     function handleAuthChange() {
@@ -1548,6 +1562,27 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
         </div>
 
         <div className="admin-topbar-right" style={{ gap: '0.65rem' }}>
+          <Link
+            to="/"
+            className="admin-action-btn admin-action-btn--home"
+            title="กลับสู่หน้าหลัก Movemall"
+            style={{
+              padding: '0.4rem 0.75rem',
+              fontSize: '0.78rem',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              color: '#334155',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '6px',
+            }}
+          >
+            <Home size={13} />
+            <span>กลับหน้าหลัก</span>
+          </Link>
+
           <button
             type="button"
             className="admin-action-btn admin-action-btn--sync"
@@ -1636,6 +1671,29 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
               </span>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="ออกจากระบบศูนย์ผู้ขาย Movemall"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              padding: '0.4rem 0.75rem',
+              borderRadius: '6px',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              background: '#fef2f2',
+              color: '#dc2626',
+              border: '1px solid #fecaca',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <LogOut size={13} />
+            <span>ออกจากระบบ</span>
+          </button>
         </div>
       </header>
 
@@ -1789,6 +1847,55 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
               <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: 4, lineHeight: 1.4 }}>
                 ร้านค้านี้ได้รับการการันตีและคุ้มครอง 100% เคลมค่าเสียหาย COD ได้เต็มจำนวน
               </div>
+            </div>
+
+            {/* Quick Home & Logout buttons in Sidebar */}
+            <div style={{ marginTop: '0.65rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <Link
+                to="/"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '7px 10px',
+                  borderRadius: 6,
+                  fontSize: '0.76rem',
+                  fontWeight: 600,
+                  color: '#475569',
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  textDecoration: 'none',
+                  transition: 'all 0.15s ease',
+                }}
+                title="กลับสู่หน้าหลัก Movemall"
+              >
+                <Home size={14} color="#64748b" />
+                <span>กลับสู่หน้าหลัก Movemall</span>
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '7px 10px',
+                  borderRadius: 6,
+                  fontSize: '0.76rem',
+                  fontWeight: 600,
+                  color: '#dc2626',
+                  background: '#fef2f2',
+                  border: '1px solid #fee2e2',
+                  cursor: 'pointer',
+                  width: '100%',
+                  textAlign: 'left',
+                  transition: 'all 0.15s ease',
+                }}
+                title="ออกจากระบบศูนย์ผู้ขาย"
+              >
+                <LogOut size={14} color="#dc2626" />
+                <span>ออกจากระบบ</span>
+              </button>
             </div>
           </div>
         </aside>
