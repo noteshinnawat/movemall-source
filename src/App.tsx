@@ -101,7 +101,8 @@ function AppLayout({
   const isLivePage = location.pathname.startsWith('/live');
   const isVideoFeedPage = location.pathname.startsWith('/video') || location.pathname.startsWith('/creator');
   const isCheckoutPage = location.pathname.startsWith('/checkout');
-  const isAdminPage = location.pathname.startsWith('/admin');
+  const isSellerPage = location.pathname.startsWith('/seller');
+  const isAdminPage = location.pathname.startsWith('/admin') || isSellerPage;
   
   // Clean full-screen pages where floating popups and footer should be suppressed
   const isDistractionFreePage = isChatPage || isLivePage || isVideoFeedPage || isCheckoutPage || isAdminPage;

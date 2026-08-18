@@ -362,6 +362,149 @@
   font-weight: 700;
 }
 
+/* Workspace Header Banner */
+.admin-workspace-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.75rem 1.25rem;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.admin-workspace-title-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.admin-workspace-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.admin-workspace-subtitle {
+  font-size: 0.825rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.admin-workspace-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* KPI Metric Cards Grid */
+.admin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.admin-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+}
+
+.admin-kpi-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.admin-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-kpi-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.admin-kpi-icon-box {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-kpi-icon-box--blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.admin-kpi-icon-box--amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.admin-kpi-icon-box--green {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.admin-kpi-icon-box--purple {
+  background: #faf5ff;
+  color: #9333ea;
+}
+
+.admin-kpi-val {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.admin-kpi-sub {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.725rem;
+  color: #94a3b8;
+}
+
+.admin-kpi-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.admin-kpi-pill--green {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.admin-kpi-pill--blue {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.admin-kpi-pill--purple {
+  background: #faf5ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+
 .admin-workspace-inner {
   padding: 1.5rem 1.75rem;
   max-width: 1400px;
