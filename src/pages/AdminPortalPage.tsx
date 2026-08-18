@@ -603,8 +603,8 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
   });
 
   const [adminLoginForm, setAdminLoginForm] = useState({
-    email: 'note.shinnawat@gmail.com',
-    password: 'movemall1234',
+    email: '',
+    password: '',
   });
   const [adminLoginLoading, setAdminLoginLoading] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState('');
@@ -697,25 +697,6 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
     } finally {
       setAdminLoginLoading(false);
     }
-  }
-
-  function handleQuickDemoAdminLogin(email = 'note.shinnawat@gmail.com') {
-    const isNote = email === 'note.shinnawat@gmail.com';
-    setAdminLoginForm({
-      email,
-      password: 'movemall1234',
-    });
-    const adminUser = {
-      id: isNote ? 'super-admin-note' : 'admin-root-01',
-      name: isNote ? 'Note Shinnawat (Super Admin)' : 'Movemall Administrator',
-      email,
-      role: 'SUPER_ADMIN',
-      coinsBalance: 99999,
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
-    };
-    localStorage.setItem('movemall_user', JSON.stringify(adminUser));
-    setCurrentUser(adminUser);
-    window.dispatchEvent(new Event('movemall_auth_change'));
   }
 
   function handleAdminLogout() {
@@ -1228,8 +1209,9 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                 className="admin-gate-input"
                 value={adminLoginForm.email}
                 onChange={e => setAdminLoginForm(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="note.shinnawat@gmail.com"
+                placeholder="admin@movemall.com"
                 required
+                autoComplete="email"
               />
             </div>
             <div className="admin-gate-field">
@@ -1239,33 +1221,16 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                 className="admin-gate-input"
                 value={adminLoginForm.password}
                 onChange={e => setAdminLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                placeholder="••••••••"
+                placeholder="••••••••••••"
                 required
+                autoComplete="current-password"
               />
             </div>
 
             <button type="submit" className="admin-gate-btn admin-gate-btn--primary" disabled={adminLoginLoading}>
-              <LogIn size={16} /> {adminLoginLoading ? 'กำลังตรวจสอบสิทธิ์...' : 'เข้าสู่ระบบผู้ดูแลระบบ'}
+              <LogIn size={16} /> {adminLoginLoading ? 'กำลังตรวจสอบสิทธิ์ความปลอดภัย...' : 'เข้าสู่ระบบผู้ดูแลระบบ'}
             </button>
           </form>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <button
-              type="button"
-              onClick={() => handleQuickDemoAdminLogin('note.shinnawat@gmail.com')}
-              className="admin-gate-btn admin-gate-btn--quick"
-            >
-              👑 เข้าสู่ระบบ Note Shinnawat (Super Admin) ด่วน
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickDemoAdminLogin('admin@movemall.com')}
-              className="admin-gate-btn admin-gate-btn--outline"
-              style={{ fontSize: '0.8rem', padding: '0.5rem' }}
-            >
-              ⚡ หรือเข้าสู่ระบบด้วยบัญชีกลาง admin@movemall.com
-            </button>
-          </div>
 
           <div className="admin-gate-divider">หรือ</div>
 
@@ -1273,11 +1238,9 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
             <ArrowLeft size={16} /> กลับสู่หน้าหลัก Movemall
           </Link>
 
-          <div className="admin-gate-hint-box">
-            <strong>👑 บัญชี Super Admin สูงสุดของระบบ:</strong><br />
-            • Email: <code style={{ color: '#2563eb', fontWeight: 700 }}>note.shinnawat@gmail.com</code><br />
-            • Password: <code style={{ color: '#2563eb' }}>movemall1234</code><br />
-            • สิทธิ์: <strong>SUPER_ADMIN</strong> ควบคุมและจัดการทุกระบบ 100%
+          <div className="admin-gate-hint-box" style={{ background: '#f8fafc', borderColor: '#e2e8f0', color: '#64748b' }}>
+            🔒 <strong>ระบบรักษาความปลอดภัยระดับองค์กร:</strong><br />
+            การพยายามเข้าถึงระบบ Super Admin ทั้งหมดจะถูกบันทึก IP Address, Browser Fingerprint และ Audit Logs เพื่อความปลอดภัยสูงสุดตาม พ.ร.บ. ว่าด้วยการกระทำความผิดเกี่ยวกับคอมพิวเตอร์
           </div>
         </div>
       </div>
@@ -1292,9 +1255,9 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
           <div className="admin-gate-icon-badge admin-gate-icon-badge--red">
             <ShieldOff size={28} />
           </div>
-          <h1 className="admin-gate-title">403 — ไม่มีสิทธิ์เข้าถึง</h1>
+          <h1 className="admin-gate-title">403 — ปฏิเสธการเข้าถึง</h1>
           <p className="admin-gate-subtitle">
-            หน้านี้จำกัดเฉพาะเจ้าหน้าที่ผู้ดูแลระบบ (Admin) เท่านั้น บัญชีของคุณไม่มีสิทธิ์ในการเข้าถึงศูนย์ควบคุม Super Admin Portal
+            บัญชีปัจจุบันของคุณไม่มีสิทธิ์ในการเข้าถึงศูนย์ควบคุม Super Admin Portal
           </p>
 
           <div className="admin-gate-user-badge">
@@ -1316,15 +1279,15 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
               onClick={handleSwitchAccount}
               className="admin-gate-btn admin-gate-btn--primary"
             >
-              <RefreshCw size={16} /> สลับบัญชี / เข้าสู่ระบบ Admin
+              <RefreshCw size={16} /> สลับบัญชีผู้ดูแลระบบ
             </button>
             <Link to="/" className="admin-gate-btn admin-gate-btn--outline">
               <ArrowLeft size={16} /> กลับสู่หน้าหลัก Movemall
             </Link>
           </div>
 
-          <div className="admin-gate-hint-box">
-            💡 <strong>คำแนะนำ:</strong> หากคุณเป็นเจ้าหน้าที่ระบบ ให้กดปุ่ม <em>"สลับบัญชี"</em> เพื่อล็อกอินด้วยบัญชี Super Admin (<code style={{ color: '#2563eb' }}>note.shinnawat@gmail.com</code> หรือ <code style={{ color: '#2563eb' }}>admin@movemall.com</code>)
+          <div className="admin-gate-hint-box" style={{ background: '#f8fafc', borderColor: '#e2e8f0', color: '#64748b' }}>
+            🔒 หากท่านเป็นเจ้าหน้าที่ผู้ดูแลระบบ กรุณากดปุ่ม <em>"สลับบัญชีผู้ดูแลระบบ"</em> เพื่อลงชื่อเข้าใช้ด้วยอีเมลองค์กรที่มีสิทธิ์ Admin
           </div>
         </div>
       </div>
