@@ -134,7 +134,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     setIsEditingStoreName(false);
   }
 
-  const sellerStoreSlug = localStorage.getItem('movemall_store_slug') || (customStoreName ? customStoreName.toLowerCase().trim().replace(/[^a-z0-9ก-๙]+/g, '-').replace(/(^-|-$)/g, '') || 'my-shop' : 'my-shop');
+  const sellerStoreSlug = localStorage.getItem('movemall_store_slug') || (customStoreName ? generateSlug(customStoreName) : 'my-shop');
   const sellerStoreId = localStorage.getItem('movemall_seller_store_id') || (currentUser?.id ? `store-${currentUser.id}` : 'store-my-live');
 
   const currentStore = {

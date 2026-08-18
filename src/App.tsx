@@ -321,6 +321,7 @@ function AppLayout({
             path="/store/:id"
             element={
               <StorePage
+                allProducts={productList}
                 onAddToCart={p => handleAddToCart(p)}
                 isWishlisted={id => wishlist.isWished(id)}
                 onToggleWishlist={p => handleToggleWishlist(p)}

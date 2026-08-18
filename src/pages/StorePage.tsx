@@ -30,25 +30,49 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
   const [claimedVouchers, setClaimedVouchers] = useState<Record<string, boolean>>({});
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
-  // 1. Resolve store from static data or active seller profile in localStorage
+  // 1. Resolve store from static data, active seller profile, or decoded URL slug
   const resolvedLocalStore: Store | undefined = (() => {
     if (!id) return stores[0];
     
+    let decodedId = id;
+    try {
+      decodedId = decodeURIComponent(id).trim();
+    } catch {
+      decodedId = id.trim();
+    }
+
     // Check static stores by ID or Slug
-    const foundStatic = getStoreById(id);
+    const foundStatic = getStoreById(decodedId) || getStoreById(id);
     if (foundStatic) return foundStatic;
 
     // Check if it's the current user's registered store
-    const customName = localStorage.getItem('movemall_custom_store_name') || localStorage.getItem('movemall_my_store_name');
-    const customId = localStorage.getItem('movemall_seller_store_id');
+    let currentUser: any = null;
+    try {
+      const stored = localStorage.getItem('movemall_auth_user');
+      if (stored) currentUser = JSON.parse(stored);
+    } catch {}
+
+    const customName = 
+      localStorage.getItem('movemall_custom_store_name') || 
+      localStorage.getItem('movemall_my_store_name') ||
+      (currentUser?.name ? `ร้านค้าของ ${currentUser.name}` : '');
+      
+    const customId = localStorage.getItem('movemall_seller_store_id') || (currentUser?.id ? `store-${currentUser.id}` : '');
     const customSlug = localStorage.getItem('movemall_store_slug') || (customName ? generateSlug(customName) : '');
 
-    if (customName && (id === customId || id === customSlug || id === 'store-my-live' || id.toLowerCase() === generateSlug(customName).toLowerCase())) {
+    const isMatchCustom = 
+      (customId && (decodedId === customId || id === customId)) ||
+      (customSlug && (decodedId === customSlug || id === customSlug || decodedId.toLowerCase() === customSlug.toLowerCase())) ||
+      (customName && (decodedId === customName || decodedId.toLowerCase() === generateSlug(customName).toLowerCase())) ||
+      decodedId === 'store-my-live' ||
+      decodedId === 'store-custom';
+
+    if (isMatchCustom || (customName && decodedId.includes(customName))) {
       return {
-        id: customId || `store-${Date.now()}`,
-        slug: customSlug,
-        name: customName,
-        logo: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=300&q=80',
+        id: customId || `store-${currentUser?.id || 'my-shop'}`,
+        slug: customSlug || generateSlug(customName || 'my-shop'),
+        name: customName || decodedId.replace(/-/g, ' '),
+        logo: currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=300&q=80',
         banner: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
         badge: 'verified',
         rating: 5.0,
@@ -60,6 +84,29 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
         followerCount: 12,
         location: 'กรุงเทพมหานคร',
         description: 'ร้านค้าทางการในระบบ Movemall การันตีสินค้าแท้ 100% จัดส่งรวดเร็ว',
+      };
+    }
+
+    // Dynamic fallback for custom store URLs (e.g. sharing link to another user / device / incognito)
+    // If URL is a custom store slug like "ร้านค้าของ-สิทธิมัณฑ์-สุขสกุล" or "store-xxx"
+    const readableName = decodedId.replace(/^store-/, '').replace(/-/g, ' ').trim();
+    if (readableName) {
+      return {
+        id: decodedId,
+        slug: decodedId,
+        name: readableName,
+        logo: currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=300&q=80',
+        banner: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
+        badge: 'verified',
+        rating: 5.0,
+        reviewCount: 12,
+        responseRate: '100%',
+        responseTime: 'ภายในไม่กี่นาที',
+        joinedDate: 'ร้านค้าสมาชิก Movemall',
+        productCount: 0,
+        followerCount: 1,
+        location: 'กรุงเทพมหานคร',
+        description: `ร้านค้า ${readableName} บนระบบ Movemall สินค้าของแท้ การันตีคุณภาพ`,
       };
     }
 
