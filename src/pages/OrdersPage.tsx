@@ -1,17 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, Calendar, MapPin, Truck, ShoppingBag, ArrowRight, Flag, ShieldAlert } from 'lucide-react';
-import { mockOrders, STATUS_LABEL, STATUS_COLOR } from '../data/orders';
+import { getStoredOrders, STATUS_LABEL, STATUS_COLOR } from '../data/orders';
+import type { Order } from '../data/orders';
 import { ReportStoreModal } from '../components/ReportStoreModal';
 import './OrdersPage.css';
 
 export function OrdersPage() {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [reportingOrder, setReportingOrder] = useState<any | null>(null);
+  const [orders, setOrders] = useState<Order[]>(() => getStoredOrders());
+
+  useEffect(() => {
+    function handleOrdersUpdate() {
+      setOrders(getStoredOrders());
+    }
+    window.addEventListener('movemall_orders_change', handleOrdersUpdate);
+    window.addEventListener('storage', handleOrdersUpdate);
+    return () => {
+      window.removeEventListener('movemall_orders_change', handleOrdersUpdate);
+      window.removeEventListener('storage', handleOrdersUpdate);
+    };
+  }, []);
 
   const filteredOrders = activeTab === 'all'
-    ? mockOrders
-    : mockOrders.filter(o => o.status === activeTab);
+    ? orders
+    : orders.filter(o => o.status === activeTab);
 
   return (
     <main className="orders">

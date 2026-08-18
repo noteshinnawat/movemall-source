@@ -1,8 +1,8 @@
 // src/pages/NotificationsPage.tsx — Movemall Notification Center Hub
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Bell, CheckCheck, Sparkles } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Bell, CheckCheck, Sparkles, LogIn, Inbox } from 'lucide-react';
 import {
   fetchUserNotifications,
   markNotificationAsRead,
@@ -21,77 +21,7 @@ interface NotificationDisplayItem {
   time: string;
   link: string;
   unread: boolean;
-  isReal?: boolean;
 }
-
-const INITIAL_NOTIFICATIONS: NotificationDisplayItem[] = [
-  {
-    id: 'n0',
-    category: 'orders',
-    icon: '🚨',
-    iconBg: '#DBEAFE',
-    title: 'พนักงานจัดส่งอยู่ห่างจากคุณอีกประมาณ 1.8 กม.!',
-    body: 'พัสดุ #MM-2026-0891 กำลังเดินทางมาถึงในอีก 12 นาที กรุณาเตรียมรับสายโทรศัพท์',
-    time: '2 นาทีที่แล้ว',
-    link: '/tracking',
-    unread: true,
-  },
-  {
-    id: 'n1',
-    category: 'orders',
-    icon: '🚚',
-    iconBg: '#DBEAFE',
-    title: 'พัสดุของคุณอยู่ระหว่างนำส่ง!',
-    body: 'คำสั่งซื้อ #MM-2026-0891 (หูฟัง Pro ANC) พนักงานจัดส่ง Flash กำลังนำจ่ายถึงคุณวันนี้',
-    time: '15 นาทีที่แล้ว',
-    link: '/tracking',
-    unread: true,
-  },
-  {
-    id: 'n2',
-    category: 'promos',
-    icon: '⚡',
-    iconBg: '#FEE2E2',
-    title: 'Flash Sale รอบ 18:00 น. เริ่มแล้ว!',
-    body: 'สินค้าไอทีและสมาร์ทวอทช์ลดราคาสูงสุด 70% จับจองก่อนของจะหมด',
-    time: '1 ชั่วโมงที่แล้ว',
-    link: '/flash-sale',
-    unread: true,
-  },
-  {
-    id: 'n3',
-    category: 'live',
-    icon: '🔴',
-    iconBg: '#FEF3C7',
-    title: 'TechPro Official เริ่มไลฟ์สดแล้ว',
-    body: 'ร่วมชมไลฟ์แจกโค้ดส่วนลด 50% เฉพาะในไลฟ์ และลุ้นรับรางวัลฟรี',
-    time: '2 ชั่วโมงที่แล้ว',
-    link: '/live',
-    unread: true,
-  },
-  {
-    id: 'n4',
-    category: 'vouchers',
-    icon: '🎟️',
-    iconBg: '#E0E7FF',
-    title: 'คุณได้รับโค้ดส่งฟรี ฿0',
-    body: 'คูปองส่งฟรีทั่วประเทศประจำเดือนพร้อมใช้งานแล้ว กดใช้ได้ทันทีตอนชำระเงิน',
-    time: '5 ชั่วโมงที่แล้ว',
-    link: '/vouchers',
-    unread: false,
-  },
-  {
-    id: 'n5',
-    category: 'orders',
-    icon: '📦',
-    iconBg: '#D1FAE5',
-    title: 'คำสั่งซื้อได้รับการยืนยันแล้ว',
-    body: 'ร้านค้า TechPro ได้รับออเดอร์ของคุณแล้ว กำลังดำเนินการแพ็คสินค้า',
-    time: '1 วันที่แล้ว',
-    link: '/orders',
-    unread: false,
-  },
-];
 
 function getCategoryIcon(category: string): { icon: string; iconBg: string } {
   switch (category) {
@@ -125,23 +55,26 @@ function formatRelativeTime(dateStr: string): string {
 }
 
 export function NotificationsPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'all' | 'orders' | 'promos' | 'live' | 'vouchers'>('all');
-  const [notifications, setNotifications] = useState<NotificationDisplayItem[]>(INITIAL_NOTIFICATIONS);
-  const [isUsingRealApi, setIsUsingRealApi] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationDisplayItem[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!localStorage.getItem('movemall_jwt_token'));
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function loadNotifications() {
       const token = localStorage.getItem('movemall_jwt_token');
       if (!token) {
-        setIsUsingRealApi(false);
+        setIsLoggedIn(false);
+        setNotifications([]);
         return;
       }
 
+      setIsLoggedIn(true);
       setLoading(true);
       try {
         const response = await fetchUserNotifications(activeTab);
-        if (response && Array.isArray(response.notifications) && response.notifications.length > 0) {
+        if (response && Array.isArray(response.notifications)) {
           const mapped: NotificationDisplayItem[] = response.notifications.map((n: ApiNotification) => {
             const iconData = getCategoryIcon(n.category);
             return {
@@ -154,19 +87,15 @@ export function NotificationsPage() {
               time: formatRelativeTime(n.createdAt),
               link: n.link || '/notifications',
               unread: !n.isRead,
-              isReal: true,
             };
           });
           setNotifications(mapped);
-          setIsUsingRealApi(true);
-        } else if (response && Array.isArray(response.notifications) && response.notifications.length === 0) {
-          // Real user with 0 notifications
+        } else {
           setNotifications([]);
-          setIsUsingRealApi(true);
         }
       } catch (err) {
-        console.warn('Could not load real notifications from API, using demo view:', err);
-        setIsUsingRealApi(false);
+        console.error('Could not load notifications from API:', err);
+        setNotifications([]);
       } finally {
         setLoading(false);
       }
@@ -182,23 +111,21 @@ export function NotificationsPage() {
   const unreadCount = notifications.filter(n => n.unread).length;
 
   async function handleMarkAllRead() {
-    if (isUsingRealApi) {
-      try {
-        await markAllNotificationsAsRead(activeTab);
-      } catch (err) {
-        console.error('Failed to mark all as read:', err);
-      }
+    try {
+      await markAllNotificationsAsRead(activeTab);
+      window.dispatchEvent(new Event('movemall_notif_change'));
+    } catch (err) {
+      console.error('Failed to mark all as read:', err);
     }
     setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
   }
 
-  async function handleItemClick(id: string, isReal?: boolean) {
-    if (isReal) {
-      try {
-        await markNotificationAsRead(id);
-      } catch (err) {
-        console.error('Failed to mark as read:', err);
-      }
+  async function handleItemClick(id: string) {
+    try {
+      await markNotificationAsRead(id);
+      window.dispatchEvent(new Event('movemall_notif_change'));
+    } catch (err) {
+      console.error('Failed to mark as read:', err);
     }
     setNotifications(prev => prev.map(n => (n.id === id ? { ...n, unread: false } : n)));
   }
@@ -211,16 +138,16 @@ export function NotificationsPage() {
             <div>
               <h1 className="notifications-title">
                 <Bell size={20} style={{ color: 'var(--primary)' }} />
-                การแจ้งเตือนของฉัน {unreadCount > 0 && <span style={{ color: 'var(--primary)', fontSize: 14 }}>({unreadCount} ข้อความใหม่)</span>}
+                การแจ้งเตือนของฉัน {isLoggedIn && unreadCount > 0 && <span style={{ color: 'var(--primary)', fontSize: 14 }}>({unreadCount} ข้อความใหม่)</span>}
               </h1>
-              {isUsingRealApi && (
+              {isLoggedIn && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 12, color: 'var(--success, #10B981)', fontWeight: 600 }}>
                   <Sparkles size={12} /> เชื่อมต่อกับระบบแจ้งเตือนฐานข้อมูลจริง (Live Sync)
                 </div>
               )}
             </div>
 
-            {unreadCount > 0 && (
+            {isLoggedIn && unreadCount > 0 && (
               <button className="notifications-mark-read" onClick={handleMarkAllRead}>
                 <CheckCheck size={14} style={{ display: 'inline', marginRight: 4 }} />
                 อ่านทั้งหมด
@@ -229,36 +156,95 @@ export function NotificationsPage() {
           </div>
 
           {/* Category Tabs */}
-          <div className="notifications-tabs">
-            <button
-              className={`notifications-tab-btn${activeTab === 'all' ? ' notifications-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('all')}
-            >
-              ทั้งหมด
-            </button>
-            <button
-              className={`notifications-tab-btn${activeTab === 'orders' ? ' notifications-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('orders')}
-            >
-              📦 ออเดอร์
-            </button>
-            <button
-              className={`notifications-tab-btn${activeTab === 'promos' ? ' notifications-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('promos')}
-            >
-              ⚡ โปรโมชั่น
-            </button>
-            <button
-              className={`notifications-tab-btn${activeTab === 'live' ? ' notifications-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('live')}
-            >
-              🔴 ไลฟ์สด
-            </button>
-          </div>
+          {isLoggedIn && (
+            <div className="notifications-tabs">
+              <button
+                className={`notifications-tab-btn${activeTab === 'all' ? ' notifications-tab-btn--active' : ''}`}
+                onClick={() => setActiveTab('all')}
+              >
+                ทั้งหมด
+              </button>
+              <button
+                className={`notifications-tab-btn${activeTab === 'orders' ? ' notifications-tab-btn--active' : ''}`}
+                onClick={() => setActiveTab('orders')}
+              >
+                📦 ออเดอร์
+              </button>
+              <button
+                className={`notifications-tab-btn${activeTab === 'promos' ? ' notifications-tab-btn--active' : ''}`}
+                onClick={() => setActiveTab('promos')}
+              >
+                ⚡ โปรโมชั่น
+              </button>
+              <button
+                className={`notifications-tab-btn${activeTab === 'live' ? ' notifications-tab-btn--active' : ''}`}
+                onClick={() => setActiveTab('live')}
+              >
+                🔴 ไลฟ์สด
+              </button>
+            </div>
+          )}
 
           {/* Notifications List */}
           <div className="notifications-list">
-            {loading ? (
+            {!isLoggedIn ? (
+              <div style={{ padding: '48px 24px', textAlign: 'center' }}>
+                <div
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    background: '#EFF6FF',
+                    color: 'var(--primary, #2563EB)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                  }}
+                >
+                  <Bell size={28} />
+                </div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: '#111827' }}>
+                  เข้าสู่ระบบเพื่อดูการแจ้งเตือนของคุณ
+                </h3>
+                <p style={{ color: '#6B7280', fontSize: 14, marginBottom: 24, maxWidth: 360, margin: '0 auto 24px' }}>
+                  ติดตามสถานะคำสั่งซื้อ พัสดุ โค้ดส่วนลด และสิทธิพิเศษของบัญชีคุณได้ที่นี่
+                </p>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                  <button
+                    onClick={() => navigate('/login')}
+                    style={{
+                      background: 'var(--primary, #2563EB)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '10px 20px',
+                      borderRadius: 'var(--radius-md, 6px)',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                    }}
+                  >
+                    <LogIn size={16} /> เข้าสู่ระบบ
+                  </button>
+                  <button
+                    onClick={() => navigate('/register')}
+                    style={{
+                      background: '#F3F4F6',
+                      color: '#374151',
+                      border: '1px solid #E5E7EB',
+                      padding: '10px 20px',
+                      borderRadius: 'var(--radius-md, 6px)',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    สมัครสมาชิกใหม่
+                  </button>
+                </div>
+              </div>
+            ) : loading ? (
               <div style={{ padding: 'var(--space-12)', textAlign: 'center', color: 'var(--text-muted)' }}>
                 กำลังโหลดการแจ้งเตือน...
               </div>
@@ -268,7 +254,7 @@ export function NotificationsPage() {
                   key={item.id}
                   to={item.link}
                   className={`notification-item${item.unread ? ' notification-item--unread' : ''}`}
-                  onClick={() => handleItemClick(item.id, item.isReal)}
+                  onClick={() => handleItemClick(item.id)}
                 >
                   <div className="notification-icon-box" style={{ background: item.iconBg }}>
                     {item.icon}
@@ -284,8 +270,14 @@ export function NotificationsPage() {
                 </Link>
               ))
             ) : (
-              <div style={{ padding: 'var(--space-12)', textAlign: 'center', color: 'var(--text-muted)' }}>
-                ไม่มีการแจ้งเตือนในหมวดหมู่นี้
+              <div style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <Inbox size={40} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+                <p style={{ fontWeight: 600, fontSize: 15, color: '#374151', margin: '0 0 4px' }}>
+                  ยังไม่มีการแจ้งเตือนในหมวดหมู่นี้
+                </p>
+                <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>
+                  เมื่อมีออเดอร์ใหม่ โปรโมชั่น หรือโค้ดส่วนลด จะปรากฏที่นี่
+                </p>
               </div>
             )}
           </div>

@@ -100,3 +100,52 @@ export const STATUS_COLOR: Record<OrderStatus, string> = {
   delivered: 'var(--success)',
   cancelled: 'var(--error)',
 };
+
+/** Get all combined orders (local user orders + demo mock orders) */
+export function getStoredOrders(): Order[] {
+  try {
+    const raw = localStorage.getItem('movemall_orders');
+    if (raw) {
+      const parsed: Order[] = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const localIds = new Set(parsed.map(o => o.id));
+        const nonDuplicateMocks = mockOrders.filter(m => !localIds.has(m.id));
+        return [...parsed, ...nonDuplicateMocks];
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load orders from localStorage:', err);
+  }
+  return mockOrders;
+}
+
+/** Save a new order to localStorage */
+export function saveOrder(newOrder: Order): void {
+  try {
+    const current = getStoredOrders();
+    const updated = [newOrder, ...current.filter(o => o.id !== newOrder.id)];
+    localStorage.setItem('movemall_orders', JSON.stringify(updated));
+    window.dispatchEvent(new Event('movemall_orders_change'));
+  } catch (err) {
+    console.error('Failed to save order to localStorage:', err);
+  }
+}
+
+/** Update status of an existing order */
+export function updateOrderStatus(orderId: string, status: OrderStatus): void {
+  try {
+    const current = getStoredOrders();
+    const updated = current.map(o => o.id === orderId ? { ...o, status } : o);
+    localStorage.setItem('movemall_orders', JSON.stringify(updated));
+    window.dispatchEvent(new Event('movemall_orders_change'));
+  } catch (err) {
+    console.error('Failed to update order status:', err);
+  }
+}
+
+/** Generate a formatted Tracking Number from Order ID */
+export function getOrderTrackingNumber(order: Order): string {
+  const cleanId = order.id.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  return `TH-FLASH-${cleanId.slice(-8)}`;
+}
+

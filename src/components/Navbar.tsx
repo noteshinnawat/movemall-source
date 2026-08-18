@@ -68,9 +68,7 @@ export function Navbar({
   });
 
   // Notification Unread Count State
-  const [unreadNotifCount, setUnreadNotifCount] = useState<number>(() => {
-    return currentUser ? 1 : 0;
-  });
+  const [unreadNotifCount, setUnreadNotifCount] = useState<number>(0);
 
   // Chat Unread Count State (0 when not logged in)
   const [unreadChatCount, setUnreadChatCount] = useState<number>(() => {

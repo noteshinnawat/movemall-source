@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, ArrowRight, QrCode, CreditCard, Banknote } from 'lucide-react';
 import { PromptPayModal } from '../components/PromptPayModal';
 import { fetchApi } from '../utils/api';
+import { saveOrder } from '../data/orders';
 import type { CartItem } from '../types';
 import './CheckoutPage.css';
 
@@ -111,6 +112,24 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
     } catch (err) {
       console.warn('API Order submission note (proceeding in client mode):', err);
     }
+
+    // Save order locally for /orders and /tracking
+    saveOrder({
+      id: orderId,
+      createdAt: new Date().toISOString(),
+      status: 'shipped',
+      items: items.map(item => ({
+        productId: item.product.id,
+        name: item.product.name,
+        image: item.product.images[0] || '',
+        price: item.product.price,
+        quantity: item.quantity,
+      })),
+      subtotal: subtotal,
+      shipping: shippingCost,
+      total: grandTotal,
+      address: `${form.firstName} ${form.lastName}`.trim() + ' • ' + (form.phone || '0812345678') + ' • ' + `${form.address} ${form.district} ${form.province} ${form.zip}`.trim(),
+    });
 
     onClear();
     navigate(`/order/success?id=${orderId}&total=${grandTotal}&method=${paymentMethod}`);
