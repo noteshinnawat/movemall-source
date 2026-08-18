@@ -128,12 +128,17 @@ export function AccountPage() {
     localStorage.setItem('movemall_user', JSON.stringify(updatedUser));
     window.dispatchEvent(new Event('movemall_auth_change'));
 
-    // Optional API call
+    // API call to sync with backend database
     const token = localStorage.getItem('movemall_jwt_token');
     if (token) {
       fetchApi('/api/user/profile', {
         method: 'PUT',
-        body: JSON.stringify({ name: updatedUser.name, avatarUrl: updatedUser.avatarUrl }),
+        body: JSON.stringify({
+          name: updatedUser.name,
+          avatarUrl: updatedUser.avatarUrl,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+        }),
       }).catch(() => {});
     }
 
@@ -636,11 +641,19 @@ export function AccountPage() {
                 <div className="account-grid-2">
                   <div className="account-field">
                     <label className="account-label">ชื่อ-นามสกุล</label>
-                    <input type="text" className="account-input" value={name} onChange={e => setName(e.target.value)} />
+                    <input type="text" className="account-input" value={name} onChange={e => setName(e.target.value)} placeholder="ชื่อ นามสกุล" />
                   </div>
                   <div className="account-field">
-                    <label className="account-label">เบอร์โทรศัพท์ (ยืนยันแล้ว)</label>
-                    <input type="text" className="account-input" value="081-234-5678" disabled />
+                    <label className="account-label">อีเมล (Email)</label>
+                    <input type="email" className="account-input" value={email} onChange={e => setEmail(e.target.value)} placeholder="user@example.com" />
+                  </div>
+                  <div className="account-field">
+                    <label className="account-label">เบอร์โทรศัพท์ (สำหรับติดต่อ & รับพัสดุ)</label>
+                    <input type="tel" className="account-input" value={phone} onChange={e => setPhone(e.target.value)} placeholder="0812345678" />
+                  </div>
+                  <div className="account-field">
+                    <label className="account-label">ระดับสมาชิก (Tier)</label>
+                    <input type="text" className="account-input" value={`${currentTier.badgeTitle} (${currentTier.roleLabel})`} disabled style={{ background: '#f1f5f9', cursor: 'not-allowed' }} />
                   </div>
                 </div>
 

@@ -9,15 +9,29 @@ async function main() {
   // 1. Create Default Users (Password: movemall1234)
   const passwordHash = await bcrypt.hash('movemall1234', 10);
 
+  const superAdminUser = await prisma.user.upsert({
+    where: { email: 'note.shinnawat@gmail.com' },
+    update: { role: 'SUPER_ADMIN' },
+    create: {
+      email: 'note.shinnawat@gmail.com',
+      phone: '0810000000',
+      passwordHash,
+      name: 'Note Shinnawat (Super Admin)',
+      role: 'SUPER_ADMIN',
+      coinsBalance: 99999,
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
+    },
+  });
+
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@movemall.com' },
-    update: {},
+    update: { role: 'SUPER_ADMIN' },
     create: {
       email: 'admin@movemall.com',
       phone: '0810000001',
       passwordHash,
       name: 'Movemall Administrator',
-      role: 'ADMIN',
+      role: 'SUPER_ADMIN',
       coinsBalance: 5000,
       avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
     },

@@ -8,6 +8,16 @@ import { LineService } from '../services/line.service.js';
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'movemall_super_secure_jwt_secret_key_2026_at_least_32_chars!';
 
+export const SUPER_ADMIN_EMAILS = [
+  'note.shinnawat@gmail.com',
+  'admin@movemall.com',
+];
+
+export function isSuperAdminEmail(email?: string | null): boolean {
+  if (!email) return false;
+  return SUPER_ADMIN_EMAILS.includes(email.trim().toLowerCase());
+}
+
 // ── 1. Send Registration OTP (SMS/Email) ──
 router.post('/send-otp', async (req: AuthRequest, res: Response) => {
   try {
@@ -72,7 +82,10 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const userRole = role === 'SELLER' || role === 'CREATOR' ? role : 'BUYER';
+    let userRole = role === 'SELLER' || role === 'CREATOR' ? role : 'BUYER';
+    if (isSuperAdminEmail(email)) {
+      userRole = 'SUPER_ADMIN';
+    }
     
     // Welcome bonus: 100 coins for buyers (+50 extra coins if referral code is provided)
     const hasReferral = Boolean(referralCode && String(referralCode).trim().length >= 4);
@@ -168,7 +181,7 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const user = email
+    let user = email
       ? await prismaRead.user.findUnique({ where: { email } })
       : await prismaRead.user.findUnique({ where: { phone } });
 
@@ -181,6 +194,14 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
     if (!isValidPassword) {
       res.status(401).json({ error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
       return;
+    }
+
+    // Auto-grant SUPER_ADMIN if email is configured in super admin whitelist
+    if (isSuperAdminEmail(user.email) && user.role !== 'SUPER_ADMIN') {
+      user = await prismaWrite.user.update({
+        where: { id: user.id },
+        data: { role: 'SUPER_ADMIN' },
+      });
     }
 
     const token = jwt.sign(
@@ -390,6 +411,7 @@ router.post('/google', async (req: AuthRequest, res: Response) => {
 
       const randomPass = Math.random().toString(36).slice(-8) + 'Mm1!';
       const passwordHash = await bcrypt.hash(randomPass, 10);
+      const userRole = isSuperAdminEmail(googleData.email) ? 'SUPER_ADMIN' : 'BUYER';
 
       user = await prismaWrite.user.create({
         data: {
@@ -398,7 +420,7 @@ router.post('/google', async (req: AuthRequest, res: Response) => {
           passwordHash,
           name: googleData.name,
           avatarUrl: googleData.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(googleData.name)}`,
-          role: 'BUYER',
+          role: userRole,
           coinsBalance: coinsAwarded,
         },
       });
@@ -422,14 +444,17 @@ router.post('/google', async (req: AuthRequest, res: Response) => {
         });
       }
     } else {
-      // 5. สมาชิกเดิม -> อัปเดต googleId, ชื่อ และรูปภาพจาก Google ให้สดใหม่อยู่เสมอ
-      const updatePayload: { googleId?: string; avatarUrl?: string; name?: string } = {};
+      // 5. สมาชิกเดิม -> อัปเดต googleId, ชื่อ, รูปภาพ และตรวจสอบสิทธิ์ SUPER_ADMIN ให้สดใหม่อยู่เสมอ
+      const updatePayload: { googleId?: string; avatarUrl?: string; name?: string; role?: any } = {};
       if (!user.googleId) updatePayload.googleId = googleData.googleId;
       if (googleData.avatarUrl && googleData.avatarUrl !== user.avatarUrl) {
         updatePayload.avatarUrl = googleData.avatarUrl;
       }
       if (googleData.name && (user.name.includes('Google') || user.name.includes('สมาชิก'))) {
         updatePayload.name = googleData.name;
+      }
+      if (isSuperAdminEmail(googleData.email) && user.role !== 'SUPER_ADMIN') {
+        updatePayload.role = 'SUPER_ADMIN';
       }
 
       if (Object.keys(updatePayload).length > 0) {
@@ -549,7 +574,7 @@ router.get('/me', authenticateJWT, async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const user = await prismaRead.user.findUnique({
+    let user = await prismaRead.user.findUnique({
       where: { id: req.user.userId },
       select: {
         id: true,
@@ -566,6 +591,14 @@ router.get('/me', authenticateJWT, async (req: AuthRequest, res: Response) => {
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
+    }
+
+    if (isSuperAdminEmail(user.email) && user.role !== 'SUPER_ADMIN') {
+      await prismaWrite.user.update({
+        where: { id: user.id },
+        data: { role: 'SUPER_ADMIN' },
+      });
+      user = { ...user, role: 'SUPER_ADMIN' as any };
     }
 
     res.json({ user });

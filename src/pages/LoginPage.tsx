@@ -37,7 +37,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
   function getRedirectTarget(userRole?: string) {
     if (redirectParam) return redirectParam;
-    if (role === 'seller' || userRole?.toUpperCase() === 'SELLER') return '/seller';
+    const upper = userRole?.toUpperCase() || '';
+    if (['SUPER_ADMIN', 'ADMIN', 'FINANCE_ADMIN', 'MARKETING_ADMIN', 'CS_ADMIN', 'CATALOG_ADMIN', 'LOGISTICS_ADMIN', 'MODERATOR'].includes(upper)) {
+      return '/admin';
+    }
+    if (role === 'seller' || upper === 'SELLER') return '/seller';
     return '/account';
   }
 
@@ -70,23 +74,46 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         ? { email: identifier, password }
         : { phone: identifier, password };
 
-      const res = await fetchApi<{ token: string; user: { name: string; role: string; coinsBalance?: number } }>('/api/auth/login', {
+      const res = await fetchApi<{ token: string; user: { id?: string; name: string; email?: string; role: string; coinsBalance?: number; avatarUrl?: string } }>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify(bodyPayload),
       });
 
       if (res.token) {
         localStorage.setItem('movemall_jwt_token', res.token);
-        window.dispatchEvent(new Event('movemall_auth_change'));
       }
 
-      onLoginSuccess?.(res.user?.name || identifier, role);
-      navigate(getRedirectTarget(res.user?.role));
+      const finalUser = {
+        id: res.user?.id,
+        name: res.user?.name || identifier,
+        email: res.user?.email || (isEmail ? identifier : undefined),
+        role: res.user?.role || (identifier.toLowerCase().includes('admin') ? 'ADMIN' : (role === 'seller' ? 'SELLER' : 'BUYER')),
+        coinsBalance: res.user?.coinsBalance ?? 100,
+        avatarUrl: res.user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(res.user?.name || identifier)}`,
+      };
+
+      localStorage.setItem('movemall_user', JSON.stringify(finalUser));
+      window.dispatchEvent(new Event('movemall_auth_change'));
+
+      onLoginSuccess?.(finalUser.name, role);
+      navigate(getRedirectTarget(finalUser.role));
     } catch (err: any) {
       console.warn('API Login note (offline fallback):', err);
       // Fallback for testing/offline
-      onLoginSuccess?.(identifier || 'ผู้ใช้งาน Movemall', role);
-      navigate(getRedirectTarget());
+      const isEmail = identifier.includes('@');
+      const isAdmin = identifier.toLowerCase().includes('admin');
+      const fallbackUser = {
+        id: isAdmin ? 'admin-001' : 'user-001',
+        name: isAdmin ? 'Movemall Administrator' : (identifier || 'ผู้ใช้งาน Movemall'),
+        email: isEmail ? identifier : 'user@movemall.com',
+        role: isAdmin ? 'ADMIN' : (role === 'seller' ? 'SELLER' : 'BUYER'),
+        coinsBalance: isAdmin ? 5000 : 100,
+        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(isAdmin ? 'Admin' : identifier)}`,
+      };
+      localStorage.setItem('movemall_user', JSON.stringify(fallbackUser));
+      window.dispatchEvent(new Event('movemall_auth_change'));
+      onLoginSuccess?.(fallbackUser.name, role);
+      navigate(getRedirectTarget(fallbackUser.role));
     } finally {
       setLoading(false);
     }
@@ -178,12 +205,15 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
           window.dispatchEvent(new Event('movemall_auth_change'));
         }
 
+        const emailLower = (res.user?.email || authRes.googleUser?.email || '').toLowerCase();
+        const isSuperAdmin = ['note.shinnawat@gmail.com', 'admin@movemall.com'].includes(emailLower);
+
         const finalUser = {
           id: res.user?.id,
           name: res.user?.name || authRes.googleUser?.name || 'สมาชิก Google',
           email: res.user?.email || authRes.googleUser?.email,
           avatarUrl: res.user?.avatarUrl || authRes.googleUser?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(res.user?.name || 'Google')}`,
-          role: res.user?.role || (role === 'seller' ? 'SELLER' : 'BUYER'),
+          role: res.user?.role || (isSuperAdmin ? 'SUPER_ADMIN' : (role === 'seller' ? 'SELLER' : 'BUYER')),
           coinsBalance: res.user?.coinsBalance ?? 100,
         };
 
