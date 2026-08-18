@@ -292,9 +292,9 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                     <h3 className="compare-dual-name" title={product.name}>{product.name}</h3>
                     
                     <div className="compare-dual-price-box">
-                      <span className="compare-dual-price">฿{product.price.toLocaleString()}</span>
+                      <span className="compare-dual-price">฿{(product.price ?? 0).toLocaleString()}</span>
                       {product.originalPrice && (
-                        <span className="compare-dual-orig-price">฿{product.originalPrice.toLocaleString()}</span>
+                        <span className="compare-dual-orig-price">฿{(product.originalPrice ?? 0).toLocaleString()}</span>
                       )}
                     </div>
 
@@ -448,9 +448,9 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                         <h3 className="compare-product-name" title={p.name}>{p.name}</h3>
                         
                         <div className="compare-product-price-box">
-                          <span className="compare-product-price">฿{p.price.toLocaleString()}</span>
+                          <span className="compare-product-price">฿{(p.price ?? 0).toLocaleString()}</span>
                           {p.originalPrice && (
-                            <span className="compare-product-orig">฿{p.originalPrice.toLocaleString()}</span>
+                            <span className="compare-product-orig">฿{(p.originalPrice ?? 0).toLocaleString()}</span>
                           )}
                         </div>
 
@@ -500,7 +500,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                       <Star size={15} fill="#F59E0B" color="#F59E0B" />
                       <strong>{p.rating}</strong> / 5.0
                     </div>
-                    <div className="review-count">({p.reviewCount.toLocaleString()} รีวิว)</div>
+                    <div className="review-count">({(p.reviewCount ?? 0).toLocaleString()} รีวิว)</div>
                   </td>
                 ))}
                 {compareItems.length < 4 && <td className="empty-cell"></td>}
@@ -662,8 +662,8 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                     <div className="compare-modal-item-info">
                       <div className="compare-modal-item-name">{product.name}</div>
                       <div className="compare-modal-item-meta">
-                        <span className="price">฿{product.price.toLocaleString()}</span>
-                        <span className="rating">⭐️ {product.rating} ({product.reviewCount})</span>
+                        <span className="price">฿{(product.price ?? 0).toLocaleString()}</span>
+                        <span className="rating">⭐️ {product.rating ?? 5} ({product.reviewCount ?? 0})</span>
                       </div>
                     </div>
                     <button 

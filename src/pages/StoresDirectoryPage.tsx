@@ -78,7 +78,7 @@ export function StoresDirectoryPage() {
                   <div className="store-card__stat-label">คะแนนร้าน</div>
                 </div>
                 <div>
-                  <div className="store-card__stat-val">{store.followerCount.toLocaleString()}</div>
+                  <div className="store-card__stat-val">{(store.followerCount ?? 0).toLocaleString()}</div>
                   <div className="store-card__stat-label">ผู้ติดตาม</div>
                 </div>
                 <div>

@@ -1,35 +1,119 @@
 // src/pages/StorePage.tsx — Movemall Modern Storefront
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MessageSquare, UserPlus, Check, Star, MapPin, ShieldCheck, Radio, Play, Ticket, Sparkles, Flag, AlertTriangle } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { ReportStoreModal } from '../components/ReportStoreModal';
-import { stores } from '../data/stores';
-import { products } from '../data/products';
+import { stores, getStoreById } from '../data/stores';
+import { products as staticProducts } from '../data/products';
 import { mockLiveStreams } from '../data/liveStreams';
-import type { Product } from '../types';
+import { fetchApi } from '../utils/api';
+import { generateSlug } from '../utils/slug';
+import type { Product, Store } from '../types';
 import './StorePage.css';
 
 interface StorePageProps {
   onAddToCart: (product: Product) => void;
   isWishlisted?: (productId: string) => boolean;
   onToggleWishlist?: (product: Product) => void;
+  allProducts?: Product[];
 }
 
-export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist }: StorePageProps) {
+export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProducts }: StorePageProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const store = stores.find(s => s.id === id) || stores[0];
-  const activeLive = mockLiveStreams.find(s => s.storeId === store.id && s.type === 'live');
 
+  const [remoteStore, setRemoteStore] = useState<Store | null>(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'popular' | 'sale'>('all');
   const [claimedVouchers, setClaimedVouchers] = useState<Record<string, boolean>>({});
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
+  // 1. Resolve store from static data or active seller profile in localStorage
+  const resolvedLocalStore: Store | undefined = (() => {
+    if (!id) return stores[0];
+    
+    // Check static stores by ID or Slug
+    const foundStatic = getStoreById(id);
+    if (foundStatic) return foundStatic;
+
+    // Check if it's the current user's registered store
+    const customName = localStorage.getItem('movemall_custom_store_name') || localStorage.getItem('movemall_my_store_name');
+    const customId = localStorage.getItem('movemall_seller_store_id');
+    const customSlug = localStorage.getItem('movemall_store_slug') || (customName ? generateSlug(customName) : '');
+
+    if (customName && (id === customId || id === customSlug || id === 'store-my-live' || id.toLowerCase() === generateSlug(customName).toLowerCase())) {
+      return {
+        id: customId || `store-${Date.now()}`,
+        slug: customSlug,
+        name: customName,
+        logo: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=300&q=80',
+        banner: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
+        badge: 'verified',
+        rating: 5.0,
+        reviewCount: 48,
+        responseRate: '100%',
+        responseTime: 'ภายในไม่กี่นาที',
+        joinedDate: 'เพิ่งเปิดร้านใหม่',
+        productCount: 3,
+        followerCount: 12,
+        location: 'กรุงเทพมหานคร',
+        description: 'ร้านค้าทางการในระบบ Movemall การันตีสินค้าแท้ 100% จัดส่งรวดเร็ว',
+      };
+    }
+
+    return undefined;
+  })();
+
+  const store: Store = remoteStore || resolvedLocalStore || stores[0];
+
+  // 2. Fetch from backend API if not found locally
+  useEffect(() => {
+    if (!resolvedLocalStore && id) {
+      fetchApi<{ store: Store }>(`/api/stores/${encodeURIComponent(id)}`)
+        .then(res => {
+          if (res && res.store) {
+            setRemoteStore({
+              ...res.store,
+              reviewCount: res.store.reviewCount || 10,
+              responseRate: res.store.responseRate || '99%',
+              responseTime: res.store.responseTime || 'ภายใน 15 นาที',
+              joinedDate: res.store.joinedDate || 'ร้านค้าสมาชิก Movemall',
+              productCount: res.store.productCount || 0,
+              followerCount: res.store.followerCount || (res.store as any).followers || 1,
+              location: res.store.location || 'กรุงเทพมหานคร',
+            });
+          }
+        })
+        .catch(() => {});
+    }
+  }, [id, resolvedLocalStore]);
+
+  // 3. Dynamic SEO Title & Meta Tags
+  useEffect(() => {
+    if (store?.name) {
+      document.title = `${store.name} — ร้านค้าทางการบน Movemall | ช้อปออนไลน์ มั่นใจของแท้ 100%`;
+      
+      // Update meta description
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+      }
+      metaDesc.setAttribute(
+        'content',
+        `ช้อปสินค้าคุณภาพจาก ${store.name} บน Movemall สั่งซื้อง่าย ส่งฟรี มีเก็บเงินปลายทาง พร้อมโค้ดส่วนลดพิเศษและไลฟ์สดทุกวัน`
+      );
+    }
+  }, [store]);
+
+  const activeLive = mockLiveStreams.find(s => (s.storeId === store.id || s.storeId === store.slug) && s.type === 'live');
+
   // Filter products belonging to this store
-  const storeProducts = products.filter(p => p.storeId === store.id);
+  const availableProductList = allProducts || staticProducts;
+  const storeProducts = availableProductList.filter(p => p.storeId === store.id || (store.slug && p.storeId === store.slug));
 
   let displayedProducts = [...storeProducts];
   if (activeTab === 'popular') {
@@ -42,8 +126,35 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist }: Store
     setClaimedVouchers(prev => ({ ...prev, [vId]: true }));
   }
 
+  // Schema.org JSON-LD for Google Rich Results
+  const storeJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Store',
+    name: store.name,
+    description: store.description,
+    image: store.logo,
+    url: window.location.href,
+    telephone: '+66-2-000-0000',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: store.location || 'กรุงเทพมหานคร',
+      addressCountry: 'TH',
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: store.rating || 5.0,
+      reviewCount: store.reviewCount || 10,
+    },
+  };
+
   return (
     <main className="store-page">
+      {/* Schema.org Structured Data for Google SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(storeJsonLd) }}
+      />
+
       {/* Store Header Banner Section */}
       <section className="store-hero">
         <div className="container">
@@ -134,7 +245,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist }: Store
                       <Radio size={11} /> กำลัง LIVE สด
                     </span>
                     <span className="store-live-viewers">
-                      👀 {activeLive.viewers.toLocaleString()} คนกำลังดู
+                      👀 {(activeLive?.viewers ?? 0).toLocaleString()} คนกำลังดู
                     </span>
                   </div>
                   <div className="store-live-caption">
@@ -158,23 +269,23 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist }: Store
               <span className="store-stat-label">คะแนนร้านค้า</span>
               <span className="store-stat-val rating-val">
                 <Star size={13} fill="#F59E0B" color="#F59E0B" />
-                <strong>{store.rating}</strong>
-                <small>({store.reviewCount.toLocaleString()})</small>
+                <strong>{store.rating ?? 5}</strong>
+                <small>({(store.reviewCount ?? 0).toLocaleString()})</small>
               </span>
             </div>
 
             <div className="store-stat-box">
               <span className="store-stat-label">การตอบกลับแชท</span>
               <span className="store-stat-val">
-                <strong>{store.responseRate}</strong>
-                <small>({store.responseTime})</small>
+                <strong>{store.responseRate || '100%'}</strong>
+                <small>({store.responseTime || 'ทันที'})</small>
               </span>
             </div>
 
             <div className="store-stat-box">
               <span className="store-stat-label">ผู้ติดตามร้าน</span>
               <span className="store-stat-val">
-                <strong>{(store.followerCount + (isFollowing ? 1 : 0)).toLocaleString()}</strong>
+                <strong>{((store.followerCount ?? 0) + (isFollowing ? 1 : 0)).toLocaleString()}</strong>
                 <small>คน</small>
               </span>
             </div>

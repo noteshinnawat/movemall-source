@@ -162,13 +162,16 @@ export function ProductDetailPage({
 
   const storeProducts = sourceProducts.filter(p => p.storeId === product.storeId && p.id !== product.id).slice(0, 8);
   const related = sourceProducts.filter(p => p.category === product.category && p.id !== product.id && p.storeId !== product.storeId).slice(0, 8);
-  const fullStars = Math.floor(product.rating);
-  const stars = '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
-  const discount = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+  const safeRating = product.rating ?? 5;
+  const fullStars = Math.min(5, Math.max(0, Math.floor(safeRating)));
+  const stars = '★'.repeat(fullStars) + '☆'.repeat(Math.max(0, 5 - fullStars));
+  const productPrice = product.price ?? 0;
+  const productOrigPrice = product.originalPrice ?? 0;
+  const discount = productOrigPrice > productPrice && productOrigPrice > 0
+    ? Math.round(((productOrigPrice - productPrice) / productOrigPrice) * 100)
     : null;
-  const totalPrice = product.price * qty;
-  const savings = product.originalPrice ? (product.originalPrice - product.price) * qty : 0;
+  const totalPrice = productPrice * qty;
+  const savings = productOrigPrice > productPrice ? (productOrigPrice - productPrice) * qty : 0;
 
   const userInterest = typeof window !== 'undefined' ? localStorage.getItem('mm_user_interest') || product.category : product.category;
 
@@ -176,16 +179,20 @@ export function ProductDetailPage({
     .filter(p => p.id !== product.id)
     .sort((a, b) => {
       if (recommendedTab === 'foryou') {
-        const aScore = (a.category === product.category ? 40 : a.category === userInterest ? 25 : 0) + a.rating * 10 + (a.badge === 'sale' ? 15 : 0);
-        const bScore = (b.category === product.category ? 40 : b.category === userInterest ? 25 : 0) + b.rating * 10 + (b.badge === 'sale' ? 15 : 0);
+        const aScore = (a.category === product.category ? 40 : a.category === userInterest ? 25 : 0) + (a.rating ?? 5) * 10 + (a.badge === 'sale' ? 15 : 0);
+        const bScore = (b.category === product.category ? 40 : b.category === userInterest ? 25 : 0) + (b.rating ?? 5) * 10 + (b.badge === 'sale' ? 15 : 0);
         return bScore - aScore;
       }
       if (recommendedTab === 'bestseller') {
-        return (b.reviewCount * b.rating) - (a.reviewCount * a.rating);
+        return ((b.reviewCount ?? 0) * (b.rating ?? 5)) - ((a.reviewCount ?? 0) * (a.rating ?? 5));
       }
       if (recommendedTab === 'deals') {
-        const aDisc = a.originalPrice ? (a.originalPrice - a.price) / a.originalPrice : 0;
-        const bDisc = b.originalPrice ? (b.originalPrice - b.price) / b.originalPrice : 0;
+        const aOrig = a.originalPrice ?? 0;
+        const aPrice = a.price ?? 0;
+        const aDisc = aOrig > 0 && aPrice > 0 ? (aOrig - aPrice) / aOrig : 0;
+        const bOrig = b.originalPrice ?? 0;
+        const bPrice = b.price ?? 0;
+        const bDisc = bOrig > 0 && bPrice > 0 ? (bOrig - bPrice) / bOrig : 0;
         return bDisc - aDisc;
       }
       return 0;
@@ -256,8 +263,8 @@ export function ProductDetailPage({
   }, [id, recommendedTab]);
 
   const mediaList = [
-    ...(product.videoUrl ? [{ type: 'video' as const, url: product.videoUrl, poster: product.images[0] }] : []),
-    ...product.images.map(img => ({ type: 'image' as const, url: img }))
+    ...(product.videoUrl ? [{ type: 'video' as const, url: product.videoUrl, poster: (product.images && product.images[0]) || '' }] : []),
+    ...((product.images || []).map(img => ({ type: 'image' as const, url: img })))
   ];
   const currentMedia = mediaList[selectedImg] || mediaList[0];
   const colorOptions = product.category === 'fashion'
@@ -269,10 +276,10 @@ export function ProductDetailPage({
     : ['รุ่นมาตรฐาน (Standard)', 'รุ่นพรีเมียม (Pro Edition)', 'สีดำคลาสสิก (Classic Black)'];
 
   const installmentOptions = [
-    { id: 'full', label: 'ชำระเต็มจำนวน', desc: `฿${totalPrice.toLocaleString()}`, tag: 'ยอดนิยม' },
-    { id: '3m', label: 'ผ่อน 0% x 3 เดือน', desc: `฿${Math.round(totalPrice / 3).toLocaleString()}/เดือน`, tag: '0% ดอกเบี้ย' },
-    { id: '6m', label: 'ผ่อน 0% x 6 เดือน', desc: `฿${Math.round(totalPrice / 6).toLocaleString()}/เดือน`, tag: 'Movemall PayLater' },
-    ...(totalPrice >= 3000 ? [{ id: '10m', label: 'ผ่อน 0% x 10 เดือน', desc: `฿${Math.round(totalPrice / 10).toLocaleString()}/เดือน`, tag: 'ยอด ฿3,000+' }] : []),
+    { id: 'full', label: 'ชำระเต็มจำนวน', desc: `฿${(totalPrice ?? 0).toLocaleString()}`, tag: 'ยอดนิยม' },
+    { id: '3m', label: 'ผ่อน 0% x 3 เดือน', desc: `฿${Math.round((totalPrice ?? 0) / 3).toLocaleString()}/เดือน`, tag: '0% ดอกเบี้ย' },
+    { id: '6m', label: 'ผ่อน 0% x 6 เดือน', desc: `฿${Math.round((totalPrice ?? 0) / 6).toLocaleString()}/เดือน`, tag: 'Movemall PayLater' },
+    ...(totalPrice >= 3000 ? [{ id: '10m', label: 'ผ่อน 0% x 10 เดือน', desc: `฿${Math.round((totalPrice ?? 0) / 10).toLocaleString()}/เดือน`, tag: 'ยอด ฿3,000+' }] : []),
   ];
 
   function openAddToCartDrawer() {
@@ -537,19 +544,19 @@ export function ProductDetailPage({
             {/* Rating */}
             <div className="product-detail__rating-row">
               <span className="product-detail__stars" aria-hidden="true">{stars}</span>
-              <span className="product-detail__rating-num">{product.rating}</span>
-              <span className="product-detail__review-count">({product.reviewCount.toLocaleString()} รีวิว)</span>
+              <span className="product-detail__rating-num">{(product.rating ?? 5).toFixed(1)}</span>
+              <span className="product-detail__review-count">({(product.reviewCount ?? 0).toLocaleString()} รีวิว)</span>
               <span className="product-detail__stock">
-                {product.stock > 10 ? `✓ มีสินค้า ${product.stock} ชิ้น` : `⚠ เหลือ ${product.stock} ชิ้น`}
+                {(product.stock ?? 0) > 10 ? `✓ มีสินค้า ${product.stock} ชิ้น` : `⚠ เหลือ ${product.stock ?? 0} ชิ้น`}
               </span>
             </div>
 
             {/* Price */}
             <div className="product-detail__price-block">
-              <span className="product-detail__price">฿{product.price.toLocaleString()}</span>
-              {product.originalPrice && (
+              <span className="product-detail__price">฿{(product.price ?? 0).toLocaleString()}</span>
+              {Boolean(product.originalPrice && product.originalPrice > (product.price ?? 0)) && (
                 <span className="product-detail__original-price">
-                  ฿{product.originalPrice.toLocaleString()}
+                  ฿{(product.originalPrice ?? 0).toLocaleString()}
                 </span>
               )}
               {discount && (
@@ -671,7 +678,7 @@ export function ProductDetailPage({
                   onClick={handleBuyNow}
                 >
                   <CreditCard size={18} />
-                  <span>ซื้อสินค้าทันที ฿{totalPrice.toLocaleString()}</span>
+                  <span>ซื้อสินค้าทันที ฿{(totalPrice ?? 0).toLocaleString()}</span>
                 </button>
 
                 {(() => {
@@ -870,11 +877,11 @@ export function ProductDetailPage({
                       )}
                     </div>
                     <div className="product-store-meta">
-                      <span className="store-meta-rating">⭐ {store.rating} ({store.reviewCount.toLocaleString()} รีวิว)</span>
+                      <span className="store-meta-rating">⭐ {store.rating ?? 5} ({(store.reviewCount ?? 0).toLocaleString()} รีวิว)</span>
                       <span className="store-meta-sep">•</span>
-                      <span>ตอบแชท: {store.responseRate}</span>
+                      <span>ตอบแชท: {store.responseRate || '100%'}</span>
                       <span className="store-meta-sep">•</span>
-                      <span>📍 {store.location}</span>
+                      <span>📍 {store.location || 'กรุงเทพมหานคร'}</span>
                     </div>
                   </div>
                 </div>
@@ -981,9 +988,9 @@ export function ProductDetailPage({
                           <div className="store-mini-info">
                             <h4 className="store-mini-name" title={p.name}>{p.name}</h4>
                             <div className="store-mini-price-row">
-                              <span className="store-mini-price">฿{p.price.toLocaleString()}</span>
+                              <span className="store-mini-price">฿{(p.price ?? 0).toLocaleString()}</span>
                               {p.originalPrice && (
-                                <span className="store-mini-orig">฿{p.originalPrice.toLocaleString()}</span>
+                                <span className="store-mini-orig">฿{(p.originalPrice ?? 0).toLocaleString()}</span>
                               )}
                             </div>
                           </div>
@@ -1153,12 +1160,12 @@ export function ProductDetailPage({
           >
             <div className="product-sticky-buy-price-row">
               <span className="product-sticky-buy-text">สั่งซื้อสินค้าทันที</span>
-              <span className="product-sticky-buy-amount">฿{totalPrice.toLocaleString()}</span>
+              <span className="product-sticky-buy-amount">฿{(totalPrice ?? 0).toLocaleString()}</span>
             </div>
             <div className="product-sticky-buy-discount-row">
               {savings > 0 ? (
                 <span className="product-sticky-savings-pill">
-                  🔥 ประหยัด ฿{savings.toLocaleString()} (ลด {discount}%)
+                  🔥 ประหยัด ฿{(savings ?? 0).toLocaleString()} (ลด {discount}%)
                 </span>
               ) : (
                 <span className="product-sticky-savings-pill">
@@ -1190,10 +1197,10 @@ export function ProductDetailPage({
                 />
                 <div className="product-drawer-meta">
                   <div className="product-drawer-price-row">
-                    <span className="product-drawer-price">฿{totalPrice.toLocaleString()}</span>
+                    <span className="product-drawer-price">฿{(totalPrice ?? 0).toLocaleString()}</span>
                     {product.originalPrice && (
                       <span className="product-drawer-orig">
-                        ฿{(product.originalPrice * qty).toLocaleString()}
+                        ฿{((product.originalPrice || 0) * qty).toLocaleString()}
                       </span>
                     )}
                     {discount && (
@@ -1322,10 +1329,10 @@ export function ProductDetailPage({
             <div className="product-drawer-footer">
               <div className="product-drawer-footer-summary">
                 <span className="product-drawer-footer-total-label">ยอดสุทธิ ({qty} ชิ้น):</span>
-                <span className="product-drawer-footer-total-price">฿{totalPrice.toLocaleString()}</span>
+                <span className="product-drawer-footer-total-price">฿{(totalPrice ?? 0).toLocaleString()}</span>
                 {savings > 0 && (
                   <span className="product-drawer-footer-savings">
-                    ประหยัด ฿{savings.toLocaleString()}
+                    ประหยัด ฿{(savings ?? 0).toLocaleString()}
                   </span>
                 )}
               </div>
@@ -1338,7 +1345,7 @@ export function ProductDetailPage({
                 {drawerAction === 'buy' ? (
                   <>
                     <CreditCard size={18} />
-                    <span>ยืนยันสั่งซื้อทันที (฿{totalPrice.toLocaleString()})</span>
+                    <span>ยืนยันสั่งซื้อทันที (฿{(totalPrice ?? 0).toLocaleString()})</span>
                   </>
                 ) : (
                   <>

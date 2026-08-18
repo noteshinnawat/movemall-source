@@ -12,9 +12,11 @@ import {
   ArrowRight,
   ArrowLeft,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  Globe
 } from 'lucide-react';
 import { fetchApi } from '../utils/api';
+import { generateSlug } from '../utils/slug';
 import './SellerRegisterPage.css';
 
 export function SellerRegisterPage() {
@@ -23,6 +25,8 @@ export function SellerRegisterPage() {
 
   // Form State
   const [storeName, setStoreName] = useState('');
+  const [storeSlug, setStoreSlug] = useState('');
+  const [isSlugCustomized, setIsSlugCustomized] = useState(false);
   const [category, setCategory] = useState('อิเล็กทรอนิกส์ & ไอที');
   const [description, setDescription] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
@@ -50,12 +54,15 @@ export function SellerRegisterPage() {
 
   async function handleSubmitStoreRegistration() {
     setIsSubmitting(true);
+    const finalSlug = storeSlug || generateSlug(storeName || 'store');
+
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const res = await fetchApi<{ message: string; store: any }>('/api/stores/register', {
         method: 'POST',
         body: JSON.stringify({
           name: storeName.trim() || 'ร้านค้าใหม่ของผู้ขาย',
+          slug: finalSlug,
           description,
           logo: logoUrl,
           sellerType,
@@ -73,6 +80,7 @@ export function SellerRegisterPage() {
 
       if (res && res.store) {
         localStorage.setItem('movemall_custom_store_name', res.store.name);
+        localStorage.setItem('movemall_store_slug', finalSlug);
         localStorage.setItem('movemall_seller_store_id', res.store.id);
         const uStr = localStorage.getItem('movemall_user');
         if (uStr) {
@@ -80,6 +88,7 @@ export function SellerRegisterPage() {
             const u = JSON.parse(uStr);
             u.role = 'SELLER';
             u.storeId = res.store.id;
+            u.storeSlug = finalSlug;
             localStorage.setItem('movemall_user', JSON.stringify(u));
           } catch {
             // Ignore
@@ -93,6 +102,7 @@ export function SellerRegisterPage() {
       }, 1500);
     } catch {
       localStorage.setItem('movemall_custom_store_name', storeName || 'ร้านค้าใหม่ของผู้ขาย');
+      localStorage.setItem('movemall_store_slug', finalSlug);
       setIsSuccess(true);
       setTimeout(() => {
         navigate('/seller');
@@ -156,8 +166,39 @@ export function SellerRegisterPage() {
                     className="seller-input"
                     placeholder="เช่น TechPro Official Store 🇹🇭"
                     value={storeName}
-                    onChange={e => setStoreName(e.target.value)}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setStoreName(val);
+                      if (!isSlugCustomized) {
+                        setStoreSlug(generateSlug(val));
+                      }
+                    }}
                   />
+                </div>
+
+                <div className="seller-form-group">
+                  <label className="seller-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Globe size={14} color="#2563EB" /> ลิงก์หน้าร้านค้า (SEO Store URL Slug) *
+                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 13, color: '#6B7280', background: '#F3F4F6', padding: '9px 12px', borderRadius: 6, border: '1px solid #E5E7EB', whiteSpace: 'nowrap' }}>
+                      movemall.pages.dev/store/
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      className="seller-input"
+                      placeholder="techpro-official"
+                      value={storeSlug}
+                      onChange={e => {
+                        setIsSlugCustomized(true);
+                        setStoreSlug(generateSlug(e.target.value));
+                      }}
+                    />
+                  </div>
+                  <p style={{ fontSize: 11.5, color: '#10B981', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    ✨ URL ที่กระชับและมีความหมายจะช่วยให้ Google Index และจัดอันดับร้านค้าของคุณอยู่อันดับแรกๆ
+                  </p>
                 </div>
 
                 <div className="seller-grid-2">

@@ -16,6 +16,7 @@ import { RichTextEditor } from '../components/RichTextEditor';
 import type { Product, AdCampaign, AdType, AdWallet, AdKeyword, ProductCompliance, ComplianceType, TaxDocument, StoreTaxProfile, TaxDocType } from '../types';
 import { fetchApi } from '../utils/api';
 import { promptGoogleAuth } from '../utils/googleAuth';
+import { generateSlug } from '../utils/slug';
 import {
   getChatSocket,
   joinSellerChatRoom,
@@ -133,12 +134,14 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     setIsEditingStoreName(false);
   }
 
+  const sellerStoreSlug = localStorage.getItem('movemall_store_slug') || (customStoreName ? customStoreName.toLowerCase().trim().replace(/[^a-z0-9ก-๙]+/g, '-').replace(/(^-|-$)/g, '') || 'my-shop' : 'my-shop');
   const sellerStoreId = localStorage.getItem('movemall_seller_store_id') || (currentUser?.id ? `store-${currentUser.id}` : 'store-my-live');
 
   const currentStore = {
     id: sellerStoreId,
+    slug: sellerStoreSlug,
     name: customStoreName,
-    logo: currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80',
+    logo: currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=300&q=80',
     rating: 5.0,
     responseRate: '100%',
     followers: 1,
@@ -1374,7 +1377,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             </div>
 
             <div className="seller-header__actions">
-              <Link to={`/store/${currentStore.id}`} className="seller-header__btn--view">
+              <Link to={`/store/${currentStore.slug || currentStore.id}`} className="seller-header__btn--view">
                 <ExternalLink size={14} />
                 ดูหน้าร้านค้า
               </Link>

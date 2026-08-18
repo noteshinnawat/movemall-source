@@ -5,6 +5,7 @@ import type { Store } from '../types';
 export const stores: Store[] = [
   {
     id: 'store-techpro',
+    slug: 'techpro-official',
     name: 'TechPro Official Store',
     logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&q=80',
     banner: 'linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%)',
@@ -21,6 +22,7 @@ export const stores: Store[] = [
   },
   {
     id: 'store-fashionista',
+    slug: 'fashionista-studio',
     name: 'Fashionista Studio',
     logo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
     banner: 'linear-gradient(135deg, #0F766E 0%, #14B8A6 100%)',
@@ -37,6 +39,7 @@ export const stores: Store[] = [
   },
   {
     id: 'store-beautyglow',
+    slug: 'beautyglow-official',
     name: 'BeautyGlow Official',
     logo: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=150&q=80',
     banner: 'linear-gradient(135deg, #9D174D 0%, #F43F5E 100%)',
@@ -53,6 +56,7 @@ export const stores: Store[] = [
   },
   {
     id: 'store-sportmax',
+    slug: 'sportmax-thailand',
     name: 'SportMax Thailand',
     logo: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=150&q=80',
     banner: 'linear-gradient(135deg, #C2410C 0%, #F97316 100%)',
@@ -69,6 +73,6 @@ export const stores: Store[] = [
   },
 ];
 
-export function getStoreById(id: string): Store | undefined {
-  return stores.find(s => s.id === id);
+export function getStoreById(idOrSlug: string): Store | undefined {
+  return stores.find(s => s.id === idOrSlug || s.slug === idOrSlug);
 }

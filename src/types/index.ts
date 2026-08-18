@@ -1,6 +1,7 @@
 export interface Store {
   id: string;
   name: string;
+  slug?: string;
   logo: string;
   banner?: string;
   badge?: 'official' | 'preferred' | 'verified';

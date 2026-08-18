@@ -165,12 +165,16 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
     }
   }
 
+  const safeReviewCount = reviewCount ?? 0;
+  const safeRating = rating ?? 5;
+  const ratingFloor = Math.min(5, Math.max(0, Math.floor(safeRating)));
+
   const distribution = [
-    { stars: 5, pct: 85, count: Math.round(reviewCount * 0.85) },
-    { stars: 4, pct: 10, count: Math.round(reviewCount * 0.10) },
-    { stars: 3, pct: 3, count: Math.round(reviewCount * 0.03) },
-    { stars: 2, pct: 1, count: Math.round(reviewCount * 0.01) },
-    { stars: 1, pct: 1, count: Math.round(reviewCount * 0.01) },
+    { stars: 5, pct: 85, count: Math.round(safeReviewCount * 0.85) },
+    { stars: 4, pct: 10, count: Math.round(safeReviewCount * 0.10) },
+    { stars: 3, pct: 3, count: Math.round(safeReviewCount * 0.03) },
+    { stars: 2, pct: 1, count: Math.round(safeReviewCount * 0.01) },
+    { stars: 1, pct: 1, count: Math.round(safeReviewCount * 0.01) },
   ];
 
   return (
@@ -178,7 +182,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
       <div className="reviews-section__header">
         <h2 id="reviews-title" className="reviews-section__title">
           <Star size={20} style={{ color: 'var(--warning)' }} />
-          คะแนนและรีวิวจากผู้ซื้อจริง ({reviewCount.toLocaleString()})
+          คะแนนและรีวิวจากผู้ซื้อจริง ({safeReviewCount.toLocaleString()})
         </h2>
         <button
           className="reviews-section__write-btn"
@@ -193,12 +197,12 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
       <div className="reviews-summary">
         <div className="reviews-summary__score-box">
           <div className="reviews-summary__score">
-            {rating} <span>/ 5</span>
+            {safeRating.toFixed(1)} <span>/ 5</span>
           </div>
           <div className="reviews-summary__stars" aria-hidden="true">
-            {'★'.repeat(Math.floor(rating)) + '☆'.repeat(5 - Math.floor(rating))}
+            {'★'.repeat(ratingFloor) + '☆'.repeat(Math.max(0, 5 - ratingFloor))}
           </div>
-          <div className="reviews-summary__total">จาก {reviewCount.toLocaleString()} รีวิว</div>
+          <div className="reviews-summary__total">จาก {safeReviewCount.toLocaleString()} รีวิว</div>
         </div>
 
         {/* Rating Breakdown Bars */}
