@@ -1,28 +1,28 @@
-// Movemall Service Worker (PWA)
-const CACHE_NAME = 'movemall-cache-v3';
-const ASSETS_TO_CACHE = [
-  '/manifest.json',
-  '/favicon.svg'
-];
+// Movemall Service Worker (PWA) — Network First Live Sync
+const CACHE_NAME = 'movemall-cache-v4';
+const STATIC_ASSETS = ['/manifest.json', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(STATIC_ASSETS);
     })
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
@@ -30,19 +30,21 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // Skip Vite dev server endpoints, HMR, chrome extensions, and non-http schemes
+  // Skip Vite dev endpoints, APIs, and non-http schemes
   if (
     url.pathname.startsWith('/@vite') ||
     url.pathname.startsWith('/@fs') ||
     url.pathname.startsWith('/src') ||
+    url.pathname.startsWith('/api') ||
     url.pathname.includes('hot-update') ||
     !url.protocol.startsWith('http')
   ) {
     return;
   }
 
+  // Network-First for HTML navigation and JS chunks
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-cache' })
       .then((networkResponse) => {
         return networkResponse;
       })
@@ -52,15 +54,6 @@ self.addEventListener('fetch', (event) => {
           return cachedResponse;
         }
 
-        // For SPA navigation requests (e.g. /vouchers, /shop, etc.)
-        if (event.request.mode === 'navigate') {
-          const indexResponse = (await caches.match('/index.html')) || (await caches.match('/'));
-          if (indexResponse) {
-            return indexResponse;
-          }
-        }
-
-        // Return a valid fallback Response instead of undefined to prevent TypeError
         return new Response('Network error or resource unavailable', {
           status: 503,
           statusText: 'Service Unavailable',

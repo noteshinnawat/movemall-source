@@ -12,6 +12,7 @@ import { BackToTopButton } from './components/BackToTopButton';
 import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { VisualSearchModal } from './components/VisualSearchModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { API_BASE_URL } from './utils/api';
 
 // Helper to automatically retry & reload on stale chunks (Cloudflare Pages deployment invalidation)
 function lazyRetry<T extends ComponentType<any>>(
@@ -651,7 +652,6 @@ function App() {
   useEffect(() => {
     async function loadProductsLive() {
       try {
-        const { API_BASE_URL } = await import('./utils/api');
         const res = await fetch(`${API_BASE_URL}/api/products?limit=200`);
         if (res.ok) {
           const data = await res.json();

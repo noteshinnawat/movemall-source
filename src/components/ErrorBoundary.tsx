@@ -47,10 +47,14 @@ export class ErrorBoundary extends Component<Props, State> {
         const keys = await caches.keys();
         await Promise.all(keys.map(key => caches.delete(key)));
       }
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
     } catch {
       // ignore
     }
-    window.location.reload();
+    window.location.href = window.location.origin + window.location.pathname + '?_reload=' + Date.now();
   };
 
   private handleGoHome = async () => {
@@ -60,10 +64,14 @@ export class ErrorBoundary extends Component<Props, State> {
         const keys = await caches.keys();
         await Promise.all(keys.map(key => caches.delete(key)));
       }
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
     } catch {
       // ignore
     }
-    window.location.href = '/';
+    window.location.href = window.location.origin + '/?_reload=' + Date.now();
   };
 
   public render() {
