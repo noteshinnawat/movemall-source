@@ -2441,9 +2441,9 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
             </div>
           </div>
 
-          {/* Filters & Search Toolbar */}
+          {/* Filters & Search Toolbar (Modern Segmented Strip) */}
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: 16 }}>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div className="admin-segmented-strip">
               {[
                 { key: 'ALL', label: 'ทั้งหมด' },
                 { key: 'VERIFIED_ACTIVE', label: '✓ ผ่านสมบูรณ์ (Active)' },
@@ -2454,7 +2454,8 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
               ].map(f => (
                 <button
                   key={f.key}
-                  className={`admin-btn-sm ${complianceFilter === f.key ? 'admin-btn-primary' : 'admin-btn-outline'}`}
+                  type="button"
+                  className={`admin-segmented-btn ${complianceFilter === f.key ? 'admin-segmented-btn--active' : ''}`}
                   onClick={() => setComplianceFilter(f.key)}
                 >
                   {f.label}
@@ -2462,27 +2463,20 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
               ))}
             </div>
 
-            <div style={{ position: 'relative', width: 280 }}>
-              <Search size={15} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+            <div className="admin-search-wrapper">
+              <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
               <input
                 type="text"
+                className="admin-search-input"
                 placeholder="ค้นหาชื่อสินค้า, เลข อย., มอก...."
                 value={complianceSearch}
                 onChange={e => setComplianceSearch(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '7px 12px 7px 32px',
-                  borderRadius: 6,
-                  border: '1px solid #E5E7EB',
-                  fontSize: '0.85rem',
-                  outline: 'none',
-                }}
               />
             </div>
           </div>
 
           {/* AI Compliance Table */}
-          <div style={{ overflowX: 'auto' }}>
+          <div className="admin-table-container">
             <table className="admin-table">
               <thead>
                 <tr>
@@ -2518,13 +2512,13 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                           <img
                             src={r.image}
                             alt={r.productName}
-                            style={{ width: 44, height: 44, borderRadius: 6, objectFit: 'cover', border: '1px solid #E5E7EB' }}
+                            style={{ width: 44, height: 44, borderRadius: 6, objectFit: 'cover', border: '1px solid #e2e8f0' }}
                           />
                           <div>
-                            <div style={{ fontWeight: 600, fontSize: '0.85rem', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={r.productName}>
+                            <div style={{ fontWeight: 700, fontSize: '0.85rem', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#0f172a' }} title={r.productName}>
                               {r.productName}
                             </div>
-                            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{r.storeName}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{r.storeName}</div>
                           </div>
                         </div>
                       </td>
@@ -2534,9 +2528,10 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                             padding: '3px 8px',
                             borderRadius: 4,
                             fontSize: '0.75rem',
-                            fontWeight: 600,
-                            background: r.certType.includes('FDA') ? '#ECFDF5' : r.certType.includes('TISI') ? '#EFF6FF' : '#F3F4F6',
-                            color: r.certType.includes('FDA') ? '#059669' : r.certType.includes('TISI') ? '#2563EB' : '#4B5563',
+                            fontWeight: 700,
+                            background: r.certType.includes('FDA') ? '#ecfdf5' : r.certType.includes('TISI') ? '#eff6ff' : '#f8fafc',
+                            color: r.certType.includes('FDA') ? '#059669' : r.certType.includes('TISI') ? '#2563eb' : '#475569',
+                            border: `1px solid ${r.certType.includes('FDA') ? '#a7f3d0' : r.certType.includes('TISI') ? '#bfdbfe' : '#e2e8f0'}`,
                           }}
                         >
                           {r.certType === 'FDA_COSMETIC'
@@ -2549,53 +2544,53 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                         </span>
                       </td>
                       <td>
-                        <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{r.licenseNumber || '-'}</div>
-                        <div style={{ fontSize: '0.75rem', color: r.officialStatus === 'EXPIRED' ? '#EF4444' : '#6b7280' }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>{r.licenseNumber || '-'}</div>
+                        <div style={{ fontSize: '0.75rem', color: r.officialStatus === 'EXPIRED' ? '#ef4444' : '#64748b' }}>
                           หมดอายุ: {r.expiryDate}
                         </div>
                       </td>
                       <td>
                         {r.officialStatus === 'ACTIVE' && (
-                          <span style={{ background: '#DEF7EC', color: '#03543F', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
+                          <span style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
                             🟢 ACTIVE (ใช้ได้)
                           </span>
                         )}
                         {r.officialStatus === 'EXPIRED' && (
-                          <span style={{ background: '#FDE8E8', color: '#9B1C1C', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
+                          <span style={{ background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
                             🟡 EXPIRED (หมดอายุ)
                           </span>
                         )}
                         {r.officialStatus === 'REVOKED' && (
-                          <span style={{ background: '#771D1D', color: '#FFFFFF', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
+                          <span style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
                             🚫 REVOKED (เพิกถอน)
                           </span>
                         )}
                       </td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <div style={{ width: 45, height: 6, background: '#E5E7EB', borderRadius: 3, overflow: 'hidden' }}>
+                          <div style={{ width: 45, height: 6, background: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
                             <div
                               style={{
                                 width: `${r.aiNameMatchScore}%`,
                                 height: '100%',
-                                background: r.aiNameMatchScore > 80 ? '#10B981' : r.aiNameMatchScore > 50 ? '#F59E0B' : '#EF4444',
+                                background: r.aiNameMatchScore > 80 ? '#10b981' : r.aiNameMatchScore > 50 ? '#f59e0b' : '#ef4444',
                               }}
                             />
                           </div>
-                          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: r.aiNameMatchScore > 80 ? '#10B981' : r.aiNameMatchScore > 50 ? '#F59E0B' : '#EF4444' }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 800, color: r.aiNameMatchScore > 80 ? '#10b981' : r.aiNameMatchScore > 50 ? '#f59e0b' : '#ef4444' }}>
                             {r.aiNameMatchScore}%
                           </span>
                         </div>
-                        <div style={{ fontSize: '0.7rem', color: '#6b7280' }}>
+                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
                           {r.aiVisionLabelDetected ? '✓ พบฉลากในรูป' : '⚠️ ไม่พบฉลาก'}
                         </div>
                       </td>
-                      <td style={{ maxWidth: 280 }}>
-                        <div style={{ fontSize: '0.8rem', lineHeight: 1.3, color: '#374151' }}>
+                      <td style={{ maxWidth: 300 }}>
+                        <div className="admin-insight-box">
                           {r.aiRecommendation}
                         </div>
                         {r.officialRegisteredName && r.officialRegisteredName !== r.productName && (
-                          <div style={{ fontSize: '0.72rem', color: '#6b7280', marginTop: 2 }}>
+                          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 3 }}>
                             ชื่อใน อย./มอก.: <em>{r.officialRegisteredName}</em>
                           </div>
                         )}
@@ -2604,6 +2599,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                         <div style={{ display: 'flex', gap: 6 }}>
                           {r.status !== 'VERIFIED_ACTIVE' ? (
                             <button
+                              type="button"
                               className="admin-btn-sm admin-btn-primary"
                               onClick={() => handleApproveCompliance(r.productId)}
                               title="อนุมัติและมอบตรา Verified"
@@ -2611,11 +2607,14 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                               <CheckCircle2 size={13} /> อนุมัติ
                             </button>
                           ) : (
-                            <span style={{ fontSize: '0.75rem', color: '#10B981', fontWeight: 600 }}>✓ รับรองแล้ว</span>
+                            <span style={{ fontSize: '0.75rem', color: '#15803d', fontWeight: 700 }}>
+                              ✓ รับรองแล้ว
+                            </span>
                           )}
 
                           {r.status !== 'REVOKED_BANNED' && (
                             <button
+                              type="button"
                               className="admin-btn-sm admin-btn-danger"
                               onClick={() => handleSuppressCompliance(r.productId, r.aiRecommendation)}
                               title="สั่งซ่อนสินค้าจากการค้นหาทันที"
