@@ -3,19 +3,18 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
-// ── Auto-reload on stale build chunks (Vite / Cloudflare Pages Cache Invalidation) ──
-window.addEventListener('vite:preloadError', () => {
-  console.warn('🔄 New version detected or chunk missing, reloading page to fetch latest version...');
-  window.location.reload();
-});
+// ── Disable verbose debug console logs in Production environment ──
+if (import.meta.env.PROD) {
+  console.log = () => {};
+  console.info = () => {};
+  console.debug = () => {};
+}
 
-window.addEventListener('error', (e) => {
-  if (e.message && (
-    e.message.includes('Failed to fetch dynamically imported module') ||
-    e.message.includes('Importing a module script failed') ||
-    e.message.includes('MIME type of "text/html"')
-  )) {
-    console.warn('🔄 Dynamic module script failed to load, auto-reloading page...');
+// ── Safe Chunk Cache Invalidation with loop protection ──
+window.addEventListener('vite:preloadError', () => {
+  const retryKey = 'mm_preload_retry';
+  if (!sessionStorage.getItem(retryKey)) {
+    sessionStorage.setItem(retryKey, 'true');
     window.location.reload();
   }
 });

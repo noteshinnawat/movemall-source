@@ -18,6 +18,7 @@ import {
   Info,
 } from 'lucide-react';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { getStoredOrders, getOrderTrackingNumber, STATUS_LABEL, STATUS_COLOR } from '../data/orders';
 import type { Order, OrderStatus } from '../data/orders';
 import { LineConnectModal } from '../components/LineConnectModal';
