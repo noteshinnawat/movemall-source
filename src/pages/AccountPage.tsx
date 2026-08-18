@@ -43,9 +43,36 @@ export function AccountPage() {
   const [phone, setPhone] = useState(savedUser?.phone || '');
   const [avatarUrl, setAvatarUrl] = useState(
     savedUser?.avatarUrl ||
-    (savedUser?.name ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(savedUser.name)}` : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80')
+    `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(savedUser?.name || 'Movemall')}`
   );
   const [coins, setCoins] = useState(savedUser?.coinsBalance ?? 100);
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
+
+  // Sync state when auth changes
+  useEffect(() => {
+    function syncAuth() {
+      try {
+        const item = localStorage.getItem('movemall_user');
+        if (item) {
+          const u = JSON.parse(item);
+          if (u.name) setName(u.name);
+          if (u.email) setEmail(u.email);
+          if (u.phone) setPhone(u.phone);
+          if (u.avatarUrl) setAvatarUrl(u.avatarUrl);
+          if (typeof u.coinsBalance === 'number') setCoins(u.coinsBalance);
+        }
+      } catch {
+        // Ignore
+      }
+    }
+
+    window.addEventListener('movemall_auth_change', syncAuth);
+    window.addEventListener('storage', syncAuth);
+    return () => {
+      window.removeEventListener('movemall_auth_change', syncAuth);
+      window.removeEventListener('storage', syncAuth);
+    };
+  }, []);
 
   // Fetch Live Profile from Server
   useEffect(() => {
@@ -72,12 +99,40 @@ export function AccountPage() {
 
           // Update local cache
           localStorage.setItem('movemall_user', JSON.stringify(res.user));
+          window.dispatchEvent(new Event('movemall_auth_change'));
         }
       })
       .catch((err) => {
         console.warn('Could not fetch live profile from API, using cached state:', err);
       });
   }, []);
+
+  function handleSaveProfile() {
+    const updatedUser = {
+      ...(savedUser || {}),
+      id: savedUser?.id || 'usr-local',
+      name: name.trim() || 'สมาชิก Movemall',
+      email: email.trim(),
+      phone: phone.trim(),
+      avatarUrl: avatarUrl,
+      coinsBalance: coins,
+    };
+
+    localStorage.setItem('movemall_user', JSON.stringify(updatedUser));
+    window.dispatchEvent(new Event('movemall_auth_change'));
+
+    // Optional API call
+    const token = localStorage.getItem('movemall_jwt_token');
+    if (token) {
+      fetchApi('/api/user/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ name: updatedUser.name, avatarUrl: updatedUser.avatarUrl }),
+      }).catch(() => {});
+    }
+
+    setSaveSuccessMsg('✅ บันทึกข้อมูลส่วนตัวและรูปโปรไฟล์เรียบร้อยแล้ว!');
+    setTimeout(() => setSaveSuccessMsg(''), 4000);
+  }
 
   function handleAvatarFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -473,7 +528,18 @@ export function AccountPage() {
                   </div>
                 </div>
 
-                <button className="account-btn-primary" style={{ marginTop: '1.25rem' }}>
+                {saveSuccessMsg && (
+                  <p style={{ margin: '1rem 0 0 0', color: '#10B981', fontWeight: 700, fontSize: '0.9rem' }}>
+                    {saveSuccessMsg}
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleSaveProfile}
+                  className="account-btn-primary"
+                  style={{ marginTop: '1.25rem' }}
+                >
                   💾 บันทึกข้อมูลส่วนตัว
                 </button>
               </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, type ComponentType } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -10,39 +10,59 @@ import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { BackToTopButton } from './components/BackToTopButton';
 import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { VisualSearchModal } from './components/VisualSearchModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
-// Lazy-loaded pages (Code Splitting) — โหลดเฉพาะเมื่อผู้ใช้เปิดหน้านั้น
-const HomePage         = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
-const ShopPage         = lazy(() => import('./pages/ShopPage').then(m => ({ default: m.ShopPage })));
-const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage })));
-const CartPage         = lazy(() => import('./pages/CartPage').then(m => ({ default: m.CartPage })));
-const CheckoutPage     = lazy(() => import('./pages/CheckoutPage').then(m => ({ default: m.CheckoutPage })));
-const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage').then(m => ({ default: m.OrderSuccessPage })));
-const WishlistPage     = lazy(() => import('./pages/WishlistPage').then(m => ({ default: m.WishlistPage })));
-const OrdersPage       = lazy(() => import('./pages/OrdersPage').then(m => ({ default: m.OrdersPage })));
-const StorePage        = lazy(() => import('./pages/StorePage').then(m => ({ default: m.StorePage })));
-const SellerCenterPage = lazy(() => import('./pages/SellerCenterPage').then(m => ({ default: m.SellerCenterPage })));
-const HelpCenterPage   = lazy(() => import('./pages/HelpCenterPage').then(m => ({ default: m.HelpCenterPage })));
-const VouchersPage     = lazy(() => import('./pages/VouchersPage').then(m => ({ default: m.VouchersPage })));
-const FlashSalePage    = lazy(() => import('./pages/FlashSalePage').then(m => ({ default: m.FlashSalePage })));
-const StoresDirectoryPage = lazy(() => import('./pages/StoresDirectoryPage').then(m => ({ default: m.StoresDirectoryPage })));
-const ChatPage         = lazy(() => import('./pages/ChatPage').then(m => ({ default: m.ChatPage })));
-const LoginPage        = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
-const RegisterPage     = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
-const LiveStreamPage   = lazy(() => import('./pages/LiveStreamPage').then(m => ({ default: m.LiveStreamPage })));
-const VideoFeedPage    = lazy(() => import('./pages/VideoFeedPage').then(m => ({ default: m.VideoFeedPage })));
-const VideoStudioPage  = lazy(() => import('./pages/VideoStudioPage').then(m => ({ default: m.VideoStudioPage })));
-const GamesPage        = lazy(() => import('./pages/GamesPage').then(m => ({ default: m.GamesPage })));
-const BrandMallPage    = lazy(() => import('./pages/BrandMallPage').then(m => ({ default: m.BrandMallPage })));
-const TrackingPage     = lazy(() => import('./pages/TrackingPage').then(m => ({ default: m.TrackingPage })));
-const NotificationsPage = lazy(() => import('./pages/NotificationsPage').then(m => ({ default: m.NotificationsPage })));
-const ComparePage      = lazy(() => import('./pages/ComparePage').then(m => ({ default: m.ComparePage })));
-const AffiliatePage    = lazy(() => import('./pages/AffiliatePage').then(m => ({ default: m.AffiliatePage })));
-const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
-const TermsPage        = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })));
-const AccountPage      = lazy(() => import('./pages/AccountPage').then(m => ({ default: m.AccountPage })));
-const AdminPortalPage  = lazy(() => import('./pages/AdminPortalPage').then(m => ({ default: m.AdminPortalPage })));
-const SellerRegisterPage = lazy(() => import('./pages/SellerRegisterPage').then(m => ({ default: m.SellerRegisterPage })));
+// Helper to automatically retry & reload on stale chunks (Cloudflare Pages deployment invalidation)
+function lazyRetry<T extends ComponentType<any>>(
+  componentImport: () => Promise<{ default: T }>
+) {
+  return lazy(async () => {
+    try {
+      return await componentImport();
+    } catch (error) {
+      console.warn('🔄 Chunk load failed, attempting auto-reload to fetch newest assets...', error);
+      const reloadKey = 'mm_retry_' + window.location.pathname;
+      if (!sessionStorage.getItem(reloadKey)) {
+        sessionStorage.setItem(reloadKey, 'true');
+        window.location.reload();
+      }
+      throw error;
+    }
+  });
+}
+
+// Lazy-loaded pages (Code Splitting) — โหลดเฉพาะเมื่อผู้ใช้เปิดหน้านั้น พร้อมระบบ Auto-Retry อัจฉริยะ
+const HomePage         = lazyRetry(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
+const ShopPage         = lazyRetry(() => import('./pages/ShopPage').then(m => ({ default: m.ShopPage })));
+const ProductDetailPage = lazyRetry(() => import('./pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage })));
+const CartPage         = lazyRetry(() => import('./pages/CartPage').then(m => ({ default: m.CartPage })));
+const CheckoutPage     = lazyRetry(() => import('./pages/CheckoutPage').then(m => ({ default: m.CheckoutPage })));
+const OrderSuccessPage = lazyRetry(() => import('./pages/OrderSuccessPage').then(m => ({ default: m.OrderSuccessPage })));
+const WishlistPage     = lazyRetry(() => import('./pages/WishlistPage').then(m => ({ default: m.WishlistPage })));
+const OrdersPage       = lazyRetry(() => import('./pages/OrdersPage').then(m => ({ default: m.OrdersPage })));
+const StorePage        = lazyRetry(() => import('./pages/StorePage').then(m => ({ default: m.StorePage })));
+const SellerCenterPage = lazyRetry(() => import('./pages/SellerCenterPage').then(m => ({ default: m.SellerCenterPage })));
+const HelpCenterPage   = lazyRetry(() => import('./pages/HelpCenterPage').then(m => ({ default: m.HelpCenterPage })));
+const VouchersPage     = lazyRetry(() => import('./pages/VouchersPage').then(m => ({ default: m.VouchersPage })));
+const FlashSalePage    = lazyRetry(() => import('./pages/FlashSalePage').then(m => ({ default: m.FlashSalePage })));
+const StoresDirectoryPage = lazyRetry(() => import('./pages/StoresDirectoryPage').then(m => ({ default: m.StoresDirectoryPage })));
+const ChatPage         = lazyRetry(() => import('./pages/ChatPage').then(m => ({ default: m.ChatPage })));
+const LoginPage        = lazyRetry(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const RegisterPage     = lazyRetry(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const LiveStreamPage   = lazyRetry(() => import('./pages/LiveStreamPage').then(m => ({ default: m.LiveStreamPage })));
+const VideoFeedPage    = lazyRetry(() => import('./pages/VideoFeedPage').then(m => ({ default: m.VideoFeedPage })));
+const VideoStudioPage  = lazyRetry(() => import('./pages/VideoStudioPage').then(m => ({ default: m.VideoStudioPage })));
+const GamesPage        = lazyRetry(() => import('./pages/GamesPage').then(m => ({ default: m.GamesPage })));
+const BrandMallPage    = lazyRetry(() => import('./pages/BrandMallPage').then(m => ({ default: m.BrandMallPage })));
+const TrackingPage     = lazyRetry(() => import('./pages/TrackingPage').then(m => ({ default: m.TrackingPage })));
+const NotificationsPage = lazyRetry(() => import('./pages/NotificationsPage').then(m => ({ default: m.NotificationsPage })));
+const ComparePage      = lazyRetry(() => import('./pages/ComparePage').then(m => ({ default: m.ComparePage })));
+const AffiliatePage    = lazyRetry(() => import('./pages/AffiliatePage').then(m => ({ default: m.AffiliatePage })));
+const PrivacyPolicyPage = lazyRetry(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
+const TermsPage        = lazyRetry(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })));
+const AccountPage      = lazyRetry(() => import('./pages/AccountPage').then(m => ({ default: m.AccountPage })));
+const AdminPortalPage  = lazyRetry(() => import('./pages/AdminPortalPage').then(m => ({ default: m.AdminPortalPage })));
+const SellerRegisterPage = lazyRetry(() => import('./pages/SellerRegisterPage').then(m => ({ default: m.SellerRegisterPage })));
 import { products as initialProducts } from './data/products';
 import { useCart } from './hooks/useCart';
 import { useWishlist } from './hooks/useWishlist';
@@ -114,12 +134,13 @@ function AppLayout({
       />
 
       <div style={{ flex: 1 }}>
-        <Suspense fallback={
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: 12 }}>
-            <div style={{ width: 36, height: 36, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-            <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>กำลังโหลด...</span>
-          </div>
-        }>
+        <ErrorBoundary>
+          <Suspense fallback={
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: 12 }}>
+              <div style={{ width: 36, height: 36, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>กำลังโหลด...</span>
+            </div>
+          }>
         <Routes>
           {/* Home */}
           <Route
@@ -584,6 +605,7 @@ function AppLayout({
           />
         </Routes>
         </Suspense>
+        </ErrorBoundary>
       </div>
 
       {!isDistractionFreePage && <Footer />}

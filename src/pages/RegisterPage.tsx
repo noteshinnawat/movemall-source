@@ -325,6 +325,15 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
     } catch (err) {
       console.warn('Social register error, using fallback:', err);
       const fallbackName = provider === 'google' ? 'Google Member' : `${provider.toUpperCase()} Member`;
+      const fallbackUser = {
+        name: fallbackName,
+        email: `${provider}_member@movemall.com`,
+        role: 'BUYER',
+        coinsBalance: 100,
+        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(fallbackName)}`,
+      };
+      localStorage.setItem('movemall_user', JSON.stringify(fallbackUser));
+      window.dispatchEvent(new Event('movemall_auth_change'));
       onRegisterSuccess?.(fallbackName, 'buyer');
       setWelcomeModal({
         show: true,

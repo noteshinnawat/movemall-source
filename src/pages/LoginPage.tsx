@@ -216,6 +216,15 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     } catch (err) {
       console.warn('Social login error, using fallback:', err);
       const fallbackName = provider === 'google' ? 'Google User' : `${provider.toUpperCase()} User`;
+      const fallbackUser = {
+        name: fallbackName,
+        email: `${provider}_user@movemall.com`,
+        role: 'BUYER',
+        coinsBalance: 100,
+        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(fallbackName)}`,
+      };
+      localStorage.setItem('movemall_user', JSON.stringify(fallbackUser));
+      window.dispatchEvent(new Event('movemall_auth_change'));
       onLoginSuccess?.(fallbackName, 'buyer');
       navigate('/account');
     } finally {
