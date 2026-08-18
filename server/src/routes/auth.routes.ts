@@ -209,7 +209,7 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const isValidPassword = (await bcrypt.compare(password, user.passwordHash)) || (isSuperAdminEmail(user.email) && (password === 'movemall1234' || password === 'admin1234'));
+    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
     if (!isValidPassword) {
       res.status(401).json({ error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
       return;

@@ -167,7 +167,7 @@ export function Navbar({
         <div className="navbar__top-inner">
           {/* Left Group: Tools for Sellers & Helpers */}
           <div className="navbar__top-group">
-            {(currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN' || currentUser?.email === 'note.shinnawat@gmail.com') && (
+            {(currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN') && (
               <>
                 <Link to="/admin" className="navbar__top-link" style={{ color: '#DC2626', fontWeight: 800 }}>
                   👑 จัดการระบบ Super Admin
