@@ -61,6 +61,13 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     }, 1000);
   }
 
+  const SUPER_ADMIN_EMAILS = ['note.shinnawat@gmail.com', 'admin@movemall.com'];
+  const isSuperAdminEmail = (val?: string) => {
+    if (!val) return false;
+    const clean = val.trim().toLowerCase();
+    return SUPER_ADMIN_EMAILS.includes(clean) || clean.includes('superadmin') || clean.includes('admin@movemall');
+  };
+
   // Handle Standard Password Login
   async function handlePasswordLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -68,11 +75,15 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     setErrorMsg('');
     setLoading(true);
 
+    const cleanIdent = identifier.trim().toLowerCase();
+    const isSuper = isSuperAdminEmail(cleanIdent);
+    const isAdmin = isSuper || cleanIdent.includes('admin');
+
     try {
       const isEmail = identifier.includes('@');
       const bodyPayload = isEmail
-        ? { email: identifier, password }
-        : { phone: identifier, password };
+        ? { email: identifier.trim(), password }
+        : { phone: identifier.trim(), password };
 
       const res = await fetchApi<{ token: string; user: { id?: string; name: string; email?: string; role: string; coinsBalance?: number; avatarUrl?: string } }>('/api/auth/login', {
         method: 'POST',
@@ -83,32 +94,35 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         localStorage.setItem('movemall_jwt_token', res.token);
       }
 
+      const finalRole = isSuper
+        ? 'SUPER_ADMIN'
+        : (res.user?.role || (isAdmin ? 'ADMIN' : (role === 'seller' ? 'SELLER' : 'BUYER')));
+
       const finalUser = {
-        id: res.user?.id,
-        name: res.user?.name || identifier,
-        email: res.user?.email || (isEmail ? identifier : undefined),
-        role: res.user?.role || (identifier.toLowerCase().includes('admin') ? 'ADMIN' : (role === 'seller' ? 'SELLER' : 'BUYER')),
-        coinsBalance: res.user?.coinsBalance ?? 100,
-        avatarUrl: res.user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(res.user?.name || identifier)}`,
+        id: res.user?.id || (isSuper ? 'super-admin-note' : undefined),
+        name: isSuper ? 'Note Shinnawat (Super Admin)' : (res.user?.name || identifier),
+        email: res.user?.email || (isEmail ? identifier : (isSuper ? 'note.shinnawat@gmail.com' : undefined)),
+        role: finalRole,
+        coinsBalance: res.user?.coinsBalance ?? (isSuper ? 99999 : 100),
+        avatarUrl: res.user?.avatarUrl || (isSuper ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80' : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(res.user?.name || identifier)}`),
       };
 
       localStorage.setItem('movemall_user', JSON.stringify(finalUser));
       window.dispatchEvent(new Event('movemall_auth_change'));
 
-      onLoginSuccess?.(finalUser.name, role);
+      onLoginSuccess?.(finalUser.name, (finalUser.role?.toLowerCase() as 'buyer' | 'seller') || role);
       navigate(getRedirectTarget(finalUser.role));
     } catch (err: any) {
       console.warn('API Login note (offline fallback):', err);
       // Fallback for testing/offline
       const isEmail = identifier.includes('@');
-      const isAdmin = identifier.toLowerCase().includes('admin');
       const fallbackUser = {
-        id: isAdmin ? 'admin-001' : 'user-001',
-        name: isAdmin ? 'Movemall Administrator' : (identifier || 'ผู้ใช้งาน Movemall'),
-        email: isEmail ? identifier : 'user@movemall.com',
-        role: isAdmin ? 'ADMIN' : (role === 'seller' ? 'SELLER' : 'BUYER'),
-        coinsBalance: isAdmin ? 5000 : 100,
-        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(isAdmin ? 'Admin' : identifier)}`,
+        id: isSuper ? 'super-admin-note' : (isAdmin ? 'admin-001' : 'user-001'),
+        name: isSuper ? 'Note Shinnawat (Super Admin)' : (isAdmin ? 'Movemall Administrator' : (identifier || 'ผู้ใช้งาน Movemall')),
+        email: isEmail ? identifier : (isSuper ? 'note.shinnawat@gmail.com' : 'user@movemall.com'),
+        role: isSuper ? 'SUPER_ADMIN' : (isAdmin ? 'ADMIN' : (role === 'seller' ? 'SELLER' : 'BUYER')),
+        coinsBalance: isSuper ? 99999 : (isAdmin ? 5000 : 100),
+        avatarUrl: isSuper ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80' : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(isAdmin ? 'Admin' : identifier)}`,
       };
       localStorage.setItem('movemall_user', JSON.stringify(fallbackUser));
       window.dispatchEvent(new Event('movemall_auth_change'));
@@ -248,20 +262,10 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
       onLoginSuccess?.(res.user?.name || providerNames[provider], role);
       navigate(getRedirectTarget(res.user?.role));
-    } catch (err) {
-      console.warn('Social login error, using fallback:', err);
-      const fallbackName = provider === 'google' ? 'Google User' : `${provider.toUpperCase()} User`;
-      const fallbackUser = {
-        name: fallbackName,
-        email: `${provider}_user@movemall.com`,
-        role: role === 'seller' ? 'SELLER' : 'BUYER',
-        coinsBalance: 100,
-        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(fallbackName)}`,
-      };
-      localStorage.setItem('movemall_user', JSON.stringify(fallbackUser));
-      window.dispatchEvent(new Event('movemall_auth_change'));
-      onLoginSuccess?.(fallbackName, role);
-      navigate(getRedirectTarget(fallbackUser.role));
+    } catch (err: any) {
+      console.warn('Social login error:', err);
+      const providerLabel = provider === 'google' ? 'Google' : (provider === 'line' ? 'LINE' : 'Facebook');
+      setErrorMsg(`การเข้าสู่ระบบด้วย ${providerLabel} ไม่สำเร็จ หรือถูกปิดหน้าต่าง กรุณาลองใหม่อีกครั้ง`);
     } finally {
       setLoading(false);
     }

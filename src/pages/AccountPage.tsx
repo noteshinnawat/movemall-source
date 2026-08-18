@@ -497,6 +497,22 @@ export function AccountPage() {
               )}
             </button>
             <div style={{ height: 1, background: '#E2E8F0', margin: '8px 0' }} />
+            {(savedUser?.role === 'SUPER_ADMIN' || savedUser?.role === 'ADMIN' || savedUser?.email === 'note.shinnawat@gmail.com') && (
+              <Link
+                to="/admin"
+                className="account-nav-btn"
+                style={{
+                  textDecoration: 'none',
+                  background: '#FEF2F2',
+                  color: '#DC2626',
+                  fontWeight: 800,
+                  border: '1px solid #FECACA',
+                  marginBottom: 6,
+                }}
+              >
+                <ShieldCheck size={18} /> 👑 จัดการระบบ Super Admin
+              </Link>
+            )}
             <Link
               to="/seller"
               className="account-nav-btn"

@@ -1210,7 +1210,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
           </div>
 
           <div className="admin-gate-hint-box">
-            💡 <strong>คำแนะนำ:</strong> หากคุณเป็นเจ้าหน้าที่ระบบ ให้กดปุ่ม <em>"สลับบัญชี"</em> เพื่อล็อกอินด้วยอีเมล Admin (<code style={{ color: '#2563eb' }}>admin@movemall.com</code>)
+            💡 <strong>คำแนะนำ:</strong> หากคุณเป็นเจ้าหน้าที่ระบบ ให้กดปุ่ม <em>"สลับบัญชี"</em> เพื่อล็อกอินด้วยบัญชี Super Admin (<code style={{ color: '#2563eb' }}>note.shinnawat@gmail.com</code> หรือ <code style={{ color: '#2563eb' }}>admin@movemall.com</code>)
           </div>
         </div>
       </div>

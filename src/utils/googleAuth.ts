@@ -139,12 +139,12 @@ export async function promptGoogleAuth(clientId?: string): Promise<GoogleAuthRes
                 resolve({ accessToken: tokenResponse.access_token });
               } else {
                 console.warn('Google OAuth Token response error:', tokenResponse);
-                resolve(getDevMockUser());
+                throw new Error('ไม่สามารถรับ Access Token จาก Google ได้');
               }
             },
             error_callback: (err) => {
               console.warn('Google OAuth Prompt Error:', err);
-              resolve(getDevMockUser());
+              throw new Error('การเข้าสู่ระบบด้วย Google ขัดข้อง หรือถูกปิดหน้าต่าง');
             },
           });
 
@@ -153,11 +153,12 @@ export async function promptGoogleAuth(clientId?: string): Promise<GoogleAuthRes
         });
       } catch (promptErr) {
         console.warn('Google Auth Client Init Error:', promptErr);
+        throw promptErr;
       }
     }
   }
 
-  // Dev fallback with simulated realistic Google Account
+  // Dev fallback only when no Client ID is configured at all
   return getDevMockUser();
 }
 

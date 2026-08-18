@@ -322,24 +322,10 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
         userName: res.user?.name || target.name,
         coins: 100,
       });
-    } catch (err) {
-      console.warn('Social register error, using fallback:', err);
-      const fallbackName = provider === 'google' ? 'Google Member' : `${provider.toUpperCase()} Member`;
-      const fallbackUser = {
-        name: fallbackName,
-        email: `${provider}_member@movemall.com`,
-        role: 'BUYER',
-        coinsBalance: 100,
-        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(fallbackName)}`,
-      };
-      localStorage.setItem('movemall_user', JSON.stringify(fallbackUser));
-      window.dispatchEvent(new Event('movemall_auth_change'));
-      onRegisterSuccess?.(fallbackName, 'buyer');
-      setWelcomeModal({
-        show: true,
-        userName: fallbackName,
-        coins: 100,
-      });
+    } catch (err: any) {
+      console.warn('Social register error:', err);
+      const providerLabel = provider === 'google' ? 'Google' : (provider === 'line' ? 'LINE' : 'Facebook');
+      setErrorMsg(`การเชื่อมต่อกับ ${providerLabel} ไม่สำเร็จ หรือถูกปิดหน้าต่าง กรุณาลองใหม่อีกครั้ง`);
     } finally {
       setLoading(false);
     }

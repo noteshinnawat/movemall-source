@@ -56,6 +56,7 @@ export function Navbar({
     id?: string;
     name?: string;
     email?: string;
+    role?: string;
     avatarUrl?: string;
     coinsBalance?: number;
   } | null>(() => {
@@ -166,6 +167,14 @@ export function Navbar({
         <div className="navbar__top-inner">
           {/* Left Group: Tools for Sellers & Helpers */}
           <div className="navbar__top-group">
+            {(currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN' || currentUser?.email === 'note.shinnawat@gmail.com') && (
+              <>
+                <Link to="/admin" className="navbar__top-link" style={{ color: '#DC2626', fontWeight: 800 }}>
+                  👑 จัดการระบบ Super Admin
+                </Link>
+                <span className="navbar__top-divider" />
+              </>
+            )}
             <Link to="/seller" className="navbar__top-link">
               🏪 ศูนย์ผู้ขาย (Seller Centre)
             </Link>
