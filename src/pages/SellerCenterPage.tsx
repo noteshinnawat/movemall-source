@@ -1420,14 +1420,14 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   return (
     <div className="admin-enterprise-shell">
       {/* ── 1. Enterprise Top Navigation Bar ── */}
-      <header className="admin-enterprise-topbar">
-        <div className="admin-topbar-left">
+      <header className="admin-enterprise-topbar" style={{ padding: '0.6rem 1.25rem' }}>
+        <div className="admin-topbar-left" style={{ gap: '0.85rem' }}>
           <div className="admin-brand-card">
-            <div className="admin-brand-icon-box">
-              <Store size={20} color="#ffffff" />
+            <div className="admin-brand-icon-box" style={{ width: 34, height: 34 }}>
+              <Store size={18} color="#ffffff" />
             </div>
             <div>
-              <div className="admin-brand-name">
+              <div className="admin-brand-name" style={{ fontSize: '0.95rem' }}>
                 MOVEMALL <span className="admin-brand-badge">SELLER CENTRE</span>
               </div>
               <div className="admin-db-status">
@@ -1437,114 +1437,127 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             </div>
           </div>
 
-          {/* Store Name with inline edit */}
-          <div style={{ marginLeft: '1rem', display: 'flex', alignItems: 'center' }}>
-            {isEditingStoreName ? (
-              <form onSubmit={handleSaveStoreName} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                <input
-                  type="text"
-                  value={storeNameInput}
-                  onChange={e => setStoreNameInput(e.target.value)}
-                  style={{
-                    padding: '3px 8px',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    border: '1.5px solid #2563eb',
-                    borderRadius: '4px',
-                    outline: 'none',
-                    color: '#0f172a',
-                  }}
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  style={{
-                    background: '#2563eb',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '3px 8px',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                  }}
-                >
-                  บันทึก
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsEditingStoreName(false)}
-                  style={{
-                    background: '#e2e8f0',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '3px 6px',
-                    fontSize: '0.75rem',
-                    cursor: 'pointer',
-                    color: '#475569',
-                  }}
-                >
-                  ยกเลิก
-                </button>
-              </form>
-            ) : (
-              <div
+          <div style={{ height: '24px', width: '1px', background: '#e2e8f0', margin: '0 0.25rem' }} />
+
+          {/* Current Store Identity */}
+          {isEditingStoreName ? (
+            <form onSubmit={handleSaveStoreName} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              <input
+                type="text"
+                value={storeNameInput}
+                onChange={e => setStoreNameInput(e.target.value)}
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  background: '#f1f5f9',
-                  padding: '3px 8px',
+                  padding: '4px 8px',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  border: '1.5px solid #2563eb',
                   borderRadius: '6px',
-                  border: '1px solid #e2e8f0',
+                  outline: 'none',
+                  color: '#0f172a',
+                  width: '180px',
+                }}
+                autoFocus
+              />
+              <button
+                type="submit"
+                style={{
+                  background: '#2563eb',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '4px 10px',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
                 }}
               >
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155' }}>
-                  🏪 {currentStore.name}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStoreNameInput(customStoreName);
-                    setIsEditingStoreName(true);
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#2563eb',
-                    cursor: 'pointer',
-                    fontSize: '0.7rem',
-                    fontWeight: 600,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '2px',
-                    padding: 0,
-                  }}
-                  title="เปลี่ยนชื่อร้านค้า"
-                >
-                  <Pencil size={10} /> แก้ไข
-                </button>
-              </div>
-            )}
-          </div>
+                บันทึก
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsEditingStoreName(false)}
+                style={{
+                  background: '#f1f5f9',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  padding: '4px 8px',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  color: '#475569',
+                }}
+              >
+                ยกเลิก
+              </button>
+            </form>
+          ) : (
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '4px 10px',
+                background: '#f8fafc',
+                borderRadius: '6px',
+                border: '1px solid #e2e8f0',
+              }}
+            >
+              {currentStore.logo ? (
+                <img
+                  src={currentStore.logo}
+                  alt={currentStore.name}
+                  style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }}
+                />
+              ) : (
+                <span style={{ fontSize: '0.9rem' }}>🏪</span>
+              )}
+              <span
+                style={{
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  color: '#1e293b',
+                  maxWidth: '220px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+                title={currentStore.name}
+              >
+                {currentStore.name}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setStoreNameInput(customStoreName);
+                  setIsEditingStoreName(true);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  padding: '2px',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                title="เปลี่ยนชื่อร้านค้า"
+              >
+                <Pencil size={11} />
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="admin-topbar-right">
-          <div className="admin-quick-metrics">
-            <span className="admin-stat-chip">📦 สินค้า <strong>{storeProducts.length}</strong></span>
-            <span className="admin-stat-chip">🛒 รอส่ง <strong>{sellerOrders.filter(o => o.status === 'pending').length}</strong></span>
-            <span className="admin-stat-chip">⭐ เรตติ้ง <strong>{currentStore.rating}</strong></span>
-          </div>
-
+        <div className="admin-topbar-right" style={{ gap: '0.65rem' }}>
           <button
             type="button"
             className="admin-action-btn admin-action-btn--sync"
             onClick={() => syncSellerHubLive(true)}
             disabled={isRefreshingData}
-            title="กดเพื่อดึงข้อมูลออเดอร์และยอดขายจริงล่าสุดจากฐานข้อมูล PostgreSQL"
+            title={lastSyncTime ? `ดึงข้อมูลจริงล่าสุดจาก PostgreSQL (${lastSyncTime})` : 'กดเพื่อซิงค์ข้อมูลจริง'}
+            style={{ padding: '0.4rem 0.75rem', fontSize: '0.78rem' }}
           >
             <RefreshCw size={13} style={{ animation: isRefreshingData ? 'spin 1s linear infinite' : 'none' }} />
-            <span>{isRefreshingData ? 'กำลังซิงค์...' : `ซิงค์ข้อมูลจริง ${lastSyncTime ? `(${lastSyncTime})` : ''}`}</span>
+            <span>{isRefreshingData ? 'กำลังซิงค์...' : 'ซิงค์ข้อมูล'}</span>
           </button>
 
           <Link
@@ -1553,10 +1566,10 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             rel="noopener noreferrer"
             className="admin-action-btn admin-action-btn--storefront"
             title="เปิดหน้าร้านค้ามุมมองผู้ซื้อในแท็บใหม่"
+            style={{ padding: '0.4rem 0.75rem', fontSize: '0.78rem' }}
           >
-            <Globe size={13} />
-            <span>หน้าร้านค้า (Storefront)</span>
-            <ExternalLink size={11} />
+            <ExternalLink size={13} />
+            <span>ดูหน้าร้าน</span>
           </Link>
 
           <button
@@ -1566,7 +1579,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.35rem',
-              padding: '0.45rem 0.85rem',
+              padding: '0.4rem 0.85rem',
               borderRadius: '6px',
               fontSize: '0.8rem',
               fontWeight: 700,
@@ -1574,38 +1587,43 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
               background: '#2563eb',
               color: '#ffffff',
               border: 'none',
-              boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)',
+              boxShadow: '0 1px 3px rgba(37, 99, 235, 0.2)',
+              whiteSpace: 'nowrap',
             }}
           >
             <Plus size={14} />
-            <span>+ ลงขายสินค้าใหม่</span>
+            <span>ลงขายสินค้า</span>
           </button>
 
           <div
             className="admin-profile-pill"
             onClick={() => setActiveTab('settings')}
-            style={{ cursor: 'pointer' }}
-            title="คลิกเพื่อไปที่การตั้งค่าร้านค้า (เปลี่ยนรูปโปรไฟล์ / แบนเนอร์)"
+            style={{
+              cursor: 'pointer',
+              padding: '3px 8px 3px 3px',
+              gap: '0.4rem',
+            }}
+            title="คลิกเพื่อไปที่การตั้งค่าร้านค้า (เปลี่ยนรูปโปรไฟล์ / แบนเนอร์ / บัญชี)"
           >
             {currentStore.logo ? (
               <img
                 src={currentStore.logo}
                 alt={currentStore.name}
                 className="admin-avatar-img"
-                style={{ borderRadius: '50%' }}
+                style={{ width: 26, height: 26, borderRadius: '50%' }}
               />
             ) : (
               <div
                 style={{
-                  width: 28,
-                  height: 28,
+                  width: 26,
+                  height: 26,
                   borderRadius: '50%',
                   background: '#2563eb',
                   color: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '0.75rem',
+                  fontSize: '0.7rem',
                   fontWeight: 700,
                 }}
               >
@@ -1613,8 +1631,9 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
               </div>
             )}
             <div className="admin-profile-text">
-              <span className="admin-profile-name">{currentStore.name}</span>
-              <span className="admin-profile-role">⚙️ ตั้งค่าร้านค้า</span>
+              <span className="admin-profile-role" style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 600 }}>
+                ⚙️ ตั้งค่าร้านค้า
+              </span>
             </div>
           </div>
         </div>

@@ -46,12 +46,27 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const rawId = req.params.id;
     const id = Array.isArray(rawId) ? rawId[0] : rawId;
+    let decoded = id;
+    try {
+      decoded = decodeURIComponent(id).trim();
+    } catch {
+      decoded = id.trim();
+    }
 
     const cacheKey = `store:detail:${id}`;
 
     const store = await getCachedOrFetch(cacheKey, 180, async () => {
-      return await prismaRead.store.findUnique({
-        where: { id },
+      const cleanKeyword = decoded.replace(/^ร้านค้าของ-?/, '').replace(/-/g, ' ').trim();
+
+      return await prismaRead.store.findFirst({
+        where: {
+          OR: [
+            { id: id },
+            { id: decoded },
+            { name: { equals: decoded, mode: 'insensitive' } },
+            ...(cleanKeyword ? [{ name: { contains: cleanKeyword, mode: 'insensitive' as const } }] : []),
+          ],
+        },
         include: {
           products: {
             take: 50,
