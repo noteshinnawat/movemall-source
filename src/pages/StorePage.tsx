@@ -48,7 +48,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
     // Check if it's the current user's registered store
     let currentUser: any = null;
     try {
-      const stored = localStorage.getItem('movemall_auth_user');
+      const stored = localStorage.getItem('movemall_user');
       if (stored) currentUser = JSON.parse(stored);
     } catch {}
 
@@ -64,10 +64,11 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
       (customId && (decodedId === customId || id === customId)) ||
       (customSlug && (decodedId === customSlug || id === customSlug || decodedId.toLowerCase() === customSlug.toLowerCase())) ||
       (customName && (decodedId === customName || decodedId.toLowerCase() === generateSlug(customName).toLowerCase())) ||
+      (currentUser?.name && (decodedId.includes(currentUser.name) || decodedId.toLowerCase().includes(generateSlug(currentUser.name).toLowerCase()))) ||
       decodedId === 'store-my-live' ||
       decodedId === 'store-custom';
 
-    const savedStoreLogo = localStorage.getItem('movemall_store_logo') || currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=300&q=80';
+    const savedStoreLogo = localStorage.getItem('movemall_store_logo') || currentUser?.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(customName || 'Store')}`;
     const savedStoreBanner = localStorage.getItem('movemall_store_banner') || 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)';
     const savedStoreBio = localStorage.getItem('movemall_store_bio') || 'ร้านค้าทางการในระบบ Movemall การันตีสินค้าแท้ 100% จัดส่งรวดเร็ว';
 
@@ -95,12 +96,17 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
     // If URL is a custom store slug like "ร้านค้าของ-สิทธิมัณฑ์-สุขสกุล" or "store-xxx"
     const readableName = decodedId.replace(/^store-/, '').replace(/-/g, ' ').trim();
     if (readableName) {
+      const isCurrentUserShop = currentUser?.name && (readableName.includes(currentUser.name) || (customName && readableName.includes(customName)));
+      const fallbackLogo = isCurrentUserShop 
+        ? (localStorage.getItem('movemall_store_logo') || currentUser?.avatarUrl)
+        : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(readableName)}`;
+
       return {
         id: decodedId,
         slug: decodedId,
         name: readableName,
-        logo: currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=300&q=80',
-        banner: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
+        logo: fallbackLogo || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(readableName)}`,
+        banner: isCurrentUserShop ? savedStoreBanner : 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
         badge: 'verified',
         rating: 5.0,
         reviewCount: 12,
@@ -110,7 +116,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
         productCount: 0,
         followerCount: 1,
         location: 'กรุงเทพมหานคร',
-        description: `ร้านค้า ${readableName} บนระบบ Movemall สินค้าของแท้ การันตีคุณภาพ`,
+        description: isCurrentUserShop ? savedStoreBio : `ร้านค้า ${readableName} บนระบบ Movemall สินค้าของแท้ การันตีคุณภาพ`,
       };
     }
 
