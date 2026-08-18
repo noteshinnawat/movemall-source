@@ -1,5 +1,3 @@
-// src/components/Navbar.tsx — Clean Multi-Tier Marketplace Header with Shopee-Style Mobile Topbar
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -17,6 +15,7 @@ import {
   Truck,
   HelpCircle,
   Camera,
+  LogOut,
 } from 'lucide-react';
 import './Navbar.css';
 
@@ -50,6 +49,49 @@ export function Navbar({
   const [keywordIndex, setKeywordIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+
+  // User Auth State
+  const [currentUser, setCurrentUser] = useState<{
+    id?: string;
+    name?: string;
+    email?: string;
+    avatarUrl?: string;
+    coinsBalance?: number;
+  } | null>(() => {
+    try {
+      const uStr = localStorage.getItem('movemall_user');
+      return uStr ? JSON.parse(uStr) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  // Sync Auth Changes across tabs and actions
+  useEffect(() => {
+    function handleAuthUpdate() {
+      try {
+        const uStr = localStorage.getItem('movemall_user');
+        setCurrentUser(uStr ? JSON.parse(uStr) : null);
+      } catch {
+        setCurrentUser(null);
+      }
+    }
+
+    window.addEventListener('storage', handleAuthUpdate);
+    window.addEventListener('movemall_auth_change', handleAuthUpdate);
+    return () => {
+      window.removeEventListener('storage', handleAuthUpdate);
+      window.removeEventListener('movemall_auth_change', handleAuthUpdate);
+    };
+  }, []);
+
+  function handleLogout() {
+    localStorage.removeItem('movemall_jwt_token');
+    localStorage.removeItem('movemall_user');
+    setCurrentUser(null);
+    window.dispatchEvent(new Event('movemall_auth_change'));
+    navigate('/login');
+  }
 
   // Cycling keyword timer (3.2 seconds)
   useEffect(() => {
@@ -111,40 +153,55 @@ export function Navbar({
               <MessageSquare size={12} /> แชทกับร้านค้า
             </Link>
             {/* Auth / Account State */}
-            {(() => {
-              try {
-                const uStr = localStorage.getItem('movemall_user');
-                const u = uStr ? JSON.parse(uStr) : null;
-                if (u) {
-                  return (
-                    <Link to="/account" className="navbar__top-link" style={{ fontWeight: 700, color: '#1E40AF', display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <img
-                        src={u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name || 'User')}`}
-                        alt=""
-                        style={{ width: 16, height: 16, borderRadius: '50%', objectFit: 'cover' }}
-                      />
-                      <span>{u.name}</span>
-                      <span style={{ fontSize: 11, background: '#FEF3C7', color: '#D97706', padding: '1px 6px', borderRadius: 4, fontWeight: 800 }}>
-                        🪙 {u.coinsBalance ?? 100}
-                      </span>
-                    </Link>
-                  );
-                }
-              } catch {
-                // Ignore parse errors
-              }
-              return (
-                <>
-                  <Link to="/register" className="navbar__top-link" style={{ color: '#D97706', fontWeight: 700 }}>
-                    🎁 สมัครสมาชิก (รับ 100.-)
-                  </Link>
-                  <span className="navbar__top-divider" />
-                  <Link to="/login" className="navbar__top-link">
-                    <User size={12} /> เข้าสู่ระบบ
-                  </Link>
-                </>
-              );
-            })()}
+            {currentUser ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Link
+                  to="/account"
+                  className="navbar__top-link"
+                  style={{ fontWeight: 700, color: '#1E40AF', display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                  <img
+                    src={currentUser.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(currentUser.name || 'User')}`}
+                    alt=""
+                    style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                  <span>{currentUser.name}</span>
+                  <span style={{ fontSize: 11, background: '#FEF3C7', color: '#D97706', padding: '1px 6px', borderRadius: 4, fontWeight: 800 }}>
+                    🪙 {currentUser.coinsBalance ?? 100}
+                  </span>
+                </Link>
+                <span className="navbar__top-divider" />
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="navbar__top-link"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#EF4444',
+                    fontWeight: 600,
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                  title="ออกจากระบบ"
+                >
+                  <LogOut size={12} /> ออกจากระบบ
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link to="/register" className="navbar__top-link" style={{ color: '#D97706', fontWeight: 700 }}>
+                  🎁 สมัครสมาชิก (รับ 100.-)
+                </Link>
+                <span className="navbar__top-divider" />
+                <Link to="/login" className="navbar__top-link">
+                  <User size={12} /> เข้าสู่ระบบ
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -184,6 +184,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         };
 
         localStorage.setItem('movemall_user', JSON.stringify(finalUser));
+        window.dispatchEvent(new Event('movemall_auth_change'));
 
         const userName = finalUser.name;
         onLoginSuccess?.(userName, (finalUser.role?.toLowerCase() as 'buyer' | 'seller') || 'buyer');

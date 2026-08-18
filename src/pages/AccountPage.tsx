@@ -17,7 +17,8 @@ import {
   Plus,
   Trash2,
   Pencil,
-  Store
+  Store,
+  LogOut
 } from 'lucide-react';
 import { fetchApi } from '../utils/api';
 import './AccountPage.css';
@@ -299,6 +300,13 @@ export function AccountPage() {
     }
   }
 
+  function handleLogout() {
+    localStorage.removeItem('movemall_jwt_token');
+    localStorage.removeItem('movemall_user');
+    window.dispatchEvent(new Event('movemall_auth_change'));
+    navigate('/login');
+  }
+
   return (
     <main className="account-page">
       <div className="account-container">
@@ -351,6 +359,21 @@ export function AccountPage() {
             >
               <Store size={18} /> 🏪 ศูนย์ผู้ขาย (Seller Centre)
             </Link>
+            <button
+              type="button"
+              className="account-nav-btn"
+              onClick={handleLogout}
+              style={{
+                color: '#EF4444',
+                fontWeight: 700,
+                marginTop: 6,
+                border: '1px solid #FEE2E2',
+                background: '#FEF2F2',
+                cursor: 'pointer',
+              }}
+            >
+              <LogOut size={18} /> 🚪 ออกจากระบบ
+            </button>
           </nav>
         </aside>
 

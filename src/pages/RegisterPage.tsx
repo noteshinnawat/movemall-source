@@ -275,6 +275,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
         };
 
         localStorage.setItem('movemall_user', JSON.stringify(finalUser));
+        window.dispatchEvent(new Event('movemall_auth_change'));
 
         const registeredName = finalUser.name;
         const coins = finalUser.coinsBalance;
