@@ -8,9 +8,7 @@ import {
   MessageSquare, Radio, Layers, Globe, ExternalLink, Lock, Cpu, CheckCircle2, Sliders, ArrowRight,
   AlertTriangle
 } from 'lucide-react';
-import { stores } from '../data/stores';
 import { categories } from '../data/products';
-import { initialAdCampaigns, initialAdWallet } from '../data/mockAdsData';
 import { ShippingLabelModal, type ShippingLabelProps } from '../components/ShippingLabelModal';
 import { RichTextEditor } from '../components/RichTextEditor';
 import type { Product, AdCampaign, AdType, AdWallet, AdKeyword, ProductCompliance, ComplianceType, TaxDocument, StoreTaxProfile, TaxDocType } from '../types';
@@ -176,28 +174,14 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     evidenceUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=400&q=80',
   });
 
-  const [myFiledReports, setMyFiledReports] = useState<any[]>([
-    {
-      id: 'rep-filed-01',
-      orderId: 'ORD-9841',
-      customerName: 'กิตติศักดิ์ สั่งเล่น',
-      type: 'COD_REJECTED',
-      description: 'ลูกค้าปฏิเสธไม่ยอมรับพัสดุเก็บเงินปลายทาง (COD) ขนส่งนำจ่าย 3 ครั้งไม่สำเร็จ',
-      status: 'ACTION_TAKEN',
-      compensationStatus: 'COMPENSATED_50THB',
-      createdAt: '2026-08-16T10:00:00.000Z',
-    },
-    {
-      id: 'rep-filed-02',
-      orderId: 'ORD-7712',
-      customerName: 'ธนากร สั่งเล่น',
-      type: 'FAKE_ORDER',
-      description: 'สั่งสินค้าชิ้นใหญ่ 5 ชิ้น แล้วยกเลิกทันทีขณะรถขนส่งเข้ารับพัสดุ',
-      status: 'INVESTIGATING',
-      compensationStatus: 'PENDING',
-      createdAt: '2026-08-17T15:30:00.000Z',
+  const [myFiledReports, setMyFiledReports] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem(`movemall_seller_buyer_reports_${sellerStoreId}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
     }
-  ]);
+  });
 
   function handleSubmitBuyerReport(e: React.FormEvent) {
     e.preventDefault();
@@ -212,30 +196,22 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
       createdAt: new Date().toISOString(),
     };
 
-    setMyFiledReports(prev => [newReport, ...prev]);
+    setMyFiledReports(prev => {
+      const updated = [newReport, ...prev];
+      try {
+        localStorage.setItem(`movemall_seller_buyer_reports_${sellerStoreId}`, JSON.stringify(updated));
+      } catch {
+        // storage full
+      }
+      return updated;
+    });
     setShowBuyerReportModal(false);
     alert(`ส่งรายงานพฤติกรรมลูกค้าออเดอร์ ${reportForm.orderId} เรียบร้อยแล้ว ทีมงาน CS Admin จะตรวจสอบและชดเชยค่าขนส่งให้ภายใน 24 ชม.`);
   }
 
   // ── Live Seller Chat State ──
-  const initialCustomerThreads: Record<string, any[]> = {
-    guest_user: [
-      { id: 'g-1', sender: 'customer', text: 'สวัสดีครับ สอบถามข้อมูลสินค้าและสต็อกพร้อมส่งครับ', time: '10:28' },
-      { id: 'g-2', sender: 'store', text: `สวัสดีครับ ยินดีต้อนรับสู่ ${currentStore.name} มีอะไรให้ร้านค้าดูแลสอบถามได้เลยครับ!`, time: '10:30' },
-    ],
-    'user-buyer-1': [
-      { id: 'b1-1', sender: 'customer', text: 'ได้รับสินค้าเรียบร้อยแล้วครับ แพ็คเกจดีมาก ขอบคุณสำหรับบริการครับ', time: '16:20' },
-      { id: 'b1-2', sender: 'store', text: 'ขอบพระคุณคุณสมชายที่ไว้วางใจอุดหนุน Movemall ของเราครับ หากต้องการคำแนะนำการใช้งานแจ้งได้ตลอดเลยนะครับ 😊', time: '16:28' },
-    ],
-    'user-buyer-2': [
-      { id: 'b2-1', sender: 'customer', text: 'ทางร้านสามารถออกใบกำกับภาษีเต็มรูปแบบในชื่อบริษัทได้ไหมคะ?', time: '14:15' },
-      { id: 'b2-2', sender: 'store', text: 'สามารถออกใบกำกับภาษี e-Tax Invoice ได้เต็มรูปแบบเลยครับคุณอารียา เพียงแนบข้อมูลเลขประจำตัวผู้เสียภาษีมาในหมายเหตุคำสั่งซื้อได้เลยครับ 📑', time: '14:18' },
-    ],
-  };
-
   const [sellerMessages, setSellerMessages] = useState<Record<string, any[]>>(() => {
-    const stored = getStoredChatHistory();
-    return Object.keys(stored).length > 0 ? stored : initialCustomerThreads;
+    return getStoredChatHistory();
   });
 
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('guest_user');
@@ -266,7 +242,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
       const threadKey = `${storeTargetId}::${custId}`;
 
       setSellerMessages(prev => {
-        const list = prev[threadKey] || prev[custId] || initialCustomerThreads[custId] || [];
+        const list = prev[threadKey] || prev[custId] || [];
         if (list.some(m => m.id === msg.id)) return prev;
         const updated = {
           ...prev,
@@ -304,7 +280,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     };
 
     setSellerMessages(prev => {
-      const list = prev[threadKey] || prev[selectedCustomerId] || initialCustomerThreads[selectedCustomerId] || [];
+      const list = prev[threadKey] || prev[selectedCustomerId] || [];
       const updated = {
         ...prev,
         [threadKey]: [...list, newMsg],
@@ -403,21 +379,14 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     registeredAt: string;
   }
 
-  const [flashNominations, setFlashNominations] = useState<FlashNomination[]>([
-    {
-      id: 'nom-1',
-      productId: storeProducts[0]?.id || 'p1',
-      productName: storeProducts[0]?.name || 'หูฟังไร้สาย Pro ANC ตัดเสียงรบกวน',
-      productImage: storeProducts[0]?.images[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80',
-      originalPrice: storeProducts[0]?.price || 1200,
-      flashPrice: 580,
-      discountPct: 52,
-      timeSlot: '20:00 - 00:00 (รอบค่ำดีลเดือด 🌙)',
-      reservedStock: 50,
-      status: 'approved',
-      registeredAt: '2026-08-17 10:30',
-    },
-  ]);
+  const [flashNominations, setFlashNominations] = useState<FlashNomination[]>(() => {
+    try {
+      const saved = localStorage.getItem(`movemall_seller_flash_nominations_${sellerStoreId}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const [isNominateModalOpen, setIsNominateModalOpen] = useState(false);
   const [nomProdId, setNomProdId] = useState(storeProducts[0]?.id || '');
@@ -604,72 +573,15 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   const [selectedOrderForLabel, setSelectedOrderForLabel] = useState<Omit<ShippingLabelProps, 'onClose'> | null>(null);
 
   // ── Seller Store Orders State (Synced with PostgreSQL) ──
-  const [sellerOrders, setSellerOrders] = useState<any[]>([
-    {
-      id: 'ord-1',
-      orderId: 'ORD-20260816-001',
-      trackingNo: 'TH-0891-FLASH',
-      customerName: 'กิตติพงษ์ ส.',
-      customerPhone: '089-123-4567',
-      customerAddress: '123 ถ.สุขุมวิท 39 คลองตันเหนือ วัฒนา กทม.',
-      zipCode: '10110',
-      items: [{ name: 'หูฟังไร้สาย Premium Pro X', quantity: 1, price: 1290 }],
-      total: 1290,
-      status: 'pending',
-      statusText: '⚙️ รอดำเนินการส่ง',
-      date: '16 ส.ค. 2026 14:32',
-      isCOD: false,
-    },
-    {
-      id: 'ord-2',
-      orderId: 'ORD-20260815-098',
-      trackingNo: 'TH-0982-FLASH',
-      customerName: 'อรทัย ว.',
-      customerPhone: '082-987-6543',
-      customerAddress: '88/1 ถ.ติวานนท์ ต.ตลาดขวัญ เมือง นนทบุรี',
-      zipCode: '11000',
-      items: [{ name: 'สมาร์ทวอทช์ Series 8 Ultra', quantity: 1, price: 5990 }],
-      total: 5990,
-      status: 'shipped',
-      statusText: '✅ จัดส่งแล้ว',
-      date: '15 ส.ค. 2026 18:20',
-      isCOD: false,
-    },
-    {
-      id: 'ord-3',
-      orderId: 'ORD-20260815-045',
-      trackingNo: 'TH-0451-KERRY',
-      customerName: 'ชินวัตร ภ.',
-      customerPhone: '081-456-7890',
-      customerAddress: '55 หมู่ 4 ต.สุเทพ อ.เมือง จ.เชียงใหม่',
-      zipCode: '50200',
-      items: [{ name: 'รองเท้าวิ่ง Ultra Lightweight Pro', quantity: 1, price: 2890 }],
-      total: 2890,
-      status: 'pending',
-      statusText: '⚙️ รอดำเนินการส่ง',
-      date: '15 ส.ค. 2026 11:15',
-      isCOD: true,
-    },
-    {
-      id: 'ord-4',
-      orderId: 'ORD-20260814-112',
-      trackingNo: 'TH-1123-FLASH',
-      customerName: 'ณภัทร ม.',
-      customerPhone: '085-789-0123',
-      customerAddress: '99/4 อาคารไอทีทาวเวอร์ ถ.พหลโยธิน จตุจักร กทม.',
-      zipCode: '10900',
-      items: [{ name: 'เคสป้องกันแม่เหล็ก Magnetic Pro', quantity: 2, price: 490 }],
-      total: 980,
-      status: 'shipped',
-      statusText: '✅ จัดส่งแล้ว',
-      date: '14 ส.ค. 2026 09:40',
-      isCOD: false,
-    },
-  ]);
+  const [sellerOrders, setSellerOrders] = useState<any[]>([]);
 
   // ── Ads State ──
-  const [campaigns, setCampaigns] = useState<AdCampaign[]>(initialAdCampaigns);
-  const [wallet, setWallet] = useState<AdWallet>(initialAdWallet);
+  const [campaigns, setCampaigns] = useState<AdCampaign[]>([]);
+  const [wallet, setWallet] = useState<AdWallet>({
+    storeId: currentStore.id,
+    balance: 0,
+    transactions: [],
+  });
 
   // Sync Live Orders, Live Ads & Tax Settings from Supabase Backend
   useEffect(() => {
@@ -682,7 +594,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
           fetchStoreTaxSettingsApi(currentStore.id).catch(() => null),
         ]);
 
-        if (ordersRes && Array.isArray(ordersRes.orders) && ordersRes.orders.length > 0) {
+        if (ordersRes && Array.isArray(ordersRes.orders)) {
           const mappedOrders = ordersRes.orders.map((o: any) => ({
             id: o.id,
             orderId: `ORD-${o.id.slice(0, 8).toUpperCase()}`,
@@ -703,21 +615,17 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             isCOD: o.paymentMethod === 'COD',
           }));
 
-          setSellerOrders(prev => {
-            const apiIds = new Set(mappedOrders.map((m: any) => m.id));
-            const remaining = prev.filter(p => !apiIds.has(p.id));
-            return [...mappedOrders, ...remaining];
-          });
+          setSellerOrders(mappedOrders);
         }
 
         if (walletRes?.wallet) {
           setWallet(prev => ({
             ...prev,
-            balance: Number(walletRes.wallet.balance || 1000),
+            balance: Number(walletRes.wallet.balance || 0),
           }));
         }
 
-        if (campsRes?.campaigns && campsRes.campaigns.length > 0) {
+        if (campsRes?.campaigns && Array.isArray(campsRes.campaigns)) {
           setCampaigns(campsRes.campaigns);
         }
 
@@ -768,108 +676,14 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   const [isTaxSaving, setIsTaxSaving] = useState(false);
   const [taxSaveSuccess, setTaxSaveSuccess] = useState(false);
 
-  const [taxDocs, setTaxDocs] = useState<TaxDocument[]>([
-    {
-      id: 'doc-001',
-      docNumber: 'TAX-202608-001',
-      docType: 'TAX_INVOICE',
-      orderId: 'ORD-9821',
-      buyerName: 'บริษัท สยามดิจิทัล โซลูชั่นส์ จำกัด',
-      buyerTaxId: '0105558012345',
-      buyerBranch: '00000 (สำนักงานใหญ่)',
-      buyerAddress: '99/4 อาคารสีลมคอมเพล็กซ์ ถ.สีลม แขวงสีลม เขตบางรัก กทม. 10500',
-      buyerEmail: 'accounting@siamdigital.co.th',
-      totalAmount: 18900.0,
-      netAmount: 17663.55,
-      vatAmount: 1236.45,
-      emailSent: true,
-      status: 'ISSUED',
-      createdAt: '2026-08-17 14:30',
-      items: [
-        { name: 'หูฟังไร้สาย Pro ANC ตัดเสียงรบกวน', qty: 10, price: 1890 },
-      ],
-    },
-    {
-      id: 'doc-002',
-      docNumber: 'TAX-202608-002',
-      docType: 'TAX_INVOICE',
-      orderId: 'ORD-9820',
-      buyerName: 'คุณ ธนพล อัครเดชาภิวัฒน์',
-      buyerTaxId: '1100400192834',
-      buyerBranch: 'สำนักงานใหญ่',
-      buyerAddress: '124 ซอยลาดพร้าว 101 แขวงคลองจั่น เขตบางกะปิ กทม. 10240',
-      buyerEmail: 'thanapol.a@gmail.com',
-      totalAmount: 4990.0,
-      netAmount: 4663.55,
-      vatAmount: 326.45,
-      emailSent: true,
-      status: 'ISSUED',
-      createdAt: '2026-08-16 11:15',
-      items: [
-        { name: 'สมาร์ตวอทช์ Ultra Titanium', qty: 1, price: 4990 },
-      ],
-    },
-    {
-      id: 'doc-003',
-      docNumber: 'REC-202608-001',
-      docType: 'RECEIPT',
-      orderId: 'ORD-9818',
-      buyerName: 'คุณ สมศักดิ์ มีสุข',
-      buyerTaxId: '-',
-      buyerBranch: '-',
-      buyerAddress: '45 หมู่ 3 ต.บางกระดี อ.เมือง จ.ปทุมธานี 12000',
-      buyerEmail: 'somsak.m@hotmail.com',
-      totalAmount: 1290.0,
-      netAmount: 1290.0,
-      vatAmount: 0.0,
-      emailSent: true,
-      status: 'ISSUED',
-      createdAt: '2026-08-15 09:40',
-      items: [
-        { name: 'คีย์บอร์ดไร้สาย Tri-Mode RGB', qty: 1, price: 1290 },
-      ],
-    },
-    {
-      id: 'doc-004',
-      docNumber: 'TAX-202608-003',
-      docType: 'TAX_INVOICE',
-      orderId: 'ORD-9815',
-      buyerName: 'ห้างหุ้นส่วนจำกัด อาร์ตแอนด์มีเดีย ดีไซน์',
-      buyerTaxId: '0103559004561',
-      buyerBranch: '00001',
-      buyerAddress: '15/22 ถ.สุขุมวิท 71 แขวงพระโขนงเหนือ เขตวัฒนา กทม. 10110',
-      buyerEmail: 'billing@artmedia.co.th',
-      totalAmount: 32500.0,
-      netAmount: 30373.83,
-      vatAmount: 2126.17,
-      emailSent: true,
-      status: 'ISSUED',
-      createdAt: '2026-08-14 16:50',
-      items: [
-        { name: 'แท็บเล็ต Pro 11 นิ้ว Wi-Fi 256GB', qty: 2, price: 16250 },
-      ],
-    },
-    {
-      id: 'doc-005',
-      docNumber: 'CN-202608-001',
-      docType: 'CREDIT_NOTE',
-      orderId: 'ORD-9805',
-      buyerName: 'คุณ วิภาดา เจริญรัตน์',
-      buyerTaxId: '3100600492811',
-      buyerBranch: 'สำนักงานใหญ่',
-      buyerAddress: '88/9 อาคารพญาไทพลาซ่า ถ.พญาไท เขตราชเทวี กทม. 10400',
-      buyerEmail: 'wipada.c@gmail.com',
-      totalAmount: -2500.0,
-      netAmount: -2336.45,
-      vatAmount: -163.55,
-      emailSent: true,
-      status: 'ISSUED',
-      createdAt: '2026-08-12 10:20',
-      items: [
-        { name: 'รับคืนสินค้า / ใบลดหนี้คำสั่งซื้อ #ORD-9805', qty: 1, price: -2500 },
-      ],
-    },
-  ]);
+  const [taxDocs, setTaxDocs] = useState<TaxDocument[]>(() => {
+    try {
+      const saved = localStorage.getItem(`movemall_seller_tax_docs_${sellerStoreId}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const [taxDocFilter, setTaxDocFilter] = useState<'ALL' | TaxDocType>('ALL');
   const [taxSearch, setTaxSearch] = useState('');
@@ -1538,63 +1352,73 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 
       <div className="container">
         {/* Modern Metric KPI Cards */}
-        <div className="seller-metrics">
-          <div className="seller-metric-card">
-            <div className="seller-metric-top">
-              <div className="seller-metric-icon seller-metric-icon--sales">
-                <DollarSign size={20} />
-              </div>
-              <span className="seller-metric-badge seller-metric-badge--green">+18.4% สัปดาห์นี้</span>
-            </div>
-            <div className="seller-metric-info">
-              <span className="seller-metric-label">ยอดขายเดือนนี้</span>
-              <span className="seller-metric-val">฿48,500.00</span>
-              <span className="seller-metric-sub">จากออเดอร์ทั้งหมด 38 รายการ</span>
-            </div>
-          </div>
+        {(() => {
+          const totalSalesAmount = sellerOrders.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
+          const pendingOrdersCount = sellerOrders.filter(o => o.status === 'pending').length;
+          const totalStockCount = storeProducts.reduce((acc, p) => acc + (p.stock || 0), 0);
 
-          <div className="seller-metric-card">
-            <div className="seller-metric-top">
-              <div className="seller-metric-icon seller-metric-icon--orders">
-                <Package size={20} />
+          return (
+            <div className="seller-metrics">
+              <div className="seller-metric-card">
+                <div className="seller-metric-top">
+                  <div className="seller-metric-icon seller-metric-icon--sales">
+                    <DollarSign size={20} />
+                  </div>
+                  <span className="seller-metric-badge seller-metric-badge--green">
+                    {sellerOrders.length > 0 ? `${sellerOrders.length} ออเดอร์` : 'พร้อมรับออเดอร์'}
+                  </span>
+                </div>
+                <div className="seller-metric-info">
+                  <span className="seller-metric-label">ยอดขายรวมร้านค้า</span>
+                  <span className="seller-metric-val">฿{totalSalesAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="seller-metric-sub">จากคำสั่งซื้อทั้งหมด {sellerOrders.length} รายการ</span>
+                </div>
               </div>
-              <span className="seller-metric-badge seller-metric-badge--blue">รอดำเนินการ 2</span>
-            </div>
-            <div className="seller-metric-info">
-              <span className="seller-metric-label">คำสั่งซื้อที่ต้องจัดส่ง</span>
-              <span className="seller-metric-val">4 ออเดอร์</span>
-              <span className="seller-metric-sub">เตรียมพัสดุและพิมพ์ใบปะหน้า</span>
-            </div>
-          </div>
 
-          <div className="seller-metric-card">
-            <div className="seller-metric-top">
-              <div className="seller-metric-icon seller-metric-icon--products">
-                <TrendingUp size={20} />
+              <div className="seller-metric-card">
+                <div className="seller-metric-top">
+                  <div className="seller-metric-icon seller-metric-icon--orders">
+                    <Package size={20} />
+                  </div>
+                  <span className="seller-metric-badge seller-metric-badge--blue">รอดำเนินการ {pendingOrdersCount}</span>
+                </div>
+                <div className="seller-metric-info">
+                  <span className="seller-metric-label">คำสั่งซื้อที่ต้องจัดส่ง</span>
+                  <span className="seller-metric-val">{pendingOrdersCount} ออเดอร์</span>
+                  <span className="seller-metric-sub">เตรียมพัสดุและพิมพ์ใบปะหน้า</span>
+                </div>
               </div>
-              <span className="seller-metric-badge seller-metric-badge--purple">พร้อมขาย 100%</span>
-            </div>
-            <div className="seller-metric-info">
-              <span className="seller-metric-label">สินค้าที่วางขาย</span>
-              <span className="seller-metric-val">{storeProducts.length} รายการ</span>
-              <span className="seller-metric-sub">สต็อกในคลัง {storeProducts.reduce((acc, p) => acc + (p.stock || 0), 0) || (storeProducts.length * 50)} ชิ้น</span>
-            </div>
-          </div>
 
-          <div className="seller-metric-card">
-            <div className="seller-metric-top">
-              <div className="seller-metric-icon seller-metric-icon--rating">
-                <Star size={20} />
+              <div className="seller-metric-card">
+                <div className="seller-metric-top">
+                  <div className="seller-metric-icon seller-metric-icon--products">
+                    <TrendingUp size={20} />
+                  </div>
+                  <span className="seller-metric-badge seller-metric-badge--purple">พร้อมขาย {storeProducts.length > 0 ? '100%' : '0%'}</span>
+                </div>
+                <div className="seller-metric-info">
+                  <span className="seller-metric-label">สินค้าที่วางขาย</span>
+                  <span className="seller-metric-val">{storeProducts.length} รายการ</span>
+                  <span className="seller-metric-sub">สต็อกในคลัง {totalStockCount.toLocaleString()} ชิ้น</span>
+                </div>
               </div>
-              <span className="seller-metric-badge seller-metric-badge--amber">สุขภาพ 100/100 🛡️</span>
+
+              <div className="seller-metric-card">
+                <div className="seller-metric-top">
+                  <div className="seller-metric-icon seller-metric-icon--rating">
+                    <Star size={20} />
+                  </div>
+                  <span className="seller-metric-badge seller-metric-badge--amber">สุขภาพ {storeHealthScore}/100 🛡️</span>
+                </div>
+                <div className="seller-metric-info">
+                  <span className="seller-metric-label">คะแนนร้านค้า</span>
+                  <span className="seller-metric-val">{currentStore.rating} / 5.0</span>
+                  <span className="seller-metric-sub">มาตรฐานร้านค้ายอดเยี่ยม</span>
+                </div>
+              </div>
             </div>
-            <div className="seller-metric-info">
-              <span className="seller-metric-label">คะแนนร้านค้า</span>
-              <span className="seller-metric-val">{currentStore.rating} / 5.0</span>
-              <span className="seller-metric-sub">มาตรฐานร้านค้ายอดเยี่ยม</span>
-            </div>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Modern Seller Segmented Tabs */}
         <div className="seller-tabs-container">
@@ -1613,7 +1437,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             >
               <Package size={15} />
               <span>รายการคำสั่งซื้อ</span>
-              <span className="seller-tab-count seller-tab-count--blue">4</span>
+              <span className="seller-tab-count seller-tab-count--blue">{sellerOrders.filter(o => o.status === 'pending').length}</span>
             </button>
             <button
               className={`seller-tab-btn${activeTab === 'ads' ? ' seller-tab-btn--active' : ''}`}
@@ -1871,148 +1695,181 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
         {/* Orders Tab */}
         {activeTab === 'orders' && (
           <div className="seller-orders-hub">
-            {/* Desktop Table View */}
-            <div className="seller-desktop-table seller-table-container">
-              <table className="seller-table">
-                <thead>
-                  <tr>
-                    <th>เลขที่คำสั่งซื้อ</th>
-                    <th>สินค้า</th>
-                    <th>ผู้ซื้อ & ที่อยู่จัดส่ง</th>
-                    <th>ยอดชำระ</th>
-                    <th>สถานะ</th>
-                    <th>การดำเนินการ</th>
-                  </tr>
-                </thead>
-                <tbody>
+            {sellerOrders.length === 0 ? (
+              <div className="seller-empty-card" style={{ padding: '60px 20px', textAlign: 'center', background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--radius-md, 6px)', marginTop: 'var(--space-4)' }}>
+                <div style={{ fontSize: 44, marginBottom: 12 }}>📦</div>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
+                  ยังไม่มีคำสั่งซื้อเข้ามาในขณะนี้
+                </h3>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', maxWidth: 500, margin: '0 auto 20px', lineHeight: 1.6 }}>
+                  เมื่อมีลูกค้าสั่งซื้อสินค้าจากร้านค้าของคุณ รายการออเดอร์ ข้อมูลจัดส่ง และปุ่มพิมพ์ใบปะหน้าพัสดุ Flash Express / Kerry จะแสดงที่นี่แบบเรียลไทม์
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('overview')}
+                  style={{
+                    padding: '8px 18px',
+                    background: 'var(--primary)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 'var(--radius-md, 6px)',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <Store size={15} /> ดูสินค้าในร้านของคุณ
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Desktop Table View */}
+                <div className="seller-desktop-table seller-table-container">
+                  <table className="seller-table">
+                    <thead>
+                      <tr>
+                        <th>เลขที่คำสั่งซื้อ</th>
+                        <th>สินค้า</th>
+                        <th>ผู้ซื้อ & ที่อยู่จัดส่ง</th>
+                        <th>ยอดชำระ</th>
+                        <th>สถานะ</th>
+                        <th>การดำเนินการ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sellerOrders.map(order => (
+                        <tr key={order.id}>
+                          <td><strong>#{order.orderId}</strong></td>
+                          <td>{order.items.map((i: any) => `${i.name} (${i.quantity} ชิ้น)`).join(', ')}</td>
+                          <td>
+                            <div>{order.customerName} ({order.customerPhone})</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{order.customerAddress} {order.zipCode}</div>
+                          </td>
+                          <td>฿{order.total.toLocaleString()}</td>
+                          <td>
+                            <span style={{
+                              color: order.status === 'pending' ? 'var(--primary)' : 'var(--success)',
+                              fontWeight: 700
+                            }}>
+                              {order.statusText}
+                            </span>
+                          </td>
+                          <td>
+                            <button
+                              onClick={() => {
+                                if (order.status === 'pending') {
+                                  updateOrderStatusApi(order.id, { status: 'SHIPPED', trackingNumber: order.trackingNo }).catch(() => {});
+                                  setSellerOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: 'shipped', statusText: '✅ จัดส่งแล้ว' } : o));
+                                }
+                                setSelectedOrderForLabel({
+                                  orderId: order.orderId,
+                                  trackingNo: order.trackingNo,
+                                  customerName: order.customerName,
+                                  customerPhone: order.customerPhone,
+                                  customerAddress: order.customerAddress,
+                                  zipCode: order.zipCode,
+                                  storeName: currentStore.name,
+                                  storePhone: '081-234-5678',
+                                  storeAddress: '456 ถ.พระราม 4 คลองเตย กทม. 10110',
+                                  items: order.items.map((i: any) => ({ name: i.name, quantity: i.quantity })),
+                                  total: order.total,
+                                  isCOD: order.isCOD,
+                                });
+                              }}
+                              style={{
+                                padding: '6px 12px',
+                                background: order.status === 'pending' ? 'var(--primary)' : 'var(--surface)',
+                                color: order.status === 'pending' ? 'white' : 'var(--text-primary)',
+                                border: order.status === 'pending' ? 'none' : '1px solid var(--border)',
+                                borderRadius: 'var(--radius-md, 6px)',
+                                fontSize: 12,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4,
+                              }}
+                            >
+                              <Printer size={13} /> {order.status === 'pending' ? 'พิมพ์ใบปะหน้า (4x6)' : 'พิมพ์ซ้ำ'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Cards View */}
+                <div className="seller-orders-mobile-list">
                   {sellerOrders.map(order => (
-                    <tr key={order.id}>
-                      <td><strong>#{order.orderId}</strong></td>
-                      <td>{order.items.map((i: any) => `${i.name} (${i.quantity} ชิ้น)`).join(', ')}</td>
-                      <td>
-                        <div>{order.customerName} ({order.customerPhone})</div>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{order.customerAddress} {order.zipCode}</div>
-                      </td>
-                      <td>฿{order.total.toLocaleString()}</td>
-                      <td>
-                        <span style={{
-                          color: order.status === 'pending' ? 'var(--primary)' : 'var(--success)',
-                          fontWeight: 700
-                        }}>
+                    <div key={order.id} className="seller-order-mobile-card">
+                      <div className="seller-order-mobile-card__header">
+                        <div className="seller-order-mobile-card__id">
+                          <strong>#{order.orderId}</strong>
+                          <span className="seller-order-mobile-card__date">{order.date}</span>
+                        </div>
+                        <span className={`seller-order-status-badge seller-order-status-badge--${order.status}`}>
                           {order.statusText}
                         </span>
-                      </td>
-                      <td>
+                      </div>
+
+                      <div className="seller-order-mobile-card__body">
+                        <div className="seller-order-mobile-card__item">
+                          <Package size={15} className="seller-order-icon" />
+                          <span className="seller-order-item-title">
+                            {order.items.map((i: any) => `${i.name} (${i.quantity} ชิ้น)`).join(', ')}
+                          </span>
+                        </div>
+
+                        <div className="seller-order-mobile-card__customer">
+                          <div className="seller-order-customer-line">
+                            <User size={14} className="seller-order-icon" />
+                            <strong>{order.customerName}</strong>
+                            <span className="seller-order-customer-phone">({order.customerPhone})</span>
+                          </div>
+                          <div className="seller-order-customer-addr">
+                            <MapPin size={14} className="seller-order-icon" />
+                            <span>{order.customerAddress} {order.zipCode}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="seller-order-mobile-card__footer">
+                        <div className="seller-order-mobile-card__total">
+                          <span className="seller-order-total-label">ยอดชำระสุทธิ</span>
+                          <span className="seller-order-total-value">฿{order.total.toLocaleString()}</span>
+                          {order.isCOD && <span className="seller-order-cod-tag">เก็บเงินปลายทาง</span>}
+                        </div>
                         <button
-                          onClick={() => {
-                            if (order.status === 'pending') {
-                              updateOrderStatusApi(order.id, { status: 'SHIPPED', trackingNumber: order.trackingNo }).catch(() => {});
-                              setSellerOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: 'shipped', statusText: '✅ จัดส่งแล้ว' } : o));
-                            }
-                            setSelectedOrderForLabel({
-                              orderId: order.orderId,
-                              trackingNo: order.trackingNo,
-                              customerName: order.customerName,
-                              customerPhone: order.customerPhone,
-                              customerAddress: order.customerAddress,
-                              zipCode: order.zipCode,
-                              storeName: currentStore.name,
-                              storePhone: '081-234-5678',
-                              storeAddress: '456 ถ.พระราม 4 คลองเตย กทม. 10110',
-                              items: order.items.map((i: any) => ({ name: i.name, quantity: i.quantity })),
-                              total: order.total,
-                              isCOD: order.isCOD,
-                            });
-                          }}
-                          style={{
-                            padding: '6px 12px',
-                            background: order.status === 'pending' ? 'var(--primary)' : 'var(--surface)',
-                            color: order.status === 'pending' ? 'white' : 'var(--text-primary)',
-                            border: order.status === 'pending' ? 'none' : '1px solid var(--border)',
-                            borderRadius: 'var(--radius-md, 6px)',
-                            fontSize: 12,
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 4,
-                          }}
+                          type="button"
+                          onClick={() => setSelectedOrderForLabel({
+                            orderId: order.orderId,
+                            trackingNo: order.trackingNo,
+                            customerName: order.customerName,
+                            customerPhone: order.customerPhone,
+                            customerAddress: order.customerAddress,
+                            zipCode: order.zipCode,
+                            storeName: currentStore.name,
+                            storePhone: '081-234-5678',
+                            storeAddress: '456 ถ.พระราม 4 คลองเตย กทม. 10110',
+                            items: order.items.map((i: any) => ({ name: i.name, quantity: i.quantity })),
+                            total: order.total,
+                            isCOD: order.isCOD,
+                          })}
+                          className={`seller-order-print-btn ${order.status !== 'pending' ? 'seller-order-print-btn--secondary' : ''}`}
                         >
-                          <Printer size={13} /> {order.status === 'pending' ? 'พิมพ์ใบปะหน้า (4x6)' : 'พิมพ์ซ้ำ'}
+                          <Printer size={14} />
+                          {order.status === 'pending' ? 'พิมพ์ใบปะหน้า (4x6)' : 'พิมพ์ซ้ำ'}
                         </button>
-                      </td>
-                    </tr>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile Cards View */}
-            <div className="seller-orders-mobile-list">
-              {sellerOrders.map(order => (
-                <div key={order.id} className="seller-order-mobile-card">
-                  <div className="seller-order-mobile-card__header">
-                    <div className="seller-order-mobile-card__id">
-                      <strong>#{order.orderId}</strong>
-                      <span className="seller-order-mobile-card__date">{order.date}</span>
-                    </div>
-                    <span className={`seller-order-status-badge seller-order-status-badge--${order.status}`}>
-                      {order.statusText}
-                    </span>
-                  </div>
-
-                  <div className="seller-order-mobile-card__body">
-                    <div className="seller-order-mobile-card__item">
-                      <Package size={15} className="seller-order-icon" />
-                      <span className="seller-order-item-title">
-                        {order.items.map((i: any) => `${i.name} (${i.quantity} ชิ้น)`).join(', ')}
-                      </span>
-                    </div>
-
-                    <div className="seller-order-mobile-card__customer">
-                      <div className="seller-order-customer-line">
-                        <User size={14} className="seller-order-icon" />
-                        <strong>{order.customerName}</strong>
-                        <span className="seller-order-customer-phone">({order.customerPhone})</span>
-                      </div>
-                      <div className="seller-order-customer-addr">
-                        <MapPin size={14} className="seller-order-icon" />
-                        <span>{order.customerAddress} {order.zipCode}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="seller-order-mobile-card__footer">
-                    <div className="seller-order-mobile-card__total">
-                      <span className="seller-order-total-label">ยอดชำระสุทธิ</span>
-                      <span className="seller-order-total-value">฿{order.total.toLocaleString()}</span>
-                      {order.isCOD && <span className="seller-order-cod-tag">เก็บเงินปลายทาง</span>}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedOrderForLabel({
-                        orderId: order.orderId,
-                        trackingNo: order.trackingNo,
-                        customerName: order.customerName,
-                        customerPhone: order.customerPhone,
-                        customerAddress: order.customerAddress,
-                        zipCode: order.zipCode,
-                        storeName: currentStore.name,
-                        storePhone: '081-234-5678',
-                        storeAddress: '456 ถ.พระราม 4 คลองเตย กทม. 10110',
-                        items: order.items.map((i: any) => ({ name: i.name, quantity: i.quantity })),
-                        total: order.total,
-                        isCOD: order.isCOD,
-                      })}
-                      className={`seller-order-print-btn ${order.status !== 'pending' ? 'seller-order-print-btn--secondary' : ''}`}
-                    >
-                      <Printer size={14} />
-                      {order.status === 'pending' ? 'พิมพ์ใบปะหน้า (4x6)' : 'พิมพ์ซ้ำ'}
-                    </button>
-                  </div>
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
         )}
 
@@ -3257,17 +3114,29 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                       </tr>
                     </thead>
                     <tbody>
-                      {taxDocs
-                        .filter(doc => (taxDocFilter === 'ALL' || doc.docType === taxDocFilter))
-                        .filter(doc => {
-                          if (!taxSearch) return true;
-                          const q = taxSearch.toLowerCase();
-                          return doc.docNumber.toLowerCase().includes(q) ||
-                            doc.buyerName.toLowerCase().includes(q) ||
-                            (doc.buyerTaxId && doc.buyerTaxId.includes(q)) ||
-                            doc.orderId.toLowerCase().includes(q);
-                        })
-                        .map((doc, idx) => (
+                      {(() => {
+                        const filtered = taxDocs
+                          .filter(doc => (taxDocFilter === 'ALL' || doc.docType === taxDocFilter))
+                          .filter(doc => {
+                            if (!taxSearch) return true;
+                            const q = taxSearch.toLowerCase();
+                            return doc.docNumber.toLowerCase().includes(q) ||
+                              doc.buyerName.toLowerCase().includes(q) ||
+                              (doc.buyerTaxId && doc.buyerTaxId.includes(q)) ||
+                              doc.orderId.toLowerCase().includes(q);
+                          });
+
+                        if (filtered.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan={9} style={{ textAlign: 'center', padding: '36px 20px', color: '#94A3B8' }}>
+                                ยังไม่มีเอกสารภาษีหรือใบกำกับภาษีในระบบ
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        return filtered.map((doc, idx) => (
                           <tr key={doc.id} style={{ borderBottom: '1px solid #F1F5F9', background: idx % 2 === 0 ? '#FFFFFF' : '#FAFAFA' }}>
                             <td style={{ padding: '10px 12px', fontWeight: 700, color: '#1E293B' }}>
                               {doc.docNumber}
@@ -3339,7 +3208,8 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                               </div>
                             </td>
                           </tr>
-                        ))}
+                        ));
+                      })()}
                     </tbody>
                   </table>
                 </div>
@@ -3990,38 +3860,51 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 </div>
 
                 <div className="seller-chat-customer-list">
-                  {['guest_user', 'user-buyer-1', 'user-buyer-2'].map((cId, idx) => {
-                    const isSelected = selectedCustomerId === cId;
-                    const customerNames: Record<string, string> = {
-                      guest_user: 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)',
-                      'user-buyer-1': 'คุณสมชาย มุ่งมั่น (Movemall VIP)',
-                      'user-buyer-2': 'คุณอารียา พรรณดี (ผู้ซื้อยืนยันตัวตน)',
-                    };
-                    const threadKey = `${currentStore.id}::${cId}`;
-                    const threadMsgs = sellerMessages[threadKey] || sellerMessages[cId] || initialCustomerThreads[cId] || [];
-                    const lastMsg = threadMsgs[threadMsgs.length - 1];
+                  {(() => {
+                    const activeChatCustomerIds = Array.from(new Set([
+                      ...Object.keys(sellerMessages).map(k => k.includes('::') ? k.split('::')[1] : k),
+                      ...sellerOrders.map(o => o.user?.id || (o.customerName ? `buyer-${o.orderId}` : null)).filter(Boolean) as string[],
+                    ]));
 
-                    return (
-                      <div
-                        key={cId}
-                        className={`seller-chat-customer-item${isSelected ? ' seller-chat-customer-item--active' : ''}`}
-                        onClick={() => setSelectedCustomerId(cId)}
-                      >
-                        <div className="seller-chat-customer-avatar">
-                          {idx === 0 ? '👤' : idx === 1 ? '👨' : '👩'}
+                    if (activeChatCustomerIds.length === 0) {
+                      return (
+                        <div style={{ padding: '36px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.5 }}>
+                          <MessageSquare size={24} style={{ opacity: 0.4, margin: '0 auto 8px', display: 'block' }} />
+                          ยังไม่มีลูกค้าทักแชทเข้ามาในขณะนี้
                         </div>
-                        <div className="seller-chat-customer-meta">
-                          <div className="seller-chat-customer-name-row">
-                            <span className="seller-chat-customer-name">{customerNames[cId] || cId}</span>
-                            <span className="seller-chat-customer-time">{lastMsg?.time || '10:30'}</span>
+                      );
+                    }
+
+                    return activeChatCustomerIds.map((cId, idx) => {
+                      const isSelected = selectedCustomerId === cId;
+                      const matchedOrder = sellerOrders.find(o => o.user?.id === cId || `buyer-${o.orderId}` === cId);
+                      const customerDisplayName = matchedOrder ? `${matchedOrder.customerName} (${matchedOrder.orderId})` : (cId === 'guest_user' ? 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)' : `ลูกค้า ${cId}`);
+                      const threadKey = `${currentStore.id}::${cId}`;
+                      const threadMsgs = sellerMessages[threadKey] || sellerMessages[cId] || [];
+                      const lastMsg = threadMsgs[threadMsgs.length - 1];
+
+                      return (
+                        <div
+                          key={cId}
+                          className={`seller-chat-customer-item${isSelected ? ' seller-chat-customer-item--active' : ''}`}
+                          onClick={() => setSelectedCustomerId(cId)}
+                        >
+                          <div className="seller-chat-customer-avatar">
+                            {idx % 3 === 0 ? '👤' : idx % 3 === 1 ? '👨' : '👩'}
                           </div>
-                          <p className="seller-chat-customer-preview">
-                            {lastMsg ? lastMsg.text : 'เริ่มการสนทนากับลูกค้า...'}
-                          </p>
+                          <div className="seller-chat-customer-meta">
+                            <div className="seller-chat-customer-name-row">
+                              <span className="seller-chat-customer-name">{customerDisplayName}</span>
+                              <span className="seller-chat-customer-time">{lastMsg?.time || ''}</span>
+                            </div>
+                            <p className="seller-chat-customer-preview">
+                              {lastMsg ? lastMsg.text : 'เริ่มการสนทนากับลูกค้า...'}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    });
+                  })()}
                 </div>
               </div>
 
@@ -4030,11 +3913,10 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 <div className="seller-chat-header">
                   <div>
                     <strong style={{ fontSize: 14, color: 'var(--text-primary)' }}>
-                      {{
-                        guest_user: 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)',
-                        'user-buyer-1': 'คุณสมชาย มุ่งมั่น (Movemall VIP)',
-                        'user-buyer-2': 'คุณอารียา พรรณดี (ผู้ซื้อยืนยันตัวตน)',
-                      }[selectedCustomerId] || selectedCustomerId}
+                      {(() => {
+                        const matchedOrder = sellerOrders.find(o => o.user?.id === selectedCustomerId || `buyer-${o.orderId}` === selectedCustomerId);
+                        return matchedOrder ? `${matchedOrder.customerName} (คำสั่งซื้อ ${matchedOrder.orderId})` : (selectedCustomerId === 'guest_user' ? 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)' : selectedCustomerId);
+                      })()}
                     </strong>
                     <div style={{ fontSize: 11, color: '#10B981', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
                       <span>● กำลังสนทนาผ่าน WebSocket สด</span>
@@ -4048,12 +3930,17 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 <div ref={sellerMessagesAreaRef} className="seller-chat-messages-area">
                   {(() => {
                     const activeThreadKey = `${currentStore.id}::${selectedCustomerId}`;
-                    const activeChatList = sellerMessages[activeThreadKey] || sellerMessages[selectedCustomerId] || initialCustomerThreads[selectedCustomerId] || [];
-                    const customerNames: Record<string, string> = {
-                      guest_user: 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)',
-                      'user-buyer-1': 'คุณสมชาย มุ่งมั่น',
-                      'user-buyer-2': 'คุณอารียา พรรณดี',
-                    };
+                    const activeChatList = sellerMessages[activeThreadKey] || sellerMessages[selectedCustomerId] || [];
+
+                    if (activeChatList.length === 0) {
+                      return (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', padding: 30, textAlign: 'center' }}>
+                          <MessageSquare size={36} style={{ opacity: 0.3, marginBottom: 10 }} />
+                          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>พร้อมรับข้อความสนทนา</div>
+                          <div style={{ fontSize: 12 }}>พิมพ์ข้อความตอบกลับหรือเลือกข้อความด่วนด้านล่างเพื่อเริ่มการสนทนา</div>
+                        </div>
+                      );
+                    }
 
                     return activeChatList.map((msg, mIdx) => (
                       <div
@@ -4064,7 +3951,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                           {msg.text}
                         </div>
                         <span className="seller-chat-time">
-                          {msg.time || '10:00'} • {msg.sender === 'store' ? 'ร้านค้า (คุณ)' : (customerNames[selectedCustomerId] || 'ลูกค้า')}
+                          {msg.time || '10:00'} • {msg.sender === 'store' ? 'ร้านค้า (คุณ)' : 'ลูกค้า'}
                         </span>
                       </div>
                     ));
@@ -4232,45 +4119,53 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                     </tr>
                   </thead>
                   <tbody>
-                    {myFiledReports.map(rep => (
-                      <tr key={rep.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#2563eb' }}>{rep.orderId}</td>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#1e293b' }}>{rep.customerName}</td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
-                          <span style={{
-                            padding: '2px 8px',
-                            borderRadius: 4,
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                            background: rep.type === 'COD_REJECTED' ? '#fee2e2' : '#fef3c7',
-                            color: rep.type === 'COD_REJECTED' ? '#b91c1c' : '#b45309'
-                          }}>
-                            {rep.type === 'COD_REJECTED' && '🚨 ปฏิเสธรับ COD'}
-                            {rep.type === 'REFUND_ABUSE' && '⚠️ ขอคืนเงินเท็จ'}
-                            {rep.type === 'FAKE_ORDER' && '📦 สั่งเล่นสแปม'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#64748b', maxWidth: 280 }}>{rep.description}</td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
-                          {rep.status === 'ACTION_TAKEN' ? (
-                            <span style={{ color: '#15803d', fontWeight: 700, background: '#dcfce7', padding: '2px 8px', borderRadius: 4 }}>
-                              ✓ ลงโทษผู้ซื้อแล้ว
-                            </span>
-                          ) : (
-                            <span style={{ color: '#b45309', fontWeight: 600, background: '#fef3c7', padding: '2px 8px', borderRadius: 4 }}>
-                              ⏳ กำลังตรวจสอบ
-                            </span>
-                          )}
-                        </td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
-                          {rep.compensationStatus === 'COMPENSATED_50THB' ? (
-                            <span style={{ color: '#10b981', fontWeight: 700 }}>💰 ชดเชย ฿50 แล้ว</span>
-                          ) : (
-                            <span style={{ color: '#94a3b8' }}>รออนุมัติ</span>
-                          )}
+                    {myFiledReports.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: 'center', padding: '36px 20px', color: '#94a3b8' }}>
+                          ยังไม่มีประวัติการยื่นรายงานลูกค้า หากพบกรณีลูกค้าปฏิเสธรับพัสดุ COD หรือกลั่นแกล้ง สามารถกดปุ่ม "🚨 แจ้งรายงานผู้ซื้อ / เคลมค่าเสียหาย COD" ด้านบนเพื่อขอรับการชดเชยได้
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      myFiledReports.map(rep => (
+                        <tr key={rep.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#2563eb' }}>{rep.orderId}</td>
+                          <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#1e293b' }}>{rep.customerName}</td>
+                          <td style={{ padding: '0.75rem 1rem' }}>
+                            <span style={{
+                              padding: '2px 8px',
+                              borderRadius: 4,
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              background: rep.type === 'COD_REJECTED' ? '#fee2e2' : '#fef3c7',
+                              color: rep.type === 'COD_REJECTED' ? '#b91c1c' : '#b45309'
+                            }}>
+                              {rep.type === 'COD_REJECTED' && '🚨 ปฏิเสธรับ COD'}
+                              {rep.type === 'REFUND_ABUSE' && '⚠️ ขอคืนเงินเท็จ'}
+                              {rep.type === 'FAKE_ORDER' && '📦 สั่งเล่นสแปม'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '0.75rem 1rem', color: '#64748b', maxWidth: 280 }}>{rep.description}</td>
+                          <td style={{ padding: '0.75rem 1rem' }}>
+                            {rep.status === 'ACTION_TAKEN' ? (
+                              <span style={{ color: '#15803d', fontWeight: 700, background: '#dcfce7', padding: '2px 8px', borderRadius: 4 }}>
+                                ✓ ลงโทษผู้ซื้อแล้ว
+                              </span>
+                            ) : (
+                              <span style={{ color: '#b45309', fontWeight: 600, background: '#fef3c7', padding: '2px 8px', borderRadius: 4 }}>
+                                ⏳ กำลังตรวจสอบ
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '0.75rem 1rem' }}>
+                            {rep.compensationStatus === 'COMPENSATED_50THB' ? (
+                              <span style={{ color: '#10b981', fontWeight: 700 }}>💰 ชดเชย ฿50 แล้ว</span>
+                            ) : (
+                              <span style={{ color: '#94a3b8' }}>รออนุมัติ</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
