@@ -375,12 +375,12 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                 <div className="compare-spec-row-label">แท็กและคุณสมบัติเด่น</div>
                 <div className="compare-spec-row-values">
                   <div className="compare-spec-val tags-val">
-                    {dualItemA?.tags.map(t => (
+                    {(dualItemA?.tags || []).map(t => (
                       <span key={t} className="feature-tag">#{t}</span>
                     ))}
                   </div>
                   <div className="compare-spec-val tags-val">
-                    {dualItemB?.tags.map(t => (
+                    {(dualItemB?.tags || []).map(t => (
                       <span key={t} className="feature-tag">#{t}</span>
                     ))}
                   </div>
@@ -571,7 +571,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                 {compareItems.map(p => (
                   <td key={p.id} className="compare-val-cell">
                     <div className="tags-container">
-                      {p.tags.map(t => (
+                      {(p.tags || []).map(t => (
                         <span key={t} className="feature-tag">#{t}</span>
                       ))}
                     </div>

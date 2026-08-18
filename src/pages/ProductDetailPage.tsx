@@ -442,7 +442,7 @@ export function ProductDetailPage({
                 </>
               ) : (
                 <img
-                  src={currentMedia?.url || product.images[0]}
+                  src={currentMedia?.url || product.images?.[0] || ''}
                   alt={product.name}
                   className="product-detail__main-image"
                 />
@@ -587,7 +587,7 @@ export function ProductDetailPage({
 
             {/* Tags */}
             <div className="product-detail__tags">
-              {product.tags.map(tag => (
+              {(product.tags || []).map(tag => (
                 <span key={tag} className="product-detail__tag">#{tag}</span>
               ))}
             </div>
@@ -982,7 +982,7 @@ export function ProductDetailPage({
                           onClick={() => navigate(`/product/${p.id}`)}
                         >
                           <div className="store-mini-img-wrap">
-                            <img src={p.images[0]} alt={p.name} className="store-mini-img" />
+                            <img src={p.images?.[0] || ''} alt={p.name} className="store-mini-img" />
                             {disc && <span className="store-mini-badge">-{disc}%</span>}
                           </div>
                           <div className="store-mini-info">
@@ -1191,7 +1191,7 @@ export function ProductDetailPage({
             <div className="product-drawer-header">
               <div className="product-drawer-product-info">
                 <img
-                  src={product.images[0]}
+                  src={product.images?.[0] || ''}
                   alt={product.name}
                   className="product-drawer-thumb"
                 />
@@ -1310,7 +1310,7 @@ export function ProductDetailPage({
                   </div>
 
                   <div className="product-drawer-quick-qtys">
-                    {[1, 2, 5, 10].filter(n => n <= product.stock).map(n => (
+                    {[1, 2, 5, 10].filter(n => n <= (product.stock ?? 1)).map(n => (
                       <button
                         key={n}
                         type="button"
