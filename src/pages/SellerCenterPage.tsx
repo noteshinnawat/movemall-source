@@ -325,7 +325,12 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 
       setSellerMessages(prev => {
         const list = prev[threadKey] || prev[custId] || [];
-        if (list.some(m => m.id === msg.id)) return prev;
+        // Deduplicate by ID or identical text from same sender
+        const isDuplicate = list.some(m =>
+          m.id === msg.id ||
+          (m.sender === msg.sender && m.text === msg.text && m.time === msg.time)
+        );
+        if (isDuplicate) return prev;
         const updated = {
           ...prev,
           [threadKey]: [...list, msg],
@@ -373,8 +378,9 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     });
     setSellerInputVal('');
 
-    // Emit live to WebSocket
+    // Emit live to WebSocket with explicit message ID
     emitChatMessage({
+      id: newMsg.id,
       storeId: currentStore.id,
       userId: selectedCustomerId,
       text: textToSend.trim(),

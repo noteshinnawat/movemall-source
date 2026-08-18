@@ -122,12 +122,14 @@ router.post('/messages', async (req: Request, res: Response) => {
       createdAt: now.toISOString(),
     };
 
-    // Emit to real-time Socket.io rooms
-    if (io) {
+    // Emit to real-time Socket.io rooms (only if requested via REST-only client)
+    if (io && req.query.broadcast === 'true') {
       const room = `chat:${targetStoreId}:${senderId}`;
       const sellerRoom = `seller:${targetStoreId}`;
       io.to(room).emit('receive_chat_message', payload);
-      io.to(sellerRoom).emit('receive_chat_message', payload);
+      if (senderRole !== 'store') {
+        io.to(sellerRoom).emit('receive_chat_message', payload);
+      }
     }
 
     res.status(201).json({

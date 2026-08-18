@@ -139,7 +139,7 @@ io.on('connection', (socket) => {
   });
 
   // Send message through WebSocket
-  socket.on('send_chat_message', async (data: { storeId: string; userId: string; text: string; sender: 'me' | 'store'; customerId?: string }) => {
+  socket.on('send_chat_message', async (data: { id?: string; storeId: string; userId: string; text: string; sender: 'me' | 'store'; customerId?: string }) => {
     if (!data?.text || !data.text.trim()) return;
 
     const activeUserId = data.customerId || data.userId;
@@ -147,7 +147,7 @@ io.on('connection', (socket) => {
     const sellerRoom = `seller:${data.storeId}`;
 
     const msgPayload = {
-      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      id: data.id || `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       sender: data.sender,
       senderId: data.sender === 'store' ? data.storeId : activeUserId,
       recipientId: data.sender === 'store' ? activeUserId : data.storeId,
@@ -157,9 +157,11 @@ io.on('connection', (socket) => {
       createdAt: new Date().toISOString(),
     };
 
-    // Broadcast to the conversation room and seller monitoring room
-    io.to(room).emit('receive_chat_message', msgPayload);
-    io.to(sellerRoom).emit('receive_chat_message', msgPayload);
+    // Broadcast only to OTHER sockets in the room (prevents duplicate self-echo)
+    socket.to(room).emit('receive_chat_message', msgPayload);
+    if (data.sender !== 'store') {
+      socket.to(sellerRoom).emit('receive_chat_message', msgPayload);
+    }
 
     // Save to Database asynchronously
     try {

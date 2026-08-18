@@ -158,8 +158,12 @@ export function ChatPage() {
 
       setMessages(prev => {
         const storeMsgs = prev[targetStoreId] || [];
-        // Prevent duplicate message IDs
-        if (storeMsgs.some(m => m.id === formattedMsg.id)) return prev;
+        // Prevent duplicate message IDs or identical recent messages
+        const isDuplicate = storeMsgs.some(m =>
+          m.id === formattedMsg.id ||
+          (m.sender === formattedMsg.sender && m.text === formattedMsg.text && m.time === formattedMsg.time)
+        );
+        if (isDuplicate) return prev;
         return {
           ...prev,
           [targetStoreId]: [...storeMsgs, formattedMsg],
@@ -311,8 +315,9 @@ export function ChatPage() {
     }));
     setInputVal('');
 
-    // 2. Real-time WebSocket Broadcast
+    // 2. Real-time WebSocket Broadcast with unique ID
     emitChatMessage({
+      id: newMsg.id,
       storeId: selectedStoreId,
       userId: myUserId,
       text: textToSend.trim(),

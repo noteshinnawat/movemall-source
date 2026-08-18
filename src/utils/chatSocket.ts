@@ -48,6 +48,7 @@ export function joinSellerChatRoom(storeId: string): void {
 }
 
 export function emitChatMessage(data: {
+  id?: string;
   storeId: string;
   userId: string;
   text: string;
