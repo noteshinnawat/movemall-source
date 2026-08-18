@@ -187,9 +187,9 @@ app.use('/api/payout', payoutRoutes);
 const PORT = Number(process.env.PORT) || 4000;
 
 if (process.env.NODE_ENV !== 'test') {
-  server.listen(PORT, () => {
-    console.log(`🚀 Movemall Server running on http://localhost:${PORT}`);
-    console.log(`📡 Health Check: http://localhost:${PORT}/healthz`);
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Movemall Server running on port ${PORT} (0.0.0.0:${PORT})`);
+    console.log(`📡 Health Check: http://0.0.0.0:${PORT}/healthz`);
   });
 }
 
