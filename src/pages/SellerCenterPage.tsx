@@ -4348,48 +4348,203 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                     />
                   </div>
 
-                  {/* Logo Preview & Input */}
-                  <div style={{ marginBottom: 14 }}>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 6 }}>
-                      โลโก้ร้านค้า (Shop Logo URL)
-                    </label>
-                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                      <img
-                        src={storeSettingsForm.logo}
-                        alt="Shop Logo Preview"
-                        style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', border: '1px solid #E5E7EB' }}
-                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=300&q=80'; }}
-                      />
-                      <input
-                        type="url"
-                        value={storeSettingsForm.logo}
-                        onChange={e => setStoreSettingsForm(prev => ({ ...prev, logo: e.target.value }))}
-                        style={{ flex: 1, padding: '9px 12px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none' }}
-                        placeholder="https://..."
-                      />
+                  {/* Logo Upload (Secure File Upload) */}
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <label style={{ fontSize: 13, fontWeight: 700, color: '#374151', margin: 0 }}>
+                        โลโก้ร้านค้า (Shop Logo) *
+                      </label>
+                      <span style={{ fontSize: 11, color: '#2563EB', fontWeight: 600, background: '#EFF6FF', padding: '2px 8px', borderRadius: 4 }}>
+                        ขนาดแนะนำ: 500 x 500 px (1:1) • ไม่เกิน 3 MB
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 14, alignItems: 'center', background: '#F9FAFB', border: '1px solid #E5E7EB', padding: 12, borderRadius: 6 }}>
+                      {storeSettingsForm.logo ? (
+                        <img
+                          src={storeSettingsForm.logo}
+                          alt="Shop Logo Preview"
+                          style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: '2px solid #2563EB', flexShrink: 0 }}
+                        />
+                      ) : (
+                        <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF', fontSize: 22, flexShrink: 0 }}>
+                          🏪
+                        </div>
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                          <label style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            background: '#2563EB',
+                            color: '#FFFFFF',
+                            padding: '7px 14px',
+                            borderRadius: 6,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            transition: '0.2s',
+                          }}>
+                            <Upload size={14} /> {storeSettingsForm.logo ? 'เปลี่ยนรูปโลโก้' : 'อัปโหลดรูปโลโก้'}
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/webp"
+                              style={{ display: 'none' }}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  if (file.size > 3 * 1024 * 1024) {
+                                    triggerToast('⚠️ ขนาดไฟล์โลโก้ต้องไม่เกิน 3 MB');
+                                    return;
+                                  }
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => {
+                                    setStoreSettingsForm(prev => ({ ...prev, logo: ev.target?.result as string }));
+                                    triggerToast('📸 อัปโหลดโลโก้ร้านค้าสำเร็จ');
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                          {storeSettingsForm.logo && (
+                            <button
+                              type="button"
+                              onClick={() => setStoreSettingsForm(prev => ({ ...prev, logo: '' }))}
+                              style={{ padding: '7px 12px', background: '#FEE2E2', color: '#DC2626', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                            >
+                              ลบรูป
+                            </button>
+                          )}
+                        </div>
+                        <p style={{ margin: '6px 0 0', fontSize: 11, color: '#6B7280' }}>
+                          รองรับไฟล์ JPG, PNG, WEBP (ภาพจะถูกตัดเป็นวงกลมแสดงบนหน้าร้านและหน้าสินค้า)
+                        </p>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Banner Preview & Input */}
-                  <div style={{ marginBottom: 14 }}>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 6 }}>
-                      ภาพหน้าปกแบนเนอร์ (Cover Banner URL)
-                    </label>
-                    <div style={{ marginBottom: 8, height: 80, borderRadius: 6, overflow: 'hidden', border: '1px solid #E5E7EB' }}>
-                      <img
-                        src={storeSettingsForm.banner}
-                        alt="Banner Preview"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80'; }}
-                      />
+                  {/* Banner Upload (Secure File Upload) */}
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <label style={{ fontSize: 13, fontWeight: 700, color: '#374151', margin: 0 }}>
+                        ภาพหน้าปกแบนเนอร์ร้านค้า (Cover Banner) *
+                      </label>
+                      <span style={{ fontSize: 11, color: '#DC2626', fontWeight: 700, background: '#FEF2F2', padding: '2px 8px', borderRadius: 4 }}>
+                        ขนาดแนะนำ: 1200 x 400 px (3:1) • ไม่เกิน 5 MB
+                      </span>
                     </div>
-                    <input
-                      type="url"
-                      value={storeSettingsForm.banner}
-                      onChange={e => setStoreSettingsForm(prev => ({ ...prev, banner: e.target.value }))}
-                      style={{ width: '100%', padding: '9px 12px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none' }}
-                      placeholder="https://..."
-                    />
+
+                    {storeSettingsForm.banner ? (
+                      <div style={{ position: 'relative', height: 120, borderRadius: 6, overflow: 'hidden', border: '1px solid #E5E7EB', marginBottom: 8 }}>
+                        <img
+                          src={storeSettingsForm.banner}
+                          alt="Banner Preview"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                        <div style={{ position: 'absolute', bottom: 8, right: 8, display: 'flex', gap: 6 }}>
+                          <label style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            background: 'rgba(17, 24, 39, 0.85)',
+                            color: '#FFFFFF',
+                            padding: '6px 12px',
+                            borderRadius: 4,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            backdropFilter: 'blur(4px)',
+                          }}>
+                            <Upload size={12} /> เปลี่ยนรูปแบนเนอร์
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/webp"
+                              style={{ display: 'none' }}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  if (file.size > 5 * 1024 * 1024) {
+                                    triggerToast('⚠️ ขนาดไฟล์แบนเนอร์ต้องไม่เกิน 5 MB');
+                                    return;
+                                  }
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => {
+                                    setStoreSettingsForm(prev => ({ ...prev, banner: ev.target?.result as string }));
+                                    triggerToast('📸 อัปโหลดภาพหน้าปกแบนเนอร์สำเร็จ');
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setStoreSettingsForm(prev => ({ ...prev, banner: '' }))}
+                            style={{
+                              background: 'rgba(220, 38, 38, 0.85)',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              padding: '6px 10px',
+                              borderRadius: 4,
+                              fontSize: 11,
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              backdropFilter: 'blur(4px)',
+                            }}
+                          >
+                            ลบรูป
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <label style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: 110,
+                        border: '2px dashed #CBD5E1',
+                        borderRadius: 6,
+                        background: '#F8FAFC',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        padding: 12,
+                        textAlign: 'center',
+                      }}>
+                        <ImageIcon size={28} style={{ color: '#94A3B8', marginBottom: 6 }} />
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>
+                          คลิกเพื่ออัปโหลดภาพหน้าปกแบนเนอร์
+                        </div>
+                        <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>
+                          สัดส่วน 3:1 แนะนำ 1200 x 400 px (JPG, PNG, WEBP สูงสุด 5 MB)
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          style={{ display: 'none' }}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              if (file.size > 5 * 1024 * 1024) {
+                                triggerToast('⚠️ ขนาดไฟล์แบนเนอร์ต้องไม่เกิน 5 MB');
+                                return;
+                              }
+                              const reader = new FileReader();
+                              reader.onload = (ev) => {
+                                setStoreSettingsForm(prev => ({ ...prev, banner: ev.target?.result as string }));
+                                triggerToast('📸 อัปโหลดภาพหน้าปกแบนเนอร์สำเร็จ');
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+
+                    <div style={{ fontSize: 11, color: '#059669', display: 'flex', alignItems: 'center', gap: 4, marginTop: 6 }}>
+                      <CheckCircle2 size={12} /> ระบบอัปโหลดไฟล์ตรงเข้าสู่ Movemall Cloud Storage ปลอดภัย ไม่รองรับลิงก์ภาพภายนอก
+                    </div>
                   </div>
 
                   {/* Social & Contact */}
