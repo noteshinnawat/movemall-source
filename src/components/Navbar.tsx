@@ -110,14 +110,41 @@ export function Navbar({
             <Link to="/chat" className="navbar__top-link">
               <MessageSquare size={12} /> แชทกับร้านค้า
             </Link>
-            <span className="navbar__top-divider" />
-            <Link to="/register" className="navbar__top-link" style={{ color: '#D97706', fontWeight: 700 }}>
-              🎁 สมัครสมาชิก (รับ 100.-)
-            </Link>
-            <span className="navbar__top-divider" />
-            <Link to="/login" className="navbar__top-link">
-              <User size={12} /> เข้าสู่ระบบ
-            </Link>
+            {/* Auth / Account State */}
+            {(() => {
+              try {
+                const uStr = localStorage.getItem('movemall_user');
+                const u = uStr ? JSON.parse(uStr) : null;
+                if (u) {
+                  return (
+                    <Link to="/account" className="navbar__top-link" style={{ fontWeight: 700, color: '#1E40AF', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <img
+                        src={u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name || 'User')}`}
+                        alt=""
+                        style={{ width: 16, height: 16, borderRadius: '50%', objectFit: 'cover' }}
+                      />
+                      <span>{u.name}</span>
+                      <span style={{ fontSize: 11, background: '#FEF3C7', color: '#D97706', padding: '1px 6px', borderRadius: 4, fontWeight: 800 }}>
+                        🪙 {u.coinsBalance ?? 100}
+                      </span>
+                    </Link>
+                  );
+                }
+              } catch {
+                // Ignore parse errors
+              }
+              return (
+                <>
+                  <Link to="/register" className="navbar__top-link" style={{ color: '#D97706', fontWeight: 700 }}>
+                    🎁 สมัครสมาชิก (รับ 100.-)
+                  </Link>
+                  <span className="navbar__top-divider" />
+                  <Link to="/login" className="navbar__top-link">
+                    <User size={12} /> เข้าสู่ระบบ
+                  </Link>
+                </>
+              );
+            })()}
           </div>
         </div>
       </div>

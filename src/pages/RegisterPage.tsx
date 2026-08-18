@@ -265,6 +265,12 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
           localStorage.setItem('movemall_jwt_token', res.token);
         }
 
+        if (res.user) {
+          localStorage.setItem('movemall_user', JSON.stringify(res.user));
+        } else if (authRes.mockUser) {
+          localStorage.setItem('movemall_user', JSON.stringify(authRes.mockUser));
+        }
+
         const registeredName = res.user?.name || authRes.mockUser?.name || 'สมาชิก Google';
         const coins = res.coinsAwarded || (res.isNewUser ? 100 : res.user?.coinsBalance || 100);
 

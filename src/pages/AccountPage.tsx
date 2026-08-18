@@ -1,7 +1,5 @@
-// src/pages/AccountPage.tsx — Customer Account & Multi-channel Verification Portal
-
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   User,
   ShieldCheck,
@@ -25,14 +23,60 @@ import { fetchApi } from '../utils/api';
 import './AccountPage.css';
 
 export function AccountPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'addresses' | 'paylater'>('profile');
 
+  // Load Saved User from LocalStorage as Initial State
+  const savedUser = (() => {
+    try {
+      const item = localStorage.getItem('movemall_user');
+      return item ? JSON.parse(item) : null;
+    } catch {
+      return null;
+    }
+  })();
+
   // User Profile State
-  const [name, setName] = useState('สมชาย ใจดี (นักช้อป Movemall)');
-  const [email, setEmail] = useState('somchai.demo@movemall.com');
-  const [phone, setPhone] = useState('0899999999');
-  const [avatarUrl, setAvatarUrl] = useState('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80');
-  const [coins, setCoins] = useState(250);
+  const [name, setName] = useState(savedUser?.name || 'สมาชิก Movemall');
+  const [email, setEmail] = useState(savedUser?.email || '');
+  const [phone, setPhone] = useState(savedUser?.phone || '');
+  const [avatarUrl, setAvatarUrl] = useState(
+    savedUser?.avatarUrl ||
+    (savedUser?.name ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(savedUser.name)}` : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80')
+  );
+  const [coins, setCoins] = useState(savedUser?.coinsBalance ?? 100);
+
+  // Fetch Live Profile from Server
+  useEffect(() => {
+    const token = localStorage.getItem('movemall_jwt_token');
+    if (!token) return;
+
+    fetchApi<{
+      user: {
+        id: string;
+        name: string;
+        email?: string;
+        phone?: string;
+        avatarUrl?: string;
+        coinsBalance?: number;
+      };
+    }>('/api/auth/me')
+      .then((res) => {
+        if (res?.user) {
+          setName(res.user.name);
+          if (res.user.email) setEmail(res.user.email);
+          if (res.user.phone) setPhone(res.user.phone);
+          if (res.user.avatarUrl) setAvatarUrl(res.user.avatarUrl);
+          if (typeof res.user.coinsBalance === 'number') setCoins(res.user.coinsBalance);
+
+          // Update local cache
+          localStorage.setItem('movemall_user', JSON.stringify(res.user));
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not fetch live profile from API, using cached state:', err);
+      });
+  }, []);
 
   function handleAvatarFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -214,7 +258,7 @@ export function AccountPage() {
       if (otpModalType === 'phone') setIsPhoneVerified(true);
 
       if (res.coinsBalance) setCoins(res.coinsBalance);
-      else setCoins(prev => prev + 50);
+      else setCoins((prev: number) => prev + 50);
 
       setOtpStatusMsg(res.message || 'ยืนยันตัวตนสำเร็จ! รับฟรี 50 Movemall Coins 🪙');
       setTimeout(() => {
@@ -223,7 +267,7 @@ export function AccountPage() {
     } catch {
       if (otpModalType === 'email') setIsEmailVerified(true);
       if (otpModalType === 'phone') setIsPhoneVerified(true);
-      setCoins(prev => prev + 50);
+      setCoins((prev: number) => prev + 50);
       setOtpStatusMsg('ยืนยันตัวตนสำเร็จ! รับฟรี 50 Movemall Coins 🪙');
       setTimeout(() => {
         setOtpModalType(null);
