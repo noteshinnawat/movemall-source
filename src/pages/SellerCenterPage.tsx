@@ -6,7 +6,7 @@ import {
   AlertCircle, RefreshCw, Zap, ShieldCheck, Pencil, Upload, Image as ImageIcon, Video,
   User, MapPin, FileText, Download, Send, Search, Check, Building2, SlidersHorizontal,
   MessageSquare, Radio, Layers, Globe, ExternalLink, Lock, Cpu, CheckCircle2, Sliders, ArrowRight,
-  AlertTriangle
+  AlertTriangle, Settings, CreditCard, Truck, Phone, Mail, Save
 } from 'lucide-react';
 import { categories } from '../data/products';
 import { ShippingLabelModal, type ShippingLabelProps } from '../components/ShippingLabelModal';
@@ -150,28 +150,109 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   const currentStore = {
     id: sellerStoreId,
     slug: sellerStoreSlug,
-    name: customStoreName,
-    logo: currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=300&q=80',
+    name: customStoreName || 'ร้านค้าของฉัน',
+    logo: currentUser?.avatarUrl || localStorage.getItem('movemall_store_logo') || '',
     rating: 5.0,
     responseRate: '100%',
-    followers: 1,
+    followers: 0,
     isMall: false,
   };
 
   const storeProducts = products.filter(p => p.storeId === currentStore.id);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'api' | 'ads' | 'tax' | 'flash' | 'chat' | 'health'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'api' | 'ads' | 'tax' | 'flash' | 'chat' | 'health' | 'settings'>('overview');
+
+  // ── Store Profile & Comprehensive Settings State ──
+  const [storeSettingsForm, setStoreSettingsForm] = useState({
+    name: customStoreName || '',
+    description: localStorage.getItem('movemall_store_bio') || '',
+    logo: currentUser?.avatarUrl || localStorage.getItem('movemall_store_logo') || '',
+    banner: localStorage.getItem('movemall_store_banner') || '',
+    category: localStorage.getItem('movemall_store_category') || 'electronics',
+    contactPhone: localStorage.getItem('movemall_store_phone') || '',
+    contactEmail: localStorage.getItem('movemall_store_email') || currentUser?.email || '',
+    lineId: localStorage.getItem('movemall_store_line') || '',
+    facebookPage: localStorage.getItem('movemall_store_fb') || '',
+
+    // Warehouse & Logistics
+    warehouseContact: localStorage.getItem('movemall_warehouse_contact') || '',
+    warehousePhone: localStorage.getItem('movemall_warehouse_phone') || '',
+    warehouseAddress: localStorage.getItem('movemall_warehouse_address') || '',
+    courier: localStorage.getItem('movemall_courier_pref') || 'flash',
+    allowCod: localStorage.getItem('movemall_allow_cod') === 'true',
+
+    // Bank Payout
+    bankName: localStorage.getItem('movemall_payout_bank') || 'กสิกรไทย (KBANK)',
+    bankAccountNo: localStorage.getItem('movemall_payout_acc_no') || '',
+    accountName: localStorage.getItem('movemall_payout_acc_name') || '',
+    promptPay: localStorage.getItem('movemall_payout_promptpay') || '',
+
+    // Auto-Reply Chat Bot
+    autoReplyEnabled: localStorage.getItem('movemall_autoreply_enabled') === 'true',
+    welcomeMessage: localStorage.getItem('movemall_welcome_msg') || '',
+  });
+
+  async function handleSaveStoreSettings(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    try {
+      localStorage.setItem('movemall_custom_store_name', storeSettingsForm.name);
+      localStorage.setItem('movemall_my_store_name', storeSettingsForm.name);
+      localStorage.setItem('movemall_store_bio', storeSettingsForm.description);
+      localStorage.setItem('movemall_store_logo', storeSettingsForm.logo);
+      localStorage.setItem('movemall_store_banner', storeSettingsForm.banner);
+      localStorage.setItem('movemall_store_category', storeSettingsForm.category);
+      localStorage.setItem('movemall_store_phone', storeSettingsForm.contactPhone);
+      localStorage.setItem('movemall_store_email', storeSettingsForm.contactEmail);
+      localStorage.setItem('movemall_store_line', storeSettingsForm.lineId);
+      localStorage.setItem('movemall_store_fb', storeSettingsForm.facebookPage);
+
+      localStorage.setItem('movemall_warehouse_contact', storeSettingsForm.warehouseContact);
+      localStorage.setItem('movemall_warehouse_phone', storeSettingsForm.warehousePhone);
+      localStorage.setItem('movemall_warehouse_address', storeSettingsForm.warehouseAddress);
+      localStorage.setItem('movemall_courier_pref', storeSettingsForm.courier);
+      localStorage.setItem('movemall_allow_cod', String(storeSettingsForm.allowCod));
+
+      localStorage.setItem('movemall_payout_bank', storeSettingsForm.bankName);
+      localStorage.setItem('movemall_payout_acc_no', storeSettingsForm.bankAccountNo);
+      localStorage.setItem('movemall_payout_acc_name', storeSettingsForm.accountName);
+      localStorage.setItem('movemall_payout_promptpay', storeSettingsForm.promptPay);
+
+      localStorage.setItem('movemall_autoreply_enabled', String(storeSettingsForm.autoReplyEnabled));
+      localStorage.setItem('movemall_welcome_msg', storeSettingsForm.welcomeMessage);
+
+      setCustomStoreName(storeSettingsForm.name);
+      setStoreNameInput(storeSettingsForm.name);
+
+      try {
+        await fetchApi(`/api/stores/${currentStore.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            name: storeSettingsForm.name,
+            description: storeSettingsForm.description,
+            logo: storeSettingsForm.logo,
+            banner: storeSettingsForm.banner,
+          }),
+        });
+      } catch {
+        // local persistence is active
+      }
+
+      triggerToast('💾 บันทึกการตั้งค่ารายละเอียดร้านค้าสำเร็จเรียบร้อยแล้ว!');
+    } catch {
+      triggerToast('❌ บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+    }
+  }
 
   // ── Shop Health & Buyer Report State ──
   const [storeHealthScore, setStoreHealthScore] = useState(100);
   const [storePenaltyPoints, setStorePenaltyPoints] = useState(0);
   const [showBuyerReportModal, setShowBuyerReportModal] = useState(false);
   const [reportForm, setReportForm] = useState({
-    orderId: 'ORD-9841',
-    customerName: 'กิตติศักดิ์ สั่งเล่น',
+    orderId: '',
+    customerName: '',
     type: 'COD_REJECTED' as 'COD_REJECTED' | 'REFUND_ABUSE' | 'FAKE_ORDER' | 'HARASSMENT',
-    description: 'ลูกค้าปฏิเสธไม่ยอมรับพัสดุเก็บเงินปลายทาง (COD) ขนส่งนำจ่าย 3 ครั้งไม่สำเร็จและติดต่อไม่ได้ ทำให้ร้านค้าเสียหายค่าบรรจุภัณฑ์และค่าขนส่ง',
-    evidenceUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=400&q=80',
+    description: '',
+    evidenceUrl: '',
   });
 
   const [myFiledReports, setMyFiledReports] = useState<any[]>(() => {
@@ -1487,6 +1568,13 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             >
               <FileText size={15} />
               <span>ระบบภาษี & e-Tax</span>
+            </button>
+            <button
+              className={`seller-tab-btn${activeTab === 'settings' ? ' seller-tab-btn--active' : ''}`}
+              onClick={() => setActiveTab('settings')}
+            >
+              <Settings size={15} />
+              <span>⚙️ ตั้งค่าร้านค้า</span>
             </button>
           </nav>
         </div>
@@ -4170,6 +4258,372 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 </table>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ── Tab: Store Settings (ตั้งค่ารายละเอียดร้านค้า) ── */}
+        {activeTab === 'settings' && (
+          <div className="seller-settings-tab" style={{ maxWidth: 1000, margin: '0 auto' }}>
+            <form onSubmit={handleSaveStoreSettings}>
+              {/* Header Title */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid #E5E7EB' }}>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: '#111827', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Settings size={22} style={{ color: '#2563EB' }} /> ตั้งค่ารายละเอียดร้านค้า (Store Settings)
+                  </h2>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6B7280' }}>
+                    จัดการข้อมูลโปรไฟล์ร้านค้า ที่อยู่จัดส่งคลังสินค้า บัญชีรับเงินโอน Payout และระบบตอบกลับอัตโนมัติ
+                  </p>
+                </div>
+                <button
+                  type="submit"
+                  style={{
+                    background: '#2563EB',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    padding: '10px 22px',
+                    borderRadius: 6,
+                    fontWeight: 700,
+                    fontSize: 14,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)',
+                  }}
+                >
+                  <Save size={16} /> บันทึกการเปลี่ยนแปลง
+                </button>
+              </div>
+
+              {/* Grid 2 Columns */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: 24 }}>
+                
+                {/* 1. Basic Store Profile Card */}
+                <div style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 6, padding: 20 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, paddingBottom: 10, borderBottom: '1px solid #F3F4F6' }}>
+                    <Store size={18} style={{ color: '#2563EB' }} />
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#1F2937' }}>ข้อมูลร้านค้าทั่วไป (Store Profile)</h3>
+                  </div>
+
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 6 }}>
+                      ชื่อร้านค้า (Shop Name) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={storeSettingsForm.name}
+                      onChange={e => setStoreSettingsForm(prev => ({ ...prev, name: e.target.value }))}
+                      style={{ width: '100%', padding: '9px 12px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none' }}
+                      placeholder="เช่น TechPro Official Store"
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 6 }}>
+                      หมวดหมู่หลักของร้าน (Main Category)
+                    </label>
+                    <select
+                      value={storeSettingsForm.category}
+                      onChange={e => setStoreSettingsForm(prev => ({ ...prev, category: e.target.value }))}
+                      style={{ width: '100%', padding: '9px 12px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none', background: '#FFFFFF' }}
+                    >
+                      {categories.filter(c => c.id !== 'all').map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 6 }}>
+                      คำอธิบายร้านค้า / Bio (แนะนำร้าน นโยบายการรับประกัน)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={storeSettingsForm.description}
+                      onChange={e => setStoreSettingsForm(prev => ({ ...prev, description: e.target.value }))}
+                      style={{ width: '100%', padding: '9px 12px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none', resize: 'vertical' }}
+                      placeholder="อธิบายจุดเด่นของร้านค้า เช่น สินค้าของแท้ 100% ประกันศูนย์ จัดส่งไวใน 24 ชม."
+                    />
+                  </div>
+
+                  {/* Logo Preview & Input */}
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 6 }}>
+                      โลโก้ร้านค้า (Shop Logo URL)
+                    </label>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                      <img
+                        src={storeSettingsForm.logo}
+                        alt="Shop Logo Preview"
+                        style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', border: '1px solid #E5E7EB' }}
+                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=300&q=80'; }}
+                      />
+                      <input
+                        type="url"
+                        value={storeSettingsForm.logo}
+                        onChange={e => setStoreSettingsForm(prev => ({ ...prev, logo: e.target.value }))}
+                        style={{ flex: 1, padding: '9px 12px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none' }}
+                        placeholder="https://..."
+                      />
+                    </div>
+                  </div>
+
+                  {/* Banner Preview & Input */}
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 6 }}>
+                      ภาพหน้าปกแบนเนอร์ (Cover Banner URL)
+                    </label>
+                    <div style={{ marginBottom: 8, height: 80, borderRadius: 6, overflow: 'hidden', border: '1px solid #E5E7EB' }}>
+                      <img
+                        src={storeSettingsForm.banner}
+                        alt="Banner Preview"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80'; }}
+                      />
+                    </div>
+                    <input
+                      type="url"
+                      value={storeSettingsForm.banner}
+                      onChange={e => setStoreSettingsForm(prev => ({ ...prev, banner: e.target.value }))}
+                      style={{ width: '100%', padding: '9px 12px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none' }}
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  {/* Social & Contact */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#4B5563', marginBottom: 4 }}>
+                        เบอร์โทรติดต่อลูกค้า
+                      </label>
+                      <input
+                        type="tel"
+                        value={storeSettingsForm.contactPhone}
+                        onChange={e => setStoreSettingsForm(prev => ({ ...prev, contactPhone: e.target.value }))}
+                        style={{ width: '100%', padding: '8px 10px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none' }}
+                        placeholder="081-234-5678"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#4B5563', marginBottom: 4 }}>
+                        อีเมลบริการลูกค้า
+                      </label>
+                      <input
+                        type="email"
+                        value={storeSettingsForm.contactEmail}
+                        onChange={e => setStoreSettingsForm(prev => ({ ...prev, contactEmail: e.target.value }))}
+                        style={{ width: '100%', padding: '8px 10px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none' }}
+                        placeholder="support@myshop.com"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Warehouse & Logistics Card */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                  
+                  {/* Warehouse Card */}
+                  <div style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 6, padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, paddingBottom: 10, borderBottom: '1px solid #F3F4F6' }}>
+                      <Truck size={18} style={{ color: '#2563EB' }} />
+                      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#1F2937' }}>ที่อยู่คลังสินค้า & การจัดส่ง (Logistics)</h3>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                          ชื่อผู้ติดต่อคลังสินค้า *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={storeSettingsForm.warehouseContact}
+                          onChange={e => setStoreSettingsForm(prev => ({ ...prev, warehouseContact: e.target.value }))}
+                          style={{ width: '100%', padding: '8px 10px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none' }}
+                          placeholder="ชื่อผู้จัดส่ง"
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                          เบอร์โทรศัพท์คลังสินค้า *
+                        </label>
+                        <input
+                          type="tel"
+                          required
+                          value={storeSettingsForm.warehousePhone}
+                          onChange={e => setStoreSettingsForm(prev => ({ ...prev, warehousePhone: e.target.value }))}
+                          style={{ width: '100%', padding: '8px 10px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none' }}
+                          placeholder="089-123-4567"
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: 14 }}>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                        ที่อยู่ต้นทางสำหรับรถขนส่งเข้ารับพัสดุ (Pickup Address) *
+                      </label>
+                      <textarea
+                        rows={2}
+                        required
+                        value={storeSettingsForm.warehouseAddress}
+                        onChange={e => setStoreSettingsForm(prev => ({ ...prev, warehouseAddress: e.target.value }))}
+                        style={{ width: '100%', padding: '8px 10px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none', resize: 'vertical' }}
+                        placeholder="ระบุเลขที่ อาคาร ซอย ถนน ตำบล อำเภอ จังหวัด และรหัสไปรษณีย์"
+                      />
+                    </div>
+
+                    {/* COD & Shipping Options */}
+                    <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 6, padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={storeSettingsForm.allowCod}
+                          onChange={e => setStoreSettingsForm(prev => ({ ...prev, allowCod: e.target.checked }))}
+                          style={{ width: 16, height: 16, accentColor: '#2563EB', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#111827' }}>
+                          เปิดให้บริการเก็บเงินปลายทาง (Cash on Delivery - COD)
+                        </span>
+                      </label>
+                      <div style={{ fontSize: 11, color: '#059669', display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <CheckCircle2 size={13} /> ร้านค้าได้รับความคุ้มครอง Movemall COD Shield เคลมค่าเสียหายได้ 100%
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. Bank Payout Card */}
+                  <div style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 6, padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, paddingBottom: 10, borderBottom: '1px solid #F3F4F6' }}>
+                      <CreditCard size={18} style={{ color: '#2563EB' }} />
+                      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#1F2937' }}>บัญชีธนาคารรับเงินโอน Payout (Bank Account)</h3>
+                    </div>
+
+                    <div style={{ marginBottom: 12 }}>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                        เลือกธนาคาร *
+                      </label>
+                      <select
+                        value={storeSettingsForm.bankName}
+                        onChange={e => setStoreSettingsForm(prev => ({ ...prev, bankName: e.target.value }))}
+                        style={{ width: '100%', padding: '8px 10px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none', background: '#FFFFFF' }}
+                      >
+                        <option value="กสิกรไทย (KBANK)">ธนาคารกสิกรไทย (Kasikornbank - KBANK)</option>
+                        <option value="ไทยพาณิชย์ (SCB)">ธนาคารไทยพาณิชย์ (Siam Commercial Bank - SCB)</option>
+                        <option value="กรุงเทพ (BBL)">ธนาคารกรุงเทพ (Bangkok Bank - BBL)</option>
+                        <option value="กรุงไทย (KTB)">ธนาคารกรุงไทย (Krungthai Bank - KTB)</option>
+                        <option value="กรุงศรีอยุธยา (BAY)">ธนาคารกรุงศรีอยุธยา (Bank of Ayudhya - BAY)</option>
+                        <option value="ทหารไทยธนชาต (ttb)">ธนาคารทหารไทยธนชาต (TMBThanachart - ttb)</option>
+                      </select>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                          เลขที่บัญชีธนาคาร *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={storeSettingsForm.bankAccountNo}
+                          onChange={e => setStoreSettingsForm(prev => ({ ...prev, bankAccountNo: e.target.value }))}
+                          style={{ width: '100%', padding: '8px 10px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none' }}
+                          placeholder="012-3-45678-9"
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                          ชื่อบัญชี (ตรงกับบัตร ปชช./นิติบุคคล) *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={storeSettingsForm.accountName}
+                          onChange={e => setStoreSettingsForm(prev => ({ ...prev, accountName: e.target.value }))}
+                          style={{ width: '100%', padding: '8px 10px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none' }}
+                          placeholder="ชื่อบัญชีธนาคาร"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#4B5563', marginBottom: 4 }}>
+                        เบอร์พร้อมเพย์ (PromptPay ID สำหรับโอนเงินด่วน)
+                      </label>
+                      <input
+                        type="text"
+                        value={storeSettingsForm.promptPay}
+                        onChange={e => setStoreSettingsForm(prev => ({ ...prev, promptPay: e.target.value }))}
+                        style={{ width: '100%', padding: '8px 10px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none' }}
+                        placeholder="0812345678"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 4. Auto-Reply Assistant Card */}
+                  <div style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 6, padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, paddingBottom: 10, borderBottom: '1px solid #F3F4F6' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <MessageSquare size={18} style={{ color: '#2563EB' }} />
+                        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#1F2937' }}>ผู้ช่วยตอบแชทอัตโนมัติ (Auto-Reply Bot)</h3>
+                      </div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={storeSettingsForm.autoReplyEnabled}
+                          onChange={e => setStoreSettingsForm(prev => ({ ...prev, autoReplyEnabled: e.target.checked }))}
+                          style={{ width: 16, height: 16, accentColor: '#2563EB', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: 12, fontWeight: 700, color: storeSettingsForm.autoReplyEnabled ? '#15803D' : '#6B7280' }}>
+                          {storeSettingsForm.autoReplyEnabled ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
+                        </span>
+                      </label>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#4B5563', marginBottom: 4 }}>
+                        ข้อความตอบกลับต้อนรับเมื่อลูกค้าทักแชทครั้งแรก
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={storeSettingsForm.welcomeMessage}
+                        onChange={e => setStoreSettingsForm(prev => ({ ...prev, welcomeMessage: e.target.value }))}
+                        style={{ width: '100%', padding: '8px 10px', fontSize: 13, border: '1px solid #D1D5DB', borderRadius: 6, outline: 'none', resize: 'vertical' }}
+                        placeholder="สวัสดีครับ สอบถามข้อมูลสินค้าหรือเช็กสต็อกได้เลยครับ"
+                      />
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* Bottom Submit Bar */}
+              <div style={{ marginTop: 24, padding: '16px 20px', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: 13, color: '#6B7280' }}>
+                  💡 เมื่อกดบันทึก ข้อมูลร้านค้าและที่อยู่จัดส่งจะอัปเดตแบบเรียลไทม์ทันที
+                </div>
+                <button
+                  type="submit"
+                  style={{
+                    background: '#2563EB',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    padding: '10px 28px',
+                    borderRadius: 6,
+                    fontWeight: 700,
+                    fontSize: 14,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)',
+                  }}
+                >
+                  <Save size={16} /> บันทึกการตั้งค่าร้านค้าทั้งหมด
+                </button>
+              </div>
+            </form>
           </div>
         )}
       </div>
