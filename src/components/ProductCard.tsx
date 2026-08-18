@@ -49,7 +49,12 @@ export function ProductCard({
   const store = storeId ? getStoreById(storeId) : undefined;
   const isMall = store?.badge === 'official';
   const isPreferred = store?.badge === 'preferred';
-  const soldCount = (reviewCount * 3) + 18;
+
+  const safePrice = Number(price ?? 0);
+  const safeOriginalPrice = originalPrice ? Number(originalPrice) : undefined;
+  const safeRating = Number(rating ?? 4.8);
+  const safeReviewCount = Number(reviewCount ?? 0);
+  const safeSoldCount = Number((product as any).soldCount ?? (safeReviewCount * 3 + 18));
 
   const reviewVideoSource = videoReview?.videoUrl || videoUrl;
   const hasVideoReview = Boolean(reviewVideoSource);
@@ -284,7 +289,7 @@ export function ProductCard({
           <span className="product-card__perk product-card__perk--shipping">
             🚚 ส่งฟรี
           </span>
-          {price >= 1000 && (
+          {safePrice >= 1000 && (
             <span className="product-card__perk product-card__perk--bnpl">
               ผ่อน 0%
             </span>
@@ -294,13 +299,13 @@ export function ProductCard({
         {/* Rating & Sold Stats */}
         <div className="product-card__rating-row">
           <span className="product-card__rating-score">
-            ⭐ {rating.toFixed(1)}
+            ⭐ {safeRating.toFixed(1)}
           </span>
           <span className="product-card__rating-reviews">
-            ({reviewCount.toLocaleString()})
+            ({safeReviewCount.toLocaleString()})
           </span>
           <span className="product-card__sold-count">
-            ขายแล้ว {soldCount >= 1000 ? `${(soldCount / 1000).toFixed(1)}k` : soldCount}
+            ขายแล้ว {safeSoldCount >= 1000 ? `${(safeSoldCount / 1000).toFixed(1)}k` : safeSoldCount}
           </span>
         </div>
 
@@ -309,11 +314,11 @@ export function ProductCard({
           <div className="product-card__price-box">
             <div className="product-card__main-price">
               <span className="product-card__currency">฿</span>
-              {price.toLocaleString()}
+              {safePrice.toLocaleString()}
             </div>
-            {originalPrice && originalPrice > price && (
+            {safeOriginalPrice && safeOriginalPrice > safePrice && (
               <div className="product-card__original-price">
-                ฿{originalPrice.toLocaleString()}
+                ฿{safeOriginalPrice.toLocaleString()}
               </div>
             )}
           </div>

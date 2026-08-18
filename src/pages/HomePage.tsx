@@ -424,7 +424,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                     {ch.pinnedProduct.name}
                   </span>
                   <span className="home-live-prod-price">
-                    ฿{ch.pinnedProduct.price.toLocaleString()}
+                    ฿{(ch.pinnedProduct?.price ?? 0).toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -513,8 +513,8 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                     </Link>
 
                     <div className="home-flash-price-row">
-                      <span className="home-flash-price">฿{flashPrice.toLocaleString()}</span>
-                      <span className="home-flash-orig">฿{product.price.toLocaleString()}</span>
+                      <span className="home-flash-price">฿{(flashPrice ?? 0).toLocaleString()}</span>
+                      <span className="home-flash-orig">฿{(product.price ?? 0).toLocaleString()}</span>
                     </div>
 
                     {/* Fire Progress Bar */}
@@ -717,8 +717,8 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                   <div className="home-store-card-thumbs">
                     {storeProducts.map(prod => (
                       <Link key={prod.id} to={`/product/${prod.id}`} className="home-store-card-thumb-item" title={prod.name}>
-                        <img src={prod.images[0]} alt={prod.name} loading="lazy" />
-                        <span className="home-store-card-thumb-price">฿{prod.price.toLocaleString()}</span>
+                        <img src={prod.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80'} alt={prod.name} loading="lazy" />
+                        <span className="home-store-card-thumb-price">฿{(prod.price ?? 0).toLocaleString()}</span>
                       </Link>
                     ))}
                   </div>
@@ -944,14 +944,14 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
 
               <div className="home-video-modal-product-card">
                 <img
-                  src={selectedVideoProduct.images[0]}
+                  src={selectedVideoProduct.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80'}
                   alt=""
                   className="home-video-modal-product-img"
                 />
                 <div className="home-video-modal-product-details">
                   <h5 className="home-video-modal-product-name">{selectedVideoProduct.name}</h5>
                   <div className="home-video-modal-product-price">
-                    ฿{selectedVideoProduct.price.toLocaleString()}
+                    ฿{(selectedVideoProduct.price ?? 0).toLocaleString()}
                   </div>
                 </div>
                 <button
