@@ -1,5 +1,3 @@
-// src/pages/ProductDetailPage.tsx
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, Heart, Minus, Plus, Store as StoreIcon, MessageSquare, ShieldCheck, ChevronLeft, ChevronRight, Play, Video, Share2, Scale, Check, X, CreditCard, Sparkles, Flame, Zap, Loader2, Flag, AlertTriangle } from 'lucide-react';
@@ -10,6 +8,7 @@ import { products as staticProducts } from '../data/products';
 import { getStoreById, stores } from '../data/stores';
 import { mockLiveStreams } from '../data/liveStreams';
 import { parseRichText } from '../components/RichTextEditor';
+import { extractProductId, getProductUrl, updateProductSEO } from '../utils/seo';
 import type { Product } from '../types';
 import './ProductDetailPage.css';
 
@@ -37,10 +36,11 @@ export function ProductDetailPage({
   cartCount = 0,
   onOpenVisualSearchWithImage,
 }: ProductDetailPageProps) {
-  const { id } = useParams<{ id: string }>();
+  const { id: rawId } = useParams<{ id: string }>();
+  const id = extractProductId(rawId);
   const navigate = useNavigate();
   const sourceProducts = propProducts || staticProducts;
-  const product = sourceProducts.find(p => p.id === id);
+  const product = sourceProducts.find(p => p.id === id || p.id === rawId);
   const store = (product?.storeId && getStoreById(product.storeId)) || stores[0];
   const activeLive = mockLiveStreams.find(s => s.storeId === product?.storeId && s.type === 'live');
 
@@ -70,10 +70,11 @@ export function ProductDetailPage({
 
   function handleShareProduct() {
     try {
+      const shareUrl = product ? `${window.location.origin}${getProductUrl(product)}` : window.location.href;
       if (navigator.clipboard) {
-        navigator.clipboard.writeText(window.location.href);
+        navigator.clipboard.writeText(shareUrl);
       }
-      alert('คัดลอกลิงก์สินค้าเรียบร้อยแล้ว!');
+      alert('คัดลอกลิงก์สินค้า (SEO URL) เรียบร้อยแล้ว!');
     } catch {}
   }
 
@@ -102,7 +103,7 @@ export function ProductDetailPage({
     isDraggingRef.current = false;
   }
 
-  // SEO Schema.org Product JSON-LD Injection & Personalized Interest Tracking
+  // SEO Schema.org, Open Graph, Meta & Canonical URL Synchronization
   useEffect(() => {
     if (!product) return;
 
@@ -111,42 +112,15 @@ export function ProductDetailPage({
       localStorage.setItem('mm_user_interest', product.category);
     } catch {}
 
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = `jsonld-${product.id}`;
-    script.text = JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'Product',
-      name: product.name,
-      image: product.images,
-      description: product.description,
-      sku: product.id,
-      brand: {
-        '@type': 'Brand',
-        name: 'Movemall Official',
-      },
-      offers: {
-        '@type': 'Offer',
-        url: window.location.href,
-        priceCurrency: 'THB',
-        price: product.price,
-        priceValidUntil: '2026-12-31',
-        itemCondition: 'https://schema.org/NewCondition',
-        availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      },
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: product.rating,
-        reviewCount: product.reviewCount || 1,
-      },
-    });
+    // Update comprehensive SEO Meta, Social & JSON-LD
+    updateProductSEO(product, store?.name);
 
-    document.head.appendChild(script);
-    return () => {
-      const existing = document.getElementById(`jsonld-${product.id}`);
-      if (existing) document.head.removeChild(existing);
-    };
-  }, [product]);
+    // If accessed with legacy non-SEO URL, gracefully replace browser history URL without reloading
+    const canonicalSeoUrl = getProductUrl(product);
+    if (window.location.pathname !== canonicalSeoUrl) {
+      window.history.replaceState(null, '', canonicalSeoUrl + window.location.search);
+    }
+  }, [product, store]);
 
   if (!product) {
     return (
@@ -979,7 +953,7 @@ export function ProductDetailPage({
                         <div 
                           key={p.id} 
                           className="store-mini-card"
-                          onClick={() => navigate(`/product/${p.id}`)}
+                          onClick={() => navigate(getProductUrl(p))}
                         >
                           <div className="store-mini-img-wrap">
                             <img src={p.images?.[0] || ''} alt={p.name} className="store-mini-img" />

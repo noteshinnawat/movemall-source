@@ -2,6 +2,7 @@
 
 import { Link } from 'react-router-dom';
 import { Minus, Plus, Trash2 } from 'lucide-react';
+import { getProductUrl } from '../utils/seo';
 import type { CartItem as CartItemType } from '../types';
 import './CartItem.css';
 
@@ -33,7 +34,7 @@ export function CartItem({ item, onUpdateQty, onRemove }: CartItemProps) {
       <div className="cart-item__body">
         <p className="cart-item__category">{product.category}</p>
         <h3 className="cart-item__name">
-          <Link to={`/product/${product.id}`}>{product.name}</Link>
+          <Link to={getProductUrl(product)}>{product.name}</Link>
         </h3>
 
         <div className="cart-item__bottom">

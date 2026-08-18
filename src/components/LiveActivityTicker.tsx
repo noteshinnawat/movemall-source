@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingBag, CheckCircle } from 'lucide-react';
 import { products } from '../data/products';
+import { getProductUrl } from '../utils/seo';
 import './LiveActivityTicker.css';
 
 interface Activity {
@@ -67,7 +68,7 @@ export function LiveActivityTicker() {
     <div className="activity-ticker-container">
       <div
         className="activity-ticker"
-        onClick={() => navigate(`/product/${currentActivity.product.id}`)}
+        onClick={() => navigate(getProductUrl(currentActivity.product))}
       >
         <div className="activity-ticker__icon-badge">
           <ShoppingBag size={13} />

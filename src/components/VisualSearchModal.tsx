@@ -21,6 +21,7 @@ import {
 import { VISUAL_SEARCH_SAMPLES, type VisualSample } from '../data/visualSearchSamples';
 import { products } from '../data/products';
 import { getStoreById } from '../data/stores';
+import { getProductUrl } from '../utils/seo';
 import type { Product } from '../types';
 import './VisualSearchModal.css';
 
@@ -608,7 +609,7 @@ export function VisualSearchModal({
                         className="vsearch-prod-thumb-wrap"
                         onClick={() => {
                           onClose();
-                          navigate(`/product/${prod.id}`);
+                          navigate(getProductUrl(prod));
                         }}
                       >
                         <img
@@ -625,7 +626,7 @@ export function VisualSearchModal({
                         title={prod.name}
                         onClick={() => {
                           onClose();
-                          navigate(`/product/${prod.id}`);
+                          navigate(getProductUrl(prod));
                         }}
                       >
                         {prod.name}
@@ -660,7 +661,7 @@ export function VisualSearchModal({
                           className="vsearch-view-btn"
                           onClick={() => {
                             onClose();
-                            navigate(`/product/${prod.id}`);
+                            navigate(getProductUrl(prod));
                           }}
                         >
                           ดูสินค้า <ChevronRight size={13} />

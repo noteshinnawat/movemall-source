@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Zap, Star, ShieldCheck, X, ChevronRight, Check } from 'lucide-react';
+import { getProductUrl } from '../utils/seo';
 import type { PinnedProductItem, Product } from '../types';
 import './YellowBasketModal.css';
 
@@ -159,7 +160,7 @@ export function YellowBasketModal({
         {/* Action Footer */}
         <div className="yellow-basket-footer">
           <Link
-            to={`/product/${current.id}`}
+            to={getProductUrl(cartProduct)}
             className="yellow-basket-detail-link"
             onClick={onClose}
           >

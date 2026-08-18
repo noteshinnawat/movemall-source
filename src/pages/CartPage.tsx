@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { stores } from '../data/stores';
 import { products as allProducts } from '../data/products';
+import { getProductUrl } from '../utils/seo';
 import { ProductCard } from '../components/ProductCard';
 import type { CartItem as CartItemType, Product } from '../types';
 import './CartPage.css';
@@ -380,7 +381,7 @@ export function CartPage({
 
                           {/* Product Thumbnail */}
                           <Link
-                            to={`/product/${item.product.id}`}
+                            to={getProductUrl(item.product)}
                             className="cart-product-img-wrap"
                           >
                             <img
@@ -400,7 +401,7 @@ export function CartPage({
                           <div className="cart-product-info-wrap">
                             <div className="cart-product-title-row">
                               <h3 className="cart-product-name">
-                                <Link to={`/product/${item.product.id}`}>
+                                <Link to={getProductUrl(item.product)}>
                                   {item.product.name}
                                 </Link>
                               </h3>

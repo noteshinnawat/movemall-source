@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Zap, Clock, Bell, Check, Sparkles, Flame, ShieldCheck, Ticket, Users, ArrowRight } from 'lucide-react';
 import { products as staticProducts } from '../data/products';
+import { getProductUrl } from '../utils/seo';
 import type { Product } from '../types';
 import './FlashSalePage.css';
 
@@ -242,7 +243,7 @@ export function FlashSalePage({ products, onAddToCart }: FlashSalePageProps) {
             return (
               <div key={p.id} className="flash-item-card">
                 {/* Image & Discount */}
-                <Link to={`/product/${p.id}`} className="flash-item-img-box">
+                <Link to={getProductUrl(p)} className="flash-item-img-box">
                   <img src={p.images[0]} alt={p.name} className="flash-item-img" />
                   <span className="flash-item-disc-badge">-{p.discountPct}%</span>
                   <span className="flash-item-guarantee-tag">👑 ถูกสุดใน 30 วัน</span>
@@ -250,7 +251,7 @@ export function FlashSalePage({ products, onAddToCart }: FlashSalePageProps) {
 
                 {/* Details */}
                 <div className="flash-item-body">
-                  <Link to={`/product/${p.id}`} className="flash-item-title">
+                  <Link to={getProductUrl(p)} className="flash-item-title">
                     {p.name}
                   </Link>
 

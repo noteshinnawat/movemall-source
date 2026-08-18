@@ -319,5 +319,35 @@ export async function toggleAdCampaignApi(id: string): Promise<{ message: string
   });
 }
 
+// ── Seller Orders & Shipping API Helpers ──
+export async function fetchSellerOrdersApi(storeId?: string): Promise<{ orders: any[] }> {
+  const query = storeId ? `?storeId=${encodeURIComponent(storeId)}` : '';
+  return fetchApi<{ orders: any[] }>(`/api/orders/seller/store-orders${query}`);
+}
+
+export async function updateOrderStatusApi(id: string, payload: { status: string; trackingNumber?: string; courierProvider?: string }): Promise<{ message: string; order: any }> {
+  return fetchApi<{ message: string; order: any }>(`/api/orders/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+}
+
+// ── Tax & e-Tax Invoices API Helpers ──
+export async function fetchStoreTaxSettingsApi(storeId: string): Promise<any> {
+  return fetchApi<any>(`/api/tax/store/${encodeURIComponent(storeId)}/settings`);
+}
+
+export async function updateStoreTaxSettingsApi(storeId: string, payload: any): Promise<any> {
+  return fetchApi<any>(`/api/tax/store/${encodeURIComponent(storeId)}/settings`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function fetchTaxDocumentsApi(storeId?: string): Promise<{ documents?: any[]; data?: any[] }> {
+  const query = storeId ? `?storeId=${encodeURIComponent(storeId)}` : '';
+  return fetchApi<{ documents?: any[]; data?: any[] }>(`/api/tax/documents${query}`);
+}
+
 
 

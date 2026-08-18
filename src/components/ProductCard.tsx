@@ -4,6 +4,7 @@ import { Heart, Plus, ShoppingCart, Check, Play, Volume2, VolumeX, Sparkles } fr
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getStoreById } from '../data/stores';
+import { getProductUrl } from '../utils/seo';
 import type { Product } from '../types';
 import './ProductCard.css';
 
@@ -120,7 +121,7 @@ export function ProductCard({
     >
       {/* Product Image & Badges & Video Slot */}
       <div className="product-card__image-wrap">
-        <Link to={`/product/${id}`} className="product-card__image-link" aria-label={`ดูรายละเอียด ${name}`}>
+        <Link to={getProductUrl(product)} className="product-card__image-link" aria-label={`ดูรายละเอียด ${name}`}>
           {/* Active Video Slot Player */}
           {isVideoCardSlot && hasVideoReview ? (
             <div className="product-card__video-container">
@@ -268,7 +269,7 @@ export function ProductCard({
         </div>
 
         {/* Product Title */}
-        <Link to={`/product/${id}`} className="product-card__name-link">
+        <Link to={getProductUrl(product)} className="product-card__name-link">
           <h3 className="product-card__name" title={name}>
             {name}
           </h3>

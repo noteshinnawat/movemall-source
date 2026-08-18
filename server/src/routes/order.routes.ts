@@ -252,4 +252,106 @@ router.get('/:id', authenticateJWT, async (req: AuthRequest, res: Response) => {
   }
 });
 
+// ── 4. Get Seller Store Orders ──
+router.get('/seller/store-orders', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const { storeId } = req.query;
+    const userId = req.user?.userId;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whereClause: any = {};
+    if (storeId && typeof storeId === 'string' && storeId !== 'all') {
+      whereClause.items = {
+        some: {
+          product: {
+            storeId: storeId,
+          },
+        },
+      };
+    }
+
+    const orders = await prismaRead.order.findMany({
+      where: whereClause,
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+        items: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                images: true,
+                price: true,
+                storeId: true,
+              },
+            },
+          },
+        },
+        tracking: true,
+      },
+    });
+
+    res.json({ orders });
+  } catch (error) {
+    console.error('Fetch Seller Orders Error:', error);
+    res.status(500).json({ error: 'Failed to fetch seller store orders' });
+  }
+});
+
+// ── 5. Update Order Status (Seller Dispatches Order) ──
+router.patch('/:id/status', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
+    const { status, trackingNumber, courierProvider = 'Flash Express' } = req.body;
+
+    const updated = await prismaWrite.order.update({
+      where: { id },
+      data: {
+        status: status as OrderStatus,
+      },
+    });
+
+    if (trackingNumber) {
+      await prismaWrite.trackingLog.upsert({
+        where: { orderId: id },
+        update: {
+          trackingNumber,
+          courierProvider,
+        },
+        create: {
+          orderId: id,
+          trackingNumber,
+          courierProvider,
+          timeline: [
+            {
+              time: new Date().toLocaleTimeString('th-TH'),
+              title: 'พัสดุรับเข้าระบบเรียบร้อยแล้ว',
+              desc: `ร้านค้าจัดส่งผ่าน ${courierProvider} เลขพัสดุ ${trackingNumber}`,
+              done: true,
+            },
+          ],
+        },
+      });
+    }
+
+    res.json({
+      message: 'Order status updated successfully',
+      order: updated,
+    });
+  } catch (error) {
+    console.error('Update Order Status Error:', error);
+    res.status(500).json({ error: 'Failed to update order status' });
+  }
+});
+
 export default router;

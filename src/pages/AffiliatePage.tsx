@@ -23,6 +23,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { products } from '../data/products';
+import { getProductUrl } from '../utils/seo';
 import { mockLiveStreams } from '../data/liveStreams';
 import { ProductPickerModal } from '../components/ProductPickerModal';
 import { AffiliateRegisterModal } from '../components/AffiliateRegisterModal';
@@ -106,8 +107,8 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
 
   function handleGenerateLink(e: React.FormEvent) {
     e.preventDefault();
-    const cleanUrl = productUrlInput.trim() || 'https://movemall.app/product/el-1';
-    const finalAffLink = `${cleanUrl}?ref=${activeRefCode}`;
+    const cleanUrl = productUrlInput.trim() || `https://movemall.app${getProductUrl(selectedProduct)}`;
+    const finalAffLink = `${cleanUrl}${cleanUrl.includes('?') ? '&' : '?'}ref=${activeRefCode}`;
     setGeneratedLink(finalAffLink);
   }
 
@@ -582,7 +583,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
             </thead>
             <tbody>
               {affiliateProducts.map((p) => {
-                const itemLink = `https://movemall.app/product/${p.id}?ref=${activeRefCode}`;
+                const itemLink = `https://movemall.app${getProductUrl(p)}?ref=${activeRefCode}`;
                 return (
                   <tr key={p.id}>
                     <td style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -634,7 +635,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
         {/* High Commission Products — Mobile Cards List */}
         <div className="affiliate-cards-mobile">
           {affiliateProducts.map((p) => {
-            const itemLink = `https://movemall.app/product/${p.id}?ref=${activeRefCode}`;
+            const itemLink = `https://movemall.app${getProductUrl(p)}?ref=${activeRefCode}`;
             return (
               <div key={p.id} className="affiliate-mobile-card">
                 <div className="affiliate-mobile-card-top">

@@ -14,9 +14,21 @@ import { initialAdCampaigns, initialAdWallet } from '../data/mockAdsData';
 import { ShippingLabelModal, type ShippingLabelProps } from '../components/ShippingLabelModal';
 import { RichTextEditor } from '../components/RichTextEditor';
 import type { Product, AdCampaign, AdType, AdWallet, AdKeyword, ProductCompliance, ComplianceType, TaxDocument, StoreTaxProfile, TaxDocType } from '../types';
-import { fetchApi } from '../utils/api';
+import {
+  fetchApi,
+  fetchSellerOrdersApi,
+  updateOrderStatusApi,
+  fetchAdWalletApi,
+  topupAdWalletApi,
+  fetchAdCampaignsApi,
+  createAdCampaignApi,
+  toggleAdCampaignApi,
+  fetchStoreTaxSettingsApi,
+  updateStoreTaxSettingsApi,
+} from '../utils/api';
 import { promptGoogleAuth } from '../utils/googleAuth';
 import { generateSlug } from '../utils/slug';
+import { getProductUrl } from '../utils/seo';
 import {
   getChatSocket,
   joinSellerChatRoom,
@@ -591,9 +603,143 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedOrderForLabel, setSelectedOrderForLabel] = useState<Omit<ShippingLabelProps, 'onClose'> | null>(null);
 
+  // ── Seller Store Orders State (Synced with PostgreSQL) ──
+  const [sellerOrders, setSellerOrders] = useState<any[]>([
+    {
+      id: 'ord-1',
+      orderId: 'ORD-20260816-001',
+      trackingNo: 'TH-0891-FLASH',
+      customerName: 'กิตติพงษ์ ส.',
+      customerPhone: '089-123-4567',
+      customerAddress: '123 ถ.สุขุมวิท 39 คลองตันเหนือ วัฒนา กทม.',
+      zipCode: '10110',
+      items: [{ name: 'หูฟังไร้สาย Premium Pro X', quantity: 1, price: 1290 }],
+      total: 1290,
+      status: 'pending',
+      statusText: '⚙️ รอดำเนินการส่ง',
+      date: '16 ส.ค. 2026 14:32',
+      isCOD: false,
+    },
+    {
+      id: 'ord-2',
+      orderId: 'ORD-20260815-098',
+      trackingNo: 'TH-0982-FLASH',
+      customerName: 'อรทัย ว.',
+      customerPhone: '082-987-6543',
+      customerAddress: '88/1 ถ.ติวานนท์ ต.ตลาดขวัญ เมือง นนทบุรี',
+      zipCode: '11000',
+      items: [{ name: 'สมาร์ทวอทช์ Series 8 Ultra', quantity: 1, price: 5990 }],
+      total: 5990,
+      status: 'shipped',
+      statusText: '✅ จัดส่งแล้ว',
+      date: '15 ส.ค. 2026 18:20',
+      isCOD: false,
+    },
+    {
+      id: 'ord-3',
+      orderId: 'ORD-20260815-045',
+      trackingNo: 'TH-0451-KERRY',
+      customerName: 'ชินวัตร ภ.',
+      customerPhone: '081-456-7890',
+      customerAddress: '55 หมู่ 4 ต.สุเทพ อ.เมือง จ.เชียงใหม่',
+      zipCode: '50200',
+      items: [{ name: 'รองเท้าวิ่ง Ultra Lightweight Pro', quantity: 1, price: 2890 }],
+      total: 2890,
+      status: 'pending',
+      statusText: '⚙️ รอดำเนินการส่ง',
+      date: '15 ส.ค. 2026 11:15',
+      isCOD: true,
+    },
+    {
+      id: 'ord-4',
+      orderId: 'ORD-20260814-112',
+      trackingNo: 'TH-1123-FLASH',
+      customerName: 'ณภัทร ม.',
+      customerPhone: '085-789-0123',
+      customerAddress: '99/4 อาคารไอทีทาวเวอร์ ถ.พหลโยธิน จตุจักร กทม.',
+      zipCode: '10900',
+      items: [{ name: 'เคสป้องกันแม่เหล็ก Magnetic Pro', quantity: 2, price: 490 }],
+      total: 980,
+      status: 'shipped',
+      statusText: '✅ จัดส่งแล้ว',
+      date: '14 ส.ค. 2026 09:40',
+      isCOD: false,
+    },
+  ]);
+
   // ── Ads State ──
   const [campaigns, setCampaigns] = useState<AdCampaign[]>(initialAdCampaigns);
   const [wallet, setWallet] = useState<AdWallet>(initialAdWallet);
+
+  // Sync Live Orders, Live Ads & Tax Settings from Supabase Backend
+  useEffect(() => {
+    async function syncSellerHubLive() {
+      try {
+        const [ordersRes, walletRes, campsRes, taxRes] = await Promise.all([
+          fetchSellerOrdersApi(currentStore.id).catch(() => null),
+          fetchAdWalletApi(currentStore.id).catch(() => null),
+          fetchAdCampaignsApi(currentStore.id).catch(() => null),
+          fetchStoreTaxSettingsApi(currentStore.id).catch(() => null),
+        ]);
+
+        if (ordersRes && Array.isArray(ordersRes.orders) && ordersRes.orders.length > 0) {
+          const mappedOrders = ordersRes.orders.map((o: any) => ({
+            id: o.id,
+            orderId: `ORD-${o.id.slice(0, 8).toUpperCase()}`,
+            trackingNo: o.tracking?.trackingNumber || `TH-${o.id.slice(0, 4).toUpperCase()}-FLASH`,
+            customerName: o.user?.name || (typeof o.shippingAddress === 'object' ? o.shippingAddress?.fullName : 'ผู้ซื้อ'),
+            customerPhone: o.user?.phone || (typeof o.shippingAddress === 'object' ? o.shippingAddress?.phone : '08x-xxx-xxxx'),
+            customerAddress: typeof o.shippingAddress === 'object' ? o.shippingAddress?.address : (o.shippingAddress || 'กรุงเทพมหานคร'),
+            zipCode: typeof o.shippingAddress === 'object' ? o.shippingAddress?.postalCode : '10110',
+            items: (o.items || []).map((i: any) => ({
+              name: i.product?.name || 'สินค้า',
+              quantity: i.quantity || 1,
+              price: Number(i.price || 0),
+            })),
+            total: Number(o.totalAmount || 0),
+            status: (o.status?.toLowerCase() === 'shipped' || o.status?.toLowerCase() === 'delivered') ? 'shipped' : 'pending',
+            statusText: (o.status?.toLowerCase() === 'shipped' || o.status?.toLowerCase() === 'delivered') ? '✅ จัดส่งแล้ว' : '⚙️ รอดำเนินการส่ง',
+            date: new Date(o.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+            isCOD: o.paymentMethod === 'COD',
+          }));
+
+          setSellerOrders(prev => {
+            const apiIds = new Set(mappedOrders.map((m: any) => m.id));
+            const remaining = prev.filter(p => !apiIds.has(p.id));
+            return [...mappedOrders, ...remaining];
+          });
+        }
+
+        if (walletRes?.wallet) {
+          setWallet(prev => ({
+            ...prev,
+            balance: Number(walletRes.wallet.balance || 1000),
+          }));
+        }
+
+        if (campsRes?.campaigns && campsRes.campaigns.length > 0) {
+          setCampaigns(campsRes.campaigns);
+        }
+
+        if (taxRes && taxRes.storeId) {
+          setTaxProfile({
+            storeId: taxRes.storeId,
+            isVatRegistered: !!taxRes.isVatRegistered,
+            taxId: taxRes.taxId || '0105562019876',
+            taxCompanyName: taxRes.taxCompanyName || currentStore.name,
+            taxBranchCode: taxRes.taxBranchCode || '00000',
+            taxAddress: taxRes.taxAddress || 'กรุงเทพมหานคร 10110',
+            eTaxAutoEmail: !!taxRes.eTaxAutoEmail,
+            eTaxProvider: taxRes.eTaxProvider || 'ETDA / Revenue Dept e-Tax by Email',
+          });
+        }
+      } catch (err) {
+        console.warn('Seller hub live sync fallback:', err);
+      }
+    }
+
+    syncSellerHubLive();
+  }, [currentStore.id]);
   const [isCreateAdModalOpen, setIsCreateAdModalOpen] = useState(false);
   const [isTopupModalOpen, setIsTopupModalOpen] = useState(false);
   const [topupAmount, setTopupAmount] = useState('1000');
@@ -1706,7 +1852,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                     >
                       <Pencil size={13} /> แก้ไข
                     </button>
-                    <Link to={`/product/${product.id}`} className="seller-mobile-card__btn-view">
+                    <Link to={getProductUrl(product)} className="seller-mobile-card__btn-view">
                       👁️ ดูสินค้า
                     </Link>
                     <button
@@ -1739,71 +1885,10 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    {
-                      id: 'ord-1',
-                      orderId: 'ORD-20260816-001',
-                      trackingNo: 'TH-0891-FLASH',
-                      customerName: 'กิตติพงษ์ ส.',
-                      customerPhone: '089-123-4567',
-                      customerAddress: '123 ถ.สุขุมวิท 39 คลองตันเหนือ วัฒนา กทม.',
-                      zipCode: '10110',
-                      items: [{ name: 'หูฟังไร้สาย Premium Pro X', quantity: 1, price: 1290 }],
-                      total: 1290,
-                      status: 'pending' as const,
-                      statusText: '⚙️ รอดำเนินการส่ง',
-                      date: '16 ส.ค. 2026 14:32',
-                      isCOD: false,
-                    },
-                    {
-                      id: 'ord-2',
-                      orderId: 'ORD-20260815-098',
-                      trackingNo: 'TH-0982-FLASH',
-                      customerName: 'อรทัย ว.',
-                      customerPhone: '082-987-6543',
-                      customerAddress: '88/1 ถ.ติวานนท์ ต.ตลาดขวัญ เมือง นนทบุรี',
-                      zipCode: '11000',
-                      items: [{ name: 'สมาร์ทวอทช์ Series 8 Ultra', quantity: 1, price: 5990 }],
-                      total: 5990,
-                      status: 'shipped' as const,
-                      statusText: '✅ จัดส่งแล้ว',
-                      date: '15 ส.ค. 2026 18:20',
-                      isCOD: false,
-                    },
-                    {
-                      id: 'ord-3',
-                      orderId: 'ORD-20260815-045',
-                      trackingNo: 'TH-0451-KERRY',
-                      customerName: 'ชินวัตร ภ.',
-                      customerPhone: '081-456-7890',
-                      customerAddress: '55 หมู่ 4 ต.สุเทพ อ.เมือง จ.เชียงใหม่',
-                      zipCode: '50200',
-                      items: [{ name: 'รองเท้าวิ่ง Ultra Lightweight Pro', quantity: 1, price: 2890 }],
-                      total: 2890,
-                      status: 'pending' as const,
-                      statusText: '⚙️ รอดำเนินการส่ง',
-                      date: '15 ส.ค. 2026 11:15',
-                      isCOD: true,
-                    },
-                    {
-                      id: 'ord-4',
-                      orderId: 'ORD-20260814-112',
-                      trackingNo: 'TH-1123-FLASH',
-                      customerName: 'ณภัทร ม.',
-                      customerPhone: '085-789-0123',
-                      customerAddress: '99/4 อาคารไอทีทาวเวอร์ ถ.พหลโยธิน จตุจักร กทม.',
-                      zipCode: '10900',
-                      items: [{ name: 'เคสป้องกันแม่เหล็ก Magnetic Pro', quantity: 2, price: 490 }],
-                      total: 980,
-                      status: 'shipped' as const,
-                      statusText: '✅ จัดส่งแล้ว',
-                      date: '14 ส.ค. 2026 09:40',
-                      isCOD: false,
-                    },
-                  ].map(order => (
+                  {sellerOrders.map(order => (
                     <tr key={order.id}>
                       <td><strong>#{order.orderId}</strong></td>
-                      <td>{order.items.map(i => `${i.name} (${i.quantity} ชิ้น)`).join(', ')}</td>
+                      <td>{order.items.map((i: any) => `${i.name} (${i.quantity} ชิ้น)`).join(', ')}</td>
                       <td>
                         <div>{order.customerName} ({order.customerPhone})</div>
                         <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{order.customerAddress} {order.zipCode}</div>
@@ -1819,20 +1904,26 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                       </td>
                       <td>
                         <button
-                          onClick={() => setSelectedOrderForLabel({
-                            orderId: order.orderId,
-                            trackingNo: order.trackingNo,
-                            customerName: order.customerName,
-                            customerPhone: order.customerPhone,
-                            customerAddress: order.customerAddress,
-                            zipCode: order.zipCode,
-                            storeName: currentStore.name,
-                            storePhone: '081-234-5678',
-                            storeAddress: '456 ถ.พระราม 4 คลองเตย กทม. 10110',
-                            items: order.items.map(i => ({ name: i.name, quantity: i.quantity })),
-                            total: order.total,
-                            isCOD: order.isCOD,
-                          })}
+                          onClick={() => {
+                            if (order.status === 'pending') {
+                              updateOrderStatusApi(order.id, { status: 'SHIPPED', trackingNumber: order.trackingNo }).catch(() => {});
+                              setSellerOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: 'shipped', statusText: '✅ จัดส่งแล้ว' } : o));
+                            }
+                            setSelectedOrderForLabel({
+                              orderId: order.orderId,
+                              trackingNo: order.trackingNo,
+                              customerName: order.customerName,
+                              customerPhone: order.customerPhone,
+                              customerAddress: order.customerAddress,
+                              zipCode: order.zipCode,
+                              storeName: currentStore.name,
+                              storePhone: '081-234-5678',
+                              storeAddress: '456 ถ.พระราม 4 คลองเตย กทม. 10110',
+                              items: order.items.map((i: any) => ({ name: i.name, quantity: i.quantity })),
+                              total: order.total,
+                              isCOD: order.isCOD,
+                            });
+                          }}
                           style={{
                             padding: '6px 12px',
                             background: order.status === 'pending' ? 'var(--primary)' : 'var(--surface)',
@@ -1858,68 +1949,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 
             {/* Mobile Cards View */}
             <div className="seller-orders-mobile-list">
-              {[
-                {
-                  id: 'ord-1',
-                  orderId: 'ORD-20260816-001',
-                  trackingNo: 'TH-0891-FLASH',
-                  customerName: 'กิตติพงษ์ ส.',
-                  customerPhone: '089-123-4567',
-                  customerAddress: '123 ถ.สุขุมวิท 39 คลองตันเหนือ วัฒนา กทม.',
-                  zipCode: '10110',
-                  items: [{ name: 'หูฟังไร้สาย Premium Pro X', quantity: 1, price: 1290 }],
-                  total: 1290,
-                  status: 'pending' as const,
-                  statusText: '⚙️ รอดำเนินการส่ง',
-                  date: '16 ส.ค. 2026 14:32',
-                  isCOD: false,
-                },
-                {
-                  id: 'ord-2',
-                  orderId: 'ORD-20260815-098',
-                  trackingNo: 'TH-0982-FLASH',
-                  customerName: 'อรทัย ว.',
-                  customerPhone: '082-987-6543',
-                  customerAddress: '88/1 ถ.ติวานนท์ ต.ตลาดขวัญ เมือง นนทบุรี',
-                  zipCode: '11000',
-                  items: [{ name: 'สมาร์ทวอทช์ Series 8 Ultra', quantity: 1, price: 5990 }],
-                  total: 5990,
-                  status: 'shipped' as const,
-                  statusText: '✅ จัดส่งแล้ว',
-                  date: '15 ส.ค. 2026 18:20',
-                  isCOD: false,
-                },
-                {
-                  id: 'ord-3',
-                  orderId: 'ORD-20260815-045',
-                  trackingNo: 'TH-0451-KERRY',
-                  customerName: 'ชินวัตร ภ.',
-                  customerPhone: '081-456-7890',
-                  customerAddress: '55 หมู่ 4 ต.สุเทพ อ.เมือง จ.เชียงใหม่',
-                  zipCode: '50200',
-                  items: [{ name: 'รองเท้าวิ่ง Ultra Lightweight Pro', quantity: 1, price: 2890 }],
-                  total: 2890,
-                  status: 'pending' as const,
-                  statusText: '⚙️ รอดำเนินการส่ง',
-                  date: '15 ส.ค. 2026 11:15',
-                  isCOD: true,
-                },
-                {
-                  id: 'ord-4',
-                  orderId: 'ORD-20260814-112',
-                  trackingNo: 'TH-1123-FLASH',
-                  customerName: 'ณภัทร ม.',
-                  customerPhone: '085-789-0123',
-                  customerAddress: '99/4 อาคารไอทีทาวเวอร์ ถ.พหลโยธิน จตุจักร กทม.',
-                  zipCode: '10900',
-                  items: [{ name: 'เคสป้องกันแม่เหล็ก Magnetic Pro', quantity: 2, price: 490 }],
-                  total: 980,
-                  status: 'shipped' as const,
-                  statusText: '✅ จัดส่งแล้ว',
-                  date: '14 ส.ค. 2026 09:40',
-                  isCOD: false,
-                },
-              ].map(order => (
+              {sellerOrders.map(order => (
                 <div key={order.id} className="seller-order-mobile-card">
                   <div className="seller-order-mobile-card__header">
                     <div className="seller-order-mobile-card__id">
@@ -1935,7 +1965,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                     <div className="seller-order-mobile-card__item">
                       <Package size={15} className="seller-order-icon" />
                       <span className="seller-order-item-title">
-                        {order.items.map(i => `${i.name} (${i.quantity} ชิ้น)`).join(', ')}
+                        {order.items.map((i: any) => `${i.name} (${i.quantity} ชิ้น)`).join(', ')}
                       </span>
                     </div>
 
@@ -1970,7 +2000,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                         storeName: currentStore.name,
                         storePhone: '081-234-5678',
                         storeAddress: '456 ถ.พระราม 4 คลองเตย กทม. 10110',
-                        items: order.items.map(i => ({ name: i.name, quantity: i.quantity })),
+                        items: order.items.map((i: any) => ({ name: i.name, quantity: i.quantity })),
                         total: order.total,
                         isCOD: order.isCOD,
                       })}

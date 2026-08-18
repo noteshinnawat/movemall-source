@@ -131,11 +131,12 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
-// ── 2. Get Single Product Details ──
+// ── 2. Get Single Product Details (Supports raw ID & SEO Slugs e.g. iphone-15-pro-i.p1) ──
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const rawId = req.params.id;
-    const id = Array.isArray(rawId) ? rawId[0] : rawId;
+    const rawStr = Array.isArray(rawId) ? rawId[0] : rawId;
+    const id = rawStr.includes('-i.') ? rawStr.split('-i.').pop()! : rawStr;
 
     const cacheKey = `product:detail:${id}`;
 
@@ -302,6 +303,13 @@ router.delete('/:id', authenticateJWT, async (req: AuthRequest, res: Response) =
 
     await invalidateCachePattern('products:*');
     await invalidateCachePattern(`product:detail:${id}`);
+
+    res.json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Delete Product Error:', error);
+    res.status(500).json({ error: 'Failed to delete product' });
+  }
+});
 
 // ── 6. Get Product Reviews from Database ──
 router.get('/:id/reviews', async (req: Request, res: Response) => {

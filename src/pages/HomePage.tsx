@@ -8,6 +8,7 @@ import { stores } from '../data/stores';
 import { mockLiveStreams } from '../data/liveStreams';
 import { famousBrands } from '../data/brands';
 import { initialAdCampaigns } from '../data/mockAdsData';
+import { getProductUrl } from '../utils/seo';
 import type { Product } from '../types';
 import './HomePage.css';
 
@@ -500,7 +501,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
               return (
                 <div key={product.id} className="home-flash-card">
                   {/* Image & Discount Badge */}
-                  <Link to={`/product/${product.id}`} className="home-flash-img-wrap">
+                  <Link to={getProductUrl(product)} className="home-flash-img-wrap">
                     <img src={product.images[0]} alt={product.name} className="home-flash-img" />
                     <span className="home-flash-tag">-{discountPct}%</span>
                     <span className="home-flash-guarantee">👑 ถูกสุด 30 วัน</span>
@@ -508,7 +509,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
 
                   {/* Info */}
                   <div className="home-flash-info">
-                    <Link to={`/product/${product.id}`} className="home-flash-name">
+                    <Link to={getProductUrl(product)} className="home-flash-name">
                       {product.name}
                     </Link>
 
@@ -716,7 +717,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                   </div>
                   <div className="home-store-card-thumbs">
                     {storeProducts.map(prod => (
-                      <Link key={prod.id} to={`/product/${prod.id}`} className="home-store-card-thumb-item" title={prod.name}>
+                      <Link key={prod.id} to={getProductUrl(prod)} className="home-store-card-thumb-item" title={prod.name}>
                         <img src={prod.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80'} alt={prod.name} loading="lazy" />
                         <span className="home-store-card-thumb-price">฿{(prod.price ?? 0).toLocaleString()}</span>
                       </Link>
