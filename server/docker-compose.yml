@@ -62,6 +62,20 @@ services:
       postgres:
         condition: service_healthy
 
+  srs:
+    image: ossrs/srs:5
+    container_name: movemall-srs-media
+    restart: always
+    ports:
+      - "1935:1935"       # RTMP Live Ingest
+      - "8080:8080"       # HTTP HLS / HTTP-FLV Playback (.m3u8, .flv)
+      - "1985:1985"       # SRS HTTP API / WebRTC Signaling
+      - "8000:8000/udp"   # WebRTC Media Transport (UDP)
+    volumes:
+      - ./srs/srs.conf:/usr/local/srs/conf/docker.conf
+    command: ./objs/srs -c conf/docker.conf
+
 volumes:
   pgdata:
   redisdata:
+
