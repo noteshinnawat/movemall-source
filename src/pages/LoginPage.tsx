@@ -158,7 +158,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         const authRes = await promptGoogleAuth();
         const res = await fetchApi<{
           token: string;
-          user: { name: string; email?: string; role?: string };
+          user: { id: string; name: string; email?: string; role?: string; avatarUrl?: string; coinsBalance?: number };
           isNewUser?: boolean;
         }>('/api/auth/google', {
           method: 'POST',
@@ -174,14 +174,19 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
           localStorage.setItem('movemall_jwt_token', res.token);
         }
 
-        if (res.user) {
-          localStorage.setItem('movemall_user', JSON.stringify(res.user));
-        } else if (authRes.mockUser) {
-          localStorage.setItem('movemall_user', JSON.stringify(authRes.mockUser));
-        }
+        const finalUser = {
+          id: res.user?.id,
+          name: res.user?.name || authRes.googleUser?.name || 'สมาชิก Google',
+          email: res.user?.email || authRes.googleUser?.email,
+          avatarUrl: res.user?.avatarUrl || authRes.googleUser?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(res.user?.name || 'Google')}`,
+          role: res.user?.role || 'BUYER',
+          coinsBalance: res.user?.coinsBalance ?? 100,
+        };
 
-        const userName = res.user?.name || authRes.mockUser?.name || 'สมาชิก Google';
-        onLoginSuccess?.(userName, (res.user?.role?.toLowerCase() as 'buyer' | 'seller') || 'buyer');
+        localStorage.setItem('movemall_user', JSON.stringify(finalUser));
+
+        const userName = finalUser.name;
+        onLoginSuccess?.(userName, (finalUser.role?.toLowerCase() as 'buyer' | 'seller') || 'buyer');
         navigate('/account');
         return;
       }

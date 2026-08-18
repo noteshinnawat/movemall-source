@@ -421,14 +421,20 @@ router.post('/google', async (req: AuthRequest, res: Response) => {
         });
       }
     } else {
-      // 5. สมาชิกเดิม -> อัปเดต googleId หรือรูปภาพ (ถ้ายังไม่มี)
-      if (!user.googleId || (googleData.avatarUrl && !user.avatarUrl)) {
+      // 5. สมาชิกเดิม -> อัปเดต googleId, ชื่อ และรูปภาพจาก Google ให้สดใหม่อยู่เสมอ
+      const updatePayload: { googleId?: string; avatarUrl?: string; name?: string } = {};
+      if (!user.googleId) updatePayload.googleId = googleData.googleId;
+      if (googleData.avatarUrl && googleData.avatarUrl !== user.avatarUrl) {
+        updatePayload.avatarUrl = googleData.avatarUrl;
+      }
+      if (googleData.name && (user.name.includes('Google') || user.name.includes('สมาชิก'))) {
+        updatePayload.name = googleData.name;
+      }
+
+      if (Object.keys(updatePayload).length > 0) {
         user = await prismaWrite.user.update({
           where: { id: user.id },
-          data: {
-            googleId: user.googleId || googleData.googleId,
-            avatarUrl: user.avatarUrl || googleData.avatarUrl,
-          },
+          data: updatePayload,
         });
       }
     }
