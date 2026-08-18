@@ -4,11 +4,12 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingBag, Send, Eye, Volume2, VolumeX, X, Plus, Check, Share2, MessageCircle, ChevronUp, ChevronDown, Sparkles, Smile, Gift, ShoppingCart, Maximize2, Minimize2 } from 'lucide-react';
 import { mockLiveStreams } from '../data/liveStreams';
-import { products } from '../data/products';
+import { products as staticProducts } from '../data/products';
 import type { Product } from '../types';
 import './LiveStreamPage.css';
 
 interface LiveStreamPageProps {
+  products?: Product[];
   onAddToCart: (product: Product, qty?: number) => void;
   cartCount?: number;
 }
@@ -29,7 +30,7 @@ interface FloatingChatMsg {
 
 import { fetchActiveLiveStreamsApi } from '../utils/api';
 
-export function LiveStreamPage({ onAddToCart, cartCount = 0 }: LiveStreamPageProps) {
+export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStreamPageProps) {
   const [streamsList, setStreamsList] = useState<any[]>(mockLiveStreams);
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'following' | 'foryou'>('foryou');
@@ -46,26 +47,25 @@ export function LiveStreamPage({ onAddToCart, cartCount = 0 }: LiveStreamPagePro
   const [inputComment, setInputComment] = useState('');
   const [floatingChats, setFloatingChats] = useState<FloatingChatMsg[]>([]);
 
+  const activeCatalog = products && products.length > 0 ? products : staticProducts;
+
   useEffect(() => {
     async function loadLiveStreams() {
       try {
         const res = await fetchActiveLiveStreamsApi();
         if (res && Array.isArray(res.streams) && res.streams.length > 0) {
-          const mapped = res.streams.map((s: any, idx: number) => ({
-            id: s.id,
-            channelName: s.store?.name || 'Movemall Official Live',
-            avatar: s.store?.logo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
-            isMall: s.store?.isMall ?? true,
-            followers: `${Math.floor(20 + idx * 15)}K`,
-            videoUrl: s.streamUrl,
-            coverImage: s.coverImage,
-            viewers: `${s.viewersCount || 1500} คนดู`,
-            likesCount: s.likesCount || 10000,
-            caption: s.title,
-            tags: ['#MovemallLive', '#ลดราคา', '#ของแท้'],
-            voucherCode: 'LIVE50',
-            voucherDiscount: 'ลด 50%',
-            pinnedProduct: s.pinnedProduct || {
+          const mapped = res.streams.map((s: any, idx: number) => {
+            const foundPinned = s.pinnedProductId ? activeCatalog.find(p => p.id === s.pinnedProductId) : null;
+            const pinnedProd = foundPinned ? {
+              id: foundPinned.id,
+              name: foundPinned.name,
+              price: foundPinned.price,
+              originalPrice: foundPinned.originalPrice || foundPinned.price * 1.5,
+              image: foundPinned.images[0] || s.coverImage,
+              stock: foundPinned.stock || 50,
+              rating: foundPinned.rating || 4.9,
+              soldCount: (foundPinned as any).salesCount || 120,
+            } : (s.pinnedProduct || {
               id: 'el-1',
               name: 'ดีลพิเศษในไลฟ์',
               price: 990,
@@ -74,20 +74,41 @@ export function LiveStreamPage({ onAddToCart, cartCount = 0 }: LiveStreamPagePro
               stock: 35,
               rating: 4.9,
               soldCount: 850,
-            },
-            basketProducts: [
-              s.pinnedProduct || {
-                id: 'el-1',
-                name: 'ดีลพิเศษในไลฟ์',
-                price: 990,
-                originalPrice: 1990,
-                image: s.coverImage,
-                stock: 35,
-                rating: 4.9,
-                soldCount: 850,
-              }
-            ],
-          }));
+            });
+
+            // Find store products for yellow basket
+            const storeProds = activeCatalog
+              .filter(p => p.storeId === s.storeId)
+              .slice(0, 4)
+              .map(p => ({
+                id: p.id,
+                name: p.name,
+                price: p.price,
+                originalPrice: p.originalPrice || p.price * 1.5,
+                image: p.images[0],
+                stock: p.stock,
+                rating: p.rating,
+                soldCount: (p as any).salesCount || 50,
+              }));
+
+            return {
+              id: s.id,
+              channelName: s.store?.name || 'Movemall Official Live',
+              avatar: s.store?.logo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
+              isMall: s.store?.isMall ?? true,
+              followers: `${Math.floor(20 + idx * 15)}K`,
+              videoUrl: s.streamUrl,
+              coverImage: s.coverImage,
+              viewers: `${s.viewersCount || 1500} คนดู`,
+              likesCount: s.likesCount || 10000,
+              caption: s.title,
+              tags: ['#MovemallLive', '#ลดราคา', '#ของแท้'],
+              voucherCode: 'LIVE50',
+              voucherDiscount: 'ลด 50%',
+              pinnedProduct: pinnedProd,
+              basketProducts: storeProds.length > 0 ? storeProds : [pinnedProd],
+            };
+          });
           setStreamsList(mapped);
         }
       } catch {
@@ -95,7 +116,7 @@ export function LiveStreamPage({ onAddToCart, cartCount = 0 }: LiveStreamPagePro
       }
     }
     loadLiveStreams();
-  }, []);
+  }, [products]);
 
   const touchStartY = useRef(0);
   const isScrolling = useRef(false);
@@ -249,7 +270,7 @@ export function LiveStreamPage({ onAddToCart, cartCount = 0 }: LiveStreamPagePro
   }
 
   function handleBuy(product = currentStream.pinnedProduct) {
-    const matchedProduct = products.find(p => p.id === product.id) || {
+    const matchedProduct = activeCatalog.find(p => p.id === product.id) || {
       id: product.id,
       storeId: currentStream.storeId,
       name: product.name,

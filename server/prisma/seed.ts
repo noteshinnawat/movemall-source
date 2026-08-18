@@ -332,6 +332,51 @@ async function main() {
   }
   console.log(`✅ Seeded ${liveSessions.length} Live Sessions`);
 
+  // 6. Seed Sample Product Reviews
+  const sampleReviews = [
+    {
+      id: 'rev-seed-1',
+      userId: demoBuyer.id,
+      productId: 'el-1',
+      rating: 5,
+      comment: 'สินค้าของแท้ 100% สภาพกล่องคมกริบ จัดส่งเร็วมาก ประทับใจสุดๆ แนะนำร้านนี้เลยครับ!',
+      likes: 12,
+    },
+    {
+      id: 'rev-seed-2',
+      userId: demoBuyer.id,
+      productId: 'fa-1',
+      rating: 5,
+      comment: 'เนื้อผ้าดีมาก สวมใส่สบาย ตรงปกตามที่ไลฟ์สดเป๊ะๆ มีโค้ดลดราคาคุ้มค่ามาก',
+      likes: 8,
+    },
+    {
+      id: 'rev-seed-3',
+      userId: demoBuyer.id,
+      productId: 'bt-1',
+      rating: 5,
+      comment: 'แพ็คสินค้าแน่นหนา มีบับเบิ้ลกันกระแทกอย่างดี วันหมดอายุอีกยาวนาน ของแท้แน่นอน',
+      likes: 15,
+    },
+    {
+      id: 'rev-seed-4',
+      userId: demoBuyer.id,
+      productId: 'sp-1',
+      rating: 5,
+      comment: 'รองเท้าเบา นุ่ม กระชับเท้า วิ่ง 10k สบายๆ ไม่เจ็บเท้า จัดส่งภายใน 1 วัน',
+      likes: 20,
+    },
+  ];
+
+  for (const rev of sampleReviews) {
+    await prisma.review.upsert({
+      where: { id: rev.id },
+      update: rev,
+      create: rev,
+    });
+  }
+  console.log(`✅ Seeded ${sampleReviews.length} Verified Reviews`);
+
   console.log('\n🎉 ALL REAL MOVEMALL DATA SEEDED TO SUPABASE POSTGRESQL SUCCESSFULLY!');
   console.log(`👤 Super Admin: note.shinnawat@gmail.com (Password: movemall1234)`);
   console.log(`👤 Admin: admin@movemall.com (Password: movemall1234)`);

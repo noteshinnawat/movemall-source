@@ -1,9 +1,8 @@
-// src/components/ReviewsSection.tsx — Customer Reviews with Complete Star Filters, Media & Pagination
-
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Star, ThumbsUp, Edit3, CheckCircle, Image, Video, X, Play, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProductReviews, type ProductReview } from '../data/reviews';
 import { compressImage } from '../utils/mediaCompressor';
+import { fetchProductReviewsApi, submitProductReviewApi } from '../utils/api';
 import './ReviewsSection.css';
 
 interface ReviewsSectionProps {
@@ -25,6 +24,38 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const PAGE_SIZE = 5;
+
+  // Load live reviews from Supabase DB via Backend REST API
+  useEffect(() => {
+    async function loadReviews() {
+      try {
+        const res = await fetchProductReviewsApi(productId);
+        if (res && Array.isArray(res.reviews) && res.reviews.length > 0) {
+          const dbReviews: ProductReview[] = res.reviews.map((r: any) => ({
+            id: r.id,
+            productId: r.productId || productId,
+            userName: r.user?.name || 'ผู้ใช้ Movemall',
+            rating: r.rating || 5,
+            date: new Date(r.createdAt).toLocaleDateString('th-TH'),
+            title: 'รีวิวสินค้าการันตีของแท้',
+            comment: r.comment,
+            images: r.images,
+            verified: true,
+            helpfulCount: r.likes || 0,
+          }));
+
+          setReviews(prev => {
+            const dbIds = new Set(dbReviews.map(dr => dr.id));
+            const remaining = prev.filter(p => !dbIds.has(p.id));
+            return [...dbReviews, ...remaining];
+          });
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    loadReviews();
+  }, [productId]);
 
   // Form State
   const [formRating, setFormRating] = useState(5);
@@ -79,7 +110,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
     setFormImages(prev => prev.filter((_, i) => i !== index));
   }
 
-  function handleSubmitReview(e: React.FormEvent) {
+  async function handleSubmitReview(e: React.FormEvent) {
     e.preventDefault();
     if (!formName.trim() || !formComment.trim()) return;
 
@@ -97,7 +128,20 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
       helpfulCount: 0,
     };
 
-    setReviews([newReview, ...reviews]);
+    setReviews(prev => [newReview, ...prev]);
+
+    // Persist to database via Backend REST API
+    try {
+      await submitProductReviewApi(productId, {
+        rating: formRating,
+        comment: formComment.trim(),
+        images: formImages.length > 0 ? formImages : undefined,
+      });
+      console.log('[Movemall API] ✅ Review submitted to DB successfully');
+    } catch (err) {
+      console.warn('[Movemall API] Could not submit review to DB, saved locally:', err);
+    }
+
     setFormName('');
     setFormTitle('');
     setFormComment('');

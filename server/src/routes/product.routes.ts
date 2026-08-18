@@ -303,10 +303,78 @@ router.delete('/:id', authenticateJWT, async (req: AuthRequest, res: Response) =
     await invalidateCachePattern('products:*');
     await invalidateCachePattern(`product:detail:${id}`);
 
-    res.json({ message: 'Product deleted successfully' });
+// ── 6. Get Product Reviews from Database ──
+router.get('/:id/reviews', async (req: Request, res: Response) => {
+  try {
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
+
+    const reviews = await prismaRead.review.findMany({
+      where: { productId: id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+
+    res.json({ reviews });
   } catch (error) {
-    console.error('Delete Product Error:', error);
-    res.status(500).json({ error: 'Failed to delete product' });
+    console.error('Fetch Product Reviews Error:', error);
+    res.status(500).json({ error: 'Failed to fetch product reviews' });
+  }
+});
+
+// ── 7. Submit Product Review to Database ──
+router.post('/:id/reviews', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const rawId = req.params.id;
+    const productId = Array.isArray(rawId) ? rawId[0] : rawId;
+    const userId = req.user?.userId;
+    const { rating, comment, images } = req.body;
+
+    if (!rating || !comment) {
+      res.status(400).json({ error: 'Rating and comment are required' });
+      return;
+    }
+
+    if (!userId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    const review = await prismaWrite.review.create({
+      data: {
+        productId,
+        userId,
+        rating: Math.min(5, Math.max(1, parseInt(rating, 10) || 5)),
+        comment,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+
+    await invalidateCachePattern(`product:detail:${productId}`);
+
+    res.status(201).json({
+      message: 'Review submitted successfully',
+      review,
+    });
+  } catch (error) {
+    console.error('Submit Product Review Error:', error);
+    res.status(500).json({ error: 'Failed to submit product review' });
   }
 });
 

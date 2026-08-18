@@ -12,7 +12,7 @@ import { BackToTopButton } from './components/BackToTopButton';
 import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { VisualSearchModal } from './components/VisualSearchModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { API_BASE_URL } from './utils/api';
+import { API_BASE_URL, createProductApi, updateProductApi, deleteProductApi } from './utils/api';
 
 // Helper to automatically retry & reload on stale chunks (Cloudflare Pages deployment invalidation)
 function lazyRetry<T extends ComponentType<any>>(
@@ -177,6 +177,7 @@ function AppLayout({
             path="/mall"
             element={
               <BrandMallPage
+                products={productList}
                 onAddToCart={p => handleAddToCart(p)}
                 isWishlisted={id => wishlist.isWished(id)}
                 onToggleWishlist={p => handleToggleWishlist(p)}
@@ -187,7 +188,7 @@ function AppLayout({
           {/* Live Streaming Shopping */}
           <Route
             path="/live"
-            element={<LiveStreamPage onAddToCart={p => handleAddToCart(p)} cartCount={cart.totalItems} />}
+            element={<LiveStreamPage products={productList} onAddToCart={p => handleAddToCart(p)} cartCount={cart.totalItems} />}
           />
 
           {/* Movemall Short Video Clips Social Feed (TikTok Style) */}
@@ -232,7 +233,7 @@ function AppLayout({
           {/* Flash Sale Hub */}
           <Route
             path="/flash-sale"
-            element={<FlashSalePage onAddToCart={p => handleAddToCart(p)} />}
+            element={<FlashSalePage products={productList} onAddToCart={p => handleAddToCart(p)} />}
           />
 
           {/* Vouchers & Promotions */}
@@ -693,7 +694,7 @@ function App() {
     addToast('🎉 เผยแพร่วิดีโอสั้นติดตะกร้าเหลืองสำเร็จแล้ว! พร้อมสร้างรายได้ทันที', 'success', '🎬');
   }
 
-  function handleAddProduct(newProduct: Product) {
+  async function handleAddProduct(newProduct: Product) {
     setProductList(prev => {
       const updated = [newProduct, ...prev];
       try {
@@ -704,10 +705,28 @@ function App() {
       }
       return updated;
     });
+
+    try {
+      await createProductApi({
+        name: newProduct.name,
+        description: newProduct.description || '',
+        price: newProduct.price,
+        originalPrice: newProduct.originalPrice,
+        category: newProduct.category,
+        brand: newProduct.name.split(' ')[0] || 'ทั่วไป',
+        images: newProduct.images?.length > 0 ? newProduct.images : ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80'],
+        stock: newProduct.stock || 100,
+        badge: newProduct.badge || 'new',
+        storeId: newProduct.storeId || undefined,
+      });
+      console.log('[Movemall API] ✅ Product saved to Supabase DB successfully');
+    } catch (err) {
+      console.warn('[Movemall API] Could not persist product to DB API, saved locally:', err);
+    }
     addToast(`ลงขายสินค้า "${newProduct.name}" สำเร็จแล้ว!`, 'success', '📦');
   }
 
-  function handleDeleteProduct(id: string) {
+  async function handleDeleteProduct(id: string) {
     setProductList(prev => {
       const updated = prev.filter(p => p.id !== id);
       try {
@@ -718,10 +737,17 @@ function App() {
       }
       return updated;
     });
+
+    try {
+      await deleteProductApi(id);
+      console.log('[Movemall API] ✅ Product deleted from DB successfully');
+    } catch (err) {
+      console.warn('[Movemall API] Could not delete product from DB API:', err);
+    }
     addToast('ลบสินค้าออกจากร้านค้าแล้ว', 'info', '🗑️');
   }
 
-  function handleUpdateProduct(updatedProduct: Product) {
+  async function handleUpdateProduct(updatedProduct: Product) {
     setProductList(prev => {
       const updated = prev.map(p => p.id === updatedProduct.id ? updatedProduct : p);
       try {
@@ -732,6 +758,22 @@ function App() {
       }
       return updated;
     });
+
+    try {
+      await updateProductApi(updatedProduct.id, {
+        name: updatedProduct.name,
+        description: updatedProduct.description,
+        price: updatedProduct.price,
+        originalPrice: updatedProduct.originalPrice,
+        category: updatedProduct.category,
+        stock: updatedProduct.stock,
+        badge: updatedProduct.badge,
+        images: updatedProduct.images,
+      });
+      console.log('[Movemall API] ✅ Product updated in DB successfully');
+    } catch (err) {
+      console.warn('[Movemall API] Could not update product on DB API:', err);
+    }
     addToast(`อัปเดตข้อมูลสินค้า "${updatedProduct.name}" สำเร็จแล้ว!`, 'success', '✏️');
   }
 

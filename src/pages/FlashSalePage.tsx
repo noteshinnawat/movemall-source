@@ -3,15 +3,16 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Zap, Clock, Bell, Check, Sparkles, Flame, ShieldCheck, Ticket, Users, ArrowRight } from 'lucide-react';
-import { products } from '../data/products';
+import { products as staticProducts } from '../data/products';
 import type { Product } from '../types';
 import './FlashSalePage.css';
 
 interface FlashSalePageProps {
+  products?: Product[];
   onAddToCart: (product: Product) => void;
 }
 
-export function FlashSalePage({ onAddToCart }: FlashSalePageProps) {
+export function FlashSalePage({ products, onAddToCart }: FlashSalePageProps) {
   const [activeSlot, setActiveSlot] = useState<number>(0);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [remindedProductIds, setRemindedProductIds] = useState<Set<string>>(new Set());
@@ -87,7 +88,8 @@ export function FlashSalePage({ onAddToCart }: FlashSalePageProps) {
   const currentSlotInfo = slots[activeSlot];
   const isUpcoming = currentSlotInfo.status === 'upcoming';
 
-  const displayedProducts = products
+  const activeProductList = products && products.length > 0 ? products : staticProducts;
+  const displayedProducts = activeProductList
     .filter(p => activeCategory === 'all' || p.category === activeCategory)
     .slice(0, 16)
     .map((p, idx) => {

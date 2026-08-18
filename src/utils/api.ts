@@ -218,9 +218,41 @@ export async function fetchStoreByIdApi(id: string): Promise<{ store: any }> {
   return fetchApi<{ store: any }>(`/api/stores/${id}`);
 }
 
+export async function createProductApi(payload: any): Promise<{ message: string; product: any }> {
+  return fetchApi<{ message: string; product: any }>('/api/products', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateProductApi(id: string, payload: any): Promise<{ message: string; product: any }> {
+  return fetchApi<{ message: string; product: any }>(`/api/products/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteProductApi(id: string): Promise<{ message: string; id: string }> {
+  return fetchApi<{ message: string; id: string }>(`/api/products/${id}`, {
+    method: 'DELETE',
+  });
+}
+
 // ── Live Streams & Media API Helpers ──
 export async function fetchActiveLiveStreamsApi(): Promise<{ streams: any[] }> {
   return fetchApi<{ streams: any[] }>('/api/live/active-streams');
+}
+
+export async function createLiveSessionApi(payload: {
+  title: string;
+  storeId?: string;
+  pinnedProductId?: string;
+  coverImage?: string;
+}): Promise<{ message: string; session: any }> {
+  return fetchApi<{ message: string; session: any }>('/api/live/create-session', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
 }
 
 // ── Orders & Checkout API Helpers ──
@@ -238,6 +270,52 @@ export async function createOrderApi(payload: {
   return fetchApi<{ message: string; order: any }>('/api/orders', {
     method: 'POST',
     body: JSON.stringify(payload),
+  });
+}
+
+// ── Product Reviews API Helpers ──
+export async function fetchProductReviewsApi(productId: string): Promise<{ reviews: any[] }> {
+  return fetchApi<{ reviews: any[] }>(`/api/products/${productId}/reviews`);
+}
+
+export async function submitProductReviewApi(productId: string, payload: { rating: number; comment: string; images?: string[] }): Promise<{ message: string; review: any }> {
+  return fetchApi<{ message: string; review: any }>(`/api/products/${productId}/reviews`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+// ── Movemall Ads API Helpers ──
+export async function fetchAdWalletApi(storeId?: string): Promise<{ wallet: any }> {
+  const query = storeId ? `?storeId=${encodeURIComponent(storeId)}` : '';
+  return fetchApi<{ wallet: any }>(`/api/ads/wallet${query}`);
+}
+
+export async function topupAdWalletApi(amount: number, storeId?: string): Promise<{ message: string; wallet: any }> {
+  return fetchApi<{ message: string; wallet: any }>('/api/ads/wallet/topup', {
+    method: 'POST',
+    body: JSON.stringify({ amount, storeId }),
+  });
+}
+
+export async function fetchAdCampaignsApi(storeId?: string, type?: string): Promise<{ campaigns: any[] }> {
+  const params = new URLSearchParams();
+  if (storeId) params.set('storeId', storeId);
+  if (type && type !== 'all') params.set('type', type);
+  const qs = params.toString();
+  return fetchApi<{ campaigns: any[] }>(`/api/ads/campaigns${qs ? `?${qs}` : ''}`);
+}
+
+export async function createAdCampaignApi(payload: any): Promise<{ message: string; campaign: any }> {
+  return fetchApi<{ message: string; campaign: any }>('/api/ads/campaigns', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function toggleAdCampaignApi(id: string): Promise<{ message: string; campaign: any }> {
+  return fetchApi<{ message: string; campaign: any }>(`/api/ads/campaigns/${id}/toggle`, {
+    method: 'PATCH',
   });
 }
 

@@ -115,9 +115,9 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
 
   const store: Store = remoteStore || resolvedLocalStore || stores[0];
 
-  // 2. Fetch from backend API if not found locally
+  // 2. Fetch from backend API to get real-time Supabase store stats & products
   useEffect(() => {
-    if (!resolvedLocalStore && id) {
+    if (id) {
       fetchApi<{ store: Store }>(`/api/stores/${encodeURIComponent(id)}`)
         .then(res => {
           if (res && res.store) {
@@ -127,7 +127,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
               responseRate: res.store.responseRate || '99%',
               responseTime: res.store.responseTime || 'ภายใน 15 นาที',
               joinedDate: res.store.joinedDate || 'ร้านค้าสมาชิก Movemall',
-              productCount: res.store.productCount || 0,
+              productCount: res.store.productCount || (res.store as any).products?.length || 0,
               followerCount: res.store.followerCount || (res.store as any).followers || 1,
               location: res.store.location || 'กรุงเทพมหานคร',
             });
@@ -135,7 +135,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
         })
         .catch(() => {});
     }
-  }, [id, resolvedLocalStore]);
+  }, [id]);
 
   // 3. Dynamic SEO Title & Meta Tags
   useEffect(() => {

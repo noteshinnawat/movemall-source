@@ -17,12 +17,13 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { famousBrands } from '../data/brands';
-import { products } from '../data/products';
+import { products as staticProducts } from '../data/products';
 import { ProductCard } from '../components/ProductCard';
 import type { Product } from '../types';
 import './BrandMallPage.css';
 
 interface BrandMallPageProps {
+  products?: Product[];
   onAddToCart: (product: Product) => void;
   isWishlisted?: (productId: string) => boolean;
   onToggleWishlist?: (product: Product) => void;
@@ -120,12 +121,14 @@ const SUPER_BRAND_HIGHLIGHTS = [
   },
 ];
 
-export function BrandMallPage({ onAddToCart, isWishlisted, onToggleWishlist }: BrandMallPageProps) {
+export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWishlist }: BrandMallPageProps) {
   const [selectedBrandCategory, setSelectedBrandCategory] = useState<string>('all');
   const [selectedProductTab, setSelectedProductTab] = useState<'hot' | 'sale' | 'new' | 'electronics' | 'sports'>('hot');
   const [followedBrands, setFollowedBrands] = useState<Record<string, boolean>>({});
   const [claimedVouchers, setClaimedVouchers] = useState<Record<string, boolean>>({});
   const [activeHighlightIndex, setActiveHighlightIndex] = useState(0);
+
+  const activeProducts = products && products.length > 0 ? products : staticProducts;
 
   // Countdown timer for Super Brand Day
   const [timeLeft, setTimeLeft] = useState({ hours: 14, minutes: 32, seconds: 48 });
@@ -150,16 +153,16 @@ export function BrandMallPage({ onAddToCart, isWishlisted, onToggleWishlist }: B
   const getTabProducts = (): Product[] => {
     switch (selectedProductTab) {
       case 'sale':
-        return products.filter(p => p.originalPrice || p.badge === 'sale').slice(0, 12);
+        return activeProducts.filter(p => p.originalPrice || p.badge === 'sale').slice(0, 12);
       case 'new':
-        return products.filter(p => p.badge === 'new').slice(0, 12);
+        return activeProducts.filter(p => p.badge === 'new').slice(0, 12);
       case 'electronics':
-        return products.filter(p => p.category === 'electronics').slice(0, 12);
+        return activeProducts.filter(p => p.category === 'electronics').slice(0, 12);
       case 'sports':
-        return products.filter(p => p.category === 'sports' || p.category === 'fashion').slice(0, 12);
+        return activeProducts.filter(p => p.category === 'sports' || p.category === 'fashion').slice(0, 12);
       case 'hot':
       default:
-        return products.slice(0, 12);
+        return activeProducts.slice(0, 12);
     }
   };
 
@@ -481,7 +484,7 @@ export function BrandMallPage({ onAddToCart, isWishlisted, onToggleWishlist }: B
 
           <div className="mall-view-all-container">
             <Link to="/shop" className="mall-view-all-btn">
-              สำรวจสินค้าทางการทั้งหมด ({products.length} รายการ) <ChevronRight size={16} />
+              สำรวจสินค้าทางการทั้งหมด ({activeProducts.length} รายการ) <ChevronRight size={16} />
             </Link>
           </div>
         </section>
