@@ -103,12 +103,26 @@ export function ChatPage() {
   });
 
   // Conversation status (unread count, online status)
-  const [convMeta, setConvMeta] = useState<Record<string, ConversationMeta>>({
-    'store-techpro': { unreadCount: 0, lastActive: 'ออนไลน์', isOnline: true },
-    'store-fashionista': { unreadCount: 2, lastActive: 'ออนไลน์เมื่อ 5 นาทีที่แล้ว', isOnline: true },
-    'store-beautyglow': { unreadCount: 1, lastActive: 'ออนไลน์เมื่อ 1 ชม. ที่แล้ว', isOnline: false },
-    'store-sportmax': { unreadCount: 0, lastActive: 'ออนไลน์เมื่อ 3 ชม. ที่แล้ว', isOnline: false },
+  const [convMeta, setConvMeta] = useState<Record<string, ConversationMeta>>(() => {
+    const isAuth = !!currentUser;
+    return {
+      'store-techpro': { unreadCount: 0, lastActive: 'ออนไลน์', isOnline: true },
+      'store-fashionista': { unreadCount: isAuth ? 2 : 0, lastActive: 'ออนไลน์เมื่อ 5 นาทีที่แล้ว', isOnline: true },
+      'store-beautyglow': { unreadCount: isAuth ? 1 : 0, lastActive: 'ออนไลน์เมื่อ 1 ชม. ที่แล้ว', isOnline: false },
+      'store-sportmax': { unreadCount: 0, lastActive: 'ออนไลน์เมื่อ 3 ชม. ที่แล้ว', isOnline: false },
+    };
   });
+
+  // Sync total unread count to LocalStorage & Navbar
+  useEffect(() => {
+    const total = Object.values(convMeta).reduce((sum, m) => sum + (m.unreadCount || 0), 0);
+    try {
+      localStorage.setItem('movemall_chat_unread_count', String(currentUser ? total : 0));
+      window.dispatchEvent(new Event('movemall_chat_change'));
+    } catch {
+      // Ignore
+    }
+  }, [convMeta, currentUser]);
 
   // Save to LocalStorage whenever messages change
   useEffect(() => {

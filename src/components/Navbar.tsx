@@ -72,11 +72,23 @@ export function Navbar({
     return currentUser ? 1 : 0;
   });
 
+  // Chat Unread Count State (0 when not logged in)
+  const [unreadChatCount, setUnreadChatCount] = useState<number>(() => {
+    if (!currentUser) return 0;
+    try {
+      const stored = localStorage.getItem('movemall_chat_unread_count');
+      return stored !== null ? Math.max(0, parseInt(stored, 10)) : 0;
+    } catch {
+      return 0;
+    }
+  });
+
   useEffect(() => {
     async function loadNotifCount() {
       const token = localStorage.getItem('movemall_jwt_token');
       if (!token) {
         setUnreadNotifCount(0);
+        setUnreadChatCount(0);
         return;
       }
       try {
@@ -87,14 +99,24 @@ export function Navbar({
       } catch {
         // Fallback default
       }
+
+      // Check chat unread count
+      try {
+        const stored = localStorage.getItem('movemall_chat_unread_count');
+        setUnreadChatCount(stored !== null ? Math.max(0, parseInt(stored, 10)) : 0);
+      } catch {
+        setUnreadChatCount(0);
+      }
     }
 
     loadNotifCount();
     window.addEventListener('movemall_auth_change', loadNotifCount);
     window.addEventListener('movemall_notif_change', loadNotifCount);
+    window.addEventListener('movemall_chat_change', loadNotifCount);
     return () => {
       window.removeEventListener('movemall_auth_change', loadNotifCount);
       window.removeEventListener('movemall_notif_change', loadNotifCount);
+      window.removeEventListener('movemall_chat_change', loadNotifCount);
     };
   }, [currentUser]);
 
@@ -350,9 +372,11 @@ export function Navbar({
             >
               <div className="navbar__icon-badge-wrap">
                 <MessageSquare size={21} />
-                <span className="navbar__badge navbar__badge--chat">
-                  2
-                </span>
+                {currentUser && unreadChatCount > 0 && (
+                  <span className="navbar__badge navbar__badge--chat">
+                    {unreadChatCount > 99 ? '99+' : unreadChatCount}
+                  </span>
+                )}
               </div>
               <span className="navbar__action-label">แชท</span>
             </Link>
