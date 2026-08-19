@@ -170,47 +170,133 @@ import {
   webhookLimiter,
 } from './middleware/rateLimit.middleware.js';
 import { verifyTurnstile } from './middleware/turnstile.middleware.js';
+import jwt from 'jsonwebtoken';
+import { JWT_SECRET } from './config/env.js';
+import { isTokenRevoked } from './services/tokenRevocation.service.js';
+import { canActAsStore, ChatIdentity } from './services/chatAccess.service.js';
 
 // ── Socket.io Live Chat Room Handlers ──
+//
+// ทุก connection ต้องแนบ JWT มาตั้งแต่ handshake — เดิมใครก็ต่อเข้ามา
+// แล้ว join_chat ด้วย userId ของคนอื่นเพื่อดักอ่านแชทได้ หรือส่งข้อความ
+// โดยอ้าง sender: 'store' เพื่อปลอมเป็นร้านค้าได้
+io.use(async (socket, next) => {
+  const raw =
+    (socket.handshake.auth?.token as string | undefined) ||
+    (socket.handshake.headers.authorization as string | undefined);
+
+  if (!raw) {
+    next(new Error('UNAUTHORIZED'));
+    return;
+  }
+
+  const token = raw.startsWith('Bearer ') ? raw.slice(7) : raw;
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as {
+      userId: string;
+      role: string;
+      jti?: string;
+      iat?: number;
+    };
+
+    if (await isTokenRevoked(decoded.jti, decoded.userId, decoded.iat)) {
+      next(new Error('SESSION_REVOKED'));
+      return;
+    }
+
+    socket.data.identity = { userId: decoded.userId, role: decoded.role };
+    next();
+  } catch {
+    next(new Error('UNAUTHORIZED'));
+  }
+});
+
 io.on('connection', (socket) => {
-  console.log(`🔌 WebSocket Client connected: ${socket.id}`);
+  const identity = socket.data.identity as ChatIdentity;
+  console.log(`🔌 WebSocket Client connected: ${socket.id} (user ${identity.userId})`);
+
+  /**
+   * ระบุว่าห้องที่ผู้เรียกขอเข้าถึงเป็นของลูกค้าคนไหน
+   * คืน null เมื่อไม่มีสิทธิ์ — ผู้ซื้อได้ห้องของตัวเองเสมอ
+   * ส่วนเจ้าของร้านระบุ customerId เพื่อเข้าห้องของลูกค้าได้
+   */
+  async function resolveThreadCustomerId(storeId: string, requestedCustomerId?: string): Promise<string | null> {
+    if (!storeId) return null;
+    if (!requestedCustomerId || requestedCustomerId === identity.userId) {
+      return identity.userId;
+    }
+    return (await canActAsStore(identity, storeId)) ? requestedCustomerId : null;
+  }
 
   // Customer or Seller joins specific conversation room
-  socket.on('join_chat', (data: { storeId: string; userId: string }) => {
-    if (!data?.storeId || !data?.userId) return;
-    const room = `chat:${data.storeId}:${data.userId}`;
+  socket.on('join_chat', async (data: { storeId: string; userId?: string; customerId?: string }) => {
+    if (!data?.storeId) return;
+
+    const customerId = await resolveThreadCustomerId(data.storeId, data.customerId || data.userId);
+    if (!customerId) {
+      socket.emit('chat_error', { code: 'FORBIDDEN_ROOM', message: 'ไม่มีสิทธิ์เข้าห้องสนทนานี้' });
+      return;
+    }
+
+    const room = `chat:${data.storeId}:${customerId}`;
     socket.join(room);
-    console.log(`💬 Client ${socket.id} (user ${data.userId}) joined chat room ${room}`);
+    console.log(`💬 Client ${socket.id} (user ${identity.userId}) joined chat room ${room}`);
   });
 
   // Seller joins store broadcast channel to monitor incoming customer messages
-  socket.on('join_seller_room', (data: { storeId: string }) => {
+  socket.on('join_seller_room', async (data: { storeId: string }) => {
     if (!data?.storeId) return;
+
+    if (!(await canActAsStore(identity, data.storeId))) {
+      socket.emit('chat_error', { code: 'FORBIDDEN_STORE', message: 'ไม่ใช่เจ้าของร้านนี้' });
+      return;
+    }
+
     const room = `seller:${data.storeId}`;
     socket.join(room);
     console.log(`🏪 Seller ${socket.id} joined store room ${room}`);
   });
 
   // Typing status indicator
-  socket.on('typing_status', (data: { storeId: string; userId: string; isTyping: boolean; sender: 'me' | 'store' }) => {
-    const room = `chat:${data.storeId}:${data.userId}`;
-    socket.to(room).emit('user_typing', data);
+  socket.on('typing_status', async (data: { storeId: string; userId?: string; customerId?: string; isTyping: boolean }) => {
+    if (!data?.storeId) return;
+
+    const customerId = await resolveThreadCustomerId(data.storeId, data.customerId || data.userId);
+    if (!customerId) return;
+
+    const actingAsStore = customerId !== identity.userId;
+    const room = `chat:${data.storeId}:${customerId}`;
+    socket.to(room).emit('user_typing', {
+      storeId: data.storeId,
+      userId: customerId,
+      isTyping: Boolean(data.isTyping),
+      sender: actingAsStore ? 'store' : 'me',
+    });
   });
 
   // Send message through WebSocket
-  socket.on('send_chat_message', async (data: { id?: string; storeId: string; userId: string; text: string; sender: 'me' | 'store'; customerId?: string }) => {
-    if (!data?.text || !data.text.trim()) return;
+  socket.on('send_chat_message', async (data: { id?: string; storeId: string; userId?: string; text: string; customerId?: string }) => {
+    if (!data?.text || !data.text.trim() || !data?.storeId) return;
 
-    const activeUserId = data.customerId || data.userId;
-    const room = `chat:${data.storeId}:${activeUserId}`;
+    const customerId = await resolveThreadCustomerId(data.storeId, data.customerId || data.userId);
+    if (!customerId) {
+      socket.emit('chat_error', { code: 'FORBIDDEN_ROOM', message: 'ไม่มีสิทธิ์ส่งข้อความในห้องนี้' });
+      return;
+    }
+
+    // บทบาทผู้ส่งมาจากสิทธิ์จริง ไม่ใช่จากค่า sender ที่ client ส่งมา
+    const actingAsStore = customerId !== identity.userId;
+    const room = `chat:${data.storeId}:${customerId}`;
     const sellerRoom = `seller:${data.storeId}`;
 
     const msgPayload = {
       id: data.id || `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-      sender: data.sender,
-      senderId: data.sender === 'store' ? data.storeId : activeUserId,
-      recipientId: data.sender === 'store' ? activeUserId : data.storeId,
+      sender: actingAsStore ? 'store' : 'me',
+      senderId: identity.userId,
+      recipientId: actingAsStore ? customerId : data.storeId,
       storeId: data.storeId,
+      customerId,
       text: data.text.trim(),
       time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
       createdAt: new Date().toISOString(),
@@ -218,7 +304,7 @@ io.on('connection', (socket) => {
 
     // Broadcast only to OTHER sockets in the room (prevents duplicate self-echo)
     socket.to(room).emit('receive_chat_message', msgPayload);
-    if (data.sender !== 'store') {
+    if (!actingAsStore) {
       socket.to(sellerRoom).emit('receive_chat_message', msgPayload);
     }
 

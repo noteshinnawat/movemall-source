@@ -13,6 +13,7 @@ import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { VisualSearchModal } from './components/VisualSearchModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { resetChatSocket } from './utils/chatSocket';
 import { API_BASE_URL, createProductApi, updateProductApi, deleteProductApi } from './utils/api';
 
 // Helper to safely retry module imports without causing browser reload loops
@@ -97,6 +98,12 @@ function AppLayout({
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
   }, [location.pathname, location.search]);
+
+  // สลับบัญชี/ออกจากระบบ: ตัด socket เดิมทิ้ง ไม่ให้ค้างด้วย token ของ session ก่อนหน้า
+  useEffect(() => {
+    window.addEventListener('movemall_auth_change', resetChatSocket);
+    return () => window.removeEventListener('movemall_auth_change', resetChatSocket);
+  }, []);
 
   const isProductDetailPage = location.pathname.startsWith('/product/');
   const isChatPage = location.pathname.startsWith('/chat');
@@ -269,8 +276,15 @@ function AppLayout({
           {/* Stores Directory */}
           <Route path="/stores" element={<StoresDirectoryPage />} />
 
-          {/* Chat Inbox */}
-          <Route path="/chat" element={<ChatPage />} />
+          {/* Chat Inbox — ต้องล็อกอิน เพราะห้องแชทผูกกับตัวตนที่เซิร์ฟเวอร์ยืนยันได้ */}
+          <Route
+            path="/chat"
+            element={
+              <ProtectedRoute>
+                <ChatPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Login / Authentication */}
           <Route
