@@ -659,7 +659,7 @@ export function ProductDetailPage({
                   const currentStore = (product.storeId && getStoreById(product.storeId)) || stores[0];
                   return (
                     <Link
-                      to={`/chat?storeId=${currentStore.id}`}
+                      to={`/chat?storeId=${currentStore.id}&source=product&ref=${product.id}&refName=${encodeURIComponent(product.name || '')}`}
                       className="product-detail__desktop-chat-btn"
                       title="แชทกับร้านค้า"
                     >
@@ -863,7 +863,7 @@ export function ProductDetailPage({
                 <div className="product-store-actions">
                   <button
                     className="product-store-chat-btn"
-                    onClick={() => navigate(`/chat?store=${store.id}`)}
+                    onClick={() => navigate(`/chat?store=${store.id}&source=product&ref=${product.id}&refName=${encodeURIComponent(product.name || '')}`)}
                   >
                     <MessageSquare size={14} />
                     แชทกับร้าน
@@ -1102,7 +1102,7 @@ export function ProductDetailPage({
           {/* Left Column: Chat & Add to Cart */}
           <div className="product-sticky-left">
             <Link
-              to={`/chat?storeId=${store.id}`}
+              to={`/chat?storeId=${store.id}&source=product&ref=${product.id}&refName=${encodeURIComponent(product.name || '')}`}
               className="product-sticky-icon-btn"
               title="แชทคุยกับร้านค้า"
             >

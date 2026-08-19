@@ -68,6 +68,34 @@ export function ChatPage() {
   });
 
   const [selectedStoreId, setSelectedStoreId] = useState(initialStoreId);
+
+  // ── Source Tracking: write source info to localStorage so seller CRM can display it ──
+  useEffect(() => {
+    const sourceType = searchParams.get('source'); // 'product' | 'store' | 'live' | 'video'
+    const refId = searchParams.get('ref');
+    const refName = searchParams.get('refName') || searchParams.get('storeId') || '';
+    if (sourceType && selectedStoreId && myUserId) {
+      const labelMap: Record<string, string> = {
+        product: `สินค้า: ${decodeURIComponent(refName || refId || '')}`,
+        store: `หน้าร้าน: ${decodeURIComponent(refName || '')}`,
+        live: `ไลฟ์สด: ${decodeURIComponent(refName || refId || '')}`,
+        video: `คลิปสั้น: ${decodeURIComponent(refName || refId || '')}`,
+      };
+      const sourceEntry = {
+        source: sourceType,
+        label: labelMap[sourceType] || decodeURIComponent(refName || sourceType),
+        openedAt: new Date().toLocaleString('th-TH', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' }),
+      };
+      // Write per-store source map: movemall_chat_source_{storeId}
+      try {
+        const key = `movemall_chat_source_${selectedStoreId}`;
+        const existing = JSON.parse(localStorage.getItem(key) || '{}');
+        existing[myUserId] = sourceEntry;
+        localStorage.setItem(key, JSON.stringify(existing));
+      } catch {}
+    }
+  }, [selectedStoreId, myUserId]); // run once per store selection
+
   const [mobileView, setMobileView] = useState<'list' | 'chat'>(storeParam ? 'chat' : 'list');
   const [filterTab, setFilterTab] = useState<'all' | 'unread' | 'official'>('all');
   const [searchQuery, setSearchQuery] = useState('');

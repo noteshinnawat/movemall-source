@@ -259,7 +259,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
               </button>
               <button 
                 className="store-chat-btn" 
-                onClick={() => navigate(`/chat?store=${store.id}`)}
+                onClick={() => navigate(`/chat?store=${store.id}&source=store&ref=${store.id}&refName=${encodeURIComponent(store.name || '')}`)}
               >
                 <MessageSquare size={14} />
                 <span>แชทกับร้านค้า</span>
