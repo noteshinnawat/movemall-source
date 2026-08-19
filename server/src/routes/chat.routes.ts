@@ -1,11 +1,11 @@
 import { Router, Response, Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { prismaRead, prismaWrite } from '../config/database.js';
+import { JWT_SECRET } from '../config/env.js';
 import { AuthRequest } from '../middleware/auth.middleware.js';
 import { io } from '../app.js';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'movemall_super_secure_jwt_secret_key_2026_at_least_32_chars!';
 
 // Helper: Extract userId from JWT token or fallback to header/query
 function resolveUserId(req: Request): string {

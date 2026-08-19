@@ -1,5 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { JWT_SECRET } from '../config/env.js';
+import { isTokenRevoked } from '../services/tokenRevocation.service.js';
+
+interface JwtPayload {
+  userId: string;
+  email?: string;
+  role: string;
+  jti?: string;
+  iat?: number;
+  exp?: number;
+}
 
 export interface AuthRequest extends Request {
   user?: {
@@ -7,11 +18,11 @@ export interface AuthRequest extends Request {
     email?: string;
     role: string;
   };
+  /** ข้อมูลของ token ใบที่ใช้เรียก — ใช้ตอน logout เพื่อเพิกถอนใบนั้น */
+  tokenMeta?: { jti?: string; exp?: number };
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'movemall_super_secure_jwt_secret_key_2026_at_least_32_chars!';
-
-export function authenticateJWT(req: AuthRequest, res: Response, next: NextFunction): void {
+export async function authenticateJWT(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -21,13 +32,23 @@ export function authenticateJWT(req: AuthRequest, res: Response, next: NextFunct
 
   const token = authHeader.split(' ')[1];
 
+  let decoded: JwtPayload;
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email?: string; role: string };
-    req.user = decoded;
-    next();
+    decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
   } catch {
     res.status(403).json({ error: 'Forbidden: Invalid or expired token' });
+    return;
   }
+
+  // ตรวจบัญชีดำ: token ที่ถูกเพิกถอน (logout / เปลี่ยนรหัสผ่าน / ถูกแบน) ต้องใช้ไม่ได้
+  if (await isTokenRevoked(decoded.jti, decoded.userId, decoded.iat)) {
+    res.status(401).json({ error: 'Session ถูกยกเลิกแล้ว กรุณาเข้าสู่ระบบใหม่' });
+    return;
+  }
+
+  req.user = decoded;
+  req.tokenMeta = { jti: decoded.jti, exp: decoded.exp };
+  next();
 }
 
 export function requireRole(...allowedRoles: string[]) {
