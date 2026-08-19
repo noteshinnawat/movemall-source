@@ -8,7 +8,12 @@
 // ⚠️ ฝั่งนี้เป็นแค่การเก็บ token ด่านจริงคือ verifyTurnstile ที่ Express
 // (server/src/middleware/turnstile.middleware.ts) เพราะบอทข้ามหน้าเว็บแล้วยิง API ตรงได้
 
-const SITE_KEY = (import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined)?.trim() || '';
+// sitekey เป็นค่าสาธารณะโดยการออกแบบ (ฝังในหน้าเว็บให้ใครก็เห็นได้) และถูกล็อกไว้กับ
+// โดเมนที่ลงทะเบียนไว้เท่านั้น จึงใส่เป็นค่า default ในโค้ดได้อย่างปลอดภัย
+// ข้อดี: ไม่ต้องพึ่ง build env var ที่ถ้าลืมตั้งแล้วด่านกันบอทจะเงียบไปโดยไม่มีสัญญาณ
+// ตั้ง VITE_TURNSTILE_SITE_KEY เพื่อ override ได้ (เช่น ใช้ widget คนละตัวต่อ environment)
+const DEFAULT_SITE_KEY = '0x4AAAAAAEV4IWYDw8lkwvt0';
+const SITE_KEY = (import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined)?.trim() || DEFAULT_SITE_KEY;
 const SCRIPT_ID = 'cf-turnstile-script';
 const CONTAINER_ID = 'cf-turnstile-invisible-host';
 const SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
