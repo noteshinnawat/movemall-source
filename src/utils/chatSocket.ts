@@ -3,6 +3,10 @@ import { API_BASE_URL } from './api';
 
 let socket: Socket | null = null;
 
+/**
+ * เซิร์ฟเวอร์บังคับ JWT ตั้งแต่ handshake — ไม่มี token ก็ต่อไม่ติด
+ * (เดิมต่อได้โดยไม่ยืนยันตัวตน แล้ว join ห้องแชทของคนอื่นได้)
+ */
 export function getChatSocket(): Socket {
   if (!socket) {
     socket = io(API_BASE_URL, {
@@ -12,6 +16,7 @@ export function getChatSocket(): Socket {
       reconnectionDelay: 1000,
       timeout: 10000,
       transports: ['websocket', 'polling'],
+      auth: (cb) => cb({ token: localStorage.getItem('movemall_jwt_token') || '' }),
     });
 
     socket.on('connect', () => {
@@ -21,8 +26,23 @@ export function getChatSocket(): Socket {
     socket.on('connect_error', (err) => {
       console.warn('⚠️ Chat WebSocket connection warning:', err.message);
     });
+
+    socket.on('chat_error', (err: { code?: string; message?: string }) => {
+      console.warn('⚠️ Chat permission denied:', err?.code, err?.message);
+    });
   }
   return socket;
+}
+
+/**
+ * ตัดการเชื่อมต่อเดิมทิ้งเมื่อสถานะล็อกอินเปลี่ยน
+ * เพื่อไม่ให้ socket ยังถือ token ของ session ก่อนหน้าอยู่
+ */
+export function resetChatSocket(): void {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
 }
 
 export function joinChatRoom(storeId: string, userId: string): void {
@@ -50,9 +70,8 @@ export function joinSellerChatRoom(storeId: string): void {
 export function emitChatMessage(data: {
   id?: string;
   storeId: string;
-  userId: string;
+  userId?: string;
   text: string;
-  sender: 'me' | 'store';
   customerId?: string;
 }): void {
   const s = getChatSocket();
@@ -61,9 +80,9 @@ export function emitChatMessage(data: {
 
 export function emitTypingStatus(data: {
   storeId: string;
-  userId: string;
+  userId?: string;
+  customerId?: string;
   isTyping: boolean;
-  sender: 'me' | 'store';
 }): void {
   const s = getChatSocket();
   s.emit('typing_status', data);

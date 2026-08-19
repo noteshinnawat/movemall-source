@@ -1,32 +1,23 @@
-import { Router, Response, Request } from 'express';
-import jwt from 'jsonwebtoken';
+import { Router, Response } from 'express';
 import { prismaRead, prismaWrite } from '../config/database.js';
-import { JWT_SECRET } from '../config/env.js';
-import { AuthRequest } from '../middleware/auth.middleware.js';
+import { authenticateJWT, AuthRequest } from '../middleware/auth.middleware.js';
+import { canAccessThread, canActAsStore, ChatIdentity } from '../services/chatAccess.service.js';
 import { io } from '../app.js';
 
 const router = Router();
 
-// Helper: Extract userId from JWT token or fallback to header/query
-function resolveUserId(req: Request): string {
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    try {
-      const token = authHeader.split(' ')[1];
-      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-      if (decoded?.userId) return decoded.userId;
-    } catch {
-      // ignore token error and fallback
-    }
-  }
-  const customUserId = (req.headers['x-user-id'] as string) || (req.query.userId as string) || (req.body?.userId as string) || (req.body?.senderId as string);
-  return customUserId || 'guest_user';
+// แชททุกเส้นทางต้องล็อกอิน — เดิมรับ x-user-id จาก client ตรง ๆ
+// ทำให้ใครก็ตั้ง header เป็น id คนอื่นแล้วอ่าน/ส่งแชทแทนเขาได้ (IDOR)
+router.use(authenticateJWT);
+
+function identityOf(req: AuthRequest): ChatIdentity {
+  return { userId: req.user!.userId, role: req.user!.role };
 }
 
 // ── 1. Fetch Conversation Messages (User & Store) ──
-router.get('/messages', async (req: Request, res: Response) => {
+router.get('/messages', async (req: AuthRequest, res: Response) => {
   try {
-    const userId = resolveUserId(req);
+    const identity = identityOf(req);
     const { storeId } = req.query;
 
     if (!storeId) {
@@ -36,14 +27,23 @@ router.get('/messages', async (req: Request, res: Response) => {
 
     const targetStoreId = Array.isArray(storeId) ? (storeId[0] as string) : (storeId as string);
 
+    // เจ้าของร้านระบุ customerId เพื่อเปิดห้องของลูกค้ารายนั้นได้
+    // ผู้ซื้อทั่วไปอ่านได้เฉพาะห้องของตัวเอง แม้จะส่ง customerId มาก็ตาม
+    const requestedCustomerId = (req.query.customerId as string) || identity.userId;
+    if (!(await canAccessThread(identity, targetStoreId, requestedCustomerId))) {
+      res.status(403).json({ error: 'Forbidden: ไม่มีสิทธิ์เข้าถึงห้องสนทนานี้' });
+      return;
+    }
+    const threadUserId = requestedCustomerId;
+
     let messages: any[] = [];
     try {
       messages = await prismaRead.chatMessage.findMany({
         where: {
           storeId: targetStoreId,
           OR: [
-            { senderId: userId },
-            { recipientId: userId },
+            { senderId: threadUserId },
+            { recipientId: threadUserId },
           ],
         },
         orderBy: { createdAt: 'asc' },
@@ -56,10 +56,10 @@ router.get('/messages', async (req: Request, res: Response) => {
     res.json({
       success: true,
       storeId: targetStoreId,
-      userId,
+      userId: threadUserId,
       messages: messages.map(m => ({
         id: m.id,
-        sender: m.senderId === userId ? 'me' : 'store',
+        sender: m.senderId === identity.userId ? 'me' : 'store',
         senderId: m.senderId,
         recipientId: m.recipientId,
         text: m.text,
@@ -74,18 +74,37 @@ router.get('/messages', async (req: Request, res: Response) => {
 });
 
 // ── 2. Send New Chat Message ──
-router.post('/messages', async (req: Request, res: Response) => {
+router.post('/messages', async (req: AuthRequest, res: Response) => {
   try {
-    const senderId = resolveUserId(req);
-    const { recipientId, storeId, text, senderRole } = req.body;
+    const identity = identityOf(req);
+    const senderId = identity.userId;
+    const { recipientId, storeId, text } = req.body;
 
     if (!text || !text.trim()) {
       res.status(400).json({ error: 'Message text is required' });
       return;
     }
+    if (!storeId) {
+      res.status(400).json({ error: 'storeId is required' });
+      return;
+    }
 
-    const targetStoreId = storeId || 'store-techpro';
-    const targetRecipientId = recipientId || 'store-admin';
+    const targetStoreId = storeId as string;
+
+    // บทบาทผู้ส่งตัดสินจากความเป็นเจ้าของร้านจริง ไม่ใช่จาก senderRole ที่ client ส่งมา
+    const actingAsStore = await canActAsStore(identity, targetStoreId);
+
+    // ร้านตอบลูกค้า → ต้องระบุว่าตอบใคร; ลูกค้าส่งหาร้าน → ปลายทางคือร้านเสมอ
+    const targetRecipientId = actingAsStore ? (recipientId as string) : targetStoreId;
+    if (actingAsStore && !targetRecipientId) {
+      res.status(400).json({ error: 'recipientId is required when replying as a store' });
+      return;
+    }
+    if (!actingAsStore && recipientId && recipientId !== targetStoreId) {
+      res.status(403).json({ error: 'Forbidden: ส่งข้อความได้เฉพาะถึงร้านค้าปลายทางเท่านั้น' });
+      return;
+    }
+
     const now = new Date();
 
     let createdMessage: any = {
@@ -113,7 +132,7 @@ router.post('/messages', async (req: Request, res: Response) => {
 
     const payload = {
       id: createdMessage.id,
-      sender: senderRole === 'store' ? 'store' : (senderId === targetRecipientId ? 'store' : 'me'),
+      sender: actingAsStore ? 'store' : 'me',
       senderId,
       recipientId: targetRecipientId,
       storeId: targetStoreId,
@@ -124,10 +143,11 @@ router.post('/messages', async (req: Request, res: Response) => {
 
     // Emit to real-time Socket.io rooms (only if requested via REST-only client)
     if (io && req.query.broadcast === 'true') {
-      const room = `chat:${targetStoreId}:${senderId}`;
+      const customerId = actingAsStore ? targetRecipientId : senderId;
+      const room = `chat:${targetStoreId}:${customerId}`;
       const sellerRoom = `seller:${targetStoreId}`;
       io.to(room).emit('receive_chat_message', payload);
-      if (senderRole !== 'store') {
+      if (!actingAsStore) {
         io.to(sellerRoom).emit('receive_chat_message', payload);
       }
     }
@@ -144,8 +164,9 @@ router.post('/messages', async (req: Request, res: Response) => {
 });
 
 // ── 3. List Conversations for Seller / Admin ──
-router.get('/conversations', async (req: Request, res: Response) => {
+router.get('/conversations', async (req: AuthRequest, res: Response) => {
   try {
+    const identity = identityOf(req);
     const { storeId } = req.query;
     if (!storeId) {
       res.status(400).json({ error: 'storeId is required' });
@@ -153,6 +174,12 @@ router.get('/conversations', async (req: Request, res: Response) => {
     }
 
     const targetStoreId = Array.isArray(storeId) ? (storeId[0] as string) : (storeId as string);
+
+    // รายชื่อลูกค้าทั้งร้านเป็นข้อมูลของผู้ขาย — เดิมเปิดให้ใครก็ดึงได้
+    if (!(await canActAsStore(identity, targetStoreId))) {
+      res.status(403).json({ error: 'Forbidden: เฉพาะเจ้าของร้านเท่านั้น' });
+      return;
+    }
 
     let messages: any[] = [];
     try {
@@ -168,7 +195,8 @@ router.get('/conversations', async (req: Request, res: Response) => {
     // Group by customer
     const convMap = new Map<string, any>();
     for (const msg of messages) {
-      const customerId = msg.senderId.startsWith('store') ? msg.recipientId : msg.senderId;
+      // ข้อความจากลูกค้ามี recipientId = storeId ส่วนข้อความจากร้านมี recipientId = ลูกค้า
+      const customerId = msg.recipientId === targetStoreId ? msg.senderId : msg.recipientId;
       if (!convMap.has(customerId)) {
         convMap.set(customerId, {
           customerId,

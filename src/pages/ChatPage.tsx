@@ -47,7 +47,7 @@ export function ChatPage() {
   const storeParam = searchParams.get('store');
   const initialStoreId = stores.find(s => s.id === storeParam)?.id || stores[0].id;
 
-  // Resolve current active user or persistent guest ID
+  // ผู้ใช้ที่ล็อกอินอยู่ (ต้องมีเสมอ เพราะ /chat อยู่หลัง ProtectedRoute)
   const currentUser = (() => {
     try {
       const uStr = localStorage.getItem('movemall_user');
@@ -57,15 +57,10 @@ export function ChatPage() {
     }
   })();
 
-  const [myUserId] = useState<string>(() => {
-    if (currentUser?.id) return currentUser.id;
-    let storedGuest = localStorage.getItem('movemall_guest_user_id');
-    if (!storedGuest) {
-      storedGuest = `guest_${Math.random().toString(36).substring(2, 9)}`;
-      localStorage.setItem('movemall_guest_user_id', storedGuest);
-    }
-    return storedGuest;
-  });
+  // ตัวตนผู้ใช้มาจากบัญชีที่ล็อกอินเท่านั้น — เดิม fallback เป็น guest id ที่ client
+  // สร้างเอง ซึ่งใครก็เดา/ปลอมเพื่อเปิดห้องแชทของคนอื่นได้ (IDOR)
+  // เส้นทาง /chat ถูกครอบด้วย ProtectedRoute แล้ว จึงมี currentUser เสมอเมื่อมาถึงตรงนี้
+  const [myUserId] = useState<string>(() => currentUser?.id || '');
 
   const [selectedStoreId, setSelectedStoreId] = useState(initialStoreId);
 
@@ -307,7 +302,6 @@ export function ChatPage() {
       storeId: selectedStoreId,
       userId: myUserId,
       isTyping: true,
-      sender: 'me',
     });
 
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -316,7 +310,6 @@ export function ChatPage() {
         storeId: selectedStoreId,
         userId: myUserId,
         isTyping: false,
-        sender: 'me',
       });
     }, 1500);
   }
@@ -349,19 +342,16 @@ export function ChatPage() {
       storeId: selectedStoreId,
       userId: myUserId,
       text: textToSend.trim(),
-      sender: 'me',
     });
 
     // 3. Persist to Backend REST API (Async)
     try {
       fetchApi('/api/chat/messages', {
         method: 'POST',
-        headers: { 'x-user-id': myUserId },
         body: JSON.stringify({
           storeId: selectedStoreId,
           recipientId: selectedStoreId,
           text: textToSend.trim(),
-          senderRole: 'buyer',
         }),
       }).catch(() => {});
     } catch {
@@ -404,13 +394,8 @@ export function ChatPage() {
           [selectedStoreId]: [...(prev[selectedStoreId] || []), autoReply],
         }));
 
-        // Broadcast reply to socket so seller center also syncs
-        emitChatMessage({
-          storeId: selectedStoreId,
-          userId: myUserId,
-          text: replyText,
-          sender: 'store',
-        });
+        // หมายเหตุ: ไม่ broadcast ข้อความนี้ออก socket แล้ว — การส่งในนามร้าน
+        // สงวนไว้ให้เจ้าของร้านที่เซิร์ฟเวอร์ยืนยันสิทธิ์เท่านั้น (mock reply จึงอยู่แค่เครื่องนี้)
       }, 1200);
     }
   }

@@ -452,9 +452,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     emitChatMessage({
       id: newMsg.id,
       storeId: currentStore.id,
-      userId: selectedCustomerId,
       text: textToSend.trim(),
-      sender: 'store',
       customerId: selectedCustomerId,
     });
 
@@ -465,7 +463,6 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
         storeId: currentStore.id,
         recipientId: selectedCustomerId,
         text: textToSend.trim(),
-        senderRole: 'store',
       }),
     }).catch(() => {});
   }
