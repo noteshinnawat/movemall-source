@@ -89,8 +89,9 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
           phone: form.phone || '0812345678',
           address: `${form.address} ${form.district} ${form.province} ${form.zip}`.trim() || 'กรุงเทพมหานคร 10110',
         },
+        // ส่งเฉพาะ coinsUsed — เซิร์ฟเวอร์คำนวณส่วนลดเองจากยอดเหรียญจริงของผู้ใช้
+        // เดิมส่ง discountAmount มาด้วย ทำให้ฝั่งเซิร์ฟเวอร์หักส่วนลดซ้ำเป็น 2 เท่า
         coinsUsed: useCoins ? Math.min(userCoins, subtotal) : 0,
-        discountAmount: coinDiscount,
         invoiceRequested: requestInvoice,
         taxInvoiceData: requestInvoice ? {
           buyerType: invoiceType,

@@ -265,7 +265,6 @@ export async function createOrderApi(payload: {
   paymentMethod: string;
   shippingAddress: any;
   coinsUsed?: number;
-  discountAmount?: number;
 }): Promise<{ message: string; order: any }> {
   return fetchApi<{ message: string; order: any }>('/api/orders', {
     method: 'POST',
@@ -351,3 +350,25 @@ export async function fetchTaxDocumentsApi(storeId?: string): Promise<{ document
 
 
 
+
+// ── ออกจากระบบ ──
+// ลบ token ฝั่ง client อย่างเดียวไม่พอ — token ใบนั้นยังใช้เรียก API ได้จนหมดอายุ
+// จึงต้องแจ้งเซิร์ฟเวอร์ให้เพิกถอน (ใส่บัญชีดำ) ด้วยเสมอ
+export function logoutApi(): void {
+  const token = localStorage.getItem('movemall_jwt_token');
+
+  // ยิงแบบไม่รอผล เพื่อไม่ให้ UI ค้างหากเครือข่ายช้า
+  if (token) {
+    fetch(`${API_BASE_URL}/api/auth/logout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      keepalive: true,
+    }).catch(() => {
+      // ออฟไลน์: token จะยังใช้ได้จนหมดอายุ ซึ่งรับได้สำหรับการกดออกจากระบบทั่วไป
+    });
+  }
+
+  localStorage.removeItem('movemall_jwt_token');
+  localStorage.removeItem('movemall_user');
+  window.dispatchEvent(new Event('movemall_auth_change'));
+}

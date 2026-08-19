@@ -249,27 +249,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         return;
       }
 
-      // Facebook & other social providers
-      const providerNames = {
-        facebook: 'Facebook User',
-      };
-
-      const res = await fetchApi<{ token: string; user: { name: string; role: string } }>('/api/auth/social-login', {
-        method: 'POST',
-        body: JSON.stringify({
-          provider,
-          name: providerNames[provider as keyof typeof providerNames] || 'Social User',
-          email: `${provider}_user@movemall.social`,
-        }),
-      });
-
-      if (res.token) {
-        localStorage.setItem('movemall_jwt_token', res.token);
-        window.dispatchEvent(new Event('movemall_auth_change'));
-      }
-
-      onLoginSuccess?.(res.user?.name || providerNames.facebook, role);
-      navigate(getRedirectTarget(res.user?.role));
+      // Facebook & ผู้ให้บริการอื่น ๆ — ยังไม่เปิดให้บริการ
+      // เดิมเส้นทางนี้ล็อกอินเข้าบัญชีกลางบัญชีเดียวที่ผู้ใช้ทุกคนใช้ร่วมกัน
+      // โดยไม่มีการยืนยันตัวตนกับ Facebook จริง จึงถูกปิดไปจนกว่าจะต่อ OAuth ของจริง
+      setErrorMsg('ขณะนี้ยังไม่เปิดให้เข้าสู่ระบบด้วย Facebook กรุณาใช้ Google, LINE, อีเมล หรือเบอร์โทรศัพท์แทน');
+      return;
     } catch (err: any) {
       console.warn('Social login error:', err);
       const providerLabel = provider === 'google' ? 'Google' : (provider === 'line' ? 'LINE' : 'Facebook');

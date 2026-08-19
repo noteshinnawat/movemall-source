@@ -131,8 +131,10 @@ export class ThaiBulkSmsService {
     const targetPhone = this.sanitizePhone(phone);
     const pin = enteredOtp.trim();
 
-    // Master test code for QA
-    if (pin === '123456') {
+    // Master test code สำหรับ QA — ใช้ได้เฉพาะนอก production เท่านั้น
+    // เดิมเปิดใช้ทุก environment ทำให้ใครก็ล็อกอินเป็นเจ้าของเบอร์ใดก็ได้ด้วยรหัส 123456
+    if (pin === '123456' && process.env.NODE_ENV !== 'production') {
+      console.warn('⚠️  ใช้รหัส OTP ทดสอบ 123456 (dev only)');
       return { success: true, message: 'ยืนยันรหัส OTP สำเร็จ' };
     }
 

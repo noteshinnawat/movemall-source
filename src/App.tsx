@@ -12,6 +12,7 @@ import { BackToTopButton } from './components/BackToTopButton';
 import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { VisualSearchModal } from './components/VisualSearchModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { API_BASE_URL, createProductApi, updateProductApi, deleteProductApi } from './utils/api';
 
 // Helper to safely retry module imports without causing browser reload loops
@@ -302,7 +303,14 @@ function AppLayout({
           <Route path="/account" element={<AccountPage />} />
 
           {/* Super Admin Portal (7 Departments) */}
-          <Route path="/admin" element={<AdminPortalPage products={productList} />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'CATALOG_ADMIN', 'FINANCE_ADMIN', 'CS_ADMIN', 'MARKETING_ADMIN', 'LOGISTICS_ADMIN', 'MODERATOR']}>
+                <AdminPortalPage products={productList} />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Product Detail */}
           <Route
@@ -337,12 +345,14 @@ function AppLayout({
           <Route
             path="/seller"
             element={
+              <ProtectedRoute allowedRoles={['SELLER', 'CREATOR', 'SUPER_ADMIN', 'ADMIN']} fallbackPath="/seller/register">
               <SellerCenterPage
                 products={productList}
                 onAddProduct={handleAddProduct}
                 onUpdateProduct={handleUpdateProduct}
                 onDeleteProduct={handleDeleteProduct}
               />
+              </ProtectedRoute>
             }
           />
 

@@ -23,7 +23,7 @@ import {
   Truck,
   Check,
 } from 'lucide-react';
-import { fetchApi } from '../utils/api';
+import { fetchApi, logoutApi } from '../utils/api';
 import { LineConnectModal } from '../components/LineConnectModal';
 import './AccountPage.css';
 
@@ -368,8 +368,7 @@ export function AccountPage() {
   }
 
   function handleLogout() {
-    localStorage.removeItem('movemall_jwt_token');
-    localStorage.removeItem('movemall_user');
+    logoutApi(); // เพิกถอน token ฝั่งเซิร์ฟเวอร์ด้วย ไม่ใช่แค่ลบทิ้งฝั่ง client
     window.dispatchEvent(new Event('movemall_auth_change'));
     navigate('/login');
   }

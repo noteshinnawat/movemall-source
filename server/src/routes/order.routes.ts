@@ -1,11 +1,36 @@
 import { Router, Response } from 'express';
+import { z } from 'zod';
 import { prismaWrite, prismaRead } from '../config/database.js';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.middleware.js';
-import { OrderStatus, PaymentMethod } from '@prisma/client';
+import { OrderStatus, PaymentMethod, Prisma } from '@prisma/client';
 import { invalidateCachePattern } from '../config/redis.js';
 import { sendNotificationToUser } from './notification.routes.js';
 
 const router = Router();
+
+// ── Schema ตรวจสอบข้อมูลคำสั่งซื้อ ──
+// ทุกค่าที่มีผลต่อยอดเงินต้องผ่านการตรวจชนิดและช่วงค่าก่อนเสมอ
+const createOrderSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        productId: z.string().min(1),
+        // จำนวนต้องเป็นจำนวนเต็มบวก — ค่าติดลบเคยทำให้สต็อกเพิ่มขึ้นและยอดรวมลดลง
+        quantity: z.number().int().positive().max(999),
+      })
+    )
+    .min(1, 'ต้องมีสินค้าอย่างน้อย 1 รายการ')
+    .max(100),
+  paymentMethod: z.nativeEnum(PaymentMethod),
+  shippingAddress: z.object({
+    name: z.string().min(1).max(200),
+    phone: z.string().min(1).max(30),
+    address: z.string().min(1).max(500),
+  }).passthrough(),
+  coinsUsed: z.number().int().min(0).max(1_000_000).default(0),
+  invoiceRequested: z.boolean().optional(),
+  taxInvoiceData: z.unknown().optional(),
+});
 
 // ── 1. Create New Order (Atomic Transaction) ──
 router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
@@ -16,23 +41,19 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const {
-      items,
-      paymentMethod,
-      shippingAddress,
-      coinsUsed = 0,
-      discountAmount = 0,
-    } = req.body;
-
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      res.status(400).json({ error: 'Order must contain at least 1 item' });
+    // ⚠️ discountAmount ถูกถอดออกจาก request body โดยเจตนา
+    //    เดิมรับค่าจาก client แล้วนำไปหักออกจากยอดสุทธิโดยไม่ตรวจสอบ
+    //    ส่งค่ามหาศาลมา = ได้สินค้าฟรี ส่วนลดทุกชนิดต้องคำนวณฝั่งเซิร์ฟเวอร์เท่านั้น
+    const parsed = createOrderSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({
+        error: 'ข้อมูลคำสั่งซื้อไม่ถูกต้อง',
+        details: parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`),
+      });
       return;
     }
 
-    if (!paymentMethod || !shippingAddress) {
-      res.status(400).json({ error: 'Payment method and shipping address are required' });
-      return;
-    }
+    const { items, paymentMethod, shippingAddress, coinsUsed } = parsed.data;
 
     // Atomic Prisma Transaction
     const result = await prismaWrite.$transaction(async (tx) => {
@@ -76,8 +97,13 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
 
       // 3. Calculate final amounts
       const shippingCost = subtotal > 500 ? 0 : 45; // Free shipping over 500
-      const coinDiscount = coinsUsed * 1; // 1 Coin = 1 THB
-      const totalAmount = Math.max(0, subtotal + shippingCost - discountAmount - coinDiscount);
+
+      // ส่วนลดจากเหรียญคิดจาก coinsUsed เพียงทางเดียว (1 Coin = 1 บาท)
+      // เดิม frontend ส่ง discountAmount ที่มีค่าเท่ากับส่วนลดเหรียญมาด้วย แล้วเซิร์ฟเวอร์หักทั้งสองค่า
+      // ทำให้ลูกค้าได้ส่วนลดเป็น 2 เท่าของเหรียญที่ใช้จริง
+      // เพดาน: ส่วนลดต้องไม่เกินค่าสินค้า (ไม่นำไปหักค่าส่ง และห้ามทำให้ยอดติดลบ)
+      const coinDiscount = Math.min(coinsUsed, subtotal);
+      const totalAmount = Math.max(0, subtotal + shippingCost - coinDiscount);
 
       // 4. Create Order record
       const order = await tx.order.create({
@@ -85,11 +111,11 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
           userId,
           totalAmount,
           shippingCost,
-          discountAmount: discountAmount + coinDiscount,
+          discountAmount: coinDiscount,
           coinsUsed,
           paymentMethod: paymentMethod as PaymentMethod,
           status: paymentMethod === 'COD' || paymentMethod === 'PAYLATER' ? OrderStatus.PAID : OrderStatus.PENDING,
-          shippingAddress: shippingAddress || {},
+          shippingAddress: shippingAddress as Prisma.InputJsonValue,
           items: {
             create: orderItemData,
           },

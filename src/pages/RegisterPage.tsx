@@ -320,37 +320,10 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
         return;
       }
 
-      // Facebook Handler
-      const providerDefaults = {
-        facebook: { name: 'Facebook Member', email: `fb_${Date.now()}@facebook.com` },
-      };
-
-      const target = providerDefaults.facebook;
-
-      const res = await fetchApi<{
-        token: string;
-        user: { name: string; email?: string; coinsBalance?: number };
-        isNewUser?: boolean;
-      }>('/api/auth/social-login', {
-        method: 'POST',
-        body: JSON.stringify({
-          provider,
-          name: target.name,
-          email: target.email,
-        }),
-      });
-
-      if (res.token) {
-        localStorage.setItem('movemall_jwt_token', res.token);
-      }
-
-      onRegisterSuccess?.(res.user?.name || target.name, 'buyer');
-
-      setWelcomeModal({
-        show: true,
-        userName: res.user?.name || target.name,
-        coins: 100,
-      });
+      // Facebook Handler — ยังไม่เปิดให้บริการ
+      // เดิมสร้างบัญชีจากอีเมลปลอมที่ฝั่ง client กำหนดเอง โดยไม่ยืนยันตัวตนกับ Facebook
+      setErrorMsg('ขณะนี้ยังไม่เปิดให้สมัครสมาชิกด้วย Facebook กรุณาใช้ Google, LINE, อีเมล หรือเบอร์โทรศัพท์แทน');
+      return;
     } catch (err: any) {
       console.warn('Social register error:', err);
       const providerLabel = provider === 'google' ? 'Google' : (provider === 'line' ? 'LINE' : 'Facebook');

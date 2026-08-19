@@ -1,3 +1,5 @@
+// โหลดและตรวจสอบ environment เป็นอันดับแรกสุด — ถ้า secret ไม่ครบให้ดับตั้งแต่ตอนบูต
+import './config/env.js';
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
@@ -10,8 +12,29 @@ import { redis } from './config/redis.js';
 const app = express();
 const server = http.createServer(app);
 
+// อยู่หลัง reverse proxy (nginx / Railway / Cloudflare) — ต้องเชื่อ X-Forwarded-For
+// เพื่อให้ rate limiting นับ IP ของผู้ใช้จริง ไม่ใช่ IP ของ proxy เพียงตัวเดียว
+// ตั้งเป็น 1 ชั้น (ไม่ใช่ true) เพื่อไม่ให้ผู้เรียกปลอม header มาเปลี่ยน IP ตัวเองได้
+app.set('trust proxy', 1);
+
 // ── Middleware Security & Performance ──
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      // API ตอบเป็น JSON เท่านั้น จึงไม่ต้องอนุญาต script/style จากที่ใด
+      scriptSrc: ["'none'"],
+      styleSrc: ["'none'"],
+      imgSrc: ["'self'", 'data:'],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+    },
+  },
+  crossOriginResourcePolicy: { policy: 'same-site' },
+  referrerPolicy: { policy: 'no-referrer' },
+}));
 app.use(compression()); // Gzip/Brotli compression ลด bandwidth ~70%
 // Flexible CORS configuration (Cloudflare Pages, Localhost & Custom Domains)
 const allowedOrigins = [
@@ -21,24 +44,51 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
 ].filter(Boolean) as string[];
 
+// เทียบ origin แบบเจาะจง hostname — เดิมใช้ origin.includes('movemall')
+// ซึ่งทำให้โดเมนอย่าง movemall.evil.com ผ่านได้ด้วย
+function isAllowedOrigin(origin: string): boolean {
+  if (allowedOrigins.includes(origin)) return true;
+
+  let hostname: string;
+  try {
+    hostname = new URL(origin).hostname;
+  } catch {
+    return false;
+  }
+
+  // โดเมนพรีวิวของ Cloudflare Pages (เช่น abc123.movemall.pages.dev)
+  if (hostname === 'movemall.pages.dev' || hostname.endsWith('.movemall.pages.dev')) return true;
+
+  // โดเมนจริงของแบรนด์และ subdomain ทั้งหมด
+  if (hostname === 'movemall.com' || hostname.endsWith('.movemall.com')) return true;
+
+  return false;
+}
+
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, server-to-server)
+    // คำขอที่ไม่มี origin (curl, server-to-server, mobile app) ไม่ถูกบล็อกโดย CORS อยู่แล้ว
+    // เพราะ CORS เป็นกลไกของเบราว์เซอร์ — การป้องกันจริงอยู่ที่ JWT และลายเซ็น webhook
     if (!origin) return callback(null, true);
-    if (
-      allowedOrigins.includes(origin) ||
-      origin.endsWith('.pages.dev') ||
-      origin.includes('movemall')
-    ) {
-      return callback(null, true);
-    }
-    return callback(null, true); // Allow all during connected deployment
+
+    if (isAllowedOrigin(origin)) return callback(null, true);
+
+    console.warn(`CORS: ปฏิเสธ origin ที่ไม่อยู่ในรายการอนุญาต — ${origin}`);
+    return callback(null, false);
   },
   credentials: true,
 };
 
 app.use(cors(corsOptions));
-app.use(express.json({ limit: '10mb' }));
+// เก็บ raw body ไว้สำหรับตรวจลายเซ็น HMAC ของ webhook
+// ต้องใช้ไบต์ดิบที่ผู้ให้บริการเซ็นมาจริง ๆ — JSON.stringify(req.body) ให้ผลต่างกันได้
+// (ลำดับคีย์, ช่องว่าง, การ escape unicode) ทำให้ลายเซ็นที่ถูกต้องถูกปฏิเสธ
+app.use(express.json({
+  limit: '10mb',
+  verify: (req, _res, buf) => {
+    (req as express.Request & { rawBody?: Buffer }).rawBody = buf;
+  },
+}));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ── WebSocket Server ──
@@ -111,6 +161,14 @@ import lensRoutes from './routes/lens.routes.js';
 import logisticsRoutes from './routes/logistics.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
 import payoutRoutes from './routes/payout.routes.js';
+import reportRoutes from './routes/report.routes.js';
+import {
+  globalLimiter,
+  authLimiter,
+  otpLimiter,
+  paymentLimiter,
+  webhookLimiter,
+} from './middleware/rateLimit.middleware.js';
 
 // ── Socket.io Live Chat Room Handlers ──
 io.on('connection', (socket) => {
@@ -212,6 +270,20 @@ app.get('/api/info', (_req, res) => {
   });
 });
 
+// ── Rate Limiting (ต้องมาก่อน route ทั้งหมด) ──
+app.use('/api', globalLimiter);
+
+// เส้นทางที่เป็นเป้าหมายการโจมตีแบบเดาซ้ำ — จำกัดเข้มเป็นพิเศษ
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/login-otp', authLimiter);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/verify-otp', authLimiter);
+app.use('/api/auth/send-otp', otpLimiter);
+app.use('/api/user/verify-email/request-otp', otpLimiter);
+app.use('/api/user/verify-phone/request-otp', otpLimiter);
+app.use('/api/payment/webhook', webhookLimiter);
+app.use('/api/payment', paymentLimiter);
+
 // ── Register REST API Routers ──
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
@@ -230,6 +302,7 @@ app.use('/api/lens', lensRoutes);
 app.use('/api/logistics', logisticsRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/payout', payoutRoutes);
+app.use('/api/reports', reportRoutes);
 
 const PORT = Number(process.env.PORT) || 4000;
 

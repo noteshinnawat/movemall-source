@@ -2,6 +2,16 @@ import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { prismaRead, prismaWrite } from '../config/database.js';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.middleware.js';
+import { issueEmailOtp, verifyEmailOtp } from '../services/emailOtp.service.js';
+import { ThaiBulkSmsService } from '../services/sms.service.js';
+import { IS_PRODUCTION } from '../config/env.js';
+import { revokeAllUserTokens } from '../services/tokenRevocation.service.js';
+
+/** ให้เหรียญโบนัสได้ครั้งเดียวต่อบัญชีต่อประเภทรางวัล — กันการฟาร์มเหรียญด้วยการยืนยันซ้ำ */
+async function hasClaimedReward(userId: string, source: string): Promise<boolean> {
+  const existing = await prismaRead.coinLedger.findFirst({ where: { userId, source } });
+  return Boolean(existing);
+}
 import { LineService } from '../services/line.service.js';
 
 const router = Router();
@@ -56,14 +66,15 @@ router.put('/profile', authenticateJWT, async (req: AuthRequest, res: Response) 
       return;
     }
 
-    const { name, avatarUrl, email, phone } = req.body;
+    const { name, avatarUrl } = req.body;
 
+    // ⚠️ email และ phone ถูกตัดออกจาก endpoint นี้โดยเจตนา
+    // เดิมผู้ใช้แก้อีเมลตัวเองเป็นอีเมลใดก็ได้ ทำให้ยึดบัญชีคนอื่นและเลื่อนขั้นเป็นแอดมินได้
+    // การเปลี่ยนอีเมล/เบอร์ต้องผ่านการยืนยัน OTP ที่ /verify-email และ /verify-phone เท่านั้น
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {};
     if (name !== undefined) updateData.name = name;
     if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
-    if (email !== undefined) updateData.email = email;
-    if (phone !== undefined) updateData.phone = phone;
 
     const user = await prismaWrite.user.update({
       where: { id: userId },
@@ -98,11 +109,25 @@ router.post('/verify-email/request-otp', authenticateJWT, async (req: AuthReques
       return;
     }
 
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const userId = req.user!.userId;
+
+    // อีเมลต้องยังไม่ถูกใช้โดยบัญชีอื่น มิฉะนั้นจะกลายเป็นช่องยึดบัญชีข้ามคน
+    const taken = await prismaRead.user.findFirst({
+      where: { email: String(email).trim().toLowerCase(), NOT: { id: userId } },
+      select: { id: true },
+    });
+    if (taken) {
+      res.status(409).json({ error: 'อีเมลนี้ถูกใช้งานโดยบัญชีอื่นแล้ว' });
+      return;
+    }
+
+    const { code } = issueEmailOtp(userId, email);
+    // TODO: ส่งอีเมลจริงผ่านผู้ให้บริการ (SES / Resend / SendGrid)
+    console.log(`[Email OTP] ${email} → ${code}`);
 
     res.json({
       message: `OTP sent to ${email}`,
-      otpDemo: otpCode, // For demo & testing
+      ...(IS_PRODUCTION ? {} : { otpDemo: code }),
     });
   } catch (error) {
     console.error('Request Email OTP Error:', error);
@@ -120,25 +145,43 @@ router.post('/verify-email/verify', authenticateJWT, async (req: AuthRequest, re
       return;
     }
 
-    // Award 50 Movemall Coins bonus on email verification
+    // ตรวจรหัส OTP จริง — เดิมรับ otp มาแล้วไม่เคยนำไปเทียบกับอะไรเลย
+    const result = verifyEmailOtp(userId, email, String(otp));
+    if (!result.success) {
+      res.status(400).json({ error: result.message });
+      return;
+    }
+
+    const taken = await prismaRead.user.findFirst({
+      where: { email: String(email).trim().toLowerCase(), NOT: { id: userId } },
+      select: { id: true },
+    });
+    if (taken) {
+      res.status(409).json({ error: 'อีเมลนี้ถูกใช้งานโดยบัญชีอื่นแล้ว' });
+      return;
+    }
+
+    // โบนัสให้ครั้งเดียวต่อบัญชี — เดิมยืนยันซ้ำกี่ครั้งก็ได้เหรียญเพิ่มทุกครั้ง
+    const alreadyRewarded = await hasClaimedReward(userId, 'email_verification_reward');
+
     const user = await prismaWrite.user.update({
       where: { id: userId },
       data: {
-        email,
-        coinsBalance: { increment: 50 },
+        email: String(email).trim().toLowerCase(),
+        ...(alreadyRewarded ? {} : { coinsBalance: { increment: 50 } }),
       },
     });
 
-    await prismaWrite.coinLedger.create({
-      data: {
-        userId,
-        amount: 50,
-        source: 'email_verification_reward',
-      },
-    });
+    if (!alreadyRewarded) {
+      await prismaWrite.coinLedger.create({
+        data: { userId, amount: 50, source: 'email_verification_reward' },
+      });
+    }
 
     res.json({
-      message: 'Email verified successfully! You received 50 Movemall Coins!',
+      message: alreadyRewarded
+        ? 'ยืนยันอีเมลสำเร็จ'
+        : 'Email verified successfully! You received 50 Movemall Coins!',
       coinsBalance: user.coinsBalance,
       isEmailVerified: true,
     });
@@ -157,11 +200,29 @@ router.post('/verify-phone/request-otp', authenticateJWT, async (req: AuthReques
       return;
     }
 
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const userId = req.user!.userId;
+    const cleanPhone = ThaiBulkSmsService.sanitizePhone(phone);
+
+    const taken = await prismaRead.user.findFirst({
+      where: { phone: cleanPhone, NOT: { id: userId } },
+      select: { id: true },
+    });
+    if (taken) {
+      res.status(409).json({ error: 'เบอร์โทรศัพท์นี้ถูกใช้งานโดยบัญชีอื่นแล้ว' });
+      return;
+    }
+
+    // ใช้บริการส่ง OTP จริงที่มี otpStore กำกับ แทนการสุ่มเลขทิ้งไว้เฉย ๆ
+    const smsResult = await ThaiBulkSmsService.sendOtp(cleanPhone);
+    if (!smsResult.success) {
+      res.status(400).json({ error: smsResult.message });
+      return;
+    }
 
     res.json({
-      message: `SMS OTP sent to ${phone}`,
-      otpDemo: otpCode,
+      message: smsResult.message,
+      refno: smsResult.refno,
+      ...(IS_PRODUCTION ? {} : { otpDemo: smsResult.otpDemo }),
     });
   } catch (error) {
     console.error('Request Phone OTP Error:', error);
@@ -179,24 +240,43 @@ router.post('/verify-phone/verify', authenticateJWT, async (req: AuthRequest, re
       return;
     }
 
+    // ตรวจรหัส OTP จริง — เดิมรับ otp มาแล้วไม่เคยนำไปเทียบ
+    const cleanPhone = ThaiBulkSmsService.sanitizePhone(phone);
+    const verifyResult = await ThaiBulkSmsService.verifyOtp(cleanPhone, String(otp));
+    if (!verifyResult.success) {
+      res.status(400).json({ error: verifyResult.message });
+      return;
+    }
+
+    const taken = await prismaRead.user.findFirst({
+      where: { phone: cleanPhone, NOT: { id: userId } },
+      select: { id: true },
+    });
+    if (taken) {
+      res.status(409).json({ error: 'เบอร์โทรศัพท์นี้ถูกใช้งานโดยบัญชีอื่นแล้ว' });
+      return;
+    }
+
+    const alreadyRewarded = await hasClaimedReward(userId, 'phone_verification_reward');
+
     const user = await prismaWrite.user.update({
       where: { id: userId },
       data: {
-        phone,
-        coinsBalance: { increment: 50 },
+        phone: cleanPhone,
+        ...(alreadyRewarded ? {} : { coinsBalance: { increment: 50 } }),
       },
     });
 
-    await prismaWrite.coinLedger.create({
-      data: {
-        userId,
-        amount: 50,
-        source: 'phone_verification_reward',
-      },
-    });
+    if (!alreadyRewarded) {
+      await prismaWrite.coinLedger.create({
+        data: { userId, amount: 50, source: 'phone_verification_reward' },
+      });
+    }
 
     res.json({
-      message: 'Phone number verified successfully! You received 50 Movemall Coins!',
+      message: alreadyRewarded
+        ? 'ยืนยันเบอร์โทรศัพท์สำเร็จ'
+        : 'Phone number verified successfully! You received 50 Movemall Coins!',
       coinsBalance: user.coinsBalance,
       isPhoneVerified: true,
     });
@@ -229,13 +309,22 @@ router.put('/change-password', authenticateJWT, async (req: AuthRequest, res: Re
       return;
     }
 
+    if (String(newPassword).length < 8) {
+      res.status(400).json({ error: 'รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร' });
+      return;
+    }
+
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
     await prismaWrite.user.update({
       where: { id: userId },
       data: { passwordHash: newPasswordHash },
     });
 
-    res.json({ message: 'Password updated successfully' });
+    // เปลี่ยนรหัสผ่านแล้วต้องเตะ session เดิมออกทั้งหมด
+    // มิฉะนั้นผู้ที่ขโมย token ไปก่อนหน้ายังใช้บัญชีต่อได้แม้เจ้าของจะเปลี่ยนรหัสแล้ว
+    await revokeAllUserTokens(userId);
+
+    res.json({ message: 'Password updated successfully', sessionsRevoked: true });
   } catch (error) {
     console.error('Change Password Error:', error);
     res.status(500).json({ error: 'Failed to update password' });

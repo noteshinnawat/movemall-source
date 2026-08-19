@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { prismaRead, prismaWrite } from '../config/database.js';
+import { JWT_SECRET } from '../config/env.js';
 import { getCachedOrFetch, redis } from '../config/redis.js';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'movemall_super_secure_jwt_secret_key_2026_at_least_32_chars!';
 
 // ── 1. Get List of Stores / Brands ──
 router.get('/', async (req: Request, res: Response) => {
