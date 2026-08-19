@@ -1,19 +1,32 @@
 import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { prismaWrite, prismaRead } from '../config/database.js';
+import { JWT_SECRET, JWT_EXPIRES_IN, GOOGLE_CLIENT_ID, SUPER_ADMIN_EMAILS, IS_PRODUCTION } from '../config/env.js';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.middleware.js';
 import { LineService } from '../services/line.service.js';
 import { ThaiBulkSmsService } from '../services/sms.service.js';
+import { revokeToken, revokeAllUserTokens } from '../services/tokenRevocation.service.js';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'movemall_super_secure_jwt_secret_key_2026_at_least_32_chars!';
 
-export const SUPER_ADMIN_EMAILS = [
-  'note.shinnawat@gmail.com',
-  'admin@movemall.com',
-];
+/**
+ * สร้าง access token พร้อม `jti` (token id)
+ * jti จำเป็นสำหรับการเพิกถอน token รายใบตอนผู้ใช้ออกจากระบบ
+ */
+function signAccessToken(user: { id: string; email: string | null; role: string }): string {
+  return jwt.sign(
+    { userId: user.id, email: user.email, role: user.role },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN, jwtid: crypto.randomUUID() }
+  );
+}
 
+// รายชื่ออีเมลผู้ดูแลระบบย้ายไปอยู่ใน environment variable แล้ว (SUPER_ADMIN_EMAILS)
+// ⚠️ ฟังก์ชันนี้ใช้ "ตรวจสอบ" เท่านั้น ห้ามนำไปใช้เลื่อนขั้น role อัตโนมัติในเส้นทางล็อกอินเด็ดขาด
+// เพราะอีเมลไม่ใช่หลักฐานยืนยันตัวตนที่เพียงพอสำหรับสิทธิ์ระดับ SUPER_ADMIN
+// การตั้งแอดมินให้ทำผ่าน seed script เท่านั้น: npm run seed:admin -- <email>
 export function isSuperAdminEmail(email?: string | null): boolean {
   if (!email) return false;
   return SUPER_ADMIN_EMAILS.includes(email.trim().toLowerCase());
@@ -39,9 +52,11 @@ router.post('/send-otp', async (req: AuthRequest, res: Response) => {
       }
 
       const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      // ⚠️ ห้ามส่งรหัส OTP กลับไปใน response บน production เด็ดขาด
+      // เพราะเท่ากับข้ามการพิสูจน์ว่าผู้สมัครเป็นเจ้าของอีเมล/เบอร์นั้นจริง
       res.json({
         message: `ส่งรหัส OTP ไปยังอีเมล ${target} เรียบร้อยแล้ว`,
-        otpDemo: otpCode,
+        ...(IS_PRODUCTION ? {} : { otpDemo: otpCode }),
         isRealSms: false,
       });
     } else {
@@ -61,7 +76,7 @@ router.post('/send-otp', async (req: AuthRequest, res: Response) => {
 
       res.json({
         message: smsResult.message,
-        otpDemo: smsResult.otpDemo,
+        ...(IS_PRODUCTION ? {} : { otpDemo: smsResult.otpDemo }),
         refno: smsResult.refno,
         isRealSms: smsResult.isRealSms,
       });
@@ -122,11 +137,11 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    let userRole = role === 'SELLER' || role === 'CREATOR' ? role : 'BUYER';
-    if (isSuperAdminEmail(email)) {
-      userRole = 'SUPER_ADMIN';
-    }
-    
+    // สมัครสมาชิกได้เฉพาะ role ระดับผู้ใช้ทั่วไปเท่านั้น
+    // ห้ามให้ role จาก request body หรือจากอีเมลกำหนดสิทธิ์แอดมินได้ (privilege escalation)
+    const userRole = role === 'SELLER' || role === 'CREATOR' ? role : 'BUYER';
+
+
     // Welcome bonus: 100 coins for buyers (+50 extra coins if referral code is provided)
     const hasReferral = Boolean(referralCode && String(referralCode).trim().length >= 4);
     const initialCoins = userRole === 'BUYER' ? (hasReferral ? 150 : 100) : 0;
@@ -189,11 +204,7 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
       console.warn('Welcome notification warning:', notifErr);
     }
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = signAccessToken(user);
 
     res.status(201).json({
       message: 'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับสู่ Movemall',
@@ -221,28 +232,13 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    let user = email
+    const user = email
       ? await prismaRead.user.findUnique({ where: { email } })
       : await prismaRead.user.findUnique({ where: { phone } });
 
-    // If Super Admin is logging in but record is not in DB yet, auto-provision instantly
-    if (!user && email && isSuperAdminEmail(email)) {
-      const passwordHash = await bcrypt.hash(password || 'movemall1234', 10);
-      const isNote = email.toLowerCase() === 'note.shinnawat@gmail.com';
-      user = await prismaWrite.user.upsert({
-        where: { email },
-        update: { role: 'SUPER_ADMIN' },
-        create: {
-          email,
-          phone: isNote ? '0810000000' : '0810000001',
-          passwordHash,
-          name: isNote ? 'Note Shinnawat (Super Admin)' : 'Movemall Administrator',
-          role: 'SUPER_ADMIN',
-          coinsBalance: 99999,
-          avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
-        },
-      });
-    }
+    // หมายเหตุด้านความปลอดภัย: เดิมโค้ดตรงนี้สร้างบัญชี SUPER_ADMIN ให้อัตโนมัติ
+    // ด้วยรหัสผ่านที่ผู้เรียกส่งมาเอง หากอีเมลอยู่ใน whitelist แต่ยังไม่มีในฐานข้อมูล
+    // = ใครก็ยึดสิทธิ์แอดมินได้ จึงถูกถอดออก ให้ตั้งแอดมินผ่าน seed script เท่านั้น
 
     if (!user) {
       res.status(401).json({ error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
@@ -255,19 +251,10 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    // Auto-grant SUPER_ADMIN if email is configured in super admin whitelist
-    if (isSuperAdminEmail(user.email) && user.role !== 'SUPER_ADMIN') {
-      user = await prismaWrite.user.update({
-        where: { id: user.id },
-        data: { role: 'SUPER_ADMIN' },
-      });
-    }
+    // ถอดการเลื่อนขั้นเป็น SUPER_ADMIN อัตโนมัติตามอีเมลออก
+    // role ต้องมาจากฐานข้อมูลที่ถูกกำหนดไว้อย่างตั้งใจเท่านั้น
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = signAccessToken(user);
 
     res.json({
       message: 'เข้าสู่ระบบสำเร็จ',
@@ -342,11 +329,7 @@ router.post('/login-otp', async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = signAccessToken(user);
 
     res.json({
       message: isNewUser ? 'สมัครสมาชิกและเข้าสู่ระบบสำเร็จ' : 'เข้าสู่ระบบสำเร็จ',
@@ -380,26 +363,53 @@ router.post(['/google', '/google/callback'], async (req: AuthRequest, res: Respo
       avatarUrl?: string;
     } | null = null;
 
-    // 1. ตรวจสอบผ่าน Google OAuth2 Access Token (Userinfo Endpoint)
+    // ── ตรวจว่า token ถูกออกให้แอปของเราจริง (ป้องกัน confused deputy) ──
+    // token ที่ Google ออกให้แอปอื่นก็เรียก userinfo ได้เหมือนกัน ถ้าไม่ตรวจ aud
+    // ผู้โจมตีสามารถเอา token จากแอปตัวเองมาสวมรอยผู้ใช้ในระบบเราได้
+    function isAudienceValid(aud?: string, azp?: string): boolean {
+      if (!GOOGLE_CLIENT_ID) {
+        // ยังไม่ได้ตั้ง GOOGLE_CLIENT_ID: ปฏิเสธใน production, อนุญาตเฉพาะตอน dev
+        if (IS_PRODUCTION) return false;
+        console.warn('⚠️  ยังไม่ได้ตั้ง GOOGLE_CLIENT_ID จึงข้ามการตรวจ aud (dev only)');
+        return true;
+      }
+      return aud === GOOGLE_CLIENT_ID || azp === GOOGLE_CLIENT_ID;
+    }
+
+    // 1. ตรวจสอบผ่าน Google OAuth2 Access Token (Tokeninfo + Userinfo)
     if (accessToken) {
       try {
-        const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (userinfoRes.ok) {
-          const uInfo = await userinfoRes.json() as {
-            sub?: string;
-            email?: string;
-            name?: string;
-            picture?: string;
-          };
-          if (uInfo.sub && uInfo.email) {
-            googleData = {
-              googleId: uInfo.sub,
-              email: uInfo.email,
-              name: uInfo.name || uInfo.email.split('@')[0],
-              avatarUrl: uInfo.picture,
+        // 1.1 ตรวจ audience ของ access token ก่อนเสมอ
+        const introspectRes = await fetch(
+          `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`
+        );
+        const introspect = introspectRes.ok
+          ? (await introspectRes.json() as { aud?: string; azp?: string; expires_in?: string })
+          : null;
+
+        if (!introspect || !isAudienceValid(introspect.aud, introspect.azp)) {
+          console.warn('Google AccessToken ถูกปฏิเสธ: audience ไม่ตรงกับ GOOGLE_CLIENT_ID');
+        } else {
+          const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+          if (userinfoRes.ok) {
+            const uInfo = await userinfoRes.json() as {
+              sub?: string;
+              email?: string;
+              email_verified?: boolean | string;
+              name?: string;
+              picture?: string;
             };
+            const emailVerified = uInfo.email_verified === true || uInfo.email_verified === 'true';
+            if (uInfo.sub && uInfo.email && emailVerified) {
+              googleData = {
+                googleId: uInfo.sub,
+                email: uInfo.email,
+                name: uInfo.name || uInfo.email.split('@')[0],
+                avatarUrl: uInfo.picture,
+              };
+            }
           }
         }
       } catch (tokenErr) {
@@ -415,17 +425,26 @@ router.post(['/google', '/google/callback'], async (req: AuthRequest, res: Respo
           const payload = await verifyRes.json() as {
             sub?: string;
             email?: string;
+            email_verified?: boolean | string;
+            aud?: string;
+            azp?: string;
+            iss?: string;
             name?: string;
             picture?: string;
           };
 
-          if (payload.sub && payload.email) {
+          const issuerValid = payload.iss === 'accounts.google.com' || payload.iss === 'https://accounts.google.com';
+          const emailVerified = payload.email_verified === true || payload.email_verified === 'true';
+
+          if (payload.sub && payload.email && emailVerified && issuerValid && isAudienceValid(payload.aud, payload.azp)) {
             googleData = {
               googleId: payload.sub,
               email: payload.email,
               name: payload.name || payload.email.split('@')[0],
               avatarUrl: payload.picture,
             };
+          } else {
+            console.warn('Google ID Token ถูกปฏิเสธ: aud/iss/email_verified ไม่ผ่านการตรวจสอบ');
           }
         }
       } catch (verifyErr) {
@@ -433,18 +452,15 @@ router.post(['/google', '/google/callback'], async (req: AuthRequest, res: Respo
       }
     }
 
-    // 3. ข้อมูลผู้ใช้ตรงจาก Google Client ที่ผ่านการยืนยัน
-    if (!googleData && googleUser?.email && googleUser?.googleId) {
-      googleData = {
-        googleId: googleUser.googleId,
-        email: googleUser.email,
-        name: googleUser.name || googleUser.email.split('@')[0],
-        avatarUrl: googleUser.avatarUrl,
-      };
-    }
+    // 3. ⛔ ถอดออกด้วยเหตุผลด้านความปลอดภัย:
+    //    เดิมยอมรับ `googleUser` (อีเมล + googleId) ที่ส่งมาจาก client ตรงๆ โดยไม่ verify
+    //    ทำให้ปลอมเป็นเจ้าของอีเมลใดก็ได้ รวมถึงบัญชีผู้ดูแลระบบ
+    //    โฟลว์จริงของ frontend ส่ง accessToken มาคู่กันเสมอ (src/utils/googleAuth.ts)
+    //    จึงตัดทิ้งได้โดยไม่กระทบผู้ใช้
 
-    // 4. Dev / Sandbox Fallback (กรณีไม่มี Client ID และทดสอบ Localhost)
-    if (!googleData && mockUser) {
+    // 4. Dev / Sandbox Fallback — เปิดใช้เฉพาะนอก production เท่านั้น
+    if (!googleData && mockUser && !IS_PRODUCTION) {
+      console.warn('⚠️  Google mockUser fallback ถูกใช้งาน (dev only)');
       googleData = {
         googleId: mockUser.googleId || `goog_${Date.now()}`,
         email: mockUser.email || `user_${Date.now()}@gmail.com`,
@@ -479,7 +495,8 @@ router.post(['/google', '/google/callback'], async (req: AuthRequest, res: Respo
 
       const randomPass = Math.random().toString(36).slice(-8) + 'Mm1!';
       const passwordHash = await bcrypt.hash(randomPass, 10);
-      const userRole = isSuperAdminEmail(googleData.email) ? 'SUPER_ADMIN' : 'BUYER';
+      // ผู้ใช้ที่สมัครผ่าน Google เริ่มต้นเป็น BUYER เสมอ ไม่เลื่อนขั้นตามอีเมล
+      const userRole = 'BUYER';
 
       user = await prismaWrite.user.create({
         data: {
@@ -521,9 +538,6 @@ router.post(['/google', '/google/callback'], async (req: AuthRequest, res: Respo
       if (googleData.name && (user.name.includes('Google') || user.name.includes('สมาชิก'))) {
         updatePayload.name = googleData.name;
       }
-      if (isSuperAdminEmail(googleData.email) && user.role !== 'SUPER_ADMIN') {
-        updatePayload.role = 'SUPER_ADMIN';
-      }
 
       if (Object.keys(updatePayload).length > 0) {
         user = await prismaWrite.user.update({
@@ -534,11 +548,7 @@ router.post(['/google', '/google/callback'], async (req: AuthRequest, res: Respo
     }
 
     // 6. สร้าง JWT Token ของ Movemall (อายุ 7 วัน)
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = signAccessToken(user);
 
     res.json({
       message: isNewUser ? 'สมัครสมาชิกด้วยบัญชี Google สำเร็จ' : 'เข้าสู่ระบบด้วยบัญชี Google สำเร็จ',
@@ -571,8 +581,12 @@ router.post('/line', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const channelId = process.env.LINE_LOGIN_CHANNEL_ID || '1656088534';
-    const channelSecret = process.env.LINE_LOGIN_CHANNEL_SECRET || '07bea9d436b9bc40e469e742abb321d8';
+    const channelId = process.env.LINE_LOGIN_CHANNEL_ID;
+    const channelSecret = process.env.LINE_LOGIN_CHANNEL_SECRET;
+    if (!channelId || !channelSecret) {
+      res.status(503).json({ error: 'ระบบเข้าสู่ระบบด้วย LINE ยังไม่ได้ตั้งค่า กรุณาติดต่อผู้ดูแลระบบ' });
+      return;
+    }
 
     // 1. Exchange Code for Access Token & ID Token with LINE Platform
     const tokenParams = new URLSearchParams();
@@ -649,7 +663,6 @@ router.post('/line', async (req: AuthRequest, res: Response) => {
     }
 
     const emailToUse = lineEmail || `line_${lineUserId || Date.now()}@line.me`;
-    const isSuper = isSuperAdminEmail(emailToUse);
 
     // 4. Find or Create User in PostgreSQL DB
     let user = await prismaRead.user.findFirst({
@@ -671,24 +684,23 @@ router.post('/line', async (req: AuthRequest, res: Response) => {
         data: {
           email: emailToUse,
           passwordHash,
-          name: isSuper ? 'Note Shinnawat (Super Admin)' : lineDisplayName,
+          name: lineDisplayName,
           avatarUrl: linePictureUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(lineDisplayName)}`,
-          role: isSuper ? 'SUPER_ADMIN' : 'BUYER',
-          coinsBalance: isSuper ? 99999 : 100,
+          role: 'BUYER',
+          coinsBalance: 100,
         },
       });
 
       await prismaWrite.coinLedger.create({
         data: {
           userId: user.id,
-          amount: isSuper ? 99999 : 100,
+          amount: 100,
           source: 'welcome_bonus_line_member',
         },
       });
     } else {
       // Update existing user with latest LINE avatar & name if needed
       const updateData: any = {};
-      if (isSuper && user.role !== 'SUPER_ADMIN') updateData.role = 'SUPER_ADMIN';
       if (linePictureUrl && !user.avatarUrl) updateData.avatarUrl = linePictureUrl;
 
       if (Object.keys(updateData).length > 0) {
@@ -699,11 +711,7 @@ router.post('/line', async (req: AuthRequest, res: Response) => {
       }
     }
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = signAccessToken(user);
 
     res.json({
       message: 'เข้าสู่ระบบผ่าน LINE สำเร็จ',
@@ -722,79 +730,6 @@ router.post('/line', async (req: AuthRequest, res: Response) => {
   } catch (error) {
     console.error('LINE Auth Error:', error);
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในการเชื่อมต่อกับ LINE' });
-  }
-});
-
-// ── 6. Social Login Generic (LINE / Facebook / อื่นๆ) ──
-router.post('/social-login', async (req: AuthRequest, res: Response) => {
-  try {
-    const { provider, email, name, avatarUrl } = req.body;
-
-    if (!provider || (!email && !name)) {
-      res.status(400).json({ error: 'ข้อมูลการยืนยันตัวตน Social ไม่ครบถ้วน' });
-      return;
-    }
-
-    const lookupEmail = email || `${provider}_${Date.now()}@movemall.social`;
-    let user = await prismaRead.user.findFirst({
-      where: {
-        OR: [
-          { email: lookupEmail },
-          { name: name }
-        ]
-      }
-    });
-
-    let isNewUser = false;
-
-    if (!user) {
-      isNewUser = true;
-      const randomPass = Math.random().toString(36).slice(-8) + 'Mm1!';
-      const passwordHash = await bcrypt.hash(randomPass, 10);
-
-      user = await prismaWrite.user.create({
-        data: {
-          email: lookupEmail,
-          passwordHash,
-          name: name || `สมาชิก ${provider.toUpperCase()}`,
-          avatarUrl: avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name || provider)}`,
-          role: 'BUYER',
-          coinsBalance: 100,
-        },
-      });
-
-      await prismaWrite.coinLedger.create({
-        data: {
-          userId: user.id,
-          amount: 100,
-          source: 'welcome_bonus_new_member',
-        },
-      });
-    }
-
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.json({
-      message: `เข้าสู่ระบบผ่าน ${provider.toUpperCase()} สำเร็จ`,
-      token,
-      isNewUser,
-      user: {
-        id: user.id,
-        email: user.email,
-        phone: user.phone,
-        name: user.name,
-        role: user.role,
-        avatarUrl: user.avatarUrl,
-        coinsBalance: user.coinsBalance,
-      },
-    });
-  } catch (error) {
-    console.error('Social Login Error:', error);
-    res.status(500).json({ error: 'ไม่สามารถเข้าสู่ระบบด้วย Social Login ได้' });
   }
 });
 
@@ -825,14 +760,6 @@ router.get('/me', authenticateJWT, async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    if (isSuperAdminEmail(user.email) && user.role !== 'SUPER_ADMIN') {
-      await prismaWrite.user.update({
-        where: { id: user.id },
-        data: { role: 'SUPER_ADMIN' },
-      });
-      user = { ...user, role: 'SUPER_ADMIN' as any };
-    }
-
     res.json({ user });
   } catch (error) {
     console.error('Get Me Error:', error);
@@ -840,73 +767,30 @@ router.get('/me', authenticateJWT, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// ── 7. LINE Login OAuth Code Exchange & Login/Register ──
-router.post('/line', async (req: AuthRequest, res: Response) => {
+// ── ออกจากระบบ (เพิกถอน token) ──
+// JWT ปกติจะใช้ได้จนหมดอายุแม้ผู้ใช้กด logout แล้ว
+// endpoint นี้จึงบันทึก token ใบนั้นลงบัญชีดำใน Redis เพื่อให้ใช้ต่อไม่ได้จริง
+router.post('/logout', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
-    const { code, redirectUri } = req.body;
-    if (!code) {
-      res.status(400).json({ error: 'LINE authorization code is required' });
-      return;
+    const { jti, exp } = req.tokenMeta ?? {};
+    if (jti && exp) {
+      await revokeToken(jti, exp);
     }
-
-    const lineProfile = await LineService.verifyLoginCode(code, redirectUri || 'https://movemall.pages.dev/auth/line/callback');
-    const dummyEmail = `line_${lineProfile.lineUserId.toLowerCase()}@movemall.internal`;
-
-    let user = await prismaRead.user.findFirst({
-      where: { email: dummyEmail },
-    });
-
-    let isNewUser = false;
-    if (!user) {
-      isNewUser = true;
-      const randomPassword = Math.random().toString(36).slice(-10) + 'Move!26';
-      const passwordHash = await bcrypt.hash(randomPassword, 10);
-
-      user = await prismaWrite.user.create({
-        data: {
-          email: dummyEmail,
-          passwordHash,
-          name: lineProfile.displayName || 'LINE Member',
-          avatarUrl: lineProfile.pictureUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(lineProfile.displayName)}`,
-          role: 'BUYER',
-          coinsBalance: 150, // 100 welcome + 50 line bonus
-        },
-      });
-
-      await prismaWrite.coinLedger.create({
-        data: {
-          userId: user.id,
-          amount: 150,
-          source: 'welcome_bonus_line_member',
-        },
-      });
-    }
-
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.json({
-      message: 'เข้าสู่ระบบด้วย LINE สำเร็จ',
-      token,
-      isNewUser,
-      user: {
-        id: user.id,
-        email: user.email,
-        phone: user.phone,
-        name: user.name,
-        role: user.role,
-        avatarUrl: user.avatarUrl,
-        coinsBalance: user.coinsBalance,
-        lineConnected: true,
-        lineProfile,
-      },
-    });
+    res.json({ message: 'ออกจากระบบเรียบร้อยแล้ว' });
   } catch (error) {
-    console.error('LINE OAuth Login Error:', error);
-    res.status(500).json({ error: 'ไม่สามารถเข้าสู่ระบบด้วย LINE ได้ กรุณาลองใหม่อีกครั้ง' });
+    console.error('Logout Error:', error);
+    res.status(500).json({ error: 'ไม่สามารถออกจากระบบได้' });
+  }
+});
+
+// ── ออกจากระบบทุกอุปกรณ์ ──
+router.post('/logout-all', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    await revokeAllUserTokens(req.user!.userId);
+    res.json({ message: 'ออกจากระบบทุกอุปกรณ์เรียบร้อยแล้ว' });
+  } catch (error) {
+    console.error('Logout All Error:', error);
+    res.status(500).json({ error: 'ไม่สามารถออกจากระบบทุกอุปกรณ์ได้' });
   }
 });
 
