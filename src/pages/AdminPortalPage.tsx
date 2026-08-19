@@ -48,7 +48,7 @@ import {
   ExternalLink,
   ChevronRight
 } from 'lucide-react';
-import { fetchApi } from '../utils/api';
+import { fetchApi, logoutApi } from '../utils/api';
 import { promptGoogleAuth } from '../utils/googleAuth';
 import { scanProductCompliance, batchScanProductsCompliance, type AIComplianceResult } from '../utils/aiComplianceScanner';
 import type { Product, ModeratedUser, ModeratedStore, ViolationReport, UserStatusType, StoreStatusType } from '../types';
@@ -379,15 +379,13 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
   }
 
   function handleAdminLogout() {
-    localStorage.removeItem('movemall_jwt_token');
-    localStorage.removeItem('movemall_user');
+    logoutApi(); // เพิกถอน token ฝั่งเซิร์ฟเวอร์ด้วย ไม่ใช่แค่ลบทิ้งฝั่ง client
     setCurrentUser(null);
     window.dispatchEvent(new Event('movemall_auth_change'));
   }
 
   function handleSwitchAccount() {
-    localStorage.removeItem('movemall_jwt_token');
-    localStorage.removeItem('movemall_user');
+    logoutApi(); // เพิกถอน token ฝั่งเซิร์ฟเวอร์ด้วย ไม่ใช่แค่ลบทิ้งฝั่ง client
     setCurrentUser(null);
     window.dispatchEvent(new Event('movemall_auth_change'));
     navigate('/login?redirect=/admin');

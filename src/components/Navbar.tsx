@@ -17,7 +17,7 @@ import {
   Camera,
   LogOut,
 } from 'lucide-react';
-import { fetchUnreadNotificationCount } from '../utils/api';
+import { fetchUnreadNotificationCount, logoutApi } from '../utils/api';
 import './Navbar.css';
 
 interface NavbarProps {
@@ -139,8 +139,7 @@ export function Navbar({
   }, []);
 
   function handleLogout() {
-    localStorage.removeItem('movemall_jwt_token');
-    localStorage.removeItem('movemall_user');
+    logoutApi(); // เพิกถอน token ฝั่งเซิร์ฟเวอร์ด้วย ไม่ใช่แค่ลบทิ้งฝั่ง client
     setCurrentUser(null);
     window.dispatchEvent(new Event('movemall_auth_change'));
     navigate('/login');
