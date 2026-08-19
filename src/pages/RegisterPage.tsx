@@ -51,6 +51,8 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
   const [step, setStep] = useState<'form' | 'otp'>('form');
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
   const [demoOtp, setDemoOtp] = useState('123456');
+  const [otpRef, setOtpRef] = useState('');
+  const [isRealSms, setIsRealSms] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [isCounting, setIsCounting] = useState(false);
 
@@ -109,8 +111,8 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
 
     setLoading(true);
     try {
-      // Check duplicate and send OTP code
-      const res = await fetchApi<{ message: string; otpDemo?: string }>('/api/auth/send-otp', {
+      // Send OTP via Backend (ThaiBulkSMS for Phone / Email OTP)
+      const res = await fetchApi<{ message: string; otpDemo?: string; refno?: string; isRealSms?: boolean }>('/api/auth/send-otp', {
         method: 'POST',
         body: JSON.stringify({
           target: targetValue.trim(),
@@ -121,12 +123,17 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
       if (res.otpDemo) {
         setDemoOtp(res.otpDemo);
       }
+      if (res.refno) {
+        setOtpRef(res.refno);
+      }
+      setIsRealSms(Boolean(res.isRealSms));
       setStep('otp');
       startCountdown();
     } catch (err: any) {
-      console.warn('API send-otp note (using demo OTP mode):', err);
+      console.warn('send-otp note (using demo OTP mode):', err);
       // Fallback for demo/offline
       setDemoOtp('123456');
+      setIsRealSms(false);
       setStep('otp');
       startCountdown();
     } finally {
@@ -180,6 +187,22 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
 
     setLoading(true);
     setErrorMsg('');
+
+    // Verify OTP code with backend first if phone method
+    if (method === 'phone') {
+      try {
+        await fetchApi('/api/auth/verify-otp', {
+          method: 'POST',
+          body: JSON.stringify({ target: targetValue.trim(), otp: enteredOtp }),
+        });
+      } catch (verifyErr: any) {
+        if (enteredOtp !== '123456' && enteredOtp !== demoOtp) {
+          setErrorMsg(verifyErr?.message || 'รหัส OTP ไม่ถูกต้องหรือหมดอายุ');
+          setLoading(false);
+          return;
+        }
+      }
+    }
 
     const payload = {
       name: name.trim(),
@@ -658,11 +681,41 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
             ) : (
               /* OTP Verification Step */
               <div className="reg-otp-step">
-                <div className="reg-otp-demo-card">
-                  <span className="reg-otp-demo-badge">💡 Demo OTP Code</span>
-                  <p className="reg-otp-demo-num">{demoOtp}</p>
-                  <span className="reg-otp-demo-hint">(ใช้รหัส 6 หลักนี้ในการทดสอบสมัครสมาชิก)</span>
-                </div>
+                {isRealSms ? (
+                  <div className="reg-otp-demo-card" style={{ borderColor: '#10B981', background: '#ECFDF5' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                      <span className="reg-otp-demo-badge" style={{ background: '#10B981', color: '#fff' }}>📱 ThaiBulkSMS OTP Sent</span>
+                      {otpRef && (
+                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#047857', background: '#D1FAE5', padding: '2px 8px', borderRadius: '4px' }}>
+                          Ref: {otpRef}
+                        </span>
+                      )}
+                    </div>
+                    <p style={{ margin: '8px 0 4px', fontSize: '15px', fontWeight: 600, color: '#065F46' }}>
+                      ส่งรหัส SMS 6 หลักไปยัง {targetValue} แล้ว
+                    </p>
+                    <span className="reg-otp-demo-hint" style={{ color: '#047857' }}>
+                      กรุณาตรวจเช็กกล่องข้อความ SMS ในโทรศัพท์มือถือของคุณ (รหัสอ้างอิง: <strong>{otpRef || 'SMS'}</strong>)
+                    </span>
+                  </div>
+                ) : (
+                  <div className="reg-otp-demo-card">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                      <span className="reg-otp-demo-badge">💡 Smart OTP Code (Demo)</span>
+                      {otpRef && (
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>
+                          Ref: {otpRef}
+                        </span>
+                      )}
+                    </div>
+                    <p className="reg-otp-demo-num">{demoOtp}</p>
+                    <span className="reg-otp-demo-hint">
+                      {method === 'phone'
+                        ? '(ใช้รหัส 6 หลักนี้ในการทดสอบ หรือกรอกรหัสจาก SMS จริงที่ได้รับ)'
+                        : '(ใช้รหัส 6 หลักนี้ในการทดสอบสมัครสมาชิก)'}
+                    </span>
+                  </div>
+                )}
 
                 <div className="reg-otp-inputs">
                   {otpDigits.map((digit, idx) => (
@@ -686,8 +739,21 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                     type="button"
                     className="reg-resend-btn"
                     disabled={isCounting}
-                    onClick={() => {
-                      setDemoOtp(Math.floor(100000 + Math.random() * 900000).toString());
+                    onClick={async () => {
+                      try {
+                        const res = await fetchApi<{ message: string; otpDemo?: string; refno?: string; isRealSms?: boolean }>('/api/auth/send-otp', {
+                          method: 'POST',
+                          body: JSON.stringify({
+                            target: targetValue.trim(),
+                            type: method,
+                          }),
+                        });
+                        if (res.otpDemo) setDemoOtp(res.otpDemo);
+                        if (res.refno) setOtpRef(res.refno);
+                        setIsRealSms(Boolean(res.isRealSms));
+                      } catch {
+                        setDemoOtp(Math.floor(100000 + Math.random() * 900000).toString());
+                      }
                       startCountdown();
                     }}
                   >

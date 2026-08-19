@@ -29,6 +29,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [otpPhone, setOtpPhone] = useState('');
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
   const [demoOtp, setDemoOtp] = useState('123456');
+  const [isRealSms, setIsRealSms] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [isCounting, setIsCounting] = useState(false);
@@ -145,16 +146,18 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     setLoading(true);
 
     try {
-      const res = await fetchApi<{ message: string; otpDemo?: string }>('/api/auth/send-otp', {
+      const res = await fetchApi<{ message: string; otpDemo?: string; isRealSms?: boolean }>('/api/auth/send-otp', {
         method: 'POST',
         body: JSON.stringify({ target: otpPhone.trim(), type: 'phone' }),
       });
       if (res.otpDemo) setDemoOtp(res.otpDemo);
+      setIsRealSms(Boolean(res.isRealSms));
       setOtpSent(true);
       startOtpCountdown();
-    } catch (err) {
+    } catch (err: any) {
       // Demo fallback
       setDemoOtp('123456');
+      setIsRealSms(false);
       setOtpSent(true);
       startOtpCountdown();
     } finally {
@@ -185,9 +188,8 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
       onLoginSuccess?.(res.user?.name || `ผู้ใช้ ${otpPhone.slice(-4)}`, role);
       navigate(getRedirectTarget(res.user?.role));
-    } catch (err) {
-      onLoginSuccess?.(`ผู้ใช้ ${otpPhone.slice(-4)}`, role);
-      navigate(getRedirectTarget());
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'รหัส OTP ไม่ถูกต้องหรือหมดอายุ');
     } finally {
       setLoading(false);
     }
@@ -405,9 +407,15 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
               </form>
             ) : (
               <div className="auth-otp-confirm">
-                <div className="auth-otp-demo-tag">
-                  💡 รหัสทดสอบ OTP Demo: <strong>{demoOtp}</strong>
-                </div>
+                {isRealSms ? (
+                  <div className="auth-otp-demo-tag" style={{ background: '#ECFDF5', color: '#065F46', borderColor: '#10B981' }}>
+                    📱 ส่งรหัส SMS OTP จริงไปยังเบอร์ {otpPhone} แล้ว กรุณาตรวจเช็ก SMS
+                  </div>
+                ) : (
+                  <div className="auth-otp-demo-tag">
+                    💡 รหัสทดสอบ OTP Demo: <strong>{demoOtp}</strong>
+                  </div>
+                )}
 
                 <p className="auth-otp-hint">กรอกรหัส OTP 6 หลักที่ส่งไปยัง {otpPhone}</p>
 
@@ -445,8 +453,17 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                     type="button"
                     className="auth-resend-link"
                     disabled={isCounting}
-                    onClick={() => {
-                      setDemoOtp(Math.floor(100000 + Math.random() * 900000).toString());
+                    onClick={async () => {
+                      try {
+                        const res = await fetchApi<{ message: string; otpDemo?: string; isRealSms?: boolean }>('/api/auth/send-otp', {
+                          method: 'POST',
+                          body: JSON.stringify({ target: otpPhone.trim(), type: 'phone' }),
+                        });
+                        if (res.otpDemo) setDemoOtp(res.otpDemo);
+                        setIsRealSms(Boolean(res.isRealSms));
+                      } catch {
+                        setDemoOtp(Math.floor(100000 + Math.random() * 900000).toString());
+                      }
                       startOtpCountdown();
                     }}
                   >

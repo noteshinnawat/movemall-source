@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { prismaWrite, prismaRead } from '../config/database.js';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.middleware.js';
 import { LineService } from '../services/line.service.js';
+import { ThaiBulkSmsService } from '../services/sms.service.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'movemall_super_secure_jwt_secret_key_2026_at_least_32_chars!';
@@ -18,39 +19,78 @@ export function isSuperAdminEmail(email?: string | null): boolean {
   return SUPER_ADMIN_EMAILS.includes(email.trim().toLowerCase());
 }
 
-// ── 1. Send Registration OTP (SMS/Email) ──
+// ── 1. Send Registration OTP (SMS via ThaiBulkSMS / Email) ──
 router.post('/send-otp', async (req: AuthRequest, res: Response) => {
   try {
     const { target, type } = req.body; // target: email or phone, type: 'email' | 'phone'
     if (!target) {
-      res.status(400).json({ error: 'Email or phone number is required' });
+      res.status(400).json({ error: 'กรุณาระบุอีเมลหรือเบอร์โทรศัพท์' });
       return;
     }
 
+    const isEmail = type === 'email' || target.includes('@');
+
     // Check if already registered
-    if (type === 'email' || target.includes('@')) {
+    if (isEmail) {
       const existing = await prismaRead.user.findUnique({ where: { email: target } });
       if (existing) {
         res.status(409).json({ error: 'อีเมลนี้ถูกลงทะเบียนใช้งานแล้ว' });
         return;
       }
+
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      res.json({
+        message: `ส่งรหัส OTP ไปยังอีเมล ${target} เรียบร้อยแล้ว`,
+        otpDemo: otpCode,
+        isRealSms: false,
+      });
     } else {
-      const existing = await prismaRead.user.findUnique({ where: { phone: target } });
+      const cleanPhone = ThaiBulkSmsService.sanitizePhone(target);
+      const existing = await prismaRead.user.findUnique({ where: { phone: cleanPhone } });
       if (existing) {
         res.status(409).json({ error: 'เบอร์โทรศัพท์นี้ถูกลงทะเบียนใช้งานแล้ว' });
         return;
       }
+
+      // Send OTP via ThaiBulkSMS
+      const smsResult = await ThaiBulkSmsService.sendOtp(cleanPhone);
+      if (!smsResult.success) {
+        res.status(400).json({ error: smsResult.message });
+        return;
+      }
+
+      res.json({
+        message: smsResult.message,
+        otpDemo: smsResult.otpDemo,
+        refno: smsResult.refno,
+        isRealSms: smsResult.isRealSms,
+      });
     }
-
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-    res.json({
-      message: `ส่งรหัส OTP ไปยัง ${target} เรียบร้อยแล้ว`,
-      otpDemo: otpCode,
-    });
   } catch (error) {
     console.error('Send Registration OTP Error:', error);
     res.status(500).json({ error: 'ไม่สามารถส่งรหัส OTP ได้ในขณะนี้' });
+  }
+});
+
+// ── 1.1 Verify OTP Code ──
+router.post('/verify-otp', async (req: AuthRequest, res: Response) => {
+  try {
+    const { target, otp } = req.body;
+    if (!target || !otp) {
+      res.status(400).json({ error: 'กรุณาระบุเบอร์โทรศัพท์และรหัส OTP' });
+      return;
+    }
+
+    const verifyResult = await ThaiBulkSmsService.verifyOtp(target, otp);
+    if (!verifyResult.success) {
+      res.status(400).json({ error: verifyResult.message });
+      return;
+    }
+
+    res.json({ success: true, message: verifyResult.message });
+  } catch (error) {
+    console.error('Verify OTP Error:', error);
+    res.status(500).json({ error: 'ตรวจสอบรหัส OTP ล้มเหลว' });
   }
 });
 
@@ -259,6 +299,15 @@ router.post('/login-otp', async (req: AuthRequest, res: Response) => {
     }
 
     const isEmail = target.includes('@');
+
+    // Verify OTP for phone login
+    if (!isEmail) {
+      const verifyResult = await ThaiBulkSmsService.verifyOtp(target, otp);
+      if (!verifyResult.success) {
+        res.status(400).json({ error: verifyResult.message });
+        return;
+      }
+    }
     let user = isEmail
       ? await prismaRead.user.findUnique({ where: { email: target } })
       : await prismaRead.user.findUnique({ where: { phone: target } });
