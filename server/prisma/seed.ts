@@ -66,19 +66,7 @@ async function main() {
     },
   });
 
-  const demoBuyer = await prisma.user.upsert({
-    where: { email: 'buyer@demo.com' },
-    update: {},
-    create: {
-      email: 'buyer@demo.com',
-      phone: '0899999999',
-      passwordHash,
-      name: 'สมชาย นักช้อป',
-      role: 'BUYER',
-      coinsBalance: 500,
-      avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80',
-    },
-  });
+  // ❌ Removed: demoBuyer (buyer@demo.com) — ไม่ seed บัญชีผู้ซื้อ mock อีกต่อไป
 
   // 2. Create Stores (8 Category Stores)
   const storesToSeed = [
@@ -332,55 +320,11 @@ async function main() {
   }
   console.log(`✅ Seeded ${liveSessions.length} Live Sessions`);
 
-  // 6. Seed Sample Product Reviews
-  const sampleReviews = [
-    {
-      id: 'rev-seed-1',
-      userId: demoBuyer.id,
-      productId: 'el-1',
-      rating: 5,
-      comment: 'สินค้าของแท้ 100% สภาพกล่องคมกริบ จัดส่งเร็วมาก ประทับใจสุดๆ แนะนำร้านนี้เลยครับ!',
-      likes: 12,
-    },
-    {
-      id: 'rev-seed-2',
-      userId: demoBuyer.id,
-      productId: 'fa-1',
-      rating: 5,
-      comment: 'เนื้อผ้าดีมาก สวมใส่สบาย ตรงปกตามที่ไลฟ์สดเป๊ะๆ มีโค้ดลดราคาคุ้มค่ามาก',
-      likes: 8,
-    },
-    {
-      id: 'rev-seed-3',
-      userId: demoBuyer.id,
-      productId: 'bt-1',
-      rating: 5,
-      comment: 'แพ็คสินค้าแน่นหนา มีบับเบิ้ลกันกระแทกอย่างดี วันหมดอายุอีกยาวนาน ของแท้แน่นอน',
-      likes: 15,
-    },
-    {
-      id: 'rev-seed-4',
-      userId: demoBuyer.id,
-      productId: 'sp-1',
-      rating: 5,
-      comment: 'รองเท้าเบา นุ่ม กระชับเท้า วิ่ง 10k สบายๆ ไม่เจ็บเท้า จัดส่งภายใน 1 วัน',
-      likes: 20,
-    },
-  ];
-
-  for (const rev of sampleReviews) {
-    await prisma.review.upsert({
-      where: { id: rev.id },
-      update: rev,
-      create: rev,
-    });
-  }
-  console.log(`✅ Seeded ${sampleReviews.length} Verified Reviews`);
+  // ❌ Removed: Sample Reviews — ไม่ seed รีวิวปลอมอีกต่อไป ใช้รีวิวจากผู้ซื้อจริงเท่านั้น
 
   console.log('\n🎉 ALL REAL MOVEMALL DATA SEEDED TO SUPABASE POSTGRESQL SUCCESSFULLY!');
   console.log(`👤 Super Admin: note.shinnawat@gmail.com (Password: movemall1234)`);
   console.log(`👤 Admin: admin@movemall.com (Password: movemall1234)`);
-  console.log(`👤 Buyer: buyer@demo.com (Password: movemall1234)`);
 }
 
 main()
