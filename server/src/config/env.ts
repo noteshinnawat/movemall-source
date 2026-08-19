@@ -72,7 +72,11 @@ if (isProduction && !PAYMENT_WEBHOOK_SECRET) {
   );
 }
 
-// ── 5. Super Admin Whitelist (ย้ายออกจาก source code มาเป็น env) ──
+// ── 5. Cloudflare Turnstile (กันบอท) ──
+// ไม่ตั้ง = ข้ามการตรวจทุกคำขอ (ใช้ได้กับ dev / ระบบที่ยังไม่เปิดใช้)
+export const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY?.trim() || '';
+
+// ── 6. Super Admin Whitelist (ย้ายออกจาก source code มาเป็น env) ──
 // ใช้เพื่อ "ตรวจสอบ" เท่านั้น ไม่ได้ใช้เลื่อนขั้นอัตโนมัติอีกต่อไป
 // การตั้งแอดมินคนแรกให้ทำผ่าน seed script: npm run seed:admin
 export const SUPER_ADMIN_EMAILS = (process.env.SUPER_ADMIN_EMAILS || '')
@@ -83,11 +87,12 @@ export const SUPER_ADMIN_EMAILS = (process.env.SUPER_ADMIN_EMAILS || '')
 export const IS_PRODUCTION = isProduction;
 export const IS_TEST = isTest;
 
-// ── 6. ยืนยันว่าโหลดสำเร็จ (ไม่พิมพ์ค่า secret ออก log) ──
+// ── 7. ยืนยันว่าโหลดสำเร็จ (ไม่พิมพ์ค่า secret ออก log) ──
 if (!isTest) {
   console.log(
     `🔐 Environment loaded (NODE_ENV=${process.env.NODE_ENV || 'development'}, ` +
     `JWT ✓, webhook secret ${PAYMENT_WEBHOOK_SECRET ? '✓' : '✗'}, ` +
-    `google client id ${GOOGLE_CLIENT_ID ? '✓' : '✗'})`
+    `google client id ${GOOGLE_CLIENT_ID ? '✓' : '✗'}, ` +
+    `turnstile ${TURNSTILE_SECRET_KEY ? '✓' : '✗'})`
   );
 }

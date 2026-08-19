@@ -7,6 +7,7 @@ import { fetchApi } from '../utils/api';
 import { promptGoogleAuth } from '../utils/googleAuth';
 import { initiateLineLogin } from '../utils/lineAuth';
 import './LoginPage.css';
+import { getTurnstileToken } from '../utils/turnstile';
 
 interface LoginPageProps {
   onLoginSuccess?: (name: string, role: 'buyer' | 'seller') => void;
@@ -89,7 +90,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
       const res = await fetchApi<{ token: string; user: { id?: string; name: string; email?: string; role: string; coinsBalance?: number; avatarUrl?: string } }>('/api/auth/login', {
         method: 'POST',
-        body: JSON.stringify(bodyPayload),
+        body: JSON.stringify({ ...bodyPayload, turnstileToken: await getTurnstileToken() }),
       });
 
       if (res.token) {
@@ -146,9 +147,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     setLoading(true);
 
     try {
+      const turnstileToken = await getTurnstileToken();
       const res = await fetchApi<{ message: string; otpDemo?: string; isRealSms?: boolean }>('/api/auth/send-otp', {
         method: 'POST',
-        body: JSON.stringify({ target: otpPhone.trim(), type: 'phone' }),
+        body: JSON.stringify({
+          turnstileToken, target: otpPhone.trim(), type: 'phone' }),
       });
       if (res.otpDemo) setDemoOtp(res.otpDemo);
       setIsRealSms(Boolean(res.isRealSms));
@@ -176,9 +179,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     setLoading(true);
 
     try {
+      const turnstileToken = await getTurnstileToken();
       const res = await fetchApi<{ token: string; user: { name: string; role: string }; isNewUser?: boolean }>('/api/auth/login-otp', {
         method: 'POST',
-        body: JSON.stringify({ target: otpPhone.trim(), otp: enteredOtp }),
+        body: JSON.stringify({
+          turnstileToken, target: otpPhone.trim(), otp: enteredOtp }),
       });
 
       if (res.token) {
@@ -439,9 +444,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                     disabled={isCounting}
                     onClick={async () => {
                       try {
+                        const turnstileToken = await getTurnstileToken();
                         const res = await fetchApi<{ message: string; otpDemo?: string; isRealSms?: boolean }>('/api/auth/send-otp', {
                           method: 'POST',
-                          body: JSON.stringify({ target: otpPhone.trim(), type: 'phone' }),
+                          body: JSON.stringify({
+                            turnstileToken, target: otpPhone.trim(), type: 'phone' }),
                         });
                         if (res.otpDemo) setDemoOtp(res.otpDemo);
                         setIsRealSms(Boolean(res.isRealSms));

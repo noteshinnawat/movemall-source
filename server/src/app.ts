@@ -169,6 +169,7 @@ import {
   paymentLimiter,
   webhookLimiter,
 } from './middleware/rateLimit.middleware.js';
+import { verifyTurnstile } from './middleware/turnstile.middleware.js';
 
 // ── Socket.io Live Chat Room Handlers ──
 io.on('connection', (socket) => {
@@ -283,6 +284,14 @@ app.use('/api/user/verify-email/request-otp', otpLimiter);
 app.use('/api/user/verify-phone/request-otp', otpLimiter);
 app.use('/api/payment/webhook', webhookLimiter);
 app.use('/api/payment', paymentLimiter);
+
+// ── Turnstile (กันบอทที่กระจาย IP ซึ่ง rate limit จับไม่ได้) ──
+// วางไว้บน endpoint ที่บอทได้ประโยชน์จากการยิงซ้ำ: สร้างบัญชี, เดารหัสผ่าน
+// และโดยเฉพาะ send-otp ที่ทุกครั้งมีค่าส่ง SMS จริง
+app.use('/api/auth/send-otp', verifyTurnstile);
+app.use('/api/auth/register', verifyTurnstile);
+app.use('/api/auth/login', verifyTurnstile);
+app.use('/api/auth/login-otp', verifyTurnstile);
 
 // ── Register REST API Routers ──
 app.use('/api/auth', authRoutes);

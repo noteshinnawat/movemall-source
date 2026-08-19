@@ -25,6 +25,7 @@ import { fetchApi } from '../utils/api';
 import { promptGoogleAuth } from '../utils/googleAuth';
 import { initiateLineLogin } from '../utils/lineAuth';
 import './RegisterPage.css';
+import { getTurnstileToken } from '../utils/turnstile';
 
 interface RegisterPageProps {
   onRegisterSuccess?: (name: string, role: 'buyer' | 'seller') => void;
@@ -112,9 +113,11 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
     setLoading(true);
     try {
       // Send OTP via Backend (ThaiBulkSMS for Phone / Email OTP)
+      const turnstileToken = await getTurnstileToken();
       const res = await fetchApi<{ message: string; otpDemo?: string; refno?: string; isRealSms?: boolean }>('/api/auth/send-otp', {
         method: 'POST',
         body: JSON.stringify({
+          turnstileToken,
           target: targetValue.trim(),
           type: method,
         }),
@@ -221,7 +224,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
         welcomePerks?: { coinsGranted: number };
       }>('/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, turnstileToken: await getTurnstileToken() }),
       });
 
       if (res.token) {
@@ -714,9 +717,11 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                     disabled={isCounting}
                     onClick={async () => {
                       try {
+                        const turnstileToken = await getTurnstileToken();
                         const res = await fetchApi<{ message: string; otpDemo?: string; refno?: string; isRealSms?: boolean }>('/api/auth/send-otp', {
                           method: 'POST',
                           body: JSON.stringify({
+                            turnstileToken,
                             target: targetValue.trim(),
                             type: method,
                           }),
