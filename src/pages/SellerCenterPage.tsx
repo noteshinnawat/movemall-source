@@ -22,8 +22,7 @@ import {
   createAdCampaignApi,
   toggleAdCampaignApi,
   fetchStoreTaxSettingsApi,
-  updateStoreTaxSettingsApi,
-} from '../utils/api';
+  updateStoreTaxSettingsApi, logoutApi } from '../utils/api';
 import { promptGoogleAuth } from '../utils/googleAuth';
 import { generateSlug } from '../utils/slug';
 import { getProductUrl } from '../utils/seo';
@@ -61,8 +60,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 
   function handleLogout() {
     if (window.confirm('คุณต้องการออกจากระบบศูนย์ผู้ขาย Movemall ใช่หรือไม่?')) {
-      localStorage.removeItem('movemall_jwt_token');
-      localStorage.removeItem('movemall_user');
+      logoutApi(); // เพิกถอน token ฝั่งเซิร์ฟเวอร์ด้วย ไม่ใช่แค่ลบทิ้งฝั่ง client
       localStorage.removeItem('movemall_seller_store_id');
       localStorage.removeItem('movemall_custom_store_name');
       setCurrentUser(null);
@@ -324,6 +322,26 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   const [isSellerSocketConnected, setIsSellerSocketConnected] = useState(false);
   const sellerMessagesAreaRef = useRef<HTMLDivElement>(null);
 
+  // Archive/delete threads (localStorage-persisted)
+  const [archivedThreads, setArchivedThreads] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem(`movemall_archived_threads_${sellerStoreId}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
+  // Chat referral source map: customerId → { source, productId, productName, openedAt }
+  const [chatSourceMap, setChatSourceMap] = useState<Record<string, { source: string; label: string; openedAt: string }>>(() => {
+    try {
+      const saved = localStorage.getItem(`movemall_chat_source_${sellerStoreId}`);
+      return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
+  });
+
+  // Customer info panel toggle
+  const [showCustomerPanel, setShowCustomerPanel] = useState(true);
+  const [hoveredCustomerId, setHoveredCustomerId] = useState<string | null>(null);
+
   // Sync real chat messages for this specific store from DB
   useEffect(() => {
     async function loadStoreChatHistory() {
@@ -450,6 +468,45 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
         senderRole: 'store',
       }),
     }).catch(() => {});
+  }
+
+  function archiveThread(customerId: string) {
+    setArchivedThreads(prev => {
+      const next = prev.includes(customerId) ? prev : [...prev, customerId];
+      try { localStorage.setItem(`movemall_archived_threads_${sellerStoreId}`, JSON.stringify(next)); } catch {}
+      return next;
+    });
+    if (selectedCustomerId === customerId) setSelectedCustomerId('');
+  }
+
+  function restoreThread(customerId: string) {
+    setArchivedThreads(prev => {
+      const next = prev.filter(id => id !== customerId);
+      try { localStorage.setItem(`movemall_archived_threads_${sellerStoreId}`, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }
+
+  function deleteThreadPermanently(customerId: string) {
+    const threadKey = `${currentStore.id}::${customerId}`;
+    setSellerMessages(prev => {
+      const next = { ...prev };
+      delete next[threadKey];
+      delete next[customerId];
+      try {
+        const allStored = getStoredChatHistory();
+        delete allStored[threadKey];
+        delete allStored[customerId];
+        saveStoredChatHistory(allStored);
+      } catch {}
+      return next;
+    });
+    setArchivedThreads(prev => {
+      const next = prev.filter(id => id !== customerId);
+      try { localStorage.setItem(`movemall_archived_threads_${sellerStoreId}`, JSON.stringify(next)); } catch {}
+      return next;
+    });
+    if (selectedCustomerId === customerId) setSelectedCustomerId('');
   }
 
   function handleLoadSampleProducts() {
@@ -4550,22 +4607,28 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
         {activeTab === 'chat' && (
           <div className="seller-chat-wrapper">
             <div className="seller-chat-layout">
-              {/* Customer List Sidebar */}
+
+              {/* ── Left Sidebar: Customer List ── */}
               <div className="seller-chat-sidebar">
                 <div className="seller-chat-sidebar__header">
                   <h3 className="seller-chat-sidebar__title">
-                    <span>💬 รายการลูกค้าที่ทักแชท</span>
+                    <span>💬 รายการลูกค้า</span>
                     {isSellerSocketConnected && (
                       <span style={{ fontSize: 11, color: '#10B981', display: 'flex', alignItems: 'center', gap: 4 }}>
                         <Radio size={10} /> ออนไลน์
                       </span>
                     )}
                   </h3>
+                  {archivedThreads.length > 0 && (
+                    <div className="seller-chat-archive-count">
+                      🗂️ ซ่อนไว้ {archivedThreads.length} การสนทนา
+                    </div>
+                  )}
                 </div>
 
                 <div className="seller-chat-customer-list">
                   {(() => {
-                    const activeChatCustomerIds = Array.from(new Set([
+                    const allIds = Array.from(new Set([
                       ...Object.keys(sellerMessages)
                         .filter(k => k.startsWith(`${currentStore.id}::`))
                         .map(k => k.split('::')[1]),
@@ -4575,29 +4638,38 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                         .filter(Boolean) as string[],
                     ]));
 
-                    if (activeChatCustomerIds.length === 0) {
+                    // Separate active vs archived
+                    const activeChatCustomerIds = allIds.filter(id => !archivedThreads.includes(id));
+                    const archivedIds = allIds.filter(id => archivedThreads.includes(id));
+
+                    if (allIds.length === 0) {
                       return (
                         <div style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6 }}>
                           <MessageSquare size={28} style={{ opacity: 0.35, margin: '0 auto 10px', display: 'block', color: '#64748B' }} />
                           <strong style={{ color: '#334155', display: 'block', marginBottom: 4 }}>ยังไม่มีลูกค้าทักแชท</strong>
-                          เมื่อมีผู้ซื้อส่งข้อความสอบถามสินค้า จะปรากฏในรายการนี้แบบสด
+                          เมื่อมีผู้ซื้อส่งข้อความสอบถาม จะปรากฏในรายการนี้แบบสด
                         </div>
                       );
                     }
 
-                    return activeChatCustomerIds.map((cId, idx) => {
+                    const renderCustomerItem = (cId: string, isArchived: boolean, idx: number) => {
                       const isSelected = (selectedCustomerId || activeChatCustomerIds[0]) === cId;
                       const matchedOrder = sellerOrders.find(o => o.user?.id === cId || `buyer-${o.orderId}` === cId);
-                      const customerDisplayName = matchedOrder ? `${matchedOrder.customerName} (${matchedOrder.orderId})` : (cId === 'guest_user' ? 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)' : `ลูกค้า ${cId}`);
+                      const customerDisplayName = matchedOrder
+                        ? matchedOrder.customerName
+                        : (cId === 'guest_user' ? 'ลูกค้าทั่วไป' : `ลูกค้า #${cId.slice(-6)}`);
                       const threadKey = `${currentStore.id}::${cId}`;
                       const threadMsgs = sellerMessages[threadKey] || [];
                       const lastMsg = threadMsgs[threadMsgs.length - 1];
+                      const sourceInfo = chatSourceMap[cId];
 
                       return (
                         <div
                           key={cId}
-                          className={`seller-chat-customer-item${isSelected ? ' seller-chat-customer-item--active' : ''}`}
-                          onClick={() => setSelectedCustomerId(cId)}
+                          className={`seller-chat-customer-item${isSelected && !isArchived ? ' seller-chat-customer-item--active' : ''}${isArchived ? ' seller-chat-customer-item--archived' : ''}`}
+                          onClick={() => { if (!isArchived) { setSelectedCustomerId(cId); } }}
+                          onMouseEnter={() => setHoveredCustomerId(cId)}
+                          onMouseLeave={() => setHoveredCustomerId(null)}
                         >
                           <div className="seller-chat-customer-avatar">
                             {idx % 3 === 0 ? '👤' : idx % 3 === 1 ? '👨' : '👩'}
@@ -4607,18 +4679,62 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                               <span className="seller-chat-customer-name">{customerDisplayName}</span>
                               <span className="seller-chat-customer-time">{lastMsg?.time || ''}</span>
                             </div>
+                            {sourceInfo && (
+                              <div className="seller-chat-customer-source">
+                                📍 {sourceInfo.label}
+                              </div>
+                            )}
                             <p className="seller-chat-customer-preview">
                               {lastMsg ? lastMsg.text : 'เริ่มการสนทนากับลูกค้า...'}
                             </p>
                           </div>
+                          {/* Hover action buttons */}
+                          {hoveredCustomerId === cId && (
+                            <div className="seller-chat-customer-hover-actions" onClick={e => e.stopPropagation()}>
+                              {isArchived ? (
+                                <button
+                                  className="seller-chat-restore-btn"
+                                  title="กู้คืนการสนทนา"
+                                  onClick={() => restoreThread(cId)}
+                                >↩️</button>
+                              ) : (
+                                <button
+                                  className="seller-chat-archive-btn"
+                                  title="ซ่อนการสนทนา (Archive)"
+                                  onClick={() => archiveThread(cId)}
+                                >🗂️</button>
+                              )}
+                              <button
+                                className="seller-chat-delete-btn"
+                                title="ลบการสนทนาถาวร"
+                                onClick={() => {
+                                  if (confirm(`ลบการสนทนากับ "${customerDisplayName}" ถาวรหรือไม่?\nข้อความทั้งหมดจะหายไป ไม่สามารถกู้คืนได้`)) {
+                                    deleteThreadPermanently(cId);
+                                  }
+                                }}
+                              >🗑️</button>
+                            </div>
+                          )}
                         </div>
                       );
-                    });
+                    };
+
+                    return (
+                      <>
+                        {activeChatCustomerIds.map((cId, idx) => renderCustomerItem(cId, false, idx))}
+                        {archivedIds.length > 0 && (
+                          <>
+                            <div className="seller-chat-section-divider">🗂️ ซ่อนไว้</div>
+                            {archivedIds.map((cId, idx) => renderCustomerItem(cId, true, idx))}
+                          </>
+                        )}
+                      </>
+                    );
                   })()}
                 </div>
               </div>
 
-              {/* Chat Thread */}
+              {/* ── Center: Chat Thread ── */}
               <div className="seller-chat-main">
                 {(() => {
                   const activeChatCustomerIds = Array.from(new Set([
@@ -4629,7 +4745,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                       .filter(o => o.storeId === currentStore.id)
                       .map(o => o.user?.id || (o.customerName ? `buyer-${o.orderId}` : null))
                       .filter(Boolean) as string[],
-                  ]));
+                  ])).filter(id => !archivedThreads.includes(id));
 
                   if (activeChatCustomerIds.length === 0) {
                     return (
@@ -4647,7 +4763,9 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                   const activeThreadKey = `${currentStore.id}::${activeCustomerId}`;
                   const activeChatList = sellerMessages[activeThreadKey] || [];
                   const matchedOrder = sellerOrders.find(o => o.user?.id === activeCustomerId || `buyer-${o.orderId}` === activeCustomerId);
-                  const currentCustomerTitle = matchedOrder ? `${matchedOrder.customerName} (คำสั่งซื้อ ${matchedOrder.orderId})` : (activeCustomerId === 'guest_user' ? 'ลูกค้าทั่วไป (ผู้ซื้อในระบบ)' : `ลูกค้า ${activeCustomerId}`);
+                  const currentCustomerTitle = matchedOrder
+                    ? `${matchedOrder.customerName}`
+                    : (activeCustomerId === 'guest_user' ? 'ลูกค้าทั่วไป' : `ลูกค้า #${activeCustomerId.slice(-6)}`);
 
                   return (
                     <>
@@ -4656,13 +4774,28 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                           <strong style={{ fontSize: 14, color: 'var(--text-primary)' }}>
                             {currentCustomerTitle}
                           </strong>
+                          {matchedOrder && (
+                            <div style={{ fontSize: 11, color: '#6B7280', marginTop: 1 }}>
+                              #{matchedOrder.orderId} · {matchedOrder.items?.length || 0} รายการ · ฿{matchedOrder.total?.toLocaleString()}
+                            </div>
+                          )}
                           <div style={{ fontSize: 11, color: '#10B981', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
                             <span>● กำลังสนทนาผ่าน WebSocket สด</span>
                           </div>
                         </div>
-                        <span style={{ fontSize: 11, color: 'var(--text-muted)', background: '#F3F4F6', padding: '4px 8px', borderRadius: 4 }}>
-                          🔒 ปลอดภัยด้วย Movemall Merchant Shield
-                        </span>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            className="seller-chat-panel-toggle"
+                            onClick={() => setShowCustomerPanel(p => !p)}
+                            title={showCustomerPanel ? 'ซ่อนข้อมูลลูกค้า' : 'แสดงข้อมูลลูกค้า'}
+                          >
+                            👤 {showCustomerPanel ? '◀' : '▶'}
+                          </button>
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)', background: '#F3F4F6', padding: '4px 8px', borderRadius: 4 }}>
+                            🔒 Movemall Merchant Shield
+                          </span>
+                        </div>
                       </div>
 
                       <div ref={sellerMessagesAreaRef} className="seller-chat-messages-area">
@@ -4726,6 +4859,175 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                   );
                 })()}
               </div>
+
+              {/* ── Right Panel: Customer Info ── */}
+              {showCustomerPanel && (() => {
+                const activeChatCustomerIds = Array.from(new Set([
+                  ...Object.keys(sellerMessages)
+                    .filter(k => k.startsWith(`${currentStore.id}::`))
+                    .map(k => k.split('::')[1]),
+                  ...sellerOrders
+                    .filter(o => o.storeId === currentStore.id)
+                    .map(o => o.user?.id || (o.customerName ? `buyer-${o.orderId}` : null))
+                    .filter(Boolean) as string[],
+                ])).filter(id => !archivedThreads.includes(id));
+
+                const activeCustomerId = selectedCustomerId || activeChatCustomerIds[0];
+                if (!activeCustomerId) return null;
+
+                const matchedOrders = sellerOrders.filter(o =>
+                  o.user?.id === activeCustomerId || `buyer-${o.orderId}` === activeCustomerId
+                );
+                const latestOrder = matchedOrders[0];
+                const sourceInfo = chatSourceMap[activeCustomerId];
+                const threadKey = `${currentStore.id}::${activeCustomerId}`;
+                const threadMsgs = sellerMessages[threadKey] || [];
+                const firstMsgDate = threadMsgs[0]?.time || 'ไม่ทราบ';
+                const totalSpend = matchedOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+                const shippingAddr = latestOrder?.shippingAddress || latestOrder?.address;
+
+                return (
+                  <div className="seller-chat-info-panel">
+                    {/* Header */}
+                    <div className="seller-chat-info-panel__header">
+                      <span>👤 ข้อมูลลูกค้า</span>
+                    </div>
+
+                    {/* Customer Profile */}
+                    <div className="seller-chat-info-section">
+                      <div className="seller-chat-info-avatar">
+                        {latestOrder?.customerName?.charAt(0) || '?'}
+                      </div>
+                      <div className="seller-chat-info-name">
+                        {latestOrder?.customerName || (activeCustomerId === 'guest_user' ? 'ลูกค้าทั่วไป' : `ลูกค้า #${activeCustomerId.slice(-6)}`)}
+                      </div>
+                      {latestOrder?.customerPhone && (
+                        <div className="seller-chat-info-phone">📞 {latestOrder.customerPhone}</div>
+                      )}
+                      <div className="seller-chat-info-id">ID: {activeCustomerId.slice(0, 16)}{activeCustomerId.length > 16 ? '…' : ''}</div>
+                    </div>
+
+                    {/* Referral Source */}
+                    <div className="seller-chat-info-block">
+                      <div className="seller-chat-info-block__title">📍 ทักมาจาก</div>
+                      {sourceInfo ? (
+                        <div className="seller-chat-info-source-badge">
+                          {sourceInfo.label}
+                          <span className="seller-chat-info-source-time">{sourceInfo.openedAt}</span>
+                        </div>
+                      ) : (
+                        <div className="seller-chat-info-block__empty">ไม่มีข้อมูลแหล่งที่มา</div>
+                      )}
+                    </div>
+
+                    {/* Chat Stats */}
+                    <div className="seller-chat-info-block">
+                      <div className="seller-chat-info-block__title">📊 สถิติการสนทนา</div>
+                      <div className="seller-chat-info-stats">
+                        <div className="seller-chat-info-stat">
+                          <span className="seller-chat-info-stat__num">{threadMsgs.length}</span>
+                          <span className="seller-chat-info-stat__label">ข้อความ</span>
+                        </div>
+                        <div className="seller-chat-info-stat">
+                          <span className="seller-chat-info-stat__num">{matchedOrders.length}</span>
+                          <span className="seller-chat-info-stat__label">ออเดอร์</span>
+                        </div>
+                        <div className="seller-chat-info-stat">
+                          <span className="seller-chat-info-stat__num">฿{totalSpend.toLocaleString()}</span>
+                          <span className="seller-chat-info-stat__label">ยอดรวม</span>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 10.5, color: 'var(--text-muted)', marginTop: 4 }}>
+                        ทักครั้งแรก: {firstMsgDate}
+                      </div>
+                    </div>
+
+                    {/* Latest Orders */}
+                    {matchedOrders.length > 0 && (
+                      <div className="seller-chat-info-block">
+                        <div className="seller-chat-info-block__title">📦 ออเดอร์ล่าสุด</div>
+                        <div className="seller-chat-info-orders">
+                          {matchedOrders.slice(0, 3).map(order => (
+                            <div key={order.orderId} className="seller-chat-info-order-item">
+                              <div className="seller-chat-info-order-id">#{order.orderId}</div>
+                              <div className="seller-chat-info-order-items">
+                                {order.items?.slice(0, 2).map((item: any, i: number) => (
+                                  <div key={i} className="seller-chat-info-order-product">
+                                    • {item.name || item.productName || `สินค้า ${i + 1}`}
+                                  </div>
+                                ))}
+                                {order.items?.length > 2 && (
+                                  <div className="seller-chat-info-order-product" style={{ color: 'var(--text-muted)' }}>
+                                    +{order.items.length - 2} รายการเพิ่มเติม
+                                  </div>
+                                )}
+                              </div>
+                              <div className="seller-chat-info-order-footer">
+                                <span className={`seller-chat-info-order-status seller-chat-info-order-status--${order.status || 'pending'}`}>
+                                  {order.status === 'delivered' ? '✅ รับแล้ว' :
+                                   order.status === 'shipped' ? '🚚 กำลังส่ง' :
+                                   order.status === 'processing' ? '⚙️ กำลังเตรียม' :
+                                   order.status === 'cancelled' ? '❌ ยกเลิก' : '⏳ รออนุมัติ'}
+                                </span>
+                                <span className="seller-chat-info-order-total">฿{order.total?.toLocaleString()}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Shipping Address */}
+                    {(shippingAddr || latestOrder?.customerAddress) && (
+                      <div className="seller-chat-info-block">
+                        <div className="seller-chat-info-block__title">🏠 ที่อยู่รับสินค้า</div>
+                        <div className="seller-chat-info-address">
+                          {latestOrder?.customerName && (
+                            <div className="seller-chat-info-address__name">👤 {latestOrder.customerName}</div>
+                          )}
+                          {latestOrder?.customerPhone && (
+                            <div className="seller-chat-info-address__phone">📞 {latestOrder.customerPhone}</div>
+                          )}
+                          <div className="seller-chat-info-address__text">
+                            {typeof shippingAddr === 'string'
+                              ? shippingAddr
+                              : typeof latestOrder?.customerAddress === 'string'
+                              ? latestOrder.customerAddress
+                              : [
+                                  shippingAddr?.addressLine || shippingAddr?.address,
+                                  shippingAddr?.district,
+                                  shippingAddr?.province,
+                                  shippingAddr?.postalCode,
+                                ].filter(Boolean).join(' ') || 'ไม่มีข้อมูลที่อยู่'}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Quick Action Buttons */}
+                    <div className="seller-chat-info-actions">
+                      <button
+                        className="seller-chat-info-action-btn seller-chat-info-action-btn--archive"
+                        onClick={() => archiveThread(activeCustomerId)}
+                      >
+                        🗂️ ซ่อนการสนทนา
+                      </button>
+                      <button
+                        className="seller-chat-info-action-btn seller-chat-info-action-btn--delete"
+                        onClick={() => {
+                          const name = latestOrder?.customerName || `ลูกค้า #${activeCustomerId.slice(-6)}`;
+                          if (confirm(`ลบการสนทนากับ "${name}" ถาวรหรือไม่?`)) {
+                            deleteThreadPermanently(activeCustomerId);
+                          }
+                        }}
+                      >
+                        🗑️ ลบถาวร
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+
             </div>
           </div>
         )}
