@@ -1,29 +1,69 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import { prismaRead, prismaWrite } from '../config/database.js';
 
 const router = Router();
 
-// Partner API Credentials Guard (HMAC-SHA256 Validation)
-function authenticatePartnerApi(req: Request, res: Response, next: NextFunction): void {
-  const appKey = req.headers['x-movemall-appkey'] as string;
-  const signature = req.headers['x-movemall-signature'] as string;
+// คำขอที่ผ่านการยืนยันตัวตนแล้วจะถูกผูกกับร้านค้าเจ้าของ API key เสมอ
+export interface PartnerRequest extends Request {
+  partnerStoreId?: string;
+}
 
-  // For Sandbox / Demo environment testing
-  if (appKey === 'sandbox_app_key_demo_2026' || req.query.sandbox === 'true') {
-    next();
-    return;
-  }
+/**
+ * Partner API Credentials Guard
+ *
+ * ของเดิมมีปัญหา 2 อย่าง:
+ *  1. `?sandbox=true` หรือ appKey ตัวอย่างที่ฮาร์ดโค้ด ข้ามการยืนยันตัวตนได้ทั้งหมด
+ *     ทำให้ 10 endpoint (รวมถึงตัวที่เขียนราคา/สต็อกสินค้าลงฐานข้อมูลจริง) เปิดสาธารณะ
+ *  2. ตรวจแค่ว่า "มี header ส่งมาไหม" ไม่เคยนำลายเซ็นไปคำนวณเทียบเลย
+ *
+ * หมายเหตุด้านการออกแบบ: schema เก็บ `MerchantApiKey.secretHash` (ค่าที่ผ่านการ hash แล้ว)
+ * จึงไม่สามารถคำนวณ HMAC ฝั่งเซิร์ฟเวอร์เพื่อเทียบลายเซ็นได้ (hash ย้อนกลับไม่ได้)
+ * ที่นี่จึงใช้รูปแบบ AppKey + Secret ที่ตรวจด้วย bcrypt แทน ซึ่งปลอดภัยเมื่อวิ่งบน HTTPS
+ * หากต้องการ HMAC จริงในอนาคต ต้องเก็บ secret แบบถอดกลับได้ (เข้ารหัสไว้) เพิ่มใน schema
+ */
+async function authenticatePartnerApi(req: PartnerRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const appKey = req.headers['x-movemall-appkey'];
+    const secret = req.headers['x-movemall-secret'] ?? req.headers['x-movemall-signature'];
 
-  if (!appKey || !signature) {
-    res.status(401).json({
-      error: 'Unauthorized: Missing X-Movemall-AppKey or X-Movemall-Signature header',
-      documentation: 'https://movemall.pages.dev/seller (Tab: Open API Hub)',
+    if (typeof appKey !== 'string' || typeof secret !== 'string' || !appKey || !secret) {
+      res.status(401).json({
+        error: 'Unauthorized: ต้องส่ง X-Movemall-AppKey และ X-Movemall-Secret มาด้วย',
+        documentation: 'https://movemall.pages.dev/seller (Tab: Open API Hub)',
+      });
+      return;
+    }
+
+    const credential = await prismaRead.merchantApiKey.findUnique({
+      where: { apiKey: appKey },
     });
-    return;
-  }
 
-  next();
+    if (!credential || !credential.isActive) {
+      res.status(401).json({ error: 'Unauthorized: API key ไม่ถูกต้องหรือถูกปิดการใช้งาน' });
+      return;
+    }
+
+    const secretValid = await bcrypt.compare(secret, credential.secretHash);
+    if (!secretValid) {
+      res.status(401).json({ error: 'Unauthorized: API secret ไม่ถูกต้อง' });
+      return;
+    }
+
+    // ผูกทุกคำขอกับร้านค้าเจ้าของ key — endpoint ปลายทางห้ามเชื่อ storeId ที่ส่งมาใน body/query
+    req.partnerStoreId = credential.storeId;
+
+    // บันทึกเวลาใช้งานล่าสุด (ไม่ให้ error ตรงนี้ทำให้คำขอล้ม)
+    prismaWrite.merchantApiKey
+      .update({ where: { id: credential.id }, data: { lastUsedAt: new Date() } })
+      .catch(() => {});
+
+    next();
+  } catch (error) {
+    console.error('Partner API Auth Error:', error);
+    res.status(500).json({ error: 'Failed to verify partner credentials' });
+  }
 }
 
 router.use(authenticatePartnerApi);
@@ -103,7 +143,7 @@ const storePartnerRegistry: Record<string, Record<string, PartnerConnection>> = 
 
 // ── 0. Partner Connections Status & Toggle Endpoints ──
 router.get('/partners/status', (req: Request, res: Response) => {
-  const storeId = (req.query.storeId as string) || 'store-techpro';
+  const storeId = (req as PartnerRequest).partnerStoreId as string;
   const connections = storePartnerRegistry[storeId] || storePartnerRegistry['store-techpro'];
   res.json({
     status: 'success',
@@ -114,7 +154,8 @@ router.get('/partners/status', (req: Request, res: Response) => {
 });
 
 router.post('/partners/connect', (req: Request, res: Response) => {
-  const { storeId = 'store-techpro', partnerId, connected, autoSyncStock, autoSyncOrders, autoSyncChat, webhookTarget } = req.body;
+  const storeId = (req as PartnerRequest).partnerStoreId as string;
+  const { partnerId, connected, autoSyncStock, autoSyncOrders, autoSyncChat, webhookTarget } = req.body;
 
   if (!partnerId) {
     res.status(400).json({ error: 'partnerId is required' });
@@ -181,7 +222,7 @@ router.post('/partners/request-access', (req: Request, res: Response) => {
 });
 
 // ── 1. Inventory & Stock Sync API (2-Way Sync with ERP/WMS) ──
-router.post('/products/sync', async (req: Request, res: Response) => {
+router.post('/products/sync', async (req: PartnerRequest, res: Response) => {
   try {
     const { productId, sku, stock, price } = req.body;
 
@@ -190,13 +231,47 @@ router.post('/products/sync', async (req: Request, res: Response) => {
       return;
     }
 
-    const targetId = productId || 'prod-1';
+    // เดิม fallback เป็น 'prod-1' และไม่ตรวจว่าสินค้าเป็นของร้านไหน
+    // ทำให้แก้ราคา/สต็อกของสินค้าร้านใดก็ได้ในระบบ
+    if (!productId) {
+      res.status(400).json({ error: 'productId is required' });
+      return;
+    }
+
+    const existing = await prismaRead.product.findUnique({
+      where: { id: productId },
+      select: { id: true, storeId: true },
+    });
+
+    if (!existing) {
+      res.status(404).json({ error: 'ไม่พบสินค้าที่ระบุ' });
+      return;
+    }
+
+    if (existing.storeId !== req.partnerStoreId) {
+      res.status(403).json({ error: 'ไม่มีสิทธิ์แก้ไขสินค้าของร้านค้าอื่น' });
+      return;
+    }
+
+    const targetId = productId;
+
+    const parsedStock = stock !== undefined ? parseInt(stock, 10) : undefined;
+    const parsedPrice = price !== undefined ? parseFloat(price) : undefined;
+
+    if (parsedStock !== undefined && (!Number.isFinite(parsedStock) || parsedStock < 0)) {
+      res.status(400).json({ error: 'stock ต้องเป็นจำนวนเต็มไม่ติดลบ' });
+      return;
+    }
+    if (parsedPrice !== undefined && (!Number.isFinite(parsedPrice) || parsedPrice <= 0)) {
+      res.status(400).json({ error: 'price ต้องเป็นจำนวนบวก' });
+      return;
+    }
 
     const updated = await prismaWrite.product.update({
       where: { id: targetId },
       data: {
-        stock: stock !== undefined ? parseInt(stock) : undefined,
-        price: price !== undefined ? parseFloat(price) : undefined,
+        stock: parsedStock,
+        price: parsedPrice,
       },
     });
 
@@ -212,16 +287,9 @@ router.post('/products/sync', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
+    // เดิมบล็อกนี้ตอบ success กลับไปแม้การอัปเดตจะล้มเหลว ทำให้พาร์ทเนอร์เข้าใจผิดว่าซิงก์สำเร็จ
     console.error('Open API Product Sync Error:', error);
-    res.json({
-      status: 'success',
-      message: 'Inventory synced successfully (Sandbox Mode)',
-      syncedData: {
-        productId: req.body.productId || 'prod-1',
-        newStock: req.body.stock || 99,
-        updatedAt: new Date().toISOString(),
-      },
-    });
+    res.status(500).json({ status: 'error', error: 'Failed to sync inventory' });
   }
 });
 
@@ -353,10 +421,11 @@ router.post('/webhook/test-trigger', async (req: Request, res: Response) => {
 // ── 5. OmniChat Reply API (External Chat Platforms Reply to Buyer) ──
 router.post('/chat/reply', async (req: Request, res: Response) => {
   try {
-    const { storeId, userId, messageText } = req.body;
+    const storeId = (req as PartnerRequest).partnerStoreId as string;
+    const { userId, messageText } = req.body;
 
     if (!storeId || !userId || !messageText) {
-      res.status(400).json({ error: 'storeId, userId, and messageText are required' });
+      res.status(400).json({ error: 'userId and messageText are required' });
       return;
     }
 

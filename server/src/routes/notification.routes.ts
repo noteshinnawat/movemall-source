@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { prismaWrite, prismaRead } from '../config/database.js';
-import { authenticateJWT, AuthRequest } from '../middleware/auth.middleware.js';
+import { authenticateJWT, AuthRequest, requireRole } from '../middleware/auth.middleware.js';
 import { io } from '../app.js';
 
 const router = Router();
@@ -228,7 +228,8 @@ router.post('/subscribe', authenticateJWT, async (req: AuthRequest, res: Respons
 });
 
 // ── 7. Send Broadcast Promo Push Notification ──
-router.post('/broadcast', authenticateJWT, async (req: AuthRequest, res: Response) => {
+// เดิมมีแค่ authenticateJWT — ผู้ใช้ทั่วไปยิง push แจ้งเตือนถึงผู้ใช้ทุกคนบนแพลตฟอร์มได้
+router.post('/broadcast', authenticateJWT, requireRole('SUPER_ADMIN', 'ADMIN', 'MARKETING_ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
     const { title, body, icon, url } = req.body;
 

@@ -2,6 +2,11 @@ import { Router, Request, Response } from 'express';
 import { prismaRead, prismaWrite } from '../config/database.js';
 import { getCachedOrFetch, invalidateCachePattern } from '../config/redis.js';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.middleware.js';
+import {
+  assertProductOwner,
+  resolveWritableStoreId,
+  respondIfOwnershipError,
+} from '../middleware/ownership.middleware.js';
 
 const router = Router();
 
@@ -213,16 +218,9 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    // Find store or default to first available store
-    let targetStoreId = storeId;
-    if (!targetStoreId) {
-      const defaultStore = await prismaRead.store.findFirst();
-      if (!defaultStore) {
-        res.status(400).json({ error: 'No active store found for product creation' });
-        return;
-      }
-      targetStoreId = defaultStore.id;
-    }
+    // สินค้าต้องถูกสร้างเข้าร้านที่ผู้เรียกเป็นเจ้าของเท่านั้น
+    // เดิมถ้าไม่ระบุ storeId จะ fallback ไปที่ร้านแรกที่เจอในฐานข้อมูล (ร้านของคนอื่น)
+    const targetStoreId = await resolveWritableStoreId(req, storeId);
 
     const store = await prismaRead.store.findUnique({ where: { id: targetStoreId } });
     const productBadge = badge || (store?.isMall ? 'mall' : 'new');
@@ -249,6 +247,7 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
       product,
     });
   } catch (error) {
+    if (respondIfOwnershipError(error, res)) return;
     console.error('Create Product Error:', error);
     res.status(500).json({ error: 'Failed to create product' });
   }
@@ -259,6 +258,9 @@ router.put('/:id', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
     const rawId = req.params.id;
     const id = Array.isArray(rawId) ? rawId[0] : rawId;
+
+    await assertProductOwner(req, id);
+
     const { name, description, price, originalPrice, category, brand, images, stock, badge } = req.body;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -286,6 +288,7 @@ router.put('/:id', authenticateJWT, async (req: AuthRequest, res: Response) => {
       product,
     });
   } catch (error) {
+    if (respondIfOwnershipError(error, res)) return;
     console.error('Update Product Error:', error);
     res.status(500).json({ error: 'Failed to update product' });
   }
@@ -297,6 +300,8 @@ router.delete('/:id', authenticateJWT, async (req: AuthRequest, res: Response) =
     const rawId = req.params.id;
     const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
+    await assertProductOwner(req, id);
+
     await prismaWrite.product.delete({
       where: { id },
     });
@@ -306,6 +311,7 @@ router.delete('/:id', authenticateJWT, async (req: AuthRequest, res: Response) =
 
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {
+    if (respondIfOwnershipError(error, res)) return;
     console.error('Delete Product Error:', error);
     res.status(500).json({ error: 'Failed to delete product' });
   }

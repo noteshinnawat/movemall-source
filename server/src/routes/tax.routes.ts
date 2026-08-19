@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { prismaRead, prismaWrite } from '../config/database.js';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.middleware.js';
+import { assertStoreOwner, respondIfOwnershipError } from '../middleware/ownership.middleware.js';
 
 const router = Router();
 
@@ -54,6 +55,8 @@ router.get('/summary', async (req: AuthRequest, res: Response) => {
 router.get('/store/:storeId/settings', async (req: AuthRequest, res: Response) => {
   try {
     const storeId = String(req.params.storeId);
+    await assertStoreOwner(req, storeId);
+
     const store = await (prismaRead.store as any).findUnique({
       where: { id: storeId },
     });
@@ -84,6 +87,7 @@ router.get('/store/:storeId/settings', async (req: AuthRequest, res: Response) =
       eTaxProvider: 'ETDA / Revenue Dept e-Tax by Email',
     });
   } catch (error) {
+    if (respondIfOwnershipError(error, res)) return;
     console.error('Get Store Tax Settings Error:', error);
     res.status(500).json({ error: 'Failed to get store tax settings' });
   }
@@ -93,6 +97,11 @@ router.put('/store/:storeId/settings', async (req: AuthRequest, res: Response) =
   try {
     const storeIdParam = req.params.storeId;
     const storeId = Array.isArray(storeIdParam) ? storeIdParam[0] : storeIdParam;
+
+    // ข้อมูลภาษี (เลขประจำตัวผู้เสียภาษี, ที่อยู่จดทะเบียน) เป็นข้อมูลอ่อนไหวของนิติบุคคล
+    // เดิมไม่ตรวจสิทธิ์เลย ทำให้อ่านและแก้ของร้านค้าอื่นได้ทั้งหมด
+    await assertStoreOwner(req, storeId);
+
     const {
       isVatRegistered,
       taxId,
@@ -133,6 +142,7 @@ router.put('/store/:storeId/settings', async (req: AuthRequest, res: Response) =
       },
     });
   } catch (error) {
+    if (respondIfOwnershipError(error, res)) return;
     console.error('Update Store Tax Settings Error:', error);
     res.status(500).json({ error: 'Failed to update store tax settings' });
   }

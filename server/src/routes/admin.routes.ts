@@ -787,43 +787,15 @@ router.get('/reports', requireRole('SUPER_ADMIN', 'ADMIN', 'CS_ADMIN'), async (_
 });
 
 // POST: Submit a new Violation / Scam Report (From Buyer or Seller)
-router.post('/reports', async (req: Request, res: Response) => {
-  try {
-    const {
-      reporterType,
-      reportedType,
-      reportedId,
-      reportedName,
-      storeName,
-      orderId,
-      type,
-      description,
-      evidenceUrl,
-      requestRefund,
-    } = req.body;
+/** เพิ่มเรื่องร้องเรียนเข้า registry กลาง — เรียกจาก report.routes.ts */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function addViolationReport(report: any) {
+  mockViolationReports.unshift(report);
+  return report;
+}
 
-    const newReport = {
-      id: `rep-${Date.now().toString().slice(-4)}`,
-      reporterName: reporterType === 'BUYER' ? 'ผู้ซื้อทั่วไป' : 'ร้านค้าบนระบบ',
-      reporterType: reporterType || 'BUYER',
-      reportedName: reportedName || storeName || 'ไม่ระบุ',
-      reportedType: reportedType || 'STORE',
-      orderId: orderId || `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-      type: type || 'FAKE_PRODUCT',
-      description: description || '',
-      evidenceUrl: evidenceUrl || null,
-      requestRefund: requestRefund !== undefined ? requestRefund : true,
-      status: 'PENDING',
-      createdAt: new Date().toISOString(),
-    };
-
-    mockViolationReports.unshift(newReport);
-    res.status(201).json({ success: true, report: newReport });
-  } catch (error) {
-    console.error('Submit Report Error:', error);
-    res.status(500).json({ error: 'Failed to submit report' });
-  }
-});
+// หมายเหตุ: endpoint รับเรื่องร้องเรียนจากผู้ซื้อถูกย้ายไปที่ `/api/reports` (report.routes.ts)
+// เพราะเป็น endpoint สำหรับผู้ใช้ทั่วไป ไม่ควรอยู่ใต้เส้นทาง /api/admin ที่สงวนไว้ให้ผู้ดูแลระบบ
 
 // POST: Resolve Violation Report & Take Action
 router.post('/reports/:id/resolve', requireRole('SUPER_ADMIN', 'ADMIN', 'CS_ADMIN'), async (req: AuthRequest, res: Response) => {
@@ -873,7 +845,7 @@ router.post('/compliance/batch-scan', requireRole('SUPER_ADMIN', 'ADMIN', 'CATAL
 });
 
 // POST: Verify Single License with Mock Government Gateway
-router.post('/compliance/verify', async (req: Request, res: Response) => {
+router.post('/compliance/verify', requireRole('SUPER_ADMIN', 'ADMIN', 'CATALOG_ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
     const { licenseNumber, type } = req.body;
     const isValid = Boolean(licenseNumber && licenseNumber.length >= 8);
