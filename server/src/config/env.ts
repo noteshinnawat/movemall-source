@@ -55,11 +55,21 @@ export const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || '7d') as SignOption
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID?.trim() || '';
 
 // ── 4. Payment Webhook Secret ──
-// ไม่บังคับตอน dev แต่ถ้าเป็น production ต้องมี มิฉะนั้น webhook จะถูกปฏิเสธทั้งหมด
+// ไม่บังคับต้องมี เพราะระบบที่ยังไม่ได้ต่อ payment gateway ก็ควรรันได้
+//
+// ไม่ตั้ง = /api/payment/webhook ปฏิเสธทุกคำขอด้วย 503 (fail-closed อยู่ในตัว)
+// จึงไม่มีเหตุผลที่จะทำให้ทั้งเซิร์ฟเวอร์ดับตั้งแต่บูต
+// แต่เตือนดัง ๆ บน production เพราะถ้าต่อ gateway จริงแล้วลืมตั้ง
+// การชำระเงินจะไม่ถูกยืนยันเลยสักรายการ
 export const PAYMENT_WEBHOOK_SECRET = process.env.PAYMENT_WEBHOOK_SECRET?.trim() || '';
 
 if (isProduction && !PAYMENT_WEBHOOK_SECRET) {
-  fail('ต้องตั้ง PAYMENT_WEBHOOK_SECRET เมื่อ NODE_ENV=production');
+  console.warn(
+    '\n⚠️  ไม่ได้ตั้ง PAYMENT_WEBHOOK_SECRET บน production\n' +
+    '   → /api/payment/webhook จะปฏิเสธทุกคำขอด้วย 503\n' +
+    '   → ใช้ได้กับระบบทดสอบที่ยังไม่ต่อ payment gateway\n' +
+    '   → ถ้าต่อ gateway จริงแล้ว ต้องตั้งค่านี้ให้ตรงกับ dashboard ของผู้ให้บริการ\n'
+  );
 }
 
 // ── 5. Super Admin Whitelist (ย้ายออกจาก source code มาเป็น env) ──
