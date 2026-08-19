@@ -883,6 +883,10 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   const [complianceCountry, setComplianceCountry] = useState('Thailand');
   const [complianceCertType, setComplianceCertType] = useState<ComplianceType | ''>('');
   const [complianceCertUrl, setComplianceCertUrl] = useState('');
+  const [complianceCertFile, setComplianceCertFile] = useState<File | null>(null);
+  const [complianceCertPreview, setComplianceCertPreview] = useState<string | null>(null);
+  const [complianceCertUploading, setComplianceCertUploading] = useState(false);
+  const [complianceCertDragOver, setComplianceCertDragOver] = useState(false);
   const [complianceHalal, setComplianceHalal] = useState('');
   const [aiCheckingCompliance, setAiCheckingCompliance] = useState(false);
   const [aiComplianceFeedback, setAiComplianceFeedback] = useState<string | null>(null);
@@ -893,8 +897,90 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     setComplianceCountry('Thailand');
     setComplianceCertType('');
     setComplianceCertUrl('');
+    setComplianceCertFile(null);
+    setComplianceCertPreview(null);
+    setComplianceCertUploading(false);
     setComplianceHalal('');
     setAiComplianceFeedback(null);
+  }
+
+  async function compressImageFile(file: File, maxSizeKB = 400, maxWidth = 1200): Promise<File> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let { width, height } = img;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d')!;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          let quality = 0.85;
+          const tryCompress = () => {
+            canvas.toBlob((blob) => {
+              if (!blob) { resolve(file); return; }
+              if (blob.size / 1024 <= maxSizeKB || quality <= 0.3) {
+                const compressed = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
+                resolve(compressed);
+              } else {
+                quality -= 0.1;
+                tryCompress();
+              }
+            }, 'image/jpeg', quality);
+          };
+          tryCompress();
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handleCertFileSelect(file: File) {
+    const isImage = file.type.startsWith('image/');
+    const isPdf = file.type === 'application/pdf';
+    if (!isImage && !isPdf) {
+      alert('รองรับเฉพาะไฟล์รูปภาพ (JPG, PNG, WebP) และ PDF เท่านั้น');
+      return;
+    }
+    const maxMB = isPdf ? 10 : 5;
+    if (file.size > maxMB * 1024 * 1024) {
+      alert(`ขนาดไฟล์ต้องไม่เกิน ${maxMB} MB`);
+      return;
+    }
+    setComplianceCertUploading(true);
+    try {
+      let finalFile = file;
+      if (isImage) {
+        finalFile = await compressImageFile(file);
+      }
+      setComplianceCertFile(finalFile);
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setComplianceCertPreview(e.target?.result as string);
+      };
+      if (isPdf) {
+        setComplianceCertPreview('pdf');
+      } else {
+        reader.readAsDataURL(finalFile);
+      }
+
+      // Encode to data URL and store as certDocUrl (base64 for local state)
+      const urlReader = new FileReader();
+      urlReader.onload = (e) => {
+        setComplianceCertUrl(e.target?.result as string);
+      };
+      urlReader.readAsDataURL(finalFile);
+    } finally {
+      setComplianceCertUploading(false);
+    }
   }
 
   function handleAICheckCompliance() {
@@ -959,6 +1045,12 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     setComplianceCountry(product.compliance?.countryOfOrigin || 'Thailand');
     setComplianceCertType(product.compliance?.certType || '');
     setComplianceCertUrl(product.compliance?.certDocUrl || '');
+    setComplianceCertFile(null);
+    setComplianceCertPreview(
+      product.compliance?.certDocUrl
+        ? (product.compliance.certDocUrl.startsWith('data:application/pdf') ? 'pdf' : product.compliance.certDocUrl)
+        : null
+    );
     setComplianceHalal(product.compliance?.halalNumber || '');
 
     setIsEditModalOpen(true);
@@ -1336,14 +1428,84 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
           )}
 
           <div className="seller-modal__group seller-modal__group--full">
-            <label className="seller-modal__label">ลิงก์ภาพสแกนใบอนุญาต / Certificate URL (ตัวเลือกเสริม)</label>
-            <input
-              type="url"
-              className="seller-modal__input"
-              placeholder="https://.../certificate-doc.jpg หรือไฟล์สแกนใบจดแจ้ง"
-              value={complianceCertUrl}
-              onChange={e => setComplianceCertUrl(e.target.value)}
-            />
+            <label className="seller-modal__label">ภาพสแกนใบอนุญาต / เอกสารรับรอง (ตัวเลือกเสริม)</label>
+            <div
+              className={`cert-upload-zone${complianceCertDragOver ? ' cert-upload-zone--dragover' : ''}${complianceCertPreview ? ' cert-upload-zone--has-file' : ''}`}
+              onDragOver={(e) => { e.preventDefault(); setComplianceCertDragOver(true); }}
+              onDragLeave={() => setComplianceCertDragOver(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setComplianceCertDragOver(false);
+                const file = e.dataTransfer.files[0];
+                if (file) handleCertFileSelect(file);
+              }}
+              onClick={() => {
+                if (!complianceCertPreview) {
+                  document.getElementById('cert-file-input-compliance')?.click();
+                }
+              }}
+            >
+              <input
+                id="cert-file-input-compliance"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,application/pdf"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleCertFileSelect(file);
+                  e.target.value = '';
+                }}
+              />
+              {complianceCertUploading ? (
+                <div className="cert-upload-zone__loading">
+                  <div className="cert-upload-zone__spinner" />
+                  <span>กำลังปรับขนาดไฟล์...</span>
+                </div>
+              ) : complianceCertPreview ? (
+                <div className="cert-upload-zone__preview">
+                  {complianceCertPreview === 'pdf' ? (
+                    <div className="cert-upload-zone__pdf-icon">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="#DC2626" strokeWidth="1.5" fill="#FEF2F2"/>
+                        <path d="M14 2v6h6" stroke="#DC2626" strokeWidth="1.5"/>
+                        <text x="6" y="18" fontSize="5" fill="#DC2626" fontWeight="700">PDF</text>
+                      </svg>
+                      <span className="cert-upload-zone__filename">{complianceCertFile?.name || 'เอกสาร PDF'}</span>
+                      {complianceCertFile && (
+                        <span className="cert-upload-zone__filesize">{(complianceCertFile.size / 1024).toFixed(0)} KB</span>
+                      )}
+                    </div>
+                  ) : (
+                    <img src={complianceCertPreview} alt="Certificate preview" className="cert-upload-zone__img" />
+                  )}
+                  <div className="cert-upload-zone__actions">
+                    <button
+                      type="button"
+                      className="cert-upload-zone__change-btn"
+                      onClick={(e) => { e.stopPropagation(); document.getElementById('cert-file-input-compliance')?.click(); }}
+                    >🔄 เปลี่ยนไฟล์</button>
+                    <button
+                      type="button"
+                      className="cert-upload-zone__remove-btn"
+                      onClick={(e) => { e.stopPropagation(); setComplianceCertFile(null); setComplianceCertPreview(null); setComplianceCertUrl(''); }}
+                    >🗑️ ลบ</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="cert-upload-zone__placeholder">
+                  <div className="cert-upload-zone__icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round"/>
+                      <polyline points="17 8 12 3 7 8" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      <line x1="12" y1="3" x2="12" y2="15" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                  <p className="cert-upload-zone__title">คลิกหรือลากไฟล์มาวางที่นี่</p>
+                  <p className="cert-upload-zone__subtitle">รองรับ JPG, PNG, WebP และ PDF · ขนาดไม่เกิน 5 MB (รูป) / 10 MB (PDF)</p>
+                  <p className="cert-upload-zone__note">ระบบจะปรับขนาดรูปภาพให้เหมาะสมอัตโนมัติ</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
