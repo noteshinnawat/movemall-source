@@ -1,4 +1,5 @@
 import { useState, useMemo, Fragment } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
@@ -8,6 +9,8 @@ import { FilterSidebar } from '../components/FilterSidebar';
 import { products as staticProducts, categories } from '../data/products';
 import { initialVideoClips } from '../data/videoClips';
 import { initialAdCampaigns } from '../data/mockAdsData';
+import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import type { Product } from '../types';
 import type { FilterState } from '../components/FilterSidebar';
 import './ShopPage.css';
@@ -30,6 +33,8 @@ interface ShopPageProps {
 }
 
 export function ShopPage({ products: propProducts, onAddToCart, isWishlisted, onToggleWishlist }: ShopPageProps) {
+  const { t, i18n } = useTranslation(['catalog', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const [searchParams] = useSearchParams();
   const urlCategory = searchParams.get('category');
   const sourceProducts = propProducts || staticProducts;
@@ -108,7 +113,10 @@ export function ShopPage({ products: propProducts, onAddToCart, isWishlisted, on
     if (cat) {
       activeChips.push({
         key: `cat-${id}`,
-        label: `${cat.icon} ${cat.name}`,
+        label: t('catalog:shop.categoryChip', {
+          icon: cat.icon,
+          category: t(`catalog:categories.${cat.id}.name`),
+        }),
         remove: () => setFilters(f => ({ ...f, categories: f.categories.filter(c => c !== id) })),
       });
     }
@@ -116,21 +124,24 @@ export function ShopPage({ products: propProducts, onAddToCart, isWishlisted, on
   if (filters.minPrice || filters.maxPrice) {
     activeChips.push({
       key: 'price',
-      label: `฿${filters.minPrice || '0'} – ฿${filters.maxPrice || '∞'}`,
+      label: t('catalog:shop.priceRange', {
+        min: formatCurrency(Number(filters.minPrice || 0), locale),
+        max: filters.maxPrice ? formatCurrency(Number(filters.maxPrice), locale) : t('catalog:shop.noMaximum'),
+      }),
       remove: () => setFilters(f => ({ ...f, minPrice: '', maxPrice: '' })),
     });
   }
   if (filters.rating !== null) {
     activeChips.push({
       key: 'rating',
-      label: `${'★'.repeat(filters.rating)} ขึ้นไป`,
+      label: t('catalog:shop.ratingChip', { stars: '★'.repeat(filters.rating) }),
       remove: () => setFilters(f => ({ ...f, rating: null })),
     });
   }
   filters.badges.forEach(b => {
     activeChips.push({
       key: `badge-${b}`,
-      label: b === 'sale' ? '🔥 Sale' : b === 'new' ? '✨ ใหม่' : '⚡ Hot',
+      label: t(`catalog:filters.badges.${b}`),
       remove: () => setFilters(f => ({ ...f, badges: f.badges.filter(x => x !== b) })),
     });
   });
@@ -140,8 +151,8 @@ export function ShopPage({ products: propProducts, onAddToCart, isWishlisted, on
       {/* Hero */}
       <div className="shop__hero">
         <div className="container">
-          <h1 className="shop__hero-title">🛍 ช้อปสินค้าทั้งหมด</h1>
-          <p className="shop__hero-sub">สินค้าคุณภาพดี ราคาโดน จัดส่งไว</p>
+          <h1 className="shop__hero-title">{t('catalog:shop.title')}</h1>
+          <p className="shop__hero-sub">{t('catalog:shop.subtitle')}</p>
         </div>
       </div>
 
@@ -154,13 +165,13 @@ export function ShopPage({ products: propProducts, onAddToCart, isWishlisted, on
           <div className="shop__main">
             {/* Active filter chips */}
             {activeChips.length > 0 && (
-              <div className="shop__active-filters" aria-label="ตัวกรองที่เลือก">
+              <div className="shop__active-filters" aria-label={t('catalog:shop.selectedFilters')}>
                 {activeChips.map(chip => (
                   <button
                     key={chip.key}
                     className="shop__filter-chip"
                     onClick={chip.remove}
-                    aria-label={`ลบตัวกรอง ${chip.label}`}
+                    aria-label={t('catalog:shop.removeFilter', { filter: chip.label })}
                   >
                     {chip.label}
                     <X size={12} />
@@ -172,22 +183,22 @@ export function ShopPage({ products: propProducts, onAddToCart, isWishlisted, on
             {/* Toolbar */}
             <div className="shop__toolbar">
               <p className="shop__result-count">
-                พบ <strong>{filtered.length}</strong> รายการ
+                {t('catalog:shop.results', { count: formatNumber(filtered.length, locale) })}
               </p>
               <div className="shop__toolbar-right">
-                <span className="shop__sort-label">เรียงตาม:</span>
+                <span className="shop__sort-label">{t('catalog:shop.sortLabel')}</span>
                 <select
                   id="shop-sort-select"
                   className="shop__sort-select"
                   value={sort}
                   onChange={e => setSort(e.target.value as SortKey)}
-                  aria-label="เรียงสินค้า"
+                  aria-label={t('catalog:shop.sortAria')}
                 >
-                  <option value="popular">ยอดนิยม</option>
-                  <option value="newest">ใหม่ล่าสุด</option>
-                  <option value="price-asc">ราคา: น้อย → มาก</option>
-                  <option value="price-desc">ราคา: มาก → น้อย</option>
-                  <option value="rating">คะแนนสูงสุด</option>
+                  <option value="popular">{t('catalog:shop.sort.popular')}</option>
+                  <option value="newest">{t('catalog:shop.sort.newest')}</option>
+                  <option value="price-asc">{t('catalog:shop.sort.priceAsc')}</option>
+                  <option value="price-desc">{t('catalog:shop.sort.priceDesc')}</option>
+                  <option value="rating">{t('catalog:shop.sort.rating')}</option>
                 </select>
               </div>
             </div>
@@ -197,15 +208,15 @@ export function ShopPage({ products: propProducts, onAddToCart, isWishlisted, on
               {filtered.length === 0 ? (
                 <div className="shop__empty">
                   <div className="shop__empty-icon">🔍</div>
-                  <h2 className="shop__empty-title">ไม่พบสินค้า</h2>
-                  <p className="shop__empty-sub">ลองปรับตัวกรองใหม่อีกครั้งนะครับ</p>
+                  <h2 className="shop__empty-title">{t('catalog:shop.emptyTitle')}</h2>
+                  <p className="shop__empty-sub">{t('catalog:shop.emptySubtitle')}</p>
                   <button
                     className="shop__empty-btn"
                     onClick={() => setFilters(DEFAULT_FILTERS)}
                     id="shop-clear-filters-btn"
                   >
                     <X size={14} />
-                    ล้างตัวกรองทั้งหมด
+                    {t('catalog:shop.clearAll')}
                   </button>
                 </div>
               ) : (

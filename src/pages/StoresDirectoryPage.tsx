@@ -1,8 +1,11 @@
 // src/pages/StoresDirectoryPage.tsx — Stores & Brands Directory
 
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Store as StoreIcon, ShieldCheck, Star } from 'lucide-react';
 import { stores } from '../data/stores';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import './StoresDirectoryPage.css';
 
 import { useState, useEffect } from 'react';
@@ -10,6 +13,8 @@ import { fetchStoresApi } from '../utils/api';
 import type { Store } from '../types';
 
 export function StoresDirectoryPage() {
+  const { t, i18n } = useTranslation(['catalog', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const [storeList, setStoreList] = useState<Store[]>(stores);
 
   useEffect(() => {
@@ -26,12 +31,12 @@ export function StoresDirectoryPage() {
             rating: s.rating || 4.8,
             reviewCount: 1200,
             responseRate: '98%',
-            responseTime: 'ภายในไม่กี่นาที',
-            joinedDate: '1 ปีที่แล้ว',
+            responseTime: t('catalog:store.defaults.responseTime'),
+            joinedDate: t('catalog:store.defaults.joinedOneYear'),
             productCount: s._count?.products || 20,
             followerCount: s.followers || 15000,
-            location: 'กรุงเทพมหานคร',
-            description: s.description || 'ร้านค้าทางการ Movemall ของแท้ 100%',
+            location: t('catalog:store.defaultLocation'),
+            description: s.description || t('catalog:storesDirectory.defaultDescription'),
           }));
           setStoreList(mapped);
         }
@@ -40,15 +45,15 @@ export function StoresDirectoryPage() {
       }
     }
     loadStores();
-  }, []);
+  }, [t]);
 
   return (
     <main className="stores-page">
       <section className="stores-hero">
         <div className="container">
-          <h1 className="stores-hero__title">🏬 ร้านค้าทางการ & แบรนด์ชั้นนำ (Movemall Official)</h1>
+          <h1 className="stores-hero__title">{t('catalog:storesDirectory.title')}</h1>
           <p className="stores-hero__subtitle">
-            ร้านทางการและร้านแนะนำในที่เดียว
+            {t('catalog:storesDirectory.subtitle')}
           </p>
         </div>
       </section>
@@ -64,7 +69,7 @@ export function StoresDirectoryPage() {
                     {store.name}
                     {store.badge === 'official' && (
                       <span style={{ fontSize: 10, background: 'var(--primary)', color: 'white', padding: '1px 5px', marginLeft: 6 }}>
-                        Official
+                        {t('catalog:store.official')}
                       </span>
                     )}
                   </h2>
@@ -75,21 +80,21 @@ export function StoresDirectoryPage() {
               <div className="store-card__stats">
                 <div>
                   <div className="store-card__stat-val">⭐ {store.rating}</div>
-                  <div className="store-card__stat-label">คะแนนร้าน</div>
+                  <div className="store-card__stat-label">{t('catalog:storesDirectory.storeRating')}</div>
                 </div>
                 <div>
-                  <div className="store-card__stat-val">{(store.followerCount ?? 0).toLocaleString()}</div>
-                  <div className="store-card__stat-label">ผู้ติดตาม</div>
+                  <div className="store-card__stat-val">{formatNumber(store.followerCount ?? 0, locale)}</div>
+                  <div className="store-card__stat-label">{t('catalog:storesDirectory.followers')}</div>
                 </div>
                 <div>
-                  <div className="store-card__stat-val">{store.productCount} รายการ</div>
-                  <div className="store-card__stat-label">สินค้าทั้งหมด</div>
+                  <div className="store-card__stat-val">{t('catalog:storesDirectory.productCount', { count: formatNumber(store.productCount, locale) })}</div>
+                  <div className="store-card__stat-label">{t('catalog:storesDirectory.allProducts')}</div>
                 </div>
               </div>
 
-              <Link to={`/store/${store.id}`} className="store-card__btn">
-                เข้าชมหน้าร้านค้า →
-              </Link>
+              <LocalizedLink to={`/store/${store.id}`} className="store-card__btn">
+                {t('catalog:storesDirectory.visitStore')}
+              </LocalizedLink>
             </div>
           ))}
         </div>

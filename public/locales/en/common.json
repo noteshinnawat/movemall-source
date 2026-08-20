@@ -2,6 +2,7 @@
   "loading": "Loading...",
   "actions": {
     "close": "Close",
+    "cancel": "Cancel",
     "back": "Back",
     "continue": "Continue",
     "retry": "Try again",

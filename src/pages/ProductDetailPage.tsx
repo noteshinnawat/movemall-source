@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, Heart, Minus, Plus, Store as StoreIcon, MessageSquare, ShieldCheck, ChevronLeft, ChevronRight, Play, Video, Share2, Check, X, CreditCard, Sparkles, Loader2, Flag } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { ReviewsSection } from '../components/ReviewsSection';
@@ -9,6 +10,10 @@ import { getStoreById, stores } from '../data/stores';
 import { mockLiveStreams } from '../data/liveStreams';
 import { parseRichText } from '../components/RichTextEditor';
 import { extractProductId, getProductUrl, updateProductSEO } from '../utils/seo';
+import { LocalizedLink as Link, useLocalizedPath } from '../i18n/LocalizedLink';
+import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
+import { getDemoProductOptionKeys } from './ProductDetailPage.behavior';
 import type { Product } from '../types';
 import './ProductDetailPage.css';
 
@@ -22,10 +27,10 @@ interface ProductDetailPageProps {
 }
 
 const PERKS = [
-  { icon: '🚚', text: 'จัดส่งฟรีเมื่อซื้อครบ ฿299' },
-  { icon: '↩️', text: 'คืนสินค้าได้ภายใน 30 วัน' },
-  { icon: '🔒', text: 'ชำระเงินปลอดภัย 100%' },
-  { icon: '⚡', text: 'รับประกันของแท้ 100%' },
+  { icon: '🚚', textKey: 'product.perks.freeShipping' },
+  { icon: '↩️', textKey: 'product.perks.returns' },
+  { icon: '🔒', textKey: 'product.perks.securePayment' },
+  { icon: '⚡', textKey: 'product.perks.authentic' },
 ];
 
 export function ProductDetailPage({
@@ -36,9 +41,12 @@ export function ProductDetailPage({
   cartCount = 0,
   onOpenVisualSearchWithImage,
 }: ProductDetailPageProps) {
+  const { t, i18n } = useTranslation(['catalog', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const { id: rawId } = useParams<{ id: string }>();
   const id = extractProductId(rawId);
   const navigate = useNavigate();
+  const localizePath = useLocalizedPath();
   const sourceProducts = propProducts || staticProducts;
   const product = sourceProducts.find(p => p.id === id || p.id === rawId);
   const store = (product?.storeId && getStoreById(product.storeId)) || stores[0];
@@ -70,11 +78,11 @@ export function ProductDetailPage({
 
   function handleShareProduct() {
     try {
-      const shareUrl = product ? `${window.location.origin}${getProductUrl(product)}` : window.location.href;
+      const shareUrl = product ? `${window.location.origin}${localizePath(getProductUrl(product))}` : window.location.href;
       if (navigator.clipboard) {
         navigator.clipboard.writeText(shareUrl);
       }
-      alert('คัดลอกลิงก์สินค้า (SEO URL) เรียบร้อยแล้ว!');
+      alert(t('catalog:product.shareCopied'));
     } catch {}
   }
 
@@ -116,11 +124,11 @@ export function ProductDetailPage({
     updateProductSEO(product, store?.name);
 
     // If accessed with legacy non-SEO URL, gracefully replace browser history URL without reloading
-    const canonicalSeoUrl = getProductUrl(product);
+    const canonicalSeoUrl = localizePath(getProductUrl(product));
     if (window.location.pathname !== canonicalSeoUrl) {
       window.history.replaceState(null, '', canonicalSeoUrl + window.location.search);
     }
-  }, [product, store]);
+  }, [localizePath, product, store]);
 
   const productId = product?.id;
   const productStoreId = product?.storeId;
@@ -236,8 +244,8 @@ export function ProductDetailPage({
       <div className="product-detail" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 64, marginBottom: 16 }}>😕</div>
-          <h1 style={{ marginBottom: 8 }}>ไม่พบสินค้า</h1>
-          <Link to="/shop" style={{ color: 'var(--primary-light)' }}>กลับไปช้อปต่อ</Link>
+          <h1 style={{ marginBottom: 8 }}>{t('catalog:product.notFound')}</h1>
+          <Link to="/shop" style={{ color: 'var(--primary-light)' }}>{t('catalog:product.backToShop')}</Link>
         </div>
       </div>
     );
@@ -248,19 +256,35 @@ export function ProductDetailPage({
     ...((product.images || []).map(img => ({ type: 'image' as const, url: img })))
   ];
   const currentMedia = mediaList[selectedImg] || mediaList[0];
-  const colorOptions = product.category === 'fashion'
-    ? ['สีดำ (Classic Black)', 'สีขาวมุก (Pearl White)', 'สีกรมท่า (Navy Blue)', 'สีเบจ (Beige)']
-    : product.category === 'electronics'
-    ? ['Space Gray (เทาเข้ม)', 'Silver (เงินเงา)', 'Midnight Blue (มิดไนท์)', 'Starlight (ทองอ่อน)']
-    : product.category === 'beauty'
-    ? ['01 Natural Glow', '02 Warm Peach', '03 Soft Rose']
-    : ['รุ่นมาตรฐาน (Standard)', 'รุ่นพรีเมียม (Pro Edition)', 'สีดำคลาสสิก (Classic Black)'];
+  const colorOptions = getDemoProductOptionKeys(product.category);
+  const selectedOptionKey = selectedColor || colorOptions[0];
+  const selectedOptionLabel = t(`catalog:${selectedOptionKey}`);
 
   const installmentOptions = [
-    { id: 'full', label: 'ชำระเต็มจำนวน', desc: `฿${(totalPrice ?? 0).toLocaleString()}`, tag: 'ยอดนิยม' },
-    { id: '3m', label: 'ผ่อน 0% x 3 เดือน', desc: `฿${Math.round((totalPrice ?? 0) / 3).toLocaleString()}/เดือน`, tag: '0% ดอกเบี้ย' },
-    { id: '6m', label: 'ผ่อน 0% x 6 เดือน', desc: `฿${Math.round((totalPrice ?? 0) / 6).toLocaleString()}/เดือน`, tag: 'Movemall PayLater' },
-    ...(totalPrice >= 3000 ? [{ id: '10m', label: 'ผ่อน 0% x 10 เดือน', desc: `฿${Math.round((totalPrice ?? 0) / 10).toLocaleString()}/เดือน`, tag: 'ยอด ฿3,000+' }] : []),
+    {
+      id: 'full',
+      label: t('catalog:product.installments.full'),
+      desc: formatCurrency(totalPrice ?? 0, locale),
+      tag: t('catalog:product.installments.popular'),
+    },
+    {
+      id: '3m',
+      label: t('catalog:product.installments.months', { count: 3 }),
+      desc: t('catalog:product.installments.perMonth', { amount: formatCurrency(Math.round((totalPrice ?? 0) / 3), locale) }),
+      tag: t('catalog:product.installments.zeroInterest'),
+    },
+    {
+      id: '6m',
+      label: t('catalog:product.installments.months', { count: 6 }),
+      desc: t('catalog:product.installments.perMonth', { amount: formatCurrency(Math.round((totalPrice ?? 0) / 6), locale) }),
+      tag: 'Movemall PayLater',
+    },
+    ...(totalPrice >= 3000 ? [{
+      id: '10m',
+      label: t('catalog:product.installments.months', { count: 10 }),
+      desc: t('catalog:product.installments.perMonth', { amount: formatCurrency(Math.round((totalPrice ?? 0) / 10), locale) }),
+      tag: t('catalog:product.installments.minimumTag', { amount: formatCurrency(3000, locale) }),
+    }] : []),
   ];
 
   function openAddToCartDrawer() {
@@ -278,7 +302,7 @@ export function ProductDetailPage({
     onAddToCart(product, qty);
     setIsDrawerOpen(false);
     if (drawerAction === 'buy') {
-      navigate('/checkout');
+      navigate(localizePath('/checkout'));
     }
   }
 
@@ -294,7 +318,7 @@ export function ProductDetailPage({
     if (window.history.length > 1) {
       navigate(-1);
     } else {
-      navigate('/shop');
+      navigate(localizePath('/shop'));
     }
   }
 
@@ -302,21 +326,23 @@ export function ProductDetailPage({
     <main className="product-detail">
       <div className="container">
         {/* Desktop Breadcrumbs & Back Navigation */}
-        <nav className="product-detail__top-nav" aria-label="แถบนำทาง">
+        <nav className="product-detail__top-nav" aria-label={t('catalog:product.breadcrumbAria')}>
           <button
             type="button"
             className="product-detail__back-nav-btn"
             onClick={handleGoBack}
-            aria-label="ย้อนกลับไปหน้าก่อนหน้า"
+            aria-label={t('catalog:product.backAria')}
           >
-            <ArrowLeft size={16} /> ย้อนกลับ
+            <ArrowLeft size={16} /> {t('common:actions.back')}
           </button>
           <div className="product-detail__breadcrumbs">
-            <Link to="/">หน้าแรก</Link>
+            <Link to="/">{t('catalog:product.home')}</Link>
             <span className="product-detail__breadcrumb-sep">/</span>
-            <Link to="/shop">สินค้าทั้งหมด</Link>
+            <Link to="/shop">{t('catalog:product.allProducts')}</Link>
             <span className="product-detail__breadcrumb-sep">/</span>
-            <Link to={`/shop?category=${product.category}`}>{product.category}</Link>
+            <Link to={`/shop?category=${product.category}`}>
+              {t(`catalog:categories.${product.category}.name`, { defaultValue: product.category })}
+            </Link>
             <span className="product-detail__breadcrumb-sep">/</span>
             <span className="product-detail__breadcrumb-current">{product.name}</span>
           </div>
@@ -343,13 +369,13 @@ export function ProductDetailPage({
               }}
             >
               {/* Shopee / TikTok Style Floating Navigation & Actions Overlay */}
-              <div className="product-floating-top-bar" aria-label="แถบควบคุมด้านบน">
+              <div className="product-floating-top-bar" aria-label={t('catalog:product.topControls')}>
                 <button
                   type="button"
                   className="product-float-btn"
                   onClick={handleGoBack}
-                  aria-label="ย้อนกลับ"
-                  title="ย้อนกลับ"
+                  aria-label={t('common:actions.back')}
+                  title={t('common:actions.back')}
                 >
                   <ArrowLeft size={22} />
                 </button>
@@ -359,8 +385,8 @@ export function ProductDetailPage({
                     type="button"
                     className="product-float-btn"
                     onClick={() => setIsReportModalOpen(true)}
-                    aria-label="รายงานสินค้าหรือร้านค้านี้"
-                    title="รายงานสินค้าหรือร้านค้านี้ (แจ้งของปลอม/หลอกลวง)"
+                    aria-label={t('catalog:product.reportAria')}
+                    title={t('catalog:product.reportTitle')}
                     style={{ color: '#DC2626' }}
                   >
                     <Flag size={18} />
@@ -370,8 +396,8 @@ export function ProductDetailPage({
                     type="button"
                     className="product-float-btn"
                     onClick={handleShareProduct}
-                    aria-label="แชร์สินค้า"
-                    title="แชร์สินค้า"
+                    aria-label={t('catalog:product.share')}
+                    title={t('catalog:product.share')}
                   >
                     <Share2 size={20} />
                   </button>
@@ -380,8 +406,8 @@ export function ProductDetailPage({
                     type="button"
                     className={`product-float-btn${isWishlisted?.(product.id) ? ' product-float-btn--wished' : ''}`}
                     onClick={() => onToggleWishlist?.(product)}
-                    aria-label="บันทึกรายการโปรด"
-                    title="บันทึกรายการโปรด"
+                    aria-label={t('catalog:product.saveFavorite')}
+                    title={t('catalog:product.saveFavorite')}
                   >
                     <Heart
                       size={20}
@@ -393,12 +419,12 @@ export function ProductDetailPage({
                   <Link
                     to="/cart"
                     className="product-float-btn product-float-cart-link"
-                    aria-label="ดูตะกร้า"
-                    title="ดูตะกร้า"
+                    aria-label={t('catalog:product.viewCart')}
+                    title={t('catalog:product.viewCart')}
                   >
                     <ShoppingBag size={20} />
                     {cartCount > 0 && (
-                      <span className="product-float-cart-badge">{cartCount}</span>
+                      <span className="product-float-cart-badge">{formatNumber(cartCount, locale)}</span>
                     )}
                   </Link>
                 </div>
@@ -418,7 +444,7 @@ export function ProductDetailPage({
                   />
                   <div className="product-detail__video-tag">
                     <Video size={12} />
-                    <span>วิดีโอสาธิตสินค้าจริง</span>
+                    <span>{t('catalog:product.demoVideo')}</span>
                   </div>
                 </>
               ) : (
@@ -434,10 +460,10 @@ export function ProductDetailPage({
                   type="button"
                   className="product-detail__visual-search"
                   onClick={() => onOpenVisualSearchWithImage(currentMedia?.url || product.images?.[0] || '')}
-                  aria-label="ค้นหาสินค้าที่คล้ายภาพนี้"
+                  aria-label={t('catalog:product.visualSearchAria')}
                 >
                   <Sparkles size={15} />
-                  <span>ค้นหาภาพคล้าย</span>
+                  <span>{t('catalog:product.visualSearch')}</span>
                 </button>
               )}
 
@@ -451,8 +477,8 @@ export function ProductDetailPage({
                       e.stopPropagation();
                       setSelectedImg((prev) => (prev > 0 ? prev - 1 : mediaList.length - 1));
                     }}
-                    aria-label="รูปภาพก่อนหน้า"
-                    title="รูปภาพก่อนหน้า"
+                    aria-label={t('catalog:product.previousImage')}
+                    title={t('catalog:product.previousImage')}
                   >
                     <ChevronLeft size={20} />
                   </button>
@@ -463,15 +489,18 @@ export function ProductDetailPage({
                       e.stopPropagation();
                       setSelectedImg((prev) => (prev < mediaList.length - 1 ? prev + 1 : 0));
                     }}
-                    aria-label="รูปภาพถัดไป"
-                    title="รูปภาพถัดไป"
+                    aria-label={t('catalog:product.nextImage')}
+                    title={t('catalog:product.nextImage')}
                   >
                     <ChevronRight size={20} />
                   </button>
 
                   {/* Image Counter Badge (e.g. 1/5) */}
                   <div className="product-detail__image-counter">
-                    <span>{selectedImg + 1} / {mediaList.length}</span>
+                    <span>{t('catalog:product.imagePosition', {
+                      current: formatNumber(selectedImg + 1, locale),
+                      total: formatNumber(mediaList.length, locale),
+                    })}</span>
                   </div>
                 </>
               )}
@@ -486,7 +515,7 @@ export function ProductDetailPage({
                     type="button"
                     className={`product-detail__dot${selectedImg === i ? ' product-detail__dot--active' : ''}`}
                     onClick={() => setSelectedImg(i)}
-                    aria-label={`ไปยังรูปที่ ${i + 1}`}
+                    aria-label={t('catalog:product.goToImage', { number: i + 1 })}
                   />
                 ))}
               </div>
@@ -501,9 +530,9 @@ export function ProductDetailPage({
                       key="video-thumb"
                       className={`product-detail__thumb product-detail__thumb--video${selectedImg === i ? ' product-detail__thumb--active' : ''}`}
                       onClick={() => setSelectedImg(i)}
-                      title="รับชมวิดีโอสินค้า"
+                      title={t('catalog:product.watchVideo')}
                     >
-                      <img src={item.poster} alt="วิดีโอตัวอย่าง" />
+                      <img src={item.poster} alt={t('catalog:product.videoPreviewAlt')} />
                       <div className="product-detail__thumb-play-badge">
                         <Play size={12} fill="#FFFFFF" color="#FFFFFF" />
                         <span>VDO</span>
@@ -513,7 +542,7 @@ export function ProductDetailPage({
                     <img
                       key={i}
                       src={item.url}
-                      alt={`${product.name} รูปที่ ${i + 1}`}
+                      alt={t('catalog:product.imageAlt', { name: product.name, number: i + 1 })}
                       className={`product-detail__thumb${selectedImg === i ? ' product-detail__thumb--active' : ''}`}
                       onClick={() => setSelectedImg(i)}
                     />
@@ -527,33 +556,37 @@ export function ProductDetailPage({
           <div className="product-detail__info">
             {product.badge && (
               <span className={`product-detail__badge product-detail__badge--${product.badge}`}>
-                {product.badge === 'sale' ? '🔥 Sale' : product.badge === 'new' ? '✨ ใหม่' : '⚡ Hot'}
+                {t(`catalog:product.card.badges.${product.badge}`)}
               </span>
             )}
 
-            <p className="product-detail__category">{product.category}</p>
+            <p className="product-detail__category">
+              {t(`catalog:categories.${product.category}.name`, { defaultValue: product.category })}
+            </p>
             <h1 className="product-detail__name">{product.name}</h1>
 
             {/* Rating */}
             <div className="product-detail__rating-row">
               <span className="product-detail__stars" aria-hidden="true">{stars}</span>
               <span className="product-detail__rating-num">{(product.rating ?? 5).toFixed(1)}</span>
-              <span className="product-detail__review-count">({(product.reviewCount ?? 0).toLocaleString()} รีวิว)</span>
+              <span className="product-detail__review-count">{t('catalog:product.reviewCount', { count: formatNumber(product.reviewCount ?? 0, locale) })}</span>
               <span className="product-detail__stock">
-                {(product.stock ?? 0) > 10 ? `✓ มีสินค้า ${product.stock} ชิ้น` : `⚠ เหลือ ${product.stock ?? 0} ชิ้น`}
+                {(product.stock ?? 0) > 10
+                  ? t('catalog:product.inStock', { count: formatNumber(product.stock, locale) })
+                  : t('catalog:product.lowStock', { count: formatNumber(product.stock ?? 0, locale) })}
               </span>
             </div>
 
             {/* Price */}
             <div className="product-detail__price-block">
-              <span className="product-detail__price">฿{(product.price ?? 0).toLocaleString()}</span>
+              <span className="product-detail__price">{formatCurrency(product.price ?? 0, locale)}</span>
               {Boolean(product.originalPrice && product.originalPrice > (product.price ?? 0)) && (
                 <span className="product-detail__original-price">
-                  ฿{(product.originalPrice ?? 0).toLocaleString()}
+                  {formatCurrency(product.originalPrice ?? 0, locale)}
                 </span>
               )}
               {discount && (
-                <span className="product-detail__discount">ลด {discount}%</span>
+                <span className="product-detail__discount">{t('catalog:product.discount', { discount })}</span>
               )}
             </div>
 
@@ -563,18 +596,18 @@ export function ProductDetailPage({
               onClick={openAddToCartDrawer}
               role="button"
               tabIndex={0}
-              title="แตะเพื่อเลือกสี จำนวน และการผ่อนชำระ"
+              title={t('catalog:product.optionsHint')}
             >
               <div className="product-detail__var-left">
-                <span className="product-detail__var-label">ตัวเลือก:</span>
-                <span className="product-detail__var-value">{selectedColor || colorOptions[0]}</span>
+                <span className="product-detail__var-label">{t('catalog:product.optionsLabel')}</span>
+                <span className="product-detail__var-value">{selectedOptionLabel}</span>
                 <span className="product-detail__var-divider">•</span>
-                <span className="product-detail__var-qty">จำนวน {qty} ชิ้น</span>
+                <span className="product-detail__var-qty">{t('catalog:product.quantityItems', { count: formatNumber(qty, locale) })}</span>
                 <span className="product-detail__var-divider">•</span>
-                <span className="product-detail__var-tag">ผ่อน 0%</span>
+                <span className="product-detail__var-tag">{t('catalog:product.installmentZero')}</span>
               </div>
               <span className="product-detail__var-btn-text">
-                เปลี่ยน &gt;
+                {t('catalog:product.change')}
               </span>
             </div>
 
@@ -588,9 +621,9 @@ export function ProductDetailPage({
             {/* Perks */}
             <div className="product-detail__perks">
               {PERKS.map(perk => (
-                <div key={perk.text} className="product-detail__perk">
+                <div key={perk.textKey} className="product-detail__perk">
                   <span className="product-detail__perk-icon">{perk.icon}</span>
-                  <span className="product-detail__perk-text">{perk.text}</span>
+                  <span className="product-detail__perk-text">{t(`catalog:${perk.textKey}`)}</span>
                 </div>
               ))}
             </div>
@@ -600,7 +633,7 @@ export function ProductDetailPage({
               <div style={{ marginTop: '0.75rem', padding: '0.6rem 0.85rem', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.825rem', color: '#1E40AF' }}>
                 <span style={{ fontSize: '1.1rem' }}>🧾</span>
                 <div>
-                  <strong>ออกใบกำกับภาษีได้</strong> — ขอรับทางอีเมลในขั้นตอนชำระเงิน
+                  {t('catalog:product.taxInvoiceBanner')}
                 </div>
               </div>
             )}
@@ -609,17 +642,17 @@ export function ProductDetailPage({
             <div className="product-detail__desktop-purchase-card">
               {/* Color / Variant Selector */}
               <div className="product-detail__desktop-var-group">
-                <span className="product-detail__desktop-label">ตัวเลือกสี:</span>
+                <span className="product-detail__desktop-label">{t('catalog:product.colorOptions')}</span>
                 <div className="product-detail__desktop-var-chips">
-                  {colorOptions.map(color => (
+                  {colorOptions.map(optionKey => (
                     <button
-                      key={color}
+                      key={optionKey}
                       type="button"
-                      className={`product-detail__desktop-chip ${selectedColor === color ? 'selected' : ''}`}
-                      onClick={() => setSelectedColor(color)}
+                      className={`product-detail__desktop-chip ${selectedOptionKey === optionKey ? 'selected' : ''}`}
+                      onClick={() => setSelectedColor(optionKey)}
                     >
-                      {color}
-                      {selectedColor === color && <Check size={12} />}
+                      {t(`catalog:${optionKey}`)}
+                      {selectedOptionKey === optionKey && <Check size={12} />}
                     </button>
                   ))}
                 </div>
@@ -627,7 +660,7 @@ export function ProductDetailPage({
 
               {/* Quantity Selector */}
               <div className="product-detail__desktop-qty-row">
-                <span className="product-detail__desktop-label">จำนวน:</span>
+                <span className="product-detail__desktop-label">{t('catalog:product.quantity')}</span>
                 <div className="product-detail__desktop-qty-box">
                   <button
                     type="button"
@@ -648,7 +681,7 @@ export function ProductDetailPage({
                   </button>
                 </div>
                 <span className="product-detail__desktop-stock-txt">
-                  มีสินค้าทั้งหมด {product.stock} ชิ้น
+                  {t('catalog:product.totalStock', { count: formatNumber(product.stock, locale) })}
                 </span>
               </div>
 
@@ -661,7 +694,7 @@ export function ProductDetailPage({
                   onClick={handleAddToCart}
                 >
                   <ShoppingBag size={18} />
-                  <span>เพิ่มลงตะกร้า</span>
+                  <span>{t('catalog:product.addToCart')}</span>
                 </button>
 
                 <button
@@ -671,7 +704,7 @@ export function ProductDetailPage({
                   onClick={handleBuyNow}
                 >
                   <CreditCard size={18} />
-                  <span>ซื้อสินค้าทันที ฿{(totalPrice ?? 0).toLocaleString()}</span>
+                  <span>{t('catalog:product.buyNowAmount', { amount: formatCurrency(totalPrice ?? 0, locale) })}</span>
                 </button>
 
                 {(() => {
@@ -680,10 +713,10 @@ export function ProductDetailPage({
                     <Link
                       to={`/chat?storeId=${currentStore.id}&source=product&ref=${product.id}&refName=${encodeURIComponent(product.name || '')}`}
                       className="product-detail__desktop-chat-btn"
-                      title="แชทกับร้านค้า"
+                      title={t('catalog:product.chatStore')}
                     >
                       <MessageSquare size={18} />
-                      <span>แชท</span>
+                      <span>{t('catalog:product.chat')}</span>
                     </Link>
                   );
                 })()}
@@ -695,14 +728,14 @@ export function ProductDetailPage({
               <div className="product-detail__compliance-header">
                 <div className="product-detail__compliance-title-group">
                   <ShieldCheck size={16} className="product-detail__compliance-icon" />
-                  <span className="product-detail__compliance-title">🛡️ มาตรฐานสินค้า & ใบอนุญาต (Movemall AI Verified)</span>
+                  <span className="product-detail__compliance-title">{t('catalog:product.compliance.title')}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: '0.72rem', background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0', padding: '2px 8px', borderRadius: 4, fontWeight: 700 }}>
-                    🟢 ฐานข้อมูลภาครัฐ: ACTIVE
+                    {t('catalog:product.compliance.governmentActive')}
                   </span>
                   <span className="product-detail__compliance-badge">
-                    ✓ AI ตรวจสอบแล้ว 98%
+                    {t('catalog:product.compliance.aiVerified', { score: 98 })}
                   </span>
                 </div>
               </div>
@@ -710,7 +743,7 @@ export function ProductDetailPage({
               <div className="product-detail__compliance-grid">
                 {product.compliance?.fdaNumber ? (
                   <div className="product-detail__compliance-item">
-                    <span className="product-detail__compliance-label">เลขที่จดแจ้ง อย.:</span>
+                    <span className="product-detail__compliance-label">{t('catalog:product.compliance.fdaNumber')}</span>
                     <div className="product-detail__compliance-value-wrap">
                       <strong className="product-detail__compliance-value" style={{ color: '#059669' }}>
                         {product.compliance.fdaNumber}
@@ -720,16 +753,16 @@ export function ProductDetailPage({
                         className="product-detail__compliance-copy-btn"
                         onClick={() => {
                           navigator.clipboard.writeText(product.compliance?.fdaNumber || '');
-                          alert(`คัดลอกเลข อย. ${product.compliance?.fdaNumber} แล้ว`);
+                          alert(t('catalog:product.compliance.copiedFda', { number: product.compliance?.fdaNumber }));
                         }}
                       >
-                        คัดลอก
+                        {t('catalog:product.compliance.copy')}
                       </button>
                     </div>
                   </div>
                 ) : (product.category === 'beauty' || product.category === 'food') ? (
                   <div className="product-detail__compliance-item">
-                    <span className="product-detail__compliance-label">เลขที่จดแจ้ง อย.:</span>
+                    <span className="product-detail__compliance-label">{t('catalog:product.compliance.fdaNumber')}</span>
                     <div className="product-detail__compliance-value-wrap">
                       <strong className="product-detail__compliance-value" style={{ color: '#059669' }}>
                         10-1-6500098765
@@ -739,10 +772,10 @@ export function ProductDetailPage({
                         className="product-detail__compliance-copy-btn"
                         onClick={() => {
                           navigator.clipboard.writeText('10-1-6500098765');
-                          alert('คัดลอกเลข อย. "10-1-6500098765" สำเร็จ!');
+                          alert(t('catalog:product.compliance.copiedFda', { number: '10-1-6500098765' }));
                         }}
                       >
-                        คัดลอก
+                        {t('catalog:product.compliance.copy')}
                       </button>
                     </div>
                   </div>
@@ -750,22 +783,22 @@ export function ProductDetailPage({
 
                 {product.compliance?.tisiNumber ? (
                   <div className="product-detail__compliance-item">
-                    <span className="product-detail__compliance-label">มาตรฐานอุตสาหกรรม (มอก.):</span>
+                    <span className="product-detail__compliance-label">{t('catalog:product.compliance.tisiNumber')}</span>
                     <strong className="product-detail__compliance-value" style={{ color: '#2563EB' }}>
                       ⚡ {product.compliance.tisiNumber}
                     </strong>
                   </div>
                 ) : (product.category === 'electronics' || product.category === 'home') ? (
                   <div className="product-detail__compliance-item">
-                    <span className="product-detail__compliance-label">มาตรฐานอุตสาหกรรม (มอก.):</span>
+                    <span className="product-detail__compliance-label">{t('catalog:product.compliance.tisiNumber')}</span>
                     <strong className="product-detail__compliance-value" style={{ color: '#2563EB' }}>
-                      ⚡ มอก. 1195-2553
+                      {t('catalog:product.compliance.defaultTisi')}
                     </strong>
                   </div>
                 ) : null}
 
                 <div className="product-detail__compliance-item">
-                  <span className="product-detail__compliance-label">ประเทศที่ผลิต (Country of Origin):</span>
+                  <span className="product-detail__compliance-label">{t('catalog:product.compliance.countryOfOrigin')}</span>
                   <strong className="product-detail__compliance-value">
                     🌐 {product.compliance?.countryOfOrigin || (product.category === 'beauty' ? 'South Korea' : product.category === 'electronics' ? 'China' : 'Thailand')}
                   </strong>
@@ -773,7 +806,7 @@ export function ProductDetailPage({
 
                 {product.compliance?.halalNumber && (
                   <div className="product-detail__compliance-item">
-                    <span className="product-detail__compliance-label">เครื่องหมายฮาลาล:</span>
+                    <span className="product-detail__compliance-label">{t('catalog:product.compliance.halal')}</span>
                     <strong className="product-detail__compliance-value" style={{ color: '#059669' }}>
                       ☪️ {product.compliance.halalNumber}
                     </strong>
@@ -803,7 +836,7 @@ export function ProductDetailPage({
                   cursor: 'pointer',
                   boxShadow: '0 4px 14px rgba(239, 68, 68, 0.25)',
                 }}
-                onClick={() => navigate('/live')}
+                onClick={() => navigate(localizePath('/live'))}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{
@@ -820,10 +853,10 @@ export function ProductDetailPage({
                   </span>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 800 }}>
-                      {store.name} กำลังไลฟ์ · {activeLive.viewers} คนดู
+                      {t('catalog:product.storeLive', { store: store.name, count: activeLive.viewers })}
                     </div>
                     <div style={{ fontSize: 11, color: '#FBBF24' }}>
-                      ลด 50% + ส่งฟรีในไลฟ์
+                      {t('catalog:product.livePromotion', { discount: 50 })}
                     </div>
                   </div>
                 </div>
@@ -840,7 +873,7 @@ export function ProductDetailPage({
                     cursor: 'pointer',
                   }}
                 >
-                  เข้าชมไลฟ์สดร้านนี้ →
+                  {t('catalog:product.joinStoreLive')}
                 </button>
               </div>
             )}
@@ -865,16 +898,19 @@ export function ProductDetailPage({
                       <h3 className="product-store-name">{store.name}</h3>
                       {store.badge === 'official' && (
                         <span className="product-store-badge-official">
-                          <ShieldCheck size={11} /> Official
+                          <ShieldCheck size={11} /> {t('catalog:store.official')}
                         </span>
                       )}
                     </div>
                     <div className="product-store-meta">
-                      <span className="store-meta-rating">⭐ {store.rating ?? 5} ({(store.reviewCount ?? 0).toLocaleString()} รีวิว)</span>
+                      <span className="store-meta-rating">{t('catalog:product.storeRating', {
+                        rating: store.rating ?? 5,
+                        count: formatNumber(store.reviewCount ?? 0, locale),
+                      })}</span>
                       <span className="store-meta-sep">•</span>
-                      <span>ตอบแชท: {store.responseRate || '100%'}</span>
+                      <span>{t('catalog:product.chatResponse', { rate: store.responseRate || '100%' })}</span>
                       <span className="store-meta-sep">•</span>
-                      <span>📍 {store.location || 'กรุงเทพมหานคร'}</span>
+                      <span>📍 {store.location || t('catalog:store.defaultLocation')}</span>
                     </div>
                   </div>
                 </div>
@@ -882,17 +918,17 @@ export function ProductDetailPage({
                 <div className="product-store-actions">
                   <button
                     className="product-store-chat-btn"
-                    onClick={() => navigate(`/chat?store=${store.id}&source=product&ref=${product.id}&refName=${encodeURIComponent(product.name || '')}`)}
+                    onClick={() => navigate(localizePath(`/chat?store=${store.id}&source=product&ref=${product.id}&refName=${encodeURIComponent(product.name || '')}`))}
                   >
                     <MessageSquare size={14} />
-                    แชทกับร้าน
+                    {t('catalog:product.chatStore')}
                   </button>
                   <Link
                     to={`/store/${store.id}`}
                     className="product-store-visit-btn"
                   >
                     <StoreIcon size={14} />
-                    เข้าชมร้านค้า
+                    {t('catalog:product.visitStore')}
                   </Link>
                   <button
                     type="button"
@@ -910,10 +946,10 @@ export function ProductDetailPage({
                       alignItems: 'center',
                       gap: 4,
                     }}
-                    title="รายงานร้านค้านี้ กรณีพบสินค้าปลอม เลียนแบบ หรือหลอกลวง"
+                    title={t('catalog:product.reportStoreTitle')}
                   >
                     <Flag size={12} />
-                    รายงาน
+                    {t('catalog:product.report')}
                   </button>
                 </div>
               </div>
@@ -923,8 +959,10 @@ export function ProductDetailPage({
                 <div className="product-store-products-tray">
                   <div className="product-store-products-header">
                     <div className="product-store-products-title">
-                      <span>สินค้าแนะนำจากร้านนี้</span>
-                      <span className="product-store-count-chip">{store.productCount || storeProducts.length + 1} ชิ้น</span>
+                      <span>{t('catalog:product.storeRecommendations')}</span>
+                      <span className="product-store-count-chip">{t('catalog:product.itemCount', {
+                        count: formatNumber(store.productCount || storeProducts.length + 1, locale),
+                      })}</span>
                     </div>
 
                     <div className="product-store-header-right">
@@ -932,16 +970,16 @@ export function ProductDetailPage({
                         <button
                           className="store-scroll-arrow-btn"
                           onClick={() => handleScrollStore('left')}
-                          aria-label="เลื่อนซ้าย"
-                          title="เลื่อนซ้าย"
+                          aria-label={t('catalog:product.scrollLeft')}
+                          title={t('catalog:product.scrollLeft')}
                         >
                           <ChevronLeft size={16} />
                         </button>
                         <button
                           className="store-scroll-arrow-btn"
                           onClick={() => handleScrollStore('right')}
-                          aria-label="เลื่อนขวา"
-                          title="เลื่อนขวา"
+                          aria-label={t('catalog:product.scrollRight')}
+                          title={t('catalog:product.scrollRight')}
                         >
                           <ChevronRight size={16} />
                         </button>
@@ -951,7 +989,7 @@ export function ProductDetailPage({
                         to={`/store/${store.id}`} 
                         className="product-store-see-all-link"
                       >
-                        ดูทั้งหมด →
+                        {t('catalog:product.viewAll')}
                       </Link>
                     </div>
                   </div>
@@ -972,18 +1010,18 @@ export function ProductDetailPage({
                         <div 
                           key={p.id} 
                           className="store-mini-card"
-                          onClick={() => navigate(getProductUrl(p))}
+                          onClick={() => navigate(localizePath(getProductUrl(p)))}
                         >
                           <div className="store-mini-img-wrap">
                             <img src={p.images?.[0] || ''} alt={p.name} className="store-mini-img" />
-                            {disc && <span className="store-mini-badge">-{disc}%</span>}
+                            {disc && <span className="store-mini-badge">{t('catalog:product.card.discount', { discount: disc })}</span>}
                           </div>
                           <div className="store-mini-info">
                             <h4 className="store-mini-name" title={p.name}>{p.name}</h4>
                             <div className="store-mini-price-row">
-                              <span className="store-mini-price">฿{(p.price ?? 0).toLocaleString()}</span>
+                              <span className="store-mini-price">{formatCurrency(p.price ?? 0, locale)}</span>
                               {p.originalPrice && (
-                                <span className="store-mini-orig">฿{(p.originalPrice ?? 0).toLocaleString()}</span>
+                                <span className="store-mini-orig">{formatCurrency(p.originalPrice ?? 0, locale)}</span>
                               )}
                             </div>
                           </div>
@@ -992,8 +1030,10 @@ export function ProductDetailPage({
                     })}
                     <Link to={`/store/${store.id}`} className="store-mini-more-card">
                       <StoreIcon size={20} />
-                      <span>ดูทั้งหมด</span>
-                      <small>{store.productCount || storeProducts.length + 1} ชิ้น →</small>
+                      <span>{t('catalog:product.viewAllLabel')}</span>
+                      <small>{t('catalog:product.itemCountArrow', {
+                        count: formatNumber(store.productCount || storeProducts.length + 1, locale),
+                      })}</small>
                     </Link>
                   </div>
                 </div>
@@ -1002,9 +1042,9 @@ export function ProductDetailPage({
 
         {/* Description */}
         <div className="product-detail__section">
-          <h2 className="product-detail__section-title">รายละเอียดสินค้า</h2>
+          <h2 className="product-detail__section-title">{t('catalog:product.descriptionTitle')}</h2>
           <div className="product-detail__desc">
-            {product.description ? parseRichText(product.description) : 'ไม่มีรายละเอียดสินค้า'}
+            {product.description ? parseRichText(product.description) : t('catalog:product.noDescription')}
           </div>
         </div>
 
@@ -1018,7 +1058,7 @@ export function ProductDetailPage({
         {/* Related */}
         {related.length > 0 && (
           <div className="product-detail__section">
-            <h2 className="product-detail__section-title">สินค้าที่เกี่ยวข้อง</h2>
+            <h2 className="product-detail__section-title">{t('catalog:product.related')}</h2>
             <div className="product-detail__related-grid">
               {related.map(p => (
                 <ProductCard
@@ -1039,9 +1079,9 @@ export function ProductDetailPage({
             <div className="product-recommend-title-wrap">
               <h2 className="product-detail__section-title">
                 <Sparkles size={18} className="product-recommend-sparkle-icon" />
-                คุณอาจชอบ
+                {t('catalog:product.recommendations.title')}
               </h2>
-              <p className="product-recommend-subtitle">สินค้าที่มักซื้อด้วยกัน</p>
+              <p className="product-recommend-subtitle">{t('catalog:product.recommendations.subtitle')}</p>
             </div>
 
             {/* Filter Tabs */}
@@ -1051,21 +1091,21 @@ export function ProductDetailPage({
                 className={`product-recommend-tab-btn${recommendedTab === 'foryou' ? ' active' : ''}`}
                 onClick={() => setRecommendedTab('foryou')}
               >
-                <span>✨ สำหรับคุณ</span>
+                <span>{t('catalog:product.recommendations.forYou')}</span>
               </button>
               <button
                 type="button"
                 className={`product-recommend-tab-btn${recommendedTab === 'bestseller' ? ' active' : ''}`}
                 onClick={() => setRecommendedTab('bestseller')}
               >
-                <span>🔥 ขายดี</span>
+                <span>{t('catalog:product.recommendations.bestSeller')}</span>
               </button>
               <button
                 type="button"
                 className={`product-recommend-tab-btn${recommendedTab === 'deals' ? ' active' : ''}`}
                 onClick={() => setRecommendedTab('deals')}
               >
-                <span>⚡ ดีลลดแรง</span>
+                <span>{t('catalog:product.recommendations.deals')}</span>
               </button>
             </div>
           </div>
@@ -1088,16 +1128,16 @@ export function ProductDetailPage({
           {isLoadingMoreRecommended && (
             <div className="product-recommend-loading-state">
               <Loader2 size={24} className="animate-spin" style={{ color: 'var(--primary)', animation: 'spin 0.8s linear infinite' }} />
-              <span>กำลังโหลด...</span>
+              <span>{t('common:loading')}</span>
             </div>
           )}
 
           {visibleRecommendedCount >= recommendedProducts.length ? (
             <div className="product-recommend-end-state">
               <span className="product-recommend-end-icon">✨</span>
-              <p className="product-recommend-end-text">ดูครบแล้ว</p>
+              <p className="product-recommend-end-text">{t('catalog:product.recommendations.end')}</p>
               <Link to="/shop" className="product-recommend-shop-link">
-                ดูสินค้าทั้งหมด →
+                {t('catalog:product.recommendations.viewAll')}
               </Link>
             </div>
           ) : (
@@ -1108,7 +1148,11 @@ export function ProductDetailPage({
                 onClick={handleLoadMoreRecommended}
                 disabled={isLoadingMoreRecommended}
               >
-                {isLoadingMoreRecommended ? 'กำลังโหลด...' : `ดูเพิ่ม (${recommendedProducts.length - visibleRecommendedCount})`}
+                {isLoadingMoreRecommended
+                  ? t('common:loading')
+                  : t('catalog:product.recommendations.loadMore', {
+                    count: formatNumber(recommendedProducts.length - visibleRecommendedCount, locale),
+                  })}
               </button>
             </div>
           )}
@@ -1116,20 +1160,20 @@ export function ProductDetailPage({
       </div>
 
       {/* ── Shopee-Style Sticky Bottom Action Bar ── */}
-      <aside className="product-bottom-sticky-bar" aria-label="แถบสั่งซื้อสินค้า">
+      <aside className="product-bottom-sticky-bar" aria-label={t('catalog:product.purchaseBarAria')}>
         <div className="container product-bottom-sticky-content">
           {/* Left Column: Chat & Add to Cart */}
           <div className="product-sticky-left">
             <Link
               to={`/chat?storeId=${store.id}&source=product&ref=${product.id}&refName=${encodeURIComponent(product.name || '')}`}
               className="product-sticky-icon-btn"
-              title="แชทคุยกับร้านค้า"
+              title={t('catalog:product.chatStore')}
             >
               <div className="product-sticky-icon-badge-wrap">
                 <MessageSquare size={19} />
                 <span className="product-sticky-dot" />
               </div>
-              <span className="product-sticky-label">แชทเลย</span>
+              <span className="product-sticky-label">{t('catalog:product.chatNow')}</span>
             </Link>
 
             <div className="product-sticky-divider" />
@@ -1138,10 +1182,10 @@ export function ProductDetailPage({
               id="sticky-add-cart-btn"
               className="product-sticky-cart-btn"
               onClick={handleAddToCart}
-              title="เพิ่มลงตะกร้า"
+              title={t('catalog:product.addToCart')}
             >
               <ShoppingBag size={18} />
-              <span className="product-sticky-label">เพิ่มลงตะกร้า</span>
+              <span className="product-sticky-label">{t('catalog:product.addToCart')}</span>
             </button>
           </div>
 
@@ -1152,17 +1196,17 @@ export function ProductDetailPage({
             onClick={handleBuyNow}
           >
             <div className="product-sticky-buy-price-row">
-              <span className="product-sticky-buy-text">ซื้อเลย</span>
-              <span className="product-sticky-buy-amount">฿{(totalPrice ?? 0).toLocaleString()}</span>
+              <span className="product-sticky-buy-text">{t('catalog:product.buyNow')}</span>
+              <span className="product-sticky-buy-amount">{formatCurrency(totalPrice ?? 0, locale)}</span>
             </div>
             <div className="product-sticky-buy-discount-row">
               {savings > 0 ? (
                 <span className="product-sticky-savings-pill">
-                  ประหยัด ฿{(savings ?? 0).toLocaleString()} · {discount}%
+                  {t('catalog:product.savings', { amount: formatCurrency(savings ?? 0, locale), discount })}
                 </span>
               ) : (
                 <span className="product-sticky-savings-pill">
-                  ส่งไว · รับประกันของแท้
+                  {t('catalog:product.fastAuthentic')}
                 </span>
               )}
             </div>
@@ -1178,7 +1222,7 @@ export function ProductDetailPage({
             onClick={e => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
-            aria-label="ตัวเลือกสินค้าและการผ่อนชำระ"
+            aria-label={t('catalog:product.drawerAria')}
           >
             {/* Header: Product Preview & Price */}
             <div className="product-drawer-header">
@@ -1190,28 +1234,31 @@ export function ProductDetailPage({
                 />
                 <div className="product-drawer-meta">
                   <div className="product-drawer-price-row">
-                    <span className="product-drawer-price">฿{(totalPrice ?? 0).toLocaleString()}</span>
+                    <span className="product-drawer-price">{formatCurrency(totalPrice ?? 0, locale)}</span>
                     {product.originalPrice && (
                       <span className="product-drawer-orig">
-                        ฿{((product.originalPrice || 0) * qty).toLocaleString()}
+                        {formatCurrency((product.originalPrice || 0) * qty, locale)}
                       </span>
                     )}
                     {discount && (
-                      <span className="product-drawer-discount-tag">ลด {discount}%</span>
+                      <span className="product-drawer-discount-tag">{t('catalog:product.discount', { discount })}</span>
                     )}
                   </div>
                   <div className="product-drawer-stock-text">
-                    คลังสินค้า: <strong>{product.stock} ชิ้น</strong>
+                    {t('catalog:product.stockLabel')} <strong>{t('catalog:product.itemCount', { count: formatNumber(product.stock, locale) })}</strong>
                   </div>
                   <div className="product-drawer-selected-summary">
-                    ตัวเลือก: <span className="product-drawer-summary-highlight">{selectedColor || colorOptions[0]}</span> • <span className="product-drawer-summary-highlight">{selectedInstallment === 'full' ? 'ชำระเต็มจำนวน' : selectedInstallment + ' ผ่อน 0%'}</span>
+                    {t('catalog:product.optionsLabel')} <span className="product-drawer-summary-highlight">{selectedOptionLabel}</span> •{' '}
+                    <span className="product-drawer-summary-highlight">
+                      {installmentOptions.find(option => option.id === selectedInstallment)?.label}
+                    </span>
                   </div>
                 </div>
               </div>
               <button
                 className="product-drawer-close-btn"
                 onClick={() => setIsDrawerOpen(false)}
-                aria-label="ปิด"
+                aria-label={t('common:actions.close')}
               >
                 <X size={20} />
               </button>
@@ -1222,21 +1269,21 @@ export function ProductDetailPage({
               {/* Option 1: สี / ตัวเลือกสินค้า */}
               <div className="product-drawer-section">
                 <div className="product-drawer-section-title">
-                  <span>🎨 ตัวเลือกสี / รุ่นสินค้า</span>
-                  <small className="product-drawer-section-hint">(เลือก 1 แบบ)</small>
+                  <span>{t('catalog:product.drawer.optionTitle')}</span>
+                  <small className="product-drawer-section-hint">{t('catalog:product.drawer.chooseOne')}</small>
                 </div>
                 <div className="product-drawer-chips-grid">
-                  {colorOptions.map((col) => {
-                    const isSelected = (selectedColor || colorOptions[0]) === col;
+                  {colorOptions.map((optionKey) => {
+                    const isSelected = selectedOptionKey === optionKey;
                     return (
                       <button
-                        key={col}
+                        key={optionKey}
                         type="button"
                         className={`product-drawer-chip${isSelected ? ' product-drawer-chip--active' : ''}`}
-                        onClick={() => setSelectedColor(col)}
+                        onClick={() => setSelectedColor(optionKey)}
                       >
                         {isSelected && <Check size={14} className="product-drawer-chip-check" />}
-                        <span>{col}</span>
+                        <span>{t(`catalog:${optionKey}`)}</span>
                       </button>
                     );
                   })}
@@ -1246,8 +1293,8 @@ export function ProductDetailPage({
               {/* Option 2: การผ่อนชำระ & PayLater */}
               <div className="product-drawer-section">
                 <div className="product-drawer-section-title">
-                  <span>💳 แผนการผ่อนชำระ (Movemall PayLater 0%)</span>
-                  <span className="product-drawer-badge-0pct">ดอกเบี้ย 0%</span>
+                  <span>{t('catalog:product.drawer.installmentTitle')}</span>
+                  <span className="product-drawer-badge-0pct">{t('catalog:product.installments.zeroInterest')}</span>
                 </div>
                 <div className="product-drawer-installments-grid">
                   {installmentOptions.map((opt) => {
@@ -1272,15 +1319,15 @@ export function ProductDetailPage({
               {/* Option 3: จำนวนสินค้า */}
               <div className="product-drawer-section">
                 <div className="product-drawer-section-title">
-                  <span>📦 จำนวนที่ต้องการ</span>
-                  <small className="product-drawer-section-hint">เหลือสินค้า {product.stock} ชิ้น</small>
+                  <span>{t('catalog:product.drawer.quantityTitle')}</span>
+                  <small className="product-drawer-section-hint">{t('catalog:product.lowStockPlain', { count: formatNumber(product.stock, locale) })}</small>
                 </div>
                 <div className="product-drawer-qty-row">
                   <div className="product-detail__qty-control">
                     <button
                       className="product-detail__qty-btn"
                       onClick={() => setQty(q => Math.max(1, q - 1))}
-                      aria-label="ลดจำนวน"
+                      aria-label={t('catalog:product.decreaseQuantity')}
                     >
                       <Minus size={14} />
                     </button>
@@ -1291,12 +1338,12 @@ export function ProductDetailPage({
                       min={1}
                       max={product.stock}
                       onChange={e => setQty(Math.min(product.stock, Math.max(1, Number(e.target.value))))}
-                      aria-label="จำนวนสินค้า"
+                      aria-label={t('catalog:product.quantityAria')}
                     />
                     <button
                       className="product-detail__qty-btn"
                       onClick={() => setQty(q => Math.min(product.stock, q + 1))}
-                      aria-label="เพิ่มจำนวน"
+                      aria-label={t('catalog:product.increaseQuantity')}
                     >
                       <Plus size={14} />
                     </button>
@@ -1321,11 +1368,11 @@ export function ProductDetailPage({
             {/* Footer Action Button */}
             <div className="product-drawer-footer">
               <div className="product-drawer-footer-summary">
-                <span className="product-drawer-footer-total-label">ยอดสุทธิ ({qty} ชิ้น):</span>
-                <span className="product-drawer-footer-total-price">฿{(totalPrice ?? 0).toLocaleString()}</span>
+                <span className="product-drawer-footer-total-label">{t('catalog:product.drawer.netTotal', { count: formatNumber(qty, locale) })}</span>
+                <span className="product-drawer-footer-total-price">{formatCurrency(totalPrice ?? 0, locale)}</span>
                 {savings > 0 && (
                   <span className="product-drawer-footer-savings">
-                    ประหยัด ฿{(savings ?? 0).toLocaleString()}
+                    {t('catalog:product.drawer.saveAmount', { amount: formatCurrency(savings ?? 0, locale) })}
                   </span>
                 )}
               </div>
@@ -1338,12 +1385,12 @@ export function ProductDetailPage({
                 {drawerAction === 'buy' ? (
                   <>
                     <CreditCard size={18} />
-                    <span>ซื้อเลย · ฿{(totalPrice ?? 0).toLocaleString()}</span>
+                    <span>{t('catalog:product.drawer.buyNow', { amount: formatCurrency(totalPrice ?? 0, locale) })}</span>
                   </>
                 ) : (
                   <>
                     <ShoppingBag size={18} />
-                    <span>เพิ่มลงตะกร้า · {qty} ชิ้น</span>
+                    <span>{t('catalog:product.drawer.addToCart', { count: formatNumber(qty, locale) })}</span>
                   </>
                 )}
               </button>
@@ -1360,7 +1407,7 @@ export function ProductDetailPage({
           targetType="PRODUCT"
           targetId={product.id}
           targetName={product.name}
-          storeName={(product.storeId && getStoreById(product.storeId)?.name) || 'ร้านค้าทางการ'}
+          storeName={(product.storeId && getStoreById(product.storeId)?.name) || t('catalog:store.official')}
         />
       )}
     </main>

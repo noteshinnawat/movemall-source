@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Star, ThumbsUp, Edit3, CheckCircle, Image, Video, X, Play, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProductReviews, type ProductReview } from '../data/reviews';
 import { compressImage } from '../utils/mediaCompressor';
 import { fetchProductReviewsApi, submitProductReviewApi } from '../utils/api';
+import { formatDate, formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import './ReviewsSection.css';
 
 interface ReviewsSectionProps {
@@ -12,6 +15,8 @@ interface ReviewsSectionProps {
 }
 
 export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectionProps) {
+  const { t, i18n } = useTranslation(['catalog', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const initialReviews = getProductReviews(productId);
   const [reviews, setReviews] = useState<ProductReview[]>(initialReviews);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -34,10 +39,10 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
           const dbReviews: ProductReview[] = res.reviews.map((r: any) => ({
             id: r.id,
             productId: r.productId || productId,
-            userName: r.user?.name || 'ผู้ใช้ Movemall',
+            userName: r.user?.name || t('catalog:reviews.movemallUser'),
             rating: r.rating || 5,
-            date: new Date(r.createdAt).toLocaleDateString('th-TH'),
-            title: 'รีวิวสินค้าการันตีของแท้',
+            date: formatDate(r.createdAt, locale),
+            title: t('catalog:reviews.verifiedProductReview'),
             comment: r.comment,
             images: r.images,
             verified: true,
@@ -55,7 +60,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
       }
     }
     loadReviews();
-  }, [productId]);
+  }, [locale, productId, t]);
 
   // Form State
   const [formRating, setFormRating] = useState(5);
@@ -71,7 +76,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
     if (!files || files.length === 0) return;
 
     if (formImages.length >= 3) {
-      alert('แนบรูปภาพได้สูงสุด 3 รูปครับ');
+      alert(t('catalog:reviews.maxImagesAlert'));
       return;
     }
 
@@ -90,7 +95,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
 
   function handleAddSamplePhoto() {
     if (formImages.length >= 3) {
-      alert('แนบรูปภาพได้สูงสุด 3 รูปครับ');
+      alert(t('catalog:reviews.maxImagesAlert'));
       return;
     }
     const samplePhotos = [
@@ -119,8 +124,8 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
       productId,
       userName: formName.trim(),
       rating: formRating,
-      date: 'วันนี้',
-      title: formTitle.trim() || 'รีวิวสินค้า',
+      date: t('catalog:reviews.today'),
+      title: formTitle.trim() || t('catalog:reviews.defaultReviewTitle'),
       comment: formComment.trim(),
       images: formImages.length > 0 ? formImages : undefined,
       video: formVideo || undefined,
@@ -226,14 +231,14 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
       <div className="reviews-section__header">
         <h2 id="reviews-title" className="reviews-section__title">
           <Star size={20} style={{ color: 'var(--warning)' }} />
-          คะแนนและรีวิวจากผู้ซื้อจริง ({safeReviewCount.toLocaleString()})
+          {t('catalog:reviews.title', { count: formatNumber(safeReviewCount, locale) })}
         </h2>
         <button
           className="reviews-section__write-btn"
           onClick={() => setIsFormOpen(prev => !prev)}
         >
           <Edit3 size={15} />
-          {isFormOpen ? 'ปิดฟอร์ม' : 'เขียนรีวิวแนบรูป/วิดีโอ'}
+          {isFormOpen ? t('catalog:reviews.closeForm') : t('catalog:reviews.writeReview')}
         </button>
       </div>
 
@@ -246,14 +251,14 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
           <div className="reviews-summary__stars" aria-hidden="true">
             {'★'.repeat(ratingFloor) + '☆'.repeat(Math.max(0, 5 - ratingFloor))}
           </div>
-          <div className="reviews-summary__total">จาก {safeReviewCount.toLocaleString()} รีวิว</div>
+          <div className="reviews-summary__total">{t('catalog:reviews.total', { count: formatNumber(safeReviewCount, locale) })}</div>
         </div>
 
         {/* Rating Breakdown Bars */}
         <div className="reviews-bars">
           {distribution.map(d => (
             <div key={d.stars} className="reviews-bar-row">
-              <span className="reviews-bar-label">{d.stars} ดาว</span>
+              <span className="reviews-bar-label">{t('catalog:reviews.stars', { count: d.stars })}</span>
               <div className="reviews-bar-track">
                 <div className="reviews-bar-fill" style={{ width: `${d.pct}%` }} />
               </div>
@@ -266,16 +271,16 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
       {/* Write Review Form */}
       {isFormOpen && (
         <form className="review-form" onSubmit={handleSubmitReview}>
-          <h3 className="review-form__title">✍️ เขียนรีวิวสินค้า พร้อมแนบรูปภาพ/วิดีโอ</h3>
+          <h3 className="review-form__title">{t('catalog:reviews.formTitle')}</h3>
           <div className="review-form__star-picker">
-            <span style={{ fontSize: 13, fontWeight: 600 }}>ให้คะแนน:</span>
+            <span style={{ fontSize: 13, fontWeight: 600 }}>{t('catalog:reviews.rateLabel')}</span>
             {[1, 2, 3, 4, 5].map(s => (
               <button
                 type="button"
                 key={s}
                 className={`review-form__star-btn${formRating >= s ? ' review-form__star-btn--active' : ''}`}
                 onClick={() => setFormRating(s)}
-                aria-label={`${s} ดาว`}
+                aria-label={t('catalog:reviews.stars', { count: s })}
               >
                 ★
               </button>
@@ -286,7 +291,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
             <input
               type="text"
               className="review-form__input"
-              placeholder="ชื่อของคุณ *"
+              placeholder={t('catalog:reviews.namePlaceholder')}
               required
               value={formName}
               onChange={e => setFormName(e.target.value)}
@@ -294,7 +299,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
             <input
               type="text"
               className="review-form__input"
-              placeholder="หัวข้อรีวิว (เช่น สินค้าคุณภาพดีมาก)"
+              placeholder={t('catalog:reviews.titlePlaceholder')}
               value={formTitle}
               onChange={e => setFormTitle(e.target.value)}
             />
@@ -302,7 +307,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
 
           <textarea
             className="review-form__textarea"
-            placeholder="เขียนความคิดเห็นของคุณเกี่ยวกับสินค้านี้... *"
+            placeholder={t('catalog:reviews.commentPlaceholder')}
             required
             value={formComment}
             onChange={e => setFormComment(e.target.value)}
@@ -311,7 +316,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
           {/* Media Attachments Area */}
           <div className="review-form__media-group">
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>
-              📸 แนบรูปภาพ & วิดีโอสินค้า (แนบได้สูงสุด 3 รูป):
+              {t('catalog:reviews.mediaLabel')}
             </div>
 
             {/* Hidden File Input */}
@@ -331,7 +336,9 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
                 disabled={isCompressing}
               >
                 <Image size={15} />
-                {isCompressing ? 'กำลังบีบอัดรูป...' : `+ อัปโหลดรูปจากเครื่อง (${formImages.length}/3)`}
+                {isCompressing
+                  ? t('catalog:reviews.compressing')
+                  : t('catalog:reviews.uploadImages', { count: formatNumber(formImages.length, locale), max: 3 })}
               </button>
 
               <button
@@ -339,7 +346,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
                 className="review-upload-btn"
                 onClick={handleAddSamplePhoto}
               >
-                + แนบรูปตัวอย่าง
+                {t('catalog:reviews.addSamplePhoto')}
               </button>
 
               <button
@@ -348,7 +355,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
                 onClick={handleAddSampleVideo}
               >
                 <Video size={15} />
-                {formVideo ? '✓ แนบวิดีโอแล้ว' : '+ เพิ่มวิดีโอแกะกล่อง'}
+                {formVideo ? t('catalog:reviews.videoAttached') : t('catalog:reviews.addVideo')}
               </button>
             </div>
 
@@ -357,7 +364,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
               <div className="review-media-previews">
                 {formImages.map((img, i) => (
                   <div key={i} className="review-img-preview-box">
-                    <img src={img} alt={`Preview ${i}`} className="review-img-preview" />
+                    <img src={img} alt={t('catalog:reviews.previewAlt', { index: i + 1 })} className="review-img-preview" />
                     <button
                       type="button"
                       className="review-img-remove"
@@ -390,10 +397,10 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
               className="review-form__cancel-btn"
               onClick={() => setIsFormOpen(false)}
             >
-              ยกเลิก
+              {t('common:actions.cancel')}
             </button>
             <button type="submit" className="review-form__submit-btn">
-              ส่งรีวิวสินค้า
+              {t('catalog:reviews.submit')}
             </button>
           </div>
         </form>
@@ -406,66 +413,66 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
             className={`reviews-filter-btn${activeFilter === 'all' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('all')}
           >
-            ทั้งหมด ({countAll})
+            {t('catalog:reviews.filters.all', { count: formatNumber(countAll, locale) })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === '5' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('5')}
           >
-            ★ 5 ดาว ({count5})
+            {t('catalog:reviews.filters.rating', { rating: 5, count: formatNumber(count5, locale) })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === '4' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('4')}
           >
-            ★ 4 ดาว ({count4})
+            {t('catalog:reviews.filters.rating', { rating: 4, count: formatNumber(count4, locale) })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === '3' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('3')}
           >
-            ★ 3 ดาว ({count3})
+            {t('catalog:reviews.filters.rating', { rating: 3, count: formatNumber(count3, locale) })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === '2' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('2')}
           >
-            ★ 2 ดาว ({count2})
+            {t('catalog:reviews.filters.rating', { rating: 2, count: formatNumber(count2, locale) })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === '1' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('1')}
           >
-            ★ 1 ดาว ({count1})
+            {t('catalog:reviews.filters.rating', { rating: 1, count: formatNumber(count1, locale) })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === 'media' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('media')}
           >
-            📸 มีรูป/วิดีโอ ({countMedia})
+            {t('catalog:reviews.filters.media', { count: formatNumber(countMedia, locale) })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === 'comment' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('comment')}
           >
-            💬 มีข้อความ ({countComment})
+            {t('catalog:reviews.filters.comment', { count: formatNumber(countComment, locale) })}
           </button>
         </div>
 
         {/* Sorting Dropdown */}
         <div className="reviews-sort-wrap">
           <ArrowUpDown size={14} className="reviews-sort-icon" />
-          <label htmlFor="reviews-sort" className="reviews-sort-label">จัดเรียง:</label>
+          <label htmlFor="reviews-sort" className="reviews-sort-label">{t('catalog:reviews.sortLabel')}</label>
           <select
             id="reviews-sort"
             className="reviews-sort-select"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
           >
-            <option value="recent">ล่าสุด</option>
-            <option value="helpful">มีประโยชน์สูงสุด</option>
-            <option value="highest">คะแนนสูงสุด (5→1)</option>
-            <option value="lowest">คะแนนต่ำสุด (1→5)</option>
+            <option value="recent">{t('catalog:reviews.sort.recent')}</option>
+            <option value="helpful">{t('catalog:reviews.sort.helpful')}</option>
+            <option value="highest">{t('catalog:reviews.sort.highest')}</option>
+            <option value="lowest">{t('catalog:reviews.sort.lowest')}</option>
           </select>
         </div>
       </div>
@@ -475,13 +482,13 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
         {paginatedReviews.length === 0 ? (
           <div className="reviews-empty-state">
             <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
-            <h4>ไม่พบรีวิวในตัวกรองนี้</h4>
-            <p>ลองเลือกตัวกรองอื่นเพื่อดูรีวิวเพิ่มเติม</p>
+            <h4>{t('catalog:reviews.emptyTitle')}</h4>
+            <p>{t('catalog:reviews.emptyDescription')}</p>
             <button
               className="reviews-empty-reset-btn"
               onClick={() => handleFilterChange('all')}
             >
-              ดูรีวิวทั้งหมด
+              {t('catalog:reviews.viewAll')}
             </button>
           </div>
         ) : (
@@ -497,7 +504,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
                     {review.verified && (
                       <span className="review-item__verified">
                         <CheckCircle size={11} style={{ display: 'inline', marginRight: 3 }} />
-                        ผู้ซื้อที่ยืนยันแล้ว
+                        {t('catalog:reviews.verifiedBuyer')}
                       </span>
                     )}
                   </div>
@@ -505,7 +512,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
                 <span className="review-item__date">{review.date}</span>
               </div>
 
-              <div className="review-item__rating" aria-label={`${review.rating} จาก 5 ดาว`}>
+              <div className="review-item__rating" aria-label={t('catalog:reviews.ratingOutOfFive', { rating: review.rating })}>
                 {'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)}
               </div>
 
@@ -519,10 +526,10 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
                     <img
                       key={idx}
                       src={imgUrl}
-                      alt={`Review attachment ${idx + 1}`}
+                      alt={t('catalog:reviews.attachmentAlt', { index: idx + 1 })}
                       className="review-gallery-img"
                       onClick={() => setLightboxImg(imgUrl)}
-                      title="คลิกเพื่อดูรูปขนาดใหญ่"
+                      title={t('catalog:reviews.enlargePhoto')}
                     />
                   ))}
                 </div>
@@ -546,7 +553,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
                 disabled={helpfulGiven[review.id]}
               >
                 <ThumbsUp size={12} />
-                มีประโยชน์ ({review.helpfulCount})
+                {t('catalog:reviews.helpful', { count: formatNumber(review.helpfulCount, locale) })}
               </button>
             </article>
           ))
@@ -557,7 +564,11 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
       {totalPages > 1 && (
         <div className="reviews-pagination-container">
           <div className="reviews-pagination-info">
-            แสดงรีวิวที่ {(currentSafePage - 1) * PAGE_SIZE + 1} - {Math.min(currentSafePage * PAGE_SIZE, filteredReviews.length)} จาก {filteredReviews.length} รายการ
+            {t('catalog:reviews.paginationInfo', {
+              start: formatNumber((currentSafePage - 1) * PAGE_SIZE + 1, locale),
+              end: formatNumber(Math.min(currentSafePage * PAGE_SIZE, filteredReviews.length), locale),
+              total: formatNumber(filteredReviews.length, locale),
+            })}
           </div>
 
           <div className="reviews-pagination-bar">
@@ -566,10 +577,10 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
               className="reviews-page-btn reviews-page-btn--nav"
               disabled={currentSafePage === 1}
               onClick={() => handlePageChange(currentSafePage - 1)}
-              aria-label="รีวิวหน้าที่แล้ว"
-              title="รีวิวหน้าที่แล้ว"
+              aria-label={t('catalog:reviews.previousPageAria')}
+              title={t('catalog:reviews.previousPageAria')}
             >
-              <ChevronLeft size={16} /> หน้าก่อน
+              <ChevronLeft size={16} /> {t('catalog:reviews.previousPage')}
             </button>
 
             {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(page => (
@@ -588,10 +599,10 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
               className="reviews-page-btn reviews-page-btn--nav"
               disabled={currentSafePage === totalPages}
               onClick={() => handlePageChange(currentSafePage + 1)}
-              aria-label="รีวิวหน้าถัดไป"
-              title="รีวิวหน้าถัดไป"
+              aria-label={t('catalog:reviews.nextPageAria')}
+              title={t('catalog:reviews.nextPageAria')}
             >
-              หน้าถัดไป <ChevronRight size={16} />
+              {t('catalog:reviews.nextPage')} <ChevronRight size={16} />
             </button>
           </div>
         </div>
@@ -615,7 +626,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
           <div style={{ position: 'relative', maxWidth: 600, width: '100%' }}>
             <img
               src={lightboxImg}
-              alt="Enlarged review photo"
+              alt={t('catalog:reviews.enlargedPhotoAlt')}
               style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain', border: '1px solid white' }}
             />
             <button
@@ -631,7 +642,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
                 cursor: 'pointer',
               }}
             >
-              ✕ ปิด
+              ✕ {t('common:actions.close')}
             </button>
           </div>
         </div>
@@ -641,4 +652,3 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
 }
 
 export default ReviewsSection;
-

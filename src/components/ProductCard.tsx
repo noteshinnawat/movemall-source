@@ -2,9 +2,12 @@
 
 import { Heart, Plus, ShoppingCart, Check, Play, Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getStoreById } from '../data/stores';
 import { getProductUrl } from '../utils/seo';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import type { Product } from '../types';
 import './ProductCard.css';
 
@@ -20,8 +23,8 @@ interface ProductCardProps {
   onOpenVideoModal?: (product: Product) => void;
 }
 
-function getDiscount(price: number, original: number): string {
-  return `-${Math.round(((original - price) / original) * 100)}%`;
+function getDiscount(price: number, original: number): number {
+  return Math.round(((original - price) / original) * 100);
 }
 
 export function ProductCard({
@@ -35,6 +38,8 @@ export function ProductCard({
   onActivateVideo,
   onOpenVideoModal,
 }: ProductCardProps) {
+  const { t, i18n } = useTranslation(['catalog', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const {
     id, name, price, originalPrice, images, category,
     rating, reviewCount, badge, storeId, videoReview, videoUrl,
@@ -121,7 +126,7 @@ export function ProductCard({
     >
       {/* Product Image & Badges & Video Slot */}
       <div className="product-card__image-wrap">
-        <Link to={getProductUrl(product)} className="product-card__image-link" aria-label={`ดูรายละเอียด ${name}`}>
+        <LocalizedLink to={getProductUrl(product)} className="product-card__image-link" aria-label={t('catalog:product.card.viewDetails', { name })}>
           {/* Active Video Slot Player */}
           {isVideoCardSlot && hasVideoReview ? (
             <div className="product-card__video-container">
@@ -151,7 +156,7 @@ export function ProductCard({
               {images[1] && (
                 <img
                   src={images[1]}
-                  alt={`${name} รูปถัดไป`}
+                  alt={t('catalog:product.card.nextImageAlt', { name })}
                   className="product-card__image product-card__image--secondary"
                   loading="lazy"
                 />
@@ -160,7 +165,7 @@ export function ProductCard({
           ) : (
             <div className="product-card__image-placeholder">🛍️</div>
           )}
-        </Link>
+        </LocalizedLink>
 
         {/* Video Review Creator Badge & Action Button */}
         {hasVideoReview && (
@@ -168,7 +173,7 @@ export function ProductCard({
             type="button"
             className="product-card__video-review-badge"
             onClick={handleOpenVideoModal}
-            title="คลิกเพื่อดูคลิปรีวิวป้ายยาแบบเต็มพร้อมเสียง"
+            title={t('catalog:product.card.openVideoReview')}
           >
             {videoReview?.creatorAvatar ? (
               <img src={videoReview.creatorAvatar} alt="" className="product-card__creator-avatar" />
@@ -176,7 +181,9 @@ export function ProductCard({
               <span className="product-card__creator-icon">🎬</span>
             )}
             <span className="product-card__creator-name">
-              {videoReview?.creatorName ? `รีวิวโดย @${videoReview.creatorName}` : 'คลิปรีวิวจริง'}
+              {videoReview?.creatorName
+                ? t('catalog:product.card.reviewBy', { creator: videoReview.creatorName })
+                : t('catalog:product.card.realReviewClip')}
             </span>
             <Sparkles size={11} className="product-card__badge-sparkle" />
           </button>
@@ -192,7 +199,7 @@ export function ProductCard({
               e.stopPropagation();
               setIsMuted(!isMuted);
             }}
-            title={isMuted ? 'เปิดเสียง' : 'ปิดเสียง'}
+            title={isMuted ? t('catalog:product.card.unmute') : t('catalog:product.card.mute')}
           >
             {isMuted ? <VolumeX size={12} /> : <Volume2 size={12} />}
           </button>
@@ -200,8 +207,8 @@ export function ProductCard({
 
         {/* Multi-image indicator badge */}
         {!isVideoCardSlot && images.length > 1 && (
-          <span className="product-card__multi-img-badge" title={`มีรูปภาพทั้งหมด ${images.length} รูป`}>
-            📷 {images.length}
+          <span className="product-card__multi-img-badge" title={t('catalog:product.card.imageCount', { count: images.length })}>
+            📷 {formatNumber(images.length, locale)}
           </span>
         )}
 
@@ -209,7 +216,7 @@ export function ProductCard({
         <div className="product-card__top-badges">
           {isSponsored && (
             <span className="product-card__badge-tag product-card__badge--sponsored">
-              📢 สปอนเซอร์
+              {t('catalog:product.card.sponsored')}
             </span>
           )}
           {isMall ? (
@@ -218,11 +225,11 @@ export function ProductCard({
             </span>
           ) : isPreferred ? (
             <span className="product-card__badge-tag product-card__badge--pref">
-              ⭐ แนะนำ
+              {t('catalog:product.card.preferred')}
             </span>
           ) : badge ? (
             <span className={`product-card__badge-tag product-card__badge--${badge}`}>
-              {badge === 'sale' ? '🔥 SALE' : badge === 'new' ? 'ใหม่' : badge === 'hot' ? '🔥 HOT' : 'LIMIT'}
+              {t(`catalog:product.card.badges.${badge}`)}
             </span>
           ) : null}
         </div>
@@ -230,7 +237,9 @@ export function ProductCard({
         {/* Wishlist Button */}
         <button
           className={`product-card__wishlist${isWishlisted ? ' product-card__wishlist--active' : ''}`}
-          aria-label={isWishlisted ? `ลบ ${name} ออกจาก Wishlist` : `บันทึก ${name} ใน Wishlist`}
+          aria-label={isWishlisted
+            ? t('catalog:product.card.removeWishlist', { name })
+            : t('catalog:product.card.addWishlist', { name })}
           id={`wishlist-${id}`}
           onClick={(e) => {
             e.preventDefault();
@@ -244,7 +253,7 @@ export function ProductCard({
         {/* Discount Tag on Image if on sale */}
         {originalPrice && originalPrice > price && (
           <span className="product-card__image-discount">
-            {getDiscount(price, originalPrice)}
+            {t('catalog:product.card.discount', { discount: getDiscount(price, originalPrice) })}
           </span>
         )}
       </div>
@@ -253,7 +262,7 @@ export function ProductCard({
       <div className="product-card__body">
         {/* Store & Location Micro Header */}
         <div className="product-card__store-bar">
-          <Link
+          <LocalizedLink
             to={store ? `/store/${store.id}` : `/shop?category=${category}`}
             className="product-card__store-link"
             onClick={(e) => e.stopPropagation()}
@@ -262,37 +271,37 @@ export function ProductCard({
             <span className="product-card__store-name">
               {store ? store.name : category}
             </span>
-          </Link>
+          </LocalizedLink>
           <span className="product-card__location">
-            📍 {store?.location || 'กทม.'}
+            📍 {store?.location || t('catalog:store.defaultShortLocation')}
           </span>
         </div>
 
         {/* Product Title */}
-        <Link to={getProductUrl(product)} className="product-card__name-link">
+        <LocalizedLink to={getProductUrl(product)} className="product-card__name-link">
           <h3 className="product-card__name" title={name}>
             {name}
           </h3>
-        </Link>
+        </LocalizedLink>
 
         {/* Service & Trust Tags */}
         <div className="product-card__perks-row">
           {(isMall || product.isVatRegistered || store?.isVatRegistered) && (
             <span className="product-card__perk" style={{ background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE' }}>
-              🧾 ใบกำกับภาษี
+              {t('catalog:product.card.taxInvoice')}
             </span>
           )}
           {hasVideoReview && (
             <span className="product-card__perk product-card__perk--video-tag">
-              🎥 มีคลิปป้ายยา
+              {t('catalog:product.card.hasVideoReview')}
             </span>
           )}
           <span className="product-card__perk product-card__perk--shipping">
-            🚚 ส่งฟรี
+            {t('catalog:product.card.freeShipping')}
           </span>
           {safePrice >= 1000 && (
             <span className="product-card__perk product-card__perk--bnpl">
-              ผ่อน 0%
+              {t('catalog:product.card.installmentZero')}
             </span>
           )}
         </div>
@@ -303,10 +312,10 @@ export function ProductCard({
             ⭐ {safeRating.toFixed(1)}
           </span>
           <span className="product-card__rating-reviews">
-            ({safeReviewCount.toLocaleString()})
+            ({formatNumber(safeReviewCount, locale)})
           </span>
           <span className="product-card__sold-count">
-            ขายแล้ว {safeSoldCount >= 1000 ? `${(safeSoldCount / 1000).toFixed(1)}k` : safeSoldCount}
+            {t('catalog:product.card.sold', { count: formatNumber(safeSoldCount, locale) })}
           </span>
         </div>
 
@@ -314,12 +323,11 @@ export function ProductCard({
         <div className="product-card__bottom-row">
           <div className="product-card__price-box">
             <div className="product-card__main-price">
-              <span className="product-card__currency">฿</span>
-              {safePrice.toLocaleString()}
+              {formatCurrency(safePrice, locale)}
             </div>
             {safeOriginalPrice && safeOriginalPrice > safePrice && (
               <div className="product-card__original-price">
-                ฿{safeOriginalPrice.toLocaleString()}
+                {formatCurrency(safeOriginalPrice, locale)}
               </div>
             )}
           </div>
@@ -328,14 +336,14 @@ export function ProductCard({
             <button
               className={`product-card__quick-cart${isAdded ? ' product-card__quick-cart--success' : ''}`}
               onClick={handleAddToCart}
-              title="เพิ่มลงตะกร้าทันที"
+              title={t('catalog:product.card.addToCartNow')}
               id={`add-cart-${id}`}
-              aria-label={`เพิ่ม ${name} ลงตะกร้า`}
+              aria-label={t('catalog:product.card.addNamedToCart', { name })}
             >
               {isAdded ? (
                 <>
                   <Check size={13} strokeWidth={3} />
-                  <span className="product-card__quick-cart-text">เพิ่มแล้ว</span>
+                  <span className="product-card__quick-cart-text">{t('catalog:product.card.added')}</span>
                 </>
               ) : (
                 <>

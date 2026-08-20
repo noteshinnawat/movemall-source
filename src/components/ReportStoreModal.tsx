@@ -1,6 +1,7 @@
 // src/components/ReportStoreModal.tsx — Customer Report Counterfeit / Scam Store Modal
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle, ShieldCheck, X, Upload, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { fetchApi } from '../utils/api';
 import './ReportStoreModal.css';
@@ -24,6 +25,7 @@ export function ReportStoreModal({
   storeName,
   orderId,
 }: ReportStoreModalProps) {
+  const { t } = useTranslation(['catalog', 'common']);
   const [violationType, setViolationType] = useState<string>('FAKE_PRODUCT');
   const [description, setDescription] = useState<string>('');
   const [evidenceUrl, setEvidenceUrl] = useState<string>('');
@@ -92,13 +94,13 @@ export function ReportStoreModal({
               <ShieldAlert size={20} color="#dc2626" />
             </div>
             <div>
-              <h2 className="report-modal-title">รายงานร้านค้า & สินค้าละเมิดกฎ</h2>
+              <h2 className="report-modal-title">{t('catalog:reporting.title')}</h2>
               <p className="report-modal-subtitle">
                 Movemall Anti-Counterfeit & Scam Protection
               </p>
             </div>
           </div>
-          <button className="report-modal-close-btn" onClick={handleCloseModal}>
+          <button className="report-modal-close-btn" onClick={handleCloseModal} aria-label={t('common:actions.close')}>
             <X size={18} />
           </button>
         </div>
@@ -107,14 +109,13 @@ export function ReportStoreModal({
           <div className="report-modal-success-box">
             <CheckCircle2 size={48} color="#10b981" />
             <h3 style={{ margin: '1rem 0 0.5rem 0', fontSize: '1.2rem', fontWeight: 800, color: '#111827' }}>
-              ส่งรายงานสำเร็จเรียบร้อยแล้ว
+              {t('catalog:reporting.successTitle')}
             </h3>
             <p style={{ fontSize: '0.875rem', color: '#4b5563', lineHeight: 1.5, margin: '0 0 1.25rem 0' }}>
-              เราได้รับรายงานแล้ว และจะตรวจสอบภายใน 24 ชม.
-              หากยืนยันว่าเป็นของปลอมหรือการหลอกลวง คุณจะได้รับเงินคืนตามนโยบาย
+              {t('catalog:reporting.successDescription')}
             </p>
             <button className="report-modal-btn-primary" onClick={handleCloseModal}>
-              เข้าใจแล้ว ปิดหน้าต่าง
+              {t('catalog:reporting.understood')}
             </button>
           </div>
         ) : (
@@ -122,12 +123,14 @@ export function ReportStoreModal({
             {/* Target Item Highlight */}
             <div className="report-target-box">
               <span className="report-target-label">
-                {targetType === 'PRODUCT' ? '📦 สินค้าที่ถูกรายงาน:' : targetType === 'STORE' ? '🏪 ร้านค้าที่ถูกรายงาน:' : '🧾 ออเดอร์ที่ถูกรายงาน:'}
+                {t(`catalog:reporting.targets.${targetType.toLowerCase()}`)}
               </span>
               <strong className="report-target-name">{targetName}</strong>
               {storeName && storeName !== targetName && (
                 <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: 2 }}>
-                  ร้านค้า: {storeName} {orderId ? `• เลขที่ออเดอร์: #${orderId}` : ''}
+                  {orderId
+                    ? t('catalog:reporting.storeAndOrder', { store: storeName, order: orderId })
+                    : t('catalog:reporting.storeName', { store: storeName })}
                 </div>
               )}
             </div>
@@ -135,7 +138,7 @@ export function ReportStoreModal({
             {/* Violation Category Picker */}
             <div className="report-form-group">
               <label className="report-form-label">
-                ประเภทรายงาน <span style={{ color: '#dc2626' }}>*</span>
+                {t('catalog:reporting.typeLabel')} <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <select
                 className="report-form-select"
@@ -143,24 +146,24 @@ export function ReportStoreModal({
                 onChange={e => setViolationType(e.target.value)}
                 required
               >
-                <option value="FAKE_PRODUCT">🚫 สินค้าปลอมหรือเลียนแบบ</option>
-                <option value="MISLEADING_SPECS">📦 สินค้าไม่ตรงปกหรือสเปกเท็จ</option>
-                <option value="SCAM_OFFPLATFORM">⚠️ หลอกโอนเงินหรือส่งของไม่ครบ</option>
-                <option value="HARASSMENT">💬 ร้านค้าส่งข้อความคุกคาม / หยาบคาย / บล็อกแชท</option>
-                <option value="NO_FDA_TISI">🏷️ สินค้าอันตรายหรือไม่มี อย./มอก.</option>
-                <option value="REFUND_DENIED">↩️ ร้านค้าปฏิเสธการคืนเงิน</option>
+                <option value="FAKE_PRODUCT">{t('catalog:reporting.types.fakeProduct')}</option>
+                <option value="MISLEADING_SPECS">{t('catalog:reporting.types.misleadingSpecs')}</option>
+                <option value="SCAM_OFFPLATFORM">{t('catalog:reporting.types.scamOffplatform')}</option>
+                <option value="HARASSMENT">{t('catalog:reporting.types.harassment')}</option>
+                <option value="NO_FDA_TISI">{t('catalog:reporting.types.noFdaTisi')}</option>
+                <option value="REFUND_DENIED">{t('catalog:reporting.types.refundDenied')}</option>
               </select>
             </div>
 
             {/* Description Textarea */}
             <div className="report-form-group">
               <label className="report-form-label">
-                รายละเอียด <span style={{ color: '#dc2626' }}>*</span>
+                {t('catalog:reporting.detailsLabel')} <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <textarea
                 className="report-form-textarea"
                 rows={3}
-                placeholder="เล่าเหตุการณ์และความเสียหายที่พบ"
+                placeholder={t('catalog:reporting.detailsPlaceholder')}
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 required
@@ -170,19 +173,19 @@ export function ReportStoreModal({
             {/* Evidence Image URL */}
             <div className="report-form-group">
               <label className="report-form-label">
-                ลิงก์รูปหลักฐาน
+                {t('catalog:reporting.evidenceLabel')}
               </label>
               <div style={{ position: 'relative' }}>
                 <input
                   type="text"
                   className="report-form-input"
-                  placeholder="เช่น: https://images.unsplash.com/... หรืออัปโหลดลิงก์รูปภาพ"
+                  placeholder={t('catalog:reporting.evidencePlaceholder')}
                   value={evidenceUrl}
                   onChange={e => setEvidenceUrl(e.target.value)}
                 />
               </div>
               <span className="report-form-hint">
-                แนบรูปหรือวิดีโอเพื่อช่วยให้ตรวจสอบเร็วขึ้น
+                {t('catalog:reporting.evidenceHint')}
               </span>
             </div>
 
@@ -197,10 +200,10 @@ export function ReportStoreModal({
                 />
                 <div>
                   <strong style={{ fontSize: '0.85rem', color: '#1e3a8a', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <ShieldCheck size={16} color="#2563eb" /> ขอรับความคุ้มครองและเงินคืน
+                    <ShieldCheck size={16} color="#2563eb" /> {t('catalog:reporting.protectionTitle')}
                   </strong>
                   <span style={{ fontSize: '0.75rem', color: '#475569', display: 'block', marginTop: 2 }}>
-                    คืน 100% หรือ 200% สำหรับสินค้า Mall เมื่อยืนยันว่าเป็นของปลอม
+                    {t('catalog:reporting.protectionDescription')}
                   </span>
                 </div>
               </label>
@@ -213,14 +216,14 @@ export function ReportStoreModal({
                 className="report-modal-btn-submit"
                 disabled={isSubmitting || !description.trim()}
               >
-                {isSubmitting ? 'กำลังส่งข้อมูล...' : '🚨 ยืนยันการส่งรายงาน'}
+                {isSubmitting ? t('catalog:reporting.submitting') : t('catalog:reporting.submit')}
               </button>
               <button
                 type="button"
                 className="report-modal-btn-cancel"
                 onClick={handleCloseModal}
               >
-                ยกเลิก
+                {t('common:actions.cancel')}
               </button>
             </div>
           </form>
