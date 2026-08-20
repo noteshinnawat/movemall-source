@@ -58,6 +58,13 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 
   const [isLoggingInGoogle, setIsLoggingInGoogle] = useState(false);
 
+  // ── ด่านตรวจสิทธิ์ในหน้า (แทน ProtectedRoute ที่เคยเด้งกลับหน้าแรกแบบเงียบ ๆ) ──
+  // ผู้ที่ล็อกอินอยู่แต่ยังไม่ได้เปิดร้าน (เช่น role BUYER) ต้องเห็นเหตุผลและปุ่มสมัครเปิดร้าน
+  // ⚠️ นี่คือด่านระดับ UX เท่านั้น ด่านจริงอยู่ที่ API ฝั่งเซิร์ฟเวอร์ (requireRole + ownership)
+  const SELLER_ROLES = ['SELLER', 'CREATOR', 'SUPER_ADMIN', 'ADMIN'];
+  const hasSellerRole = SELLER_ROLES.includes(String(currentUser?.role || '').toUpperCase());
+  const isSignedIn = Boolean(currentUser) && Boolean(localStorage.getItem('movemall_jwt_token'));
+
   function handleLogout() {
     if (window.confirm('คุณต้องการออกจากระบบศูนย์ผู้ขาย Movemall ใช่หรือไม่?')) {
       logoutApi(); // เพิกถอน token ฝั่งเซิร์ฟเวอร์ด้วย ไม่ใช่แค่ลบทิ้งฝั่ง client
@@ -1566,7 +1573,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     );
   }
 
-  if (!currentUser) {
+  if (!isSignedIn || !hasSellerRole) {
     return (
       <main className="seller-auth-gate">
         <div className="seller-auth-gate__container">
@@ -1582,7 +1589,9 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 
             <h1 className="seller-auth-gate__title">ศูนย์ผู้ขาย Movemall (Seller Centre)</h1>
             <p className="seller-auth-gate__desc">
-              กรุณาเข้าสู่ระบบบัญชีผู้ขาย หรือสมัครเปิดร้านค้าใหม่ เพื่อเข้าถึงระบบจัดการสต็อกสินค้า คำสั่งซื้อ ยิงแคมเปญโฆษณา และศูนย์การเงินร้านค้า
+              {isSignedIn
+                ? 'บัญชีนี้ยังไม่ได้เปิดร้านค้าบน Movemall จึงยังเข้าศูนย์ผู้ขายไม่ได้ — สมัครเปิดร้าน (ฟรี ไม่มีค่าแรกเข้า) เพื่อเริ่มจัดการสต็อกสินค้า คำสั่งซื้อ แคมเปญโฆษณา และศูนย์การเงินร้านค้า'
+                : 'กรุณาเข้าสู่ระบบบัญชีผู้ขาย หรือสมัครเปิดร้านค้าใหม่ เพื่อเข้าถึงระบบจัดการสต็อกสินค้า คำสั่งซื้อ ยิงแคมเปญโฆษณา และศูนย์การเงินร้านค้า'}
             </p>
 
             <div className="seller-auth-gate__features">
@@ -1605,23 +1614,27 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
             </div>
 
             <div className="seller-auth-gate__actions">
-              <Link
-                to="/login?role=seller&redirect=/seller"
-                className="seller-auth-gate__btn seller-auth-gate__btn--primary"
-              >
-                <Lock size={16} />
-                <span>เข้าสู่ระบบผู้ขาย (Seller Login)</span>
-                <ArrowRight size={16} />
-              </Link>
+              {!isSignedIn && (
+                <Link
+                  to="/login?role=seller&redirect=/seller"
+                  className="seller-auth-gate__btn seller-auth-gate__btn--primary"
+                >
+                  <Lock size={16} />
+                  <span>เข้าสู่ระบบผู้ขาย (Seller Login)</span>
+                  <ArrowRight size={16} />
+                </Link>
+              )}
 
               <Link
                 to="/seller/register"
-                className="seller-auth-gate__btn seller-auth-gate__btn--secondary"
+                className={`seller-auth-gate__btn ${isSignedIn ? 'seller-auth-gate__btn--primary' : 'seller-auth-gate__btn--secondary'}`}
               >
                 <Store size={16} />
                 <span>สมัครเปิดร้านค้าใหม่ (Register Store)</span>
+                {isSignedIn && <ArrowRight size={16} />}
               </Link>
 
+              {!isSignedIn && (
               <button
                 type="button"
                 onClick={handleFastGoogleLogin}
@@ -1636,6 +1649,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 </svg>
                 <span>{isLoggingInGoogle ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด่วนด้วย Google'}</span>
               </button>
+              )}
 
               <Link to="/" className="seller-auth-gate__btn--text">
                 ← กลับสู่หน้าหลัก Movemall
