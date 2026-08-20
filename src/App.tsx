@@ -364,14 +364,14 @@ function AppLayout({
           <Route
             path="/seller"
             element={
-              <ProtectedRoute allowedRoles={['SELLER', 'CREATOR', 'SUPER_ADMIN', 'ADMIN']} fallbackPath="/seller/register">
+              /* ไม่ห่อ ProtectedRoute: หน้านี้มีด่านตรวจสิทธิ์ (seller-auth-gate) ในตัวเอง
+                 ที่อธิบายเหตุผลและมีปุ่มเข้าสู่ระบบ/สมัครเปิดร้านให้ แทนการเด้งกลับเงียบ ๆ */
               <SellerCenterPage
                 products={productList}
                 onAddProduct={handleAddProduct}
                 onUpdateProduct={handleUpdateProduct}
                 onDeleteProduct={handleDeleteProduct}
               />
-              </ProtectedRoute>
             }
           />
 
