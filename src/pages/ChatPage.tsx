@@ -138,6 +138,7 @@ export function ChatPage() {
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<any>(null);
+  const tRef = useRef(t);
 
   // ประวัติแชทจริง — เริ่มจาก cache ในเครื่อง แล้วให้ API/socket เติมของจริงทับ
   const [messages, setMessages] = useState<Record<string, Message[]>>(() => getStoredChatHistory(myUserId));
@@ -163,6 +164,13 @@ export function ChatPage() {
   }, [myUserId, messages]);
 
   // Connect WebSocket & Register Socket listeners
+  useEffect(() => {
+    // Kept in a ref so a language switch (which gives `t` a new identity)
+    // doesn't tear down and re-attach the socket listeners or re-emit
+    // `join_chat` — only the room selection should do that.
+    tRef.current = t;
+  }, [t]);
+
   useEffect(() => {
     const socket = getChatSocket();
 
@@ -226,7 +234,7 @@ export function ChatPage() {
         [data.storeId]: {
           ...(prev[data.storeId] || { unreadCount: 0 }),
           isOnline: data.isOnline,
-          lastActive: data.isOnline ? t('engagement:chat.online') : t('engagement:chat.offline'),
+          lastActive: data.isOnline ? tRef.current('engagement:chat.online') : tRef.current('engagement:chat.offline'),
         },
       }));
     };
@@ -255,7 +263,7 @@ export function ChatPage() {
       socket.off('user_typing', handleUserTyping);
       socket.off('store_presence', handleStorePresence);
     };
-  }, [selectedStoreId, myUserId, t]);
+  }, [selectedStoreId, myUserId]);
 
   // รายการห้องแชทจริงของผู้ใช้คนนี้
   const [apiConversations, setApiConversations] = useState<ApiConversation[]>([]);

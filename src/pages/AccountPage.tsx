@@ -472,7 +472,7 @@ export function AccountPage() {
               className={`account-nav-btn ${activeTab === 'paylater' ? 'account-nav-btn--active' : ''}`}
               onClick={() => setActiveTab('paylater')}
             >
-              <CreditCard size={18} /> Movemall PayLater
+              <CreditCard size={18} /> {t('auth:account.nav.payLater')}
             </button>
             <button
               className={`account-nav-btn ${activeTab === 'line' ? 'account-nav-btn--active' : ''}`}
@@ -1057,6 +1057,7 @@ export function AccountPage() {
               <button
                 type="button"
                 onClick={() => setIsAddressModalOpen(false)}
+                aria-label={t('auth:account.addresses.modalClose')}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}
               >
                 <X size={20} />
