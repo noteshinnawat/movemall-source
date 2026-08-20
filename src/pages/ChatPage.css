@@ -165,6 +165,34 @@
   font-size: 12px;
 }
 
+.chat-no-selection {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.chat-no-selection__title {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted, #9CA3AF);
+}
+
+.chat-browse-stores-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary, #2563EB);
+  text-decoration: none;
+}
+
+.chat-browse-stores-link:hover {
+  text-decoration: underline;
+}
+
 .chat-empty-thread {
   margin: auto 0;
   padding: 40px 20px;
