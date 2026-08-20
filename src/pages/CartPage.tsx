@@ -1,7 +1,8 @@
 // src/pages/CartPage.tsx — Movemall Modern Interactive Marketplace Cart
 
 import { useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   ShoppingBag,
   Trash2,
@@ -25,6 +26,9 @@ import { stores } from '../data/stores';
 import { products as allProducts } from '../data/products';
 import { getProductUrl } from '../utils/seo';
 import { ProductCard } from '../components/ProductCard';
+import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
+import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import type { CartItem as CartItemType, Product } from '../types';
 import './CartPage.css';
 
@@ -53,6 +57,10 @@ export function CartPage({
   onToggleWishlist,
 }: CartPageProps) {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation(['commerce', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const localizePath = useLocalizedPath();
+  const money = (value: number) => formatCurrency(value, locale);
 
   // Selected item IDs (default to all items selected)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set(items.map(i => i.product.id)));
@@ -106,13 +114,13 @@ export function CartPage({
     return Array.from(map.entries()).map(([storeId, groupItems]) => {
       const storeInfo = stores.find(s => s.id === storeId) || {
         id: storeId,
-        name: 'Movemall Official Store',
+        name: t('commerce:cart.storeFallbackName'),
         badge: 'official' as const,
         rating: 4.9,
       };
       return { storeInfo, groupItems };
     });
-  }, [items]);
+  }, [items, t]);
 
   // Recommended products (excluding items in cart)
   const recommendedProducts = useMemo(() => {
@@ -171,24 +179,24 @@ export function CartPage({
             <div className="cart-empty-icon-wrap">
               <ShoppingBag size={56} className="cart-empty-bag-icon" />
             </div>
-            <h1 className="cart-empty-title">ตะกร้ายังว่าง</h1>
+            <h1 className="cart-empty-title">{t('commerce:cart.empty.title')}</h1>
             <p className="cart-empty-subtitle">
-              เลือกสินค้าที่ชอบแล้วกลับมาที่นี่
+              {t('commerce:cart.empty.subtitle')}
             </p>
             <div className="cart-empty-actions">
-              <Link to="/shop" className="cart-empty-primary-btn" id="cart-empty-shop-btn">
-                ⚡ เริ่มช้อป
-              </Link>
-              <Link to="/mall" className="cart-empty-secondary-btn">
-                👑 ดูสินค้า Mall
-              </Link>
+              <LocalizedLink to="/shop" className="cart-empty-primary-btn" id="cart-empty-shop-btn">
+                {t('commerce:cart.empty.startShopping')}
+              </LocalizedLink>
+              <LocalizedLink to="/mall" className="cart-empty-secondary-btn">
+                {t('commerce:cart.empty.viewMall')}
+              </LocalizedLink>
             </div>
 
             {/* Recommendations Grid */}
             <div className="cart-empty-recommendations">
               <div className="cart-recom-header">
-                <span className="cart-recom-tag">RECOMMENDED FOR YOU</span>
-                <h2 className="cart-recom-title">✨ สินค้าที่คุณอาจสนใจ</h2>
+                <span className="cart-recom-tag">{t('commerce:cart.empty.recommendedTag')}</span>
+                <h2 className="cart-recom-title">{t('commerce:cart.empty.recommendedTitle')}</h2>
               </div>
               <div className="cart-recom-grid">
                 {recommendedProducts.slice(0, 4).map(p => (
@@ -219,15 +227,17 @@ export function CartPage({
             <button
               className="cart-back-nav-btn"
               onClick={() => navigate(-1)}
-              aria-label="ย้อนกลับ"
-              title="ย้อนกลับ"
+              aria-label={t('commerce:cart.topbar.back')}
+              title={t('commerce:cart.topbar.back')}
             >
               <ArrowLeft size={18} />
             </button>
             <div className="cart-topbar-heading">
               <h1 className="cart-main-title">
-                ตะกร้าสินค้า
-                <span className="cart-items-pill">{items.length} รายการ</span>
+                {t('commerce:cart.topbar.title')}
+                <span className="cart-items-pill">
+                  {t('commerce:cart.topbar.itemCount', { count: formatNumber(items.length, locale) })}
+                </span>
               </h1>
             </div>
           </div>
@@ -237,18 +247,22 @@ export function CartPage({
               <button
                 className="cart-delete-selected-btn"
                 onClick={handleRemoveSelected}
-                title="ลบรายการที่เลือก"
+                title={t('commerce:cart.topbar.deleteSelectedTitle')}
               >
                 <Trash2 size={14} />
-                <span>ลบที่เลือก ({selectedIds.size})</span>
+                <span>
+                  {t('commerce:cart.topbar.deleteSelected', {
+                    count: formatNumber(selectedIds.size, locale),
+                  })}
+                </span>
               </button>
             )}
             <button
               className="cart-clear-all-header-btn"
               onClick={onClear}
-              title="ล้างตะกร้าทั้งหมด"
+              title={t('commerce:cart.topbar.clearAllTitle')}
             >
-              ล้างทั้งหมด
+              {t('commerce:cart.topbar.clearAll')}
             </button>
           </div>
         </div>
@@ -264,11 +278,20 @@ export function CartPage({
             <div className="cart-shipping-text-wrap">
               {remainingForFreeShipping === 0 ? (
                 <span className="cart-shipping-congrats">
-                  🎉 ได้รับสิทธิ์ <strong>ส่งฟรี</strong> แล้ว
+                  <Trans
+                    i18nKey="cart.freeShipping.achieved"
+                    ns="commerce"
+                    components={{ b: <strong /> }}
+                  />
                 </span>
               ) : (
                 <span className="cart-shipping-hint">
-                  อีก <strong>฿{remainingForFreeShipping.toLocaleString()}</strong> ได้ <strong>ส่งฟรี</strong>
+                  <Trans
+                    i18nKey="cart.freeShipping.remaining"
+                    ns="commerce"
+                    values={{ amount: money(remainingForFreeShipping) }}
+                    components={{ b: <strong /> }}
+                  />
                 </span>
               )}
             </div>
@@ -288,7 +311,7 @@ export function CartPage({
 
       <div className="container cart-layout-grid">
         {/* ── Left Column: Store-Grouped Cart Items ── */}
-        <section className="cart-items-column" aria-label="รายการสินค้าในตะกร้า">
+        <section className="cart-items-column" aria-label={t('commerce:cart.itemsAria')}>
           {/* Select All Bar Header */}
           <div className="cart-select-all-header">
             <label className="cart-checkbox-label">
@@ -302,12 +325,12 @@ export function CartPage({
                 {isAllSelected ? <CheckSquare size={18} /> : <Square size={18} />}
               </span>
               <span className="cart-select-all-text">
-                เลือกสินค้าทั้งหมด ({items.length} รายการ)
+                {t('commerce:cart.selectAll', { count: formatNumber(items.length, locale) })}
               </span>
             </label>
 
             <span className="cart-selected-summary-badge">
-              เลือกแล้ว {selectedCount} ชิ้น
+              {t('commerce:cart.selectedSummary', { count: formatNumber(selectedCount, locale) })}
             </span>
           </div>
 
@@ -333,22 +356,24 @@ export function CartPage({
                       </span>
                     </label>
 
-                    <Link to={`/store/${storeInfo.id}`} className="cart-store-name-link">
+                    <LocalizedLink to={`/store/${storeInfo.id}`} className="cart-store-name-link">
                       <StoreIcon size={16} className="cart-store-icon" />
                       {storeInfo.badge === 'official' && (
                         <span className="cart-mall-badge">Mall</span>
                       )}
                       <span className="cart-store-title">{storeInfo.name}</span>
                       <ChevronRight size={14} className="cart-store-chevron" />
-                    </Link>
+                    </LocalizedLink>
 
                     <button
                       className="cart-store-voucher-btn"
-                      onClick={() => alert(`เก็บคูปองส่วนลดร้านค้า ${storeInfo.name} สำเร็จ!`)}
-                      title="เก็บคูปองร้านค้า"
+                      onClick={() =>
+                        alert(t('commerce:cart.storeVoucherClaimed', { store: storeInfo.name }))
+                      }
+                      title={t('commerce:cart.storeVoucherTitle')}
                     >
                       <Ticket size={13} />
-                      <span>คูปองร้าน</span>
+                      <span>{t('commerce:cart.storeVoucher')}</span>
                     </button>
                   </div>
 
@@ -380,7 +405,7 @@ export function CartPage({
                           </label>
 
                           {/* Product Thumbnail */}
-                          <Link
+                          <LocalizedLink
                             to={getProductUrl(item.product)}
                             className="cart-product-img-wrap"
                           >
@@ -392,24 +417,28 @@ export function CartPage({
                             />
                             {item.product.badge && (
                               <span className={`cart-img-badge cart-img-badge--${item.product.badge}`}>
-                                {item.product.badge === 'sale' ? 'SALE' : 'HOT'}
+                                {item.product.badge === 'sale'
+                                  ? t('commerce:cart.badges.sale')
+                                  : t('commerce:cart.badges.hot')}
                               </span>
                             )}
-                          </Link>
+                          </LocalizedLink>
 
                           {/* Product Info & Controls */}
                           <div className="cart-product-info-wrap">
                             <div className="cart-product-title-row">
                               <h3 className="cart-product-name">
-                                <Link to={getProductUrl(item.product)}>
+                                <LocalizedLink to={getProductUrl(item.product)}>
                                   {item.product.name}
-                                </Link>
+                                </LocalizedLink>
                               </h3>
                               <button
                                 className="cart-item-trash-btn"
                                 onClick={() => onRemove(item.product.id)}
-                                title={`ลบ ${item.product.name}`}
-                                aria-label="ลบสินค้านี้"
+                                title={t('commerce:cart.item.removeTitle', {
+                                  product: item.product.name,
+                                })}
+                                aria-label={t('commerce:cart.item.removeAria')}
                               >
                                 <Trash2 size={15} />
                               </button>
@@ -417,25 +446,34 @@ export function CartPage({
 
                             {/* Variation Tag Badge */}
                             <div className="cart-product-variation-tag">
-                              <span>ตัวเลือก: {item.product.category === 'fashion' ? 'Classic Black' : item.product.category === 'electronics' ? 'Space Gray' : 'รุ่นมาตรฐาน'}</span>
+                              <span>
+                                {t('commerce:cart.item.variation', {
+                                  variant:
+                                    item.product.category === 'fashion'
+                                      ? t('commerce:cart.variants.fashion')
+                                      : item.product.category === 'electronics'
+                                        ? t('commerce:cart.variants.electronics')
+                                        : t('commerce:cart.variants.standard'),
+                                })}
+                              </span>
                               <span className="cart-var-tag-divider">•</span>
-                              <span className="cart-paylater-pill">ผ่อน 0% PayLater</span>
+                              <span className="cart-paylater-pill">{t('commerce:cart.item.payLater')}</span>
                             </div>
 
                             {/* Price & Quantity Stepper Row */}
                             <div className="cart-product-price-qty-row">
                               <div className="cart-product-price-col">
                                 <div className="cart-product-current-price">
-                                  ฿{item.product.price.toLocaleString()}
+                                  {money(item.product.price)}
                                 </div>
                                 {item.product.originalPrice && (
                                   <div className="cart-product-orig-price-wrap">
                                     <span className="cart-product-orig-price">
-                                      ฿{item.product.originalPrice.toLocaleString()}
+                                      {money(item.product.originalPrice)}
                                     </span>
                                     {discount && (
                                       <span className="cart-product-discount-pill">
-                                        -{discount}%
+                                        {t('commerce:cart.item.discount', { discount })}
                                       </span>
                                     )}
                                   </div>
@@ -447,7 +485,7 @@ export function CartPage({
                                 <button
                                   className="cart-stepper-btn"
                                   onClick={() => onUpdateQty(item.product.id, item.quantity - 1)}
-                                  aria-label="ลดจำนวน"
+                                  aria-label={t('commerce:cart.item.decrease')}
                                   disabled={item.quantity <= 1}
                                 >
                                   <Minus size={13} />
@@ -464,12 +502,12 @@ export function CartPage({
                                       Math.min(item.product.stock, Math.max(1, Number(e.target.value) || 1))
                                     )
                                   }
-                                  aria-label="จำนวนสินค้า"
+                                  aria-label={t('commerce:cart.item.quantityAria')}
                                 />
                                 <button
                                   className="cart-stepper-btn"
                                   onClick={() => onUpdateQty(item.product.id, item.quantity + 1)}
-                                  aria-label="เพิ่มจำนวน"
+                                  aria-label={t('commerce:cart.item.increase')}
                                   disabled={item.quantity >= item.product.stock}
                                 >
                                   <Plus size={13} />
@@ -479,8 +517,8 @@ export function CartPage({
 
                             {/* Item Subtotal Highlight */}
                             <div className="cart-item-subtotal-footer">
-                              <span className="cart-item-subtotal-label">รวมรายการนี้:</span>
-                              <span className="cart-item-subtotal-val">฿{itemTotal.toLocaleString()}</span>
+                              <span className="cart-item-subtotal-label">{t('commerce:cart.item.subtotalLabel')}</span>
+                              <span className="cart-item-subtotal-val">{money(itemTotal)}</span>
                             </div>
                           </div>
                         </div>
@@ -499,17 +537,21 @@ export function CartPage({
               <div className="cart-perk-left">
                 <Ticket size={18} className="cart-perk-icon cart-perk-icon--voucher" />
                 <div>
-                  <span className="cart-perk-title">โค้ดส่วนลด</span>
+                  <span className="cart-perk-title">{t('commerce:cart.perks.voucherTitle')}</span>
                   <p className="cart-perk-desc">
-                    {voucherApplied ? 'ใช้ MOVEMALL50 ลด ฿50 แล้ว' : 'เลือกหรือใส่โค้ด'}
+                    {voucherApplied
+                      ? t('commerce:cart.perks.voucherApplied', { amount: money(voucherDiscount) })
+                      : t('commerce:cart.perks.voucherIdle')}
                   </p>
                 </div>
               </div>
               <div className="cart-perk-right">
                 {voucherApplied ? (
-                  <span className="cart-perk-badge cart-perk-badge--applied">-฿50</span>
+                  <span className="cart-perk-badge cart-perk-badge--applied">
+                    {t('commerce:cart.perks.voucherBadge', { amount: money(voucherDiscount) })}
+                  </span>
                 ) : (
-                  <span className="cart-perk-action-text">เลือกโค้ด &gt;</span>
+                  <span className="cart-perk-action-text">{t('commerce:cart.perks.voucherAction')}</span>
                 )}
               </div>
             </div>
@@ -521,9 +563,12 @@ export function CartPage({
               <div className="cart-perk-left">
                 <Coins size={18} className="cart-perk-icon cart-perk-icon--coins" />
                 <div>
-                  <span className="cart-perk-title">Movemall Coins</span>
+                  <span className="cart-perk-title">{t('commerce:cart.perks.coinsTitle')}</span>
                   <p className="cart-perk-desc">
-                    มี {userCoins} Coins · ลดได้สูงสุด ฿50
+                    {t('commerce:cart.perks.coinsDesc', {
+                      count: formatNumber(userCoins, locale),
+                      max: money(50),
+                    })}
                   </p>
                 </div>
               </div>
@@ -542,54 +587,59 @@ export function CartPage({
         </section>
 
         {/* ── Right Column: Order Summary Sidebar (Desktop Sticky) ── */}
-        <aside className="cart-summary-sidebar" aria-label="สรุปคำสั่งซื้อ">
+        <aside className="cart-summary-sidebar" aria-label={t('commerce:cart.summary.aria')}>
           <div className="cart-summary-card">
             <h2 className="cart-summary-heading">
-              สรุปคำสั่งซื้อ
-              <span className="cart-summary-count">({selectedCount} ชิ้น)</span>
+              {t('commerce:cart.summary.heading')}
+              <span className="cart-summary-count">
+                {t('commerce:cart.summary.count', { count: formatNumber(selectedCount, locale) })}
+              </span>
             </h2>
 
             <div className="cart-summary-breakdown">
               <div className="cart-summary-line">
-                <span className="cart-summary-line-label">สินค้า ({selectedCount} ชิ้น)</span>
-                <span className="cart-summary-line-val">฿{selectedSubtotal.toLocaleString()}</span>
+                <span className="cart-summary-line-label">
+                  {t('commerce:cart.summary.items', { count: formatNumber(selectedCount, locale) })}
+                </span>
+                <span className="cart-summary-line-val">{money(selectedSubtotal)}</span>
               </div>
 
               {selectedSavings > 0 && (
                 <div className="cart-summary-line cart-summary-line--savings">
                   <span className="cart-summary-line-label">
-                    <Sparkles size={14} /> ส่วนลด
+                    <Sparkles size={14} /> {t('commerce:cart.summary.savings')}
                   </span>
-                  <span className="cart-summary-line-val">-฿{selectedSavings.toLocaleString()}</span>
+                  <span className="cart-summary-line-val">-{money(selectedSavings)}</span>
                 </div>
               )}
 
               {voucherApplied && (
                 <div className="cart-summary-line cart-summary-line--voucher">
                   <span className="cart-summary-line-label">
-                    <Ticket size={14} /> โค้ดส่วนลด
+                    <Ticket size={14} /> {t('commerce:cart.summary.voucher')}
                   </span>
-                  <span className="cart-summary-line-val">-฿{voucherDiscount.toLocaleString()}</span>
+                  <span className="cart-summary-line-val">-{money(voucherDiscount)}</span>
                 </div>
               )}
 
               {useCoins && (
                 <div className="cart-summary-line cart-summary-line--coins">
                   <span className="cart-summary-line-label">
-                    <Coins size={14} /> Coins ({coinsDiscount})
+                    <Coins size={14} />{' '}
+                    {t('commerce:cart.summary.coins', { count: formatNumber(coinsDiscount, locale) })}
                   </span>
-                  <span className="cart-summary-line-val">-฿{coinsDiscount.toLocaleString()}</span>
+                  <span className="cart-summary-line-val">-{money(coinsDiscount)}</span>
                 </div>
               )}
 
               <div className="cart-summary-line">
-                <span className="cart-summary-line-label">ค่าจัดส่ง</span>
+                <span className="cart-summary-line-label">{t('commerce:cart.summary.shipping')}</span>
                 {shippingFee === 0 ? (
                   <span className="cart-summary-line-val cart-summary-line-val--free">
-                    ฟรี ฿0 🎉
+                    {t('commerce:cart.summary.shippingFree', { amount: money(0) })}
                   </span>
                 ) : (
-                  <span className="cart-summary-line-val">฿{shippingFee}</span>
+                  <span className="cart-summary-line-val">{money(shippingFee)}</span>
                 )}
               </div>
             </div>
@@ -598,38 +648,45 @@ export function CartPage({
 
             <div className="cart-summary-total-block">
               <div className="cart-summary-total-label-wrap">
-                <span className="cart-summary-total-title">ยอดชำระ</span>
-                <span className="cart-summary-total-tax">รวม VAT 7%</span>
+                <span className="cart-summary-total-title">{t('commerce:cart.summary.totalTitle')}</span>
+                <span className="cart-summary-total-tax">{t('commerce:cart.summary.totalTax')}</span>
               </div>
               <div className="cart-summary-total-amount">
-                ฿{finalTotal.toLocaleString()}
+                {money(finalTotal)}
               </div>
             </div>
 
             {selectedSavings > 0 && (
               <div className="cart-summary-savings-banner">
-                ประหยัด <strong>฿{selectedSavings.toLocaleString()}</strong>
+                <Trans
+                  i18nKey="cart.summary.savingsBanner"
+                  ns="commerce"
+                  values={{ amount: money(selectedSavings) }}
+                  components={{ b: <strong /> }}
+                />
               </div>
             )}
 
             <button
               id="cart-checkout-btn-sidebar"
               className="cart-checkout-main-btn"
-              onClick={() => navigate('/checkout')}
+              onClick={() => navigate(localizePath('/checkout'))}
               disabled={selectedCount === 0}
             >
-              <span>ดำเนินการชำระเงิน ({selectedCount})</span>
+              <span>
+                {t('commerce:cart.summary.checkout', { count: formatNumber(selectedCount, locale) })}
+              </span>
               <ArrowRight size={18} />
             </button>
 
             <div className="cart-guarantee-perks">
               <div className="cart-guarantee-item">
                 <ShieldCheck size={16} className="cart-guarantee-icon" />
-                <span>Movemall การันตี ได้รับสินค้าแท้ 100% หรือคืนเงิน 2 เท่า</span>
+                <span>{t('commerce:cart.summary.guaranteeAuthentic')}</span>
               </div>
               <div className="cart-guarantee-item">
                 <CheckCircle2 size={16} className="cart-guarantee-icon" />
-                <span>คืนสินค้าได้ฟรีภายใน 30 วัน</span>
+                <span>{t('commerce:cart.summary.guaranteeReturns')}</span>
               </div>
             </div>
           </div>
@@ -641,12 +698,12 @@ export function CartPage({
         <div className="container">
           <div className="cart-recom-master-header">
             <div className="cart-recom-header-left">
-              <span className="cart-recom-tag">YOU MAY ALSO LIKE</span>
-              <h2 className="cart-recom-title">✨ สินค้าแนะนำสำหรับคุณ</h2>
+              <span className="cart-recom-tag">{t('commerce:cart.recommendations.tag')}</span>
+              <h2 className="cart-recom-title">{t('commerce:cart.recommendations.title')}</h2>
             </div>
-            <Link to="/shop" className="cart-recom-more-link">
-              ดูสินค้าทั้งหมด &gt;
-            </Link>
+            <LocalizedLink to="/shop" className="cart-recom-more-link">
+              {t('commerce:cart.recommendations.viewAll')}
+            </LocalizedLink>
           </div>
 
           <div className="cart-recom-grid">
@@ -664,7 +721,7 @@ export function CartPage({
       </section>
 
       {/* ── Shopee-Style Sticky Bottom Checkout Dock (Mobile & Quick Action) ── */}
-      <div className="cart-sticky-checkout-dock" aria-label="แถบชำระเงิน">
+      <div className="cart-sticky-checkout-dock" aria-label={t('commerce:cart.dock.aria')}>
         <div className="container cart-sticky-dock-inner">
           {/* Left: Select All */}
           <div className="cart-sticky-select-all">
@@ -678,23 +735,25 @@ export function CartPage({
               <span className="cart-custom-checkbox">
                 {isAllSelected ? <CheckSquare size={19} /> : <Square size={19} />}
               </span>
-              <span className="cart-sticky-select-text">ทั้งหมด ({items.length})</span>
+              <span className="cart-sticky-select-text">
+                {t('commerce:cart.dock.selectAll', { count: formatNumber(items.length, locale) })}
+              </span>
             </label>
           </div>
 
           {/* Middle: Total & Savings */}
           <div className="cart-sticky-total-col">
             <div className="cart-sticky-total-row">
-              <span className="cart-sticky-total-label">รวม:</span>
-              <span className="cart-sticky-total-price">฿{finalTotal.toLocaleString()}</span>
+              <span className="cart-sticky-total-label">{t('commerce:cart.dock.totalLabel')}</span>
+              <span className="cart-sticky-total-price">{money(finalTotal)}</span>
             </div>
             {selectedSavings > 0 ? (
               <div className="cart-sticky-savings-pill">
-                🔥 ประหยัด ฿{selectedSavings.toLocaleString()}
+                {t('commerce:cart.dock.savings', { amount: money(selectedSavings) })}
               </div>
             ) : (
               <div className="cart-sticky-free-ship-tag">
-                🚚 ส่งฟรีเมื่อครบ ฿299
+                {t('commerce:cart.dock.freeShippingHint', { amount: money(FREE_SHIPPING_THRESHOLD) })}
               </div>
             )}
           </div>
@@ -703,10 +762,12 @@ export function CartPage({
           <button
             id="cart-sticky-checkout-btn"
             className="cart-sticky-checkout-btn"
-            onClick={() => navigate('/checkout')}
+            onClick={() => navigate(localizePath('/checkout'))}
             disabled={selectedCount === 0}
           >
-            <span>ชำระเงิน ({selectedCount})</span>
+            <span>
+              {t('commerce:cart.dock.checkout', { count: formatNumber(selectedCount, locale) })}
+            </span>
             <ArrowRight size={16} />
           </button>
         </div>

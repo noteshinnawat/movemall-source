@@ -1,8 +1,11 @@
 // src/pages/WishlistPage.tsx
 
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import type { Product } from '../types';
 import './WishlistPage.css';
 
@@ -12,18 +15,21 @@ interface WishlistPageProps {
 }
 
 export function WishlistPage({ items, onAddToCart }: WishlistPageProps) {
+  const { t, i18n } = useTranslation(['commerce', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+
   if (items.length === 0) {
     return (
       <main className="wishlist">
         <div className="container">
           <div className="wishlist__empty">
             <div className="wishlist__empty-icon">💔</div>
-            <h1 className="wishlist__empty-title">ยังไม่มีสินค้าที่บันทึกไว้</h1>
-            <p className="wishlist__empty-sub">กดไอคอนหัวใจที่สินค้าเพื่อบันทึกไว้ดูภายหลังได้เลย</p>
-            <Link to="/shop" className="wishlist__empty-btn">
+            <h1 className="wishlist__empty-title">{t('commerce:wishlist.emptyTitle')}</h1>
+            <p className="wishlist__empty-sub">{t('commerce:wishlist.emptySubtitle')}</p>
+            <LocalizedLink to="/shop" className="wishlist__empty-btn">
               <ShoppingBag size={18} />
-              ไปเลือกดูสินค้า
-            </Link>
+              {t('commerce:wishlist.emptyCta')}
+            </LocalizedLink>
           </div>
         </div>
       </main>
@@ -36,8 +42,10 @@ export function WishlistPage({ items, onAddToCart }: WishlistPageProps) {
         <div className="container">
           <h1 className="wishlist__header-title">
             <Heart size={32} style={{ color: 'var(--accent)' }} fill="var(--accent)" />
-            สินค้าที่บันทึกไว้ (Wishlist)
-            <span className="wishlist__count-badge">{items.length} รายการ</span>
+            {t('commerce:wishlist.title')}
+            <span className="wishlist__count-badge">
+              {t('commerce:wishlist.count', { count: formatNumber(items.length, locale) })}
+            </span>
           </h1>
         </div>
       </div>
@@ -58,5 +66,3 @@ export function WishlistPage({ items, onAddToCart }: WishlistPageProps) {
     </main>
   );
 }
-
-export default WishlistPage;

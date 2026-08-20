@@ -70,7 +70,12 @@
   },
   "toast": {
     "region": "Notifications",
-    "close": "Close notification"
+    "close": "Close notification",
+    "cartAdded": "Added to cart · {{count}} pieces",
+    "cartRemoved": "Removed from your cart",
+    "cartCleared": "Cart cleared",
+    "wishlistAdded": "Product saved",
+    "wishlistRemoved": "Removed from your wishlist"
   },
   "accessibility": {
     "backToTop": "Scroll to the top of the page",

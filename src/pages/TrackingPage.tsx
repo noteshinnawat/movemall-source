@@ -1,6 +1,7 @@
 // src/pages/TrackingPage.tsx — Real Order Tracking & Logistics Hub
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Truck,
   CheckCircle2,
@@ -19,12 +20,21 @@ import {
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { getStoredOrders, getOrderTrackingNumber, STATUS_LABEL, STATUS_COLOR } from '../data/orders';
-import type { Order, OrderStatus } from '../data/orders';
+import { getStoredOrders, getOrderTrackingNumber, STATUS_COLOR } from '../data/orders';
+import type { Order } from '../data/orders';
 import { LineConnectModal } from '../components/LineConnectModal';
+import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
+import { formatCurrency, formatDate, formatNumber, formatTime } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import './TrackingPage.css';
 
+const CARRIER_NAME = 'Flash Express';
+const CARRIER_SERVICE = 'Standard Delivery (Flash Express)';
+
 export function TrackingPage() {
+  const { t, i18n } = useTranslation(['commerce', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const localizePath = useLocalizedPath();
   const { orderId: routeOrderId } = useParams<{ orderId: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -128,7 +138,7 @@ export function TrackingPage() {
     // Distribution Hub Marker
     const hubIcon = L.divIcon({
       className: 'leaflet-hub-marker',
-      html: '<div style="background:#2563EB;color:white;padding:3px 8px;font-size:11px;font-weight:bold;border-radius:4px;border:1.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25)">🏢 ศูนย์กระจายสินค้า Movemall Hub</div>',
+      html: `<div style="background:#2563EB;color:white;padding:3px 8px;font-size:11px;font-weight:bold;border-radius:4px;border:1.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25)">${t('commerce:tracking.mapHub')}</div>`,
       iconSize: [160, 24],
     });
     L.marker(hubCoords, { icon: hubIcon }).addTo(map);
@@ -136,7 +146,7 @@ export function TrackingPage() {
     // Destination Pin
     const homeIcon = L.divIcon({
       className: 'leaflet-home-marker',
-      html: '<div class="custom-home-pin">📍 ที่อยู่จัดส่งปลายทาง</div>',
+      html: `<div class="custom-home-pin">${t('commerce:tracking.mapDestination')}</div>`,
       iconSize: [130, 24],
     });
     L.marker(destCoords, { icon: homeIcon }).addTo(map);
@@ -157,7 +167,7 @@ export function TrackingPage() {
         mapInstanceRef.current = null;
       }
     };
-  }, [currentOrder]);
+  }, [currentOrder, t]);
 
   function showToast(msg: string) {
     setToastMsg(msg);
@@ -177,45 +187,35 @@ export function TrackingPage() {
 
     if (found) {
       setCurrentOrder(found);
-      navigate(`/tracking/${found.id}`, { replace: true });
-      showToast(`พบพัสดุสำหรับคำสั่งซื้อ #${found.id}`);
+      navigate(localizePath(`/tracking/${found.id}`), { replace: true });
+      showToast(t('commerce:tracking.foundToast', { orderId: found.id }));
     } else {
-      showToast(`ไม่พบหมายเลขพัสดุ "${query}" ในรายการคำสั่งซื้อของคุณ`);
+      showToast(t('commerce:tracking.notFoundToast', { query }));
     }
   }
 
   function handleCopyTracking(trackingNo: string) {
     navigator.clipboard.writeText(trackingNo);
     setCopiedTracking(true);
-    showToast('คัดลอกหมายเลขพัสดุเรียบร้อยแล้ว 📋');
+    showToast(t('commerce:tracking.copiedToast'));
     setTimeout(() => setCopiedTracking(false), 2000);
   }
 
   // Format Dates dynamically from actual order
   const orderCreatedDate = currentOrder ? new Date(currentOrder.createdAt) : new Date();
-  const createdDateStr = orderCreatedDate.toLocaleDateString('th-TH', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const dateTimeStr = (value: Date) =>
+    t('commerce:tracking.dateTime', {
+      date: formatDate(value, locale),
+      time: formatTime(value, locale),
+    });
+
+  const createdDateStr = dateTimeStr(orderCreatedDate);
 
   const packDate = new Date(orderCreatedDate.getTime() + 2 * 60 * 60 * 1000);
-  const packDateStr = packDate.toLocaleDateString('th-TH', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const packDateStr = dateTimeStr(packDate);
 
   const shipDate = new Date(orderCreatedDate.getTime() + 5 * 60 * 60 * 1000);
-  const shipDateStr = shipDate.toLocaleDateString('th-TH', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const shipDateStr = dateTimeStr(shipDate);
 
   const trackingNumber = currentOrder ? getOrderTrackingNumber(currentOrder) : '';
 
@@ -224,9 +224,9 @@ export function TrackingPage() {
       <div className="tracking-container">
         {/* Navigation & Search Hub */}
         <div className="tracking-top-nav">
-          <Link to="/orders" className="tracking-back-btn">
-            <ArrowLeft size={16} /> กลับสู่รายการคำสั่งซื้อ
-          </Link>
+          <LocalizedLink to="/orders" className="tracking-back-btn">
+            <ArrowLeft size={16} /> {t('commerce:tracking.back')}
+          </LocalizedLink>
 
           {toastMsg && (
             <div className="tracking-toast-pill">
@@ -241,10 +241,10 @@ export function TrackingPage() {
             <div>
               <h2 className="tracking-search-title">
                 <Search size={18} style={{ color: 'var(--primary)' }} />
-                ค้นหาและติดตามพัสดุ (Parcel Tracking)
+                {t('commerce:tracking.searchTitle')}
               </h2>
               <p className="tracking-search-desc">
-                กรอกเลขพัสดุหรือเลขคำสั่งซื้อ
+                {t('commerce:tracking.searchDesc')}
               </p>
             </div>
           </div>
@@ -254,7 +254,7 @@ export function TrackingPage() {
               <Truck size={18} className="tracking-search-icon" />
               <input
                 type="text"
-                placeholder="เช่น TH-FLASH-XXXXX หรือ ORD-..."
+                placeholder={t('commerce:tracking.searchPlaceholder')}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="tracking-search-input"
@@ -264,20 +264,23 @@ export function TrackingPage() {
                   type="button"
                   onClick={() => setSearchQuery('')}
                   className="tracking-search-clear"
+                  aria-label={t('commerce:tracking.searchClear')}
                 >
                   ✕
                 </button>
               )}
             </div>
             <button type="submit" className="tracking-search-btn">
-              <Search size={15} /> ค้นหาพัสดุ
+              <Search size={15} /> {t('commerce:tracking.searchSubmit')}
             </button>
           </form>
 
           {/* Real User's Orders Quick Selector */}
           {orders.length > 0 && (
             <div className="tracking-quick-selector">
-              <span className="tracking-quick-label">📦 รายการคำสั่งซื้อจริงของคุณ ({orders.length}):</span>
+              <span className="tracking-quick-label">
+                {t('commerce:tracking.quickLabel', { count: formatNumber(orders.length, locale) })}
+              </span>
               <div className="tracking-quick-pills">
                 {orders.map(o => {
                   const isSelected = currentOrder?.id === o.id;
@@ -287,13 +290,13 @@ export function TrackingPage() {
                       type="button"
                       onClick={() => {
                         setCurrentOrder(o);
-                        navigate(`/tracking/${o.id}`);
+                        navigate(localizePath(`/tracking/${o.id}`));
                       }}
                       className={`tracking-quick-pill ${isSelected ? 'tracking-quick-pill--active' : ''}`}
                     >
                       <span className="tracking-pill-id">#{o.id}</span>
                       <span className="tracking-pill-status" style={{ color: STATUS_COLOR[o.status] }}>
-                        {STATUS_LABEL[o.status]}
+                        {t(`commerce:orderStatus.${o.status}`)}
                       </span>
                     </button>
                   );
@@ -308,7 +311,7 @@ export function TrackingPage() {
             {/* Header Summary Card */}
             <section className="tracking-header-card">
               <div className="tracking-header-left">
-                <div className="tracking-no-label">หมายเลขติดตามพัสดุ (Tracking No.)</div>
+                <div className="tracking-no-label">{t('commerce:tracking.trackingNoLabel')}</div>
                 <div className="tracking-title-row">
                   <h1 className="tracking-title">
                     <Truck size={22} style={{ color: 'var(--primary)' }} />
@@ -318,32 +321,40 @@ export function TrackingPage() {
                     type="button"
                     onClick={() => handleCopyTracking(trackingNumber)}
                     className="tracking-copy-btn"
-                    title="คัดลอกหมายเลขพัสดุ"
+                    title={t('commerce:tracking.copyTitle')}
                   >
                     {copiedTracking ? <Check size={14} style={{ color: 'var(--success)' }} /> : <Copy size={14} />}
-                    <span>{copiedTracking ? 'คัดลอกแล้ว' : 'คัดลอก'}</span>
+                    <span>
+                      {copiedTracking ? t('commerce:tracking.copied') : t('commerce:tracking.copy')}
+                    </span>
                   </button>
                 </div>
                 <div className="tracking-meta-line">
-                  คำสั่งซื้อ: <strong>#{currentOrder.id}</strong> • ขนส่งโดย <strong>Standard Delivery (Flash Express)</strong> • สั่งซื้อเมื่อ {createdDateStr}
+                  {t('commerce:tracking.metaLine', {
+                    orderId: currentOrder.id,
+                    carrier: CARRIER_SERVICE,
+                    date: createdDateStr,
+                  })}
                 </div>
               </div>
 
               <div className="tracking-eta-box">
                 <div className="tracking-eta-label">
-                  {currentOrder.status === 'delivered' ? '✅ สถานะการจัดส่ง' : '⏱️ กำหนดส่งถึงคุณโดยประมาณ'}
+                  {currentOrder.status === 'delivered'
+                    ? t('commerce:tracking.etaLabelDelivered')
+                    : t('commerce:tracking.etaLabelPending')}
                 </div>
                 <div className="tracking-eta-time">
                   {currentOrder.status === 'delivered'
-                    ? 'จัดส่งสำเร็จเรียบร้อยแล้ว'
+                    ? t('commerce:tracking.etaDelivered')
                     : currentOrder.status === 'shipped'
-                    ? '1-2 วันทำการ'
+                    ? t('commerce:tracking.etaShipped')
                     : currentOrder.status === 'processing'
-                    ? '2-3 วันทำการ'
-                    : 'รอดำเนินการ'}
+                    ? t('commerce:tracking.etaProcessing')
+                    : t('commerce:tracking.etaWaiting')}
                 </div>
                 <div className="tracking-badge-status" style={{ background: STATUS_COLOR[currentOrder.status], color: '#FFFFFF' }}>
-                  {STATUS_LABEL[currentOrder.status]}
+                  {t(`commerce:orderStatus.${currentOrder.status}`)}
                 </div>
               </div>
             </section>
@@ -355,13 +366,13 @@ export function TrackingPage() {
                 <div>
                   <div className="tracking-line-title">
                     {isLineConnected
-                      ? '✓ แจ้งเตือนสถานะพัสดุผ่าน LINE เปิดใช้งานอยู่'
-                      : '🔔 รับการแจ้งเตือนพัสดุชิ้นนี้เข้า LINE อัตโนมัติ'}
+                      ? t('commerce:tracking.lineOnTitle')
+                      : t('commerce:tracking.lineOffTitle')}
                   </div>
                   <div className="tracking-line-subtitle">
                     {isLineConnected
-                      ? `รับสถานะพัสดุ ${trackingNumber} ผ่าน LINE`
-                      : 'เชื่อมต่อ LINE รับ 50 Coins และสถานะพัสดุ'}
+                      ? t('commerce:tracking.lineOnSubtitle', { trackingNumber })
+                      : t('commerce:tracking.lineOffSubtitle')}
                   </div>
                 </div>
               </div>
@@ -374,12 +385,12 @@ export function TrackingPage() {
                 {isLineConnected ? (
                   <>
                     <Smartphone size={14} />
-                    ดูการแจ้งเตือน LINE
+                    {t('commerce:tracking.lineViewCta')}
                   </>
                 ) : (
                   <>
                     <Sparkles size={14} />
-                    เชื่อมต่อ LINE (+50 Coins)
+                    {t('commerce:tracking.lineConnectCta')}
                   </>
                 )}
               </button>
@@ -388,14 +399,14 @@ export function TrackingPage() {
             {/* Stepper Timeline */}
             <section className="tracking-stepper-card">
               <h2 className="tracking-section-title">
-                สถานะขั้นตอนการจัดส่ง (Shipping Timeline)
+                {t('commerce:tracking.timelineTitle')}
               </h2>
 
               <div className="tracking-stepper">
                 {/* Step 1: Confirmed */}
                 <div className="tracking-step tracking-step--done">
                   <div className="tracking-step-icon">✓</div>
-                  <div className="tracking-step-title">1. ชำระเงิน / ยืนยันคำสั่งซื้อ</div>
+                  <div className="tracking-step-title">{t('commerce:tracking.step1')}</div>
                   <div className="tracking-step-time">{createdDateStr}</div>
                 </div>
 
@@ -404,9 +415,9 @@ export function TrackingPage() {
                   <div className="tracking-step-icon">
                     {currentOrder.status !== 'pending' ? '✓' : <Clock size={16} />}
                   </div>
-                  <div className="tracking-step-title">2. ร้านค้าเตรียมจัดส่ง</div>
+                  <div className="tracking-step-title">{t('commerce:tracking.step2')}</div>
                   <div className="tracking-step-time">
-                    {currentOrder.status === 'pending' ? 'กำลังเตรียมพัสดุ' : packDateStr}
+                    {currentOrder.status === 'pending' ? t('commerce:tracking.step2Pending') : packDateStr}
                   </div>
                 </div>
 
@@ -415,9 +426,11 @@ export function TrackingPage() {
                   <div className="tracking-step-icon">
                     {currentOrder.status === 'delivered' ? '✓' : <Truck size={18} />}
                   </div>
-                  <div className="tracking-step-title">3. บริษัทขนส่งเข้ารับพัสดุ</div>
+                  <div className="tracking-step-title">{t('commerce:tracking.step3')}</div>
                   <div className="tracking-step-time">
-                    {currentOrder.status === 'delivered' || currentOrder.status === 'shipped' ? shipDateStr : 'รอดำเนินการ'}
+                    {currentOrder.status === 'delivered' || currentOrder.status === 'shipped'
+                      ? shipDateStr
+                      : t('commerce:tracking.stepWaiting')}
                   </div>
                 </div>
 
@@ -426,9 +439,11 @@ export function TrackingPage() {
                   <div className="tracking-step-icon">
                     {currentOrder.status === 'delivered' ? '✓' : <Package size={16} />}
                   </div>
-                  <div className="tracking-step-title">4. จัดส่งสำเร็จ</div>
+                  <div className="tracking-step-title">{t('commerce:tracking.step4')}</div>
                   <div className="tracking-step-time">
-                    {currentOrder.status === 'delivered' ? 'ส่งมอบเรียบร้อย' : 'รอดำเนินการ'}
+                    {currentOrder.status === 'delivered'
+                      ? t('commerce:tracking.step4Done')
+                      : t('commerce:tracking.stepWaiting')}
                   </div>
                 </div>
               </div>
@@ -440,10 +455,12 @@ export function TrackingPage() {
                 <div className="tracking-map-header">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 14 }}>
                     <span style={{ width: 8, height: 8, background: '#10B981', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.25)' }} />
-                    <span>เส้นทางการขนส่งพัสดุ (Logistics Route Overview)</span>
+                    <span>{t('commerce:tracking.mapTitle')}</span>
                   </div>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                    {currentOrder.status === 'delivered' ? '📍 ส่งถึงแล้ว' : '🚚 Flash Express กำลังจัดส่ง'}
+                    {currentOrder.status === 'delivered'
+                      ? t('commerce:tracking.mapDelivered')
+                      : t('commerce:tracking.mapShipping', { carrier: CARRIER_NAME })}
                   </span>
                 </div>
 
@@ -457,7 +474,9 @@ export function TrackingPage() {
             <section className="tracking-items-card">
               <h2 className="tracking-section-title">
                 <Package size={18} style={{ color: 'var(--primary)' }} />
-                รายการสินค้าในคำสั่งซื้อนี้ ({currentOrder.items.length} รายการ)
+                {t('commerce:tracking.itemsTitle', {
+                  count: formatNumber(currentOrder.items.length, locale),
+                })}
               </h2>
 
               <div className="tracking-items-list">
@@ -467,11 +486,14 @@ export function TrackingPage() {
                     <div className="tracking-item-info">
                       <div className="tracking-item-name">{item.name}</div>
                       <div className="tracking-item-sub">
-                        ฿{item.price.toLocaleString()} × {item.quantity} ชิ้น
+                        {t('commerce:tracking.itemLine', {
+                          price: formatCurrency(item.price, locale),
+                          quantity: formatNumber(item.quantity, locale),
+                        })}
                       </div>
                     </div>
                     <div className="tracking-item-total">
-                      ฿{(item.price * item.quantity).toLocaleString()}
+                      {formatCurrency(item.price * item.quantity, locale)}
                     </div>
                   </div>
                 ))}
@@ -481,23 +503,27 @@ export function TrackingPage() {
               <div className="tracking-address-summary">
                 <div className="tracking-address-box">
                   <div className="address-label">
-                    <MapPin size={14} style={{ color: 'var(--primary)' }} /> ที่อยู่จัดส่งปลายทาง:
+                    <MapPin size={14} style={{ color: 'var(--primary)' }} /> {t('commerce:tracking.addressLabel')}
                   </div>
                   <div className="address-val">{currentOrder.address}</div>
                 </div>
 
                 <div className="tracking-price-box">
                   <div className="price-row">
-                    <span>ยอดรวมค่าสินค้า:</span>
-                    <span>฿{currentOrder.subtotal.toLocaleString()}</span>
+                    <span>{t('commerce:tracking.subtotalLabel')}</span>
+                    <span>{formatCurrency(currentOrder.subtotal, locale)}</span>
                   </div>
                   <div className="price-row">
-                    <span>ค่าจัดส่ง:</span>
-                    <span>{currentOrder.shipping === 0 ? 'ส่งฟรี (Free Shipping)' : `฿${currentOrder.shipping}`}</span>
+                    <span>{t('commerce:tracking.shippingLabel')}</span>
+                    <span>
+                      {currentOrder.shipping === 0
+                        ? t('commerce:tracking.shippingFree')
+                        : formatCurrency(currentOrder.shipping, locale)}
+                    </span>
                   </div>
                   <div className="price-row price-row--grand">
-                    <span>ยอดชำระสุทธิ:</span>
-                    <span className="price-grand-val">฿{currentOrder.total.toLocaleString()}</span>
+                    <span>{t('commerce:tracking.grandTotalLabel')}</span>
+                    <span className="price-grand-val">{formatCurrency(currentOrder.total, locale)}</span>
                   </div>
                 </div>
               </div>
@@ -508,18 +534,20 @@ export function TrackingPage() {
           <div className="tracking-not-found-card">
             <div style={{ fontSize: 48, marginBottom: 12 }}>📦</div>
             <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>
-              {activeIdOrTracking ? 'ไม่พบข้อมูลพัสดุสำหรับคำสั่งซื้อนี้' : 'ยังไม่มีประวัติคำสั่งซื้อ'}
+              {activeIdOrTracking
+                ? t('commerce:tracking.notFoundTitle')
+                : t('commerce:tracking.emptyTitle')}
             </h2>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16, maxWidth: 450, margin: '0 auto 16px' }}>
               {activeIdOrTracking
-                ? 'ตรวจสอบเลขพัสดุ หรือลองค้นหาจากประวัติออเดอร์'
-                : 'เมื่อสั่งซื้อแล้ว สถานะพัสดุจะแสดงที่นี่'}
+                ? t('commerce:tracking.notFoundDesc')
+                : t('commerce:tracking.emptyDesc')}
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link to="/shop" className="tracking-view-orders-btn">
-                <ShoppingBag size={15} style={{ display: 'inline', marginRight: 4 }} /> ไปเลือกซื้อสินค้า
-              </Link>
-              <Link to="/orders" style={{
+              <LocalizedLink to="/shop" className="tracking-view-orders-btn">
+                <ShoppingBag size={15} style={{ display: 'inline', marginRight: 4 }} /> {t('commerce:tracking.shopCta')}
+              </LocalizedLink>
+              <LocalizedLink to="/orders" style={{
                 padding: '9px 18px',
                 background: 'var(--surface)',
                 border: '1px solid var(--border)',
@@ -532,8 +560,8 @@ export function TrackingPage() {
                 alignItems: 'center',
                 gap: 6,
               }}>
-                <Info size={15} /> ดูคำสั่งซื้อทั้งหมด
-              </Link>
+                <Info size={15} /> {t('commerce:tracking.ordersCta')}
+              </LocalizedLink>
             </div>
           </div>
         )}

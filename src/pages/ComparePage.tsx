@@ -1,6 +1,7 @@
 // src/pages/ComparePage.tsx — Movemall Responsive Product Comparison Tool
 
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Scale, 
   ShoppingBag, 
@@ -20,6 +21,8 @@ import {
 import { categories } from '../data/products';
 import { allMarketplaceProducts } from '../data/mockProductsData';
 import { stores } from '../data/stores';
+import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import type { Product } from '../types';
 import './ComparePage.css';
 
@@ -28,6 +31,10 @@ interface ComparePageProps {
 }
 
 export function ComparePage({ onAddToCart }: ComparePageProps) {
+  const { t, i18n } = useTranslation(['commerce', 'catalog', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const money = (value: number) => formatCurrency(value, locale);
+
   // Category state
   const [selectedCat, setSelectedCat] = useState<string>('electronics');
   
@@ -66,7 +73,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
   // Remove an item
   function handleRemoveItem(id: string) {
     if (compareItems.length <= 1) {
-      alert('ต้องมีสินค้าอย่างน้อย 1 รายการสำหรับการเปรียบเทียบ');
+      alert(t('commerce:compare.minItemsAlert'));
       return;
     }
     const updated = compareItems.filter(p => p.id !== id);
@@ -98,11 +105,11 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
       setCompareItems(updated);
     } else {
       if (compareItems.some(p => p.id === product.id)) {
-        alert('สินค้านี้อยู่ในรายการเปรียบเทียบแล้ว');
+        alert(t('commerce:compare.duplicateAlert'));
         return;
       }
       if (compareItems.length >= 4) {
-        alert('สามารถเปรียบเทียบสินค้าได้สูงสุด 4 รายการพร้อมกัน');
+        alert(t('commerce:compare.maxItemsAlert'));
         return;
       }
       setCompareItems([...compareItems, product]);
@@ -160,7 +167,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
       {/* Toast Notification */}
       {copiedToast && (
         <div className="compare-toast">
-          <Check size={16} /> คัดลอกลิงก์เปรียบเทียบเรียบร้อยแล้ว!
+          <Check size={16} /> {t('commerce:compare.copiedToast')}
         </div>
       )}
 
@@ -169,13 +176,13 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
         <div className="compare-header">
           <div className="compare-header-left">
             <div className="compare-badge-pill">
-              <Scale size={14} /> Smart Comparison Tool
+              <Scale size={14} /> {t('commerce:compare.badge')}
             </div>
             <h1 className="compare-title">
-              เปรียบเทียบสเปกสินค้า (Product Comparison)
+              {t('commerce:compare.title')}
             </h1>
             <p className="compare-subtitle">
-              เทียบราคา สเปก และรีวิวในหน้าเดียว
+              {t('commerce:compare.subtitle')}
             </p>
           </div>
 
@@ -183,21 +190,25 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
             <button 
               className={`compare-tool-btn ${highlightDiff ? 'compare-tool-btn--active' : ''}`}
               onClick={() => setHighlightDiff(!highlightDiff)}
-              title="ไฮไลท์เฉพาะแถวที่มีสเปกต่างกัน"
+              title={t('commerce:compare.highlightTitle')}
             >
               <SlidersHorizontal size={14} />
-              <span>{highlightDiff ? 'แสดงทุกข้อมูล' : 'เน้นจุดต่าง'}</span>
+              <span>
+                {highlightDiff
+                  ? t('commerce:compare.showAll')
+                  : t('commerce:compare.highlightDiff')}
+              </span>
             </button>
             <button className="compare-tool-btn" onClick={handleShare}>
               <Share2 size={14} />
-              <span>แชร์ผลเทียบ</span>
+              <span>{t('commerce:compare.share')}</span>
             </button>
           </div>
         </div>
 
         {/* Category Selector Bar */}
         <div className="compare-cat-bar">
-          <span className="compare-cat-label">หมวดหมู่:</span>
+          <span className="compare-cat-label">{t('commerce:compare.categoryLabel')}</span>
           <div className="compare-cat-scroll">
             {categories.map(cat => (
               <button
@@ -205,7 +216,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                 className={`compare-cat-chip ${selectedCat === cat.id ? 'compare-cat-chip--active' : ''}`}
                 onClick={() => handleSelectCategory(cat.id)}
               >
-                <span>{cat.icon}</span> {cat.name}
+                <span>{cat.icon}</span> {t(`catalog:categories.${cat.id}.name`, { defaultValue: cat.name })}
               </button>
             ))}
           </div>
@@ -218,20 +229,20 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
               className={`compare-mode-btn ${mobileMode === 'dual' ? 'compare-mode-btn--active' : ''}`}
               onClick={() => setMobileMode('dual')}
             >
-              ⚡ เทียบคู่ 1 vs 1 (อ่านง่าย)
+              {t('commerce:compare.modeDual')}
             </button>
             <button 
               className={`compare-mode-btn ${mobileMode === 'table' ? 'compare-mode-btn--active' : ''}`}
               onClick={() => setMobileMode('table')}
             >
-              📊 ตารางรวม ({compareItems.length} ชิ้น)
+              {t('commerce:compare.modeTable', { count: formatNumber(compareItems.length, locale) })}
             </button>
           </div>
 
           {mobileMode === 'dual' && compareItems.length >= 2 && (
             <div className="compare-dual-selectors">
               <div className="compare-dual-select-group">
-                <label>สินค้าฝั่งซ้าย (A):</label>
+                <label>{t('commerce:compare.sideA')}</label>
                 <select 
                   value={dualIndexA} 
                   onChange={(e) => setDualIndexA(Number(e.target.value))}
@@ -239,18 +250,21 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                 >
                   {compareItems.map((item, idx) => (
                     <option key={item.id} value={idx} disabled={idx === dualIndexB}>
-                      {idx + 1}. {item.name.substring(0, 20)}...
+                      {t('commerce:compare.optionLabel', {
+                        index: formatNumber(idx + 1, locale),
+                        name: item.name.substring(0, 20),
+                      })}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <button className="compare-swap-btn" onClick={handleSwapDual} title="สลับตำแหน่ง">
+              <button className="compare-swap-btn" onClick={handleSwapDual} title={t('commerce:compare.swap')}>
                 <ArrowLeftRight size={16} />
               </button>
 
               <div className="compare-dual-select-group">
-                <label>สินค้าฝั่งขวา (B):</label>
+                <label>{t('commerce:compare.sideB')}</label>
                 <select 
                   value={dualIndexB} 
                   onChange={(e) => setDualIndexB(Number(e.target.value))}
@@ -258,7 +272,10 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                 >
                   {compareItems.map((item, idx) => (
                     <option key={item.id} value={idx} disabled={idx === dualIndexA}>
-                      {idx + 1}. {item.name.substring(0, 20)}...
+                      {t('commerce:compare.optionLabel', {
+                        index: formatNumber(idx + 1, locale),
+                        name: item.name.substring(0, 20),
+                      })}
                     </option>
                   ))}
                 </select>
@@ -283,30 +300,30 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                     <div className="compare-img-box">
                       <img src={product.images[0]} alt={product.name} className="compare-dual-img" />
                       <div className="compare-card-badges-overlay">
-                        {isLowest && <span className="badge-best-price">🏷️ คุ้มสุด</span>}
-                        {isTopRating && <span className="badge-best-rating">⭐️ ดีสุด</span>}
-                        {isTopDisc && <span className="badge-best-disc">🔥 ลดแรง</span>}
+                        {isLowest && <span className="badge-best-price">{t('commerce:compare.badgeBestPrice')}</span>}
+                        {isTopRating && <span className="badge-best-rating">{t('commerce:compare.badgeBestRating')}</span>}
+                        {isTopDisc && <span className="badge-best-disc">{t('commerce:compare.badgeBestDiscount')}</span>}
                       </div>
                     </div>
 
                     <h3 className="compare-dual-name" title={product.name}>{product.name}</h3>
                     
                     <div className="compare-dual-price-box">
-                      <span className="compare-dual-price">฿{(product.price ?? 0).toLocaleString()}</span>
+                      <span className="compare-dual-price">{money(product.price ?? 0)}</span>
                       {product.originalPrice && (
-                        <span className="compare-dual-orig-price">฿{(product.originalPrice ?? 0).toLocaleString()}</span>
+                        <span className="compare-dual-orig-price">{money(product.originalPrice ?? 0)}</span>
                       )}
                     </div>
 
                     <button className="compare-buy-btn" onClick={() => onAddToCart(product)}>
-                      <ShoppingBag size={13} /> ใส่ตะกร้า
+                      <ShoppingBag size={13} /> {t('commerce:compare.addToCart')}
                     </button>
                     
                     <button 
                       className="compare-sub-btn" 
                       onClick={() => openAddModal(sideIdx === 0 ? dualIndexA : dualIndexB)}
                     >
-                      เปลี่ยนสินค้า
+                      {t('commerce:compare.changeProduct')}
                     </button>
                   </div>
                 );
@@ -315,64 +332,76 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
 
             {/* Spec Rows for Dual View */}
             <div className="compare-dual-specs">
-              <div className="compare-spec-section-title">📊 สรุปข้อมูล & สเปกเปรียบเทียบ</div>
+              <div className="compare-spec-section-title">{t('commerce:compare.specsTitle')}</div>
 
               <div className="compare-spec-row">
-                <div className="compare-spec-row-label">คะแนนรีวิว</div>
+                <div className="compare-spec-row-label">{t('commerce:compare.rowRating')}</div>
                 <div className="compare-spec-row-values">
                   <div className="compare-spec-val">
                     <span className="star-rating"><Star size={13} fill="#F59E0B" /> {dualItemA?.rating}</span>
-                    <span className="sub-text">({dualItemA?.reviewCount} รีวิว)</span>
+                    <span className="sub-text">
+                      {t('commerce:compare.reviewCount', {
+                        count: formatNumber(dualItemA?.reviewCount ?? 0, locale),
+                      })}
+                    </span>
                   </div>
                   <div className="compare-spec-val">
                     <span className="star-rating"><Star size={13} fill="#F59E0B" /> {dualItemB?.rating}</span>
-                    <span className="sub-text">({dualItemB?.reviewCount} รีวิว)</span>
+                    <span className="sub-text">
+                      {t('commerce:compare.reviewCount', {
+                        count: formatNumber(dualItemB?.reviewCount ?? 0, locale),
+                      })}
+                    </span>
                   </div>
                 </div>
               </div>
 
               <div className="compare-spec-row">
-                <div className="compare-spec-row-label">ส่วนลดโปรโมชั่น</div>
+                <div className="compare-spec-row-label">{t('commerce:compare.rowDiscount')}</div>
                 <div className="compare-spec-row-values">
                   <div className="compare-spec-val">
                     {dualItemA?.originalPrice ? (
                       <span className="discount-tag">
-                        ลด {Math.round(((dualItemA.originalPrice - dualItemA.price) / dualItemA.originalPrice) * 100)}%
+                        {t('commerce:compare.discountTag', {
+                          discount: Math.round(((dualItemA.originalPrice - dualItemA.price) / dualItemA.originalPrice) * 100),
+                        })}
                       </span>
-                    ) : <span className="muted-text">ราคามาตรฐาน</span>}
+                    ) : <span className="muted-text">{t('commerce:compare.standardPrice')}</span>}
                   </div>
                   <div className="compare-spec-val">
                     {dualItemB?.originalPrice ? (
                       <span className="discount-tag">
-                        ลด {Math.round(((dualItemB.originalPrice - dualItemB.price) / dualItemB.originalPrice) * 100)}%
+                        {t('commerce:compare.discountTag', {
+                          discount: Math.round(((dualItemB.originalPrice - dualItemB.price) / dualItemB.originalPrice) * 100),
+                        })}
                       </span>
-                    ) : <span className="muted-text">ราคามาตรฐาน</span>}
+                    ) : <span className="muted-text">{t('commerce:compare.standardPrice')}</span>}
                   </div>
                 </div>
               </div>
 
               <div className="compare-spec-row">
-                <div className="compare-spec-row-label">การรับประกันสินค้า</div>
+                <div className="compare-spec-row-label">{t('commerce:compare.rowWarranty')}</div>
                 <div className="compare-spec-row-values">
                   <div className="compare-spec-val highlight-green">
-                    <ShieldCheck size={14} /> ประกันศูนย์ไทย 1 ปี
+                    <ShieldCheck size={14} /> {t('commerce:compare.warrantyShort')}
                   </div>
                   <div className="compare-spec-val highlight-green">
-                    <ShieldCheck size={14} /> ประกันศูนย์ไทย 1 ปี
+                    <ShieldCheck size={14} /> {t('commerce:compare.warrantyShort')}
                   </div>
                 </div>
               </div>
 
               <div className="compare-spec-row">
-                <div className="compare-spec-row-label">การจัดส่ง</div>
+                <div className="compare-spec-row-label">{t('commerce:compare.rowShipping')}</div>
                 <div className="compare-spec-row-values">
-                  <div className="compare-spec-val highlight-green">✓ จัดส่งฟรี 0 บาท</div>
-                  <div className="compare-spec-val highlight-green">✓ จัดส่งฟรี 0 บาท</div>
+                  <div className="compare-spec-val highlight-green">{t('commerce:compare.shippingShort')}</div>
+                  <div className="compare-spec-val highlight-green">{t('commerce:compare.shippingShort')}</div>
                 </div>
               </div>
 
               <div className="compare-spec-row">
-                <div className="compare-spec-row-label">แท็กและคุณสมบัติเด่น</div>
+                <div className="compare-spec-row-label">{t('commerce:compare.rowTags')}</div>
                 <div className="compare-spec-row-values">
                   <div className="compare-spec-val tags-val">
                     {(dualItemA?.tags || []).map(t => (
@@ -388,7 +417,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
               </div>
 
               <div className="compare-spec-row">
-                <div className="compare-spec-row-label">คำอธิบายรายละเอียด</div>
+                <div className="compare-spec-row-label">{t('commerce:compare.rowDescription')}</div>
                 <div className="compare-spec-row-values">
                   <div className="compare-spec-val desc-val">{dualItemA?.description}</div>
                   <div className="compare-spec-val desc-val">{dualItemB?.description}</div>
@@ -405,10 +434,14 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
               <tr className="compare-sticky-header">
                 <th className="compare-corner-cell">
                   <div className="corner-label">
-                    <span>สินค้า ({compareItems.length}/4)</span>
+                    <span>
+                      {t('commerce:compare.cornerLabel', {
+                        count: formatNumber(compareItems.length, locale),
+                      })}
+                    </span>
                     {compareItems.length < 4 && (
                       <button className="corner-add-btn" onClick={() => openAddModal(null)}>
-                        <Plus size={12} /> เพิ่มสินค้า
+                        <Plus size={12} /> {t('commerce:compare.addProduct')}
                       </button>
                     )}
                   </div>
@@ -425,7 +458,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                         <button 
                           className="compare-remove-icon-btn" 
                           onClick={() => handleRemoveItem(p.id)}
-                          title="ลบออก"
+                          title={t('commerce:compare.removeTitle')}
                         >
                           <Trash2 size={13} />
                         </button>
@@ -433,9 +466,9 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                         <div className="compare-img-box">
                           <img src={p.images[0]} alt={p.name} className="compare-product-img" />
                           <div className="compare-card-badges-overlay">
-                            {isLowest && <span className="badge-best-price">🏷️ คุ้มสุด</span>}
-                            {isTopRating && <span className="badge-best-rating">⭐️ ดีสุด</span>}
-                            {isTopDisc && <span className="badge-best-disc">🔥 ลดแรง</span>}
+                            {isLowest && <span className="badge-best-price">{t('commerce:compare.badgeBestPrice')}</span>}
+                            {isTopRating && <span className="badge-best-rating">{t('commerce:compare.badgeBestRating')}</span>}
+                            {isTopDisc && <span className="badge-best-disc">{t('commerce:compare.badgeBestDiscount')}</span>}
                           </div>
                         </div>
                         
@@ -448,21 +481,21 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                         <h3 className="compare-product-name" title={p.name}>{p.name}</h3>
                         
                         <div className="compare-product-price-box">
-                          <span className="compare-product-price">฿{(p.price ?? 0).toLocaleString()}</span>
+                          <span className="compare-product-price">{money(p.price ?? 0)}</span>
                           {p.originalPrice && (
-                            <span className="compare-product-orig">฿{(p.originalPrice ?? 0).toLocaleString()}</span>
+                            <span className="compare-product-orig">{money(p.originalPrice ?? 0)}</span>
                           )}
                         </div>
 
                         <button className="compare-buy-btn" onClick={() => onAddToCart(p)}>
-                          <ShoppingBag size={14} /> ใส่ตะกร้า
+                          <ShoppingBag size={14} /> {t('commerce:compare.addToCart')}
                         </button>
 
                         <button 
                           className="compare-change-btn" 
                           onClick={() => openAddModal(idx)}
                         >
-                          <ArrowLeftRight size={12} /> สลับสินค้า
+                          <ArrowLeftRight size={12} /> {t('commerce:compare.swapProduct')}
                         </button>
                       </div>
                     </td>
@@ -476,8 +509,8 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                       <div className="empty-slot-circle">
                         <Plus size={24} />
                       </div>
-                      <span className="empty-slot-title">+ เพิ่มสินค้าเปรียบเทียบ</span>
-                      <span className="empty-slot-sub">เลือกจากแคตตาล็อก 160+ ชิ้น</span>
+                      <span className="empty-slot-title">{t('commerce:compare.emptySlotTitle')}</span>
+                      <span className="empty-slot-sub">{t('commerce:compare.emptySlotSub')}</span>
                     </button>
                   </td>
                 )}
@@ -488,34 +521,40 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
               {/* Category Spec Header */}
               <tr className="compare-section-divider">
                 <td colSpan={compareItems.length + (compareItems.length < 4 ? 2 : 1)}>
-                  ⭐️ สถิติและการให้คะแนนผู้ซื้อ
+                  {t('commerce:compare.sectionStats')}
                 </td>
               </tr>
 
               <tr className={highlightDiff ? 'row-highlight' : ''}>
-                <th className="compare-spec-label">คะแนนรีวิวเฉลี่ย</th>
+                <th className="compare-spec-label">{t('commerce:compare.rowAvgRating')}</th>
                 {compareItems.map(p => (
                   <td key={p.id} className="compare-val-cell center">
                     <div className="rating-box">
                       <Star size={15} fill="#F59E0B" color="#F59E0B" />
-                      <strong>{p.rating}</strong> / 5.0
+                      <strong>{p.rating}</strong> {t('commerce:compare.ratingOutOf')}
                     </div>
-                    <div className="review-count">({(p.reviewCount ?? 0).toLocaleString()} รีวิว)</div>
+                    <div className="review-count">
+                      {t('commerce:compare.reviewCount', {
+                        count: formatNumber(p.reviewCount ?? 0, locale),
+                      })}
+                    </div>
                   </td>
                 ))}
                 {compareItems.length < 4 && <td className="empty-cell"></td>}
               </tr>
 
               <tr className={highlightDiff ? 'row-highlight' : ''}>
-                <th className="compare-spec-label">โปรโมชั่น & ส่วนลด</th>
+                <th className="compare-spec-label">{t('commerce:compare.rowPromotions')}</th>
                 {compareItems.map(p => (
                   <td key={p.id} className="compare-val-cell center">
                     {p.originalPrice ? (
                       <span className="discount-tag">
-                        ลด {Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)}%
+                        {t('commerce:compare.discountTag', {
+                          discount: Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100),
+                        })}
                       </span>
                     ) : (
-                      <span className="muted-text">ราคามาตรฐาน</span>
+                      <span className="muted-text">{t('commerce:compare.standardPrice')}</span>
                     )}
                   </td>
                 ))}
@@ -525,35 +564,35 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
               {/* Service & Guarantee Specs */}
               <tr className="compare-section-divider">
                 <td colSpan={compareItems.length + (compareItems.length < 4 ? 2 : 1)}>
-                  🛡️ การการันตีและบริการจัดส่ง
+                  {t('commerce:compare.sectionGuarantee')}
                 </td>
               </tr>
 
               <tr>
-                <th className="compare-spec-label">การรับประกัน</th>
+                <th className="compare-spec-label">{t('commerce:compare.rowWarrantyTable')}</th>
                 {compareItems.map(p => (
                   <td key={p.id} className="compare-val-cell center highlight-green">
-                    <ShieldCheck size={16} /> ประกันศูนย์ไทย 1 ปีเต็ม
+                    <ShieldCheck size={16} /> {t('commerce:compare.warrantyFull')}
                   </td>
                 ))}
                 {compareItems.length < 4 && <td className="empty-cell"></td>}
               </tr>
 
               <tr>
-                <th className="compare-spec-label">บริการจัดส่ง</th>
+                <th className="compare-spec-label">{t('commerce:compare.rowShippingTable')}</th>
                 {compareItems.map(p => (
                   <td key={p.id} className="compare-val-cell center highlight-green">
-                    ✓ ส่งฟรีทั่วไทย (0 บาท)
+                    {t('commerce:compare.shippingFull')}
                   </td>
                 ))}
                 {compareItems.length < 4 && <td className="empty-cell"></td>}
               </tr>
 
               <tr>
-                <th className="compare-spec-label">นโยบายการคืนสินค้า</th>
+                <th className="compare-spec-label">{t('commerce:compare.rowReturns')}</th>
                 {compareItems.map(p => (
                   <td key={p.id} className="compare-val-cell center">
-                    คืนเงิน/สินค้าฟรีใน 15 วัน
+                    {t('commerce:compare.returnsPolicy')}
                   </td>
                 ))}
                 {compareItems.length < 4 && <td className="empty-cell"></td>}
@@ -562,12 +601,12 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
               {/* Features & Detailed Specs */}
               <tr className="compare-section-divider">
                 <td colSpan={compareItems.length + (compareItems.length < 4 ? 2 : 1)}>
-                  💻 สเปกและจุดเด่นสินค้า
+                  {t('commerce:compare.sectionSpecs')}
                 </td>
               </tr>
 
               <tr>
-                <th className="compare-spec-label">แท็กฟีเจอร์สำคัญ</th>
+                <th className="compare-spec-label">{t('commerce:compare.rowFeatureTags')}</th>
                 {compareItems.map(p => (
                   <td key={p.id} className="compare-val-cell">
                     <div className="tags-container">
@@ -581,7 +620,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
               </tr>
 
               <tr>
-                <th className="compare-spec-label">คำอธิบายและสเปก</th>
+                <th className="compare-spec-label">{t('commerce:compare.rowSpecs')}</th>
                 {compareItems.map(p => (
                   <td key={p.id} className="compare-val-cell desc-text">
                     {p.description}
@@ -599,11 +638,8 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
             <Sparkles size={20} />
           </div>
           <div>
-            <h4>💡 ทริปการช้อปอย่างคุ้มค่าบน Movemall</h4>
-            <p>
-              สินค้าแท้ พร้อมใช้ <strong>Movemall Coins</strong> และโค้ดส่งฟรี
-              เพื่อรับส่วนลดเงินสดสูงสุดถึง 25% ในขั้นตอนชำระเงิน
-            </p>
+            <h4>{t('commerce:compare.tipsTitle')}</h4>
+            <p>{t('commerce:compare.tipsBody')}</p>
           </div>
         </div>
       </div>
@@ -615,9 +651,15 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
             <div className="compare-modal-header">
               <h3>
                 <Plus size={18} />
-                {replaceIndex !== null ? 'เลือกสินค้าใหม่มาแทนที่' : 'เพิ่มสินค้าเข้าตารางเปรียบเทียบ'}
+                {replaceIndex !== null
+                  ? t('commerce:compare.modalReplaceTitle')
+                  : t('commerce:compare.modalAddTitle')}
               </h3>
-              <button className="compare-modal-close" onClick={() => setIsModalOpen(false)}>
+              <button
+                className="compare-modal-close"
+                onClick={() => setIsModalOpen(false)}
+                aria-label={t('commerce:compare.modalClose')}
+              >
                 <X size={18} />
               </button>
             </div>
@@ -628,7 +670,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                 <Search size={16} />
                 <input 
                   type="text"
-                  placeholder="ค้นหาชื่อสินค้า แบรนด์ หรือสเปก..."
+                  placeholder={t('commerce:compare.modalSearchPlaceholder')}
                   value={modalSearchQuery}
                   onChange={e => setModalSearchQuery(e.target.value)}
                   className="compare-modal-input"
@@ -641,9 +683,14 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                 onChange={e => setModalCatFilter(e.target.value)}
                 className="compare-modal-select"
               >
-                <option value="all">ทุกหมวดหมู่</option>
+                <option value="all">{t('commerce:compare.modalAllCategories')}</option>
                 {categories.map(c => (
-                  <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
+                  <option key={c.id} value={c.id}>
+                    {t('commerce:compare.modalCategoryOption', {
+                      icon: c.icon,
+                      category: t(`catalog:categories.${c.id}.name`, { defaultValue: c.name }),
+                    })}
+                  </option>
                 ))}
               </select>
             </div>
@@ -653,7 +700,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
               {availableModalProducts.length === 0 ? (
                 <div className="compare-modal-empty">
                   <Info size={32} />
-                  <p>ไม่พบสินค้าที่ตรงกับคำค้นหา หรือสินค้านี้ถูกเพิ่มไปแล้ว</p>
+                  <p>{t('commerce:compare.modalEmpty')}</p>
                 </div>
               ) : (
                 availableModalProducts.map(product => (
@@ -662,15 +709,20 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                     <div className="compare-modal-item-info">
                       <div className="compare-modal-item-name">{product.name}</div>
                       <div className="compare-modal-item-meta">
-                        <span className="price">฿{(product.price ?? 0).toLocaleString()}</span>
-                        <span className="rating">⭐️ {product.rating ?? 5} ({product.reviewCount ?? 0})</span>
+                        <span className="price">{money(product.price ?? 0)}</span>
+                        <span className="rating">
+                          {t('commerce:compare.modalRating', {
+                            rating: product.rating ?? 5,
+                            count: formatNumber(product.reviewCount ?? 0, locale),
+                          })}
+                        </span>
                       </div>
                     </div>
                     <button 
                       className="compare-modal-select-btn"
                       onClick={() => handleAddProduct(product)}
                     >
-                      เลือกชิ้นนี้
+                      {t('commerce:compare.modalSelect')}
                     </button>
                   </div>
                 ))

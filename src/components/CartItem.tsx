@@ -1,8 +1,11 @@
 // src/components/CartItem.tsx
 
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { getProductUrl } from '../utils/seo';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { formatCurrency } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import type { CartItem as CartItemType } from '../types';
 import './CartItem.css';
 
@@ -13,6 +16,8 @@ interface CartItemProps {
 }
 
 export function CartItem({ item, onUpdateQty, onRemove }: CartItemProps) {
+  const { t, i18n } = useTranslation(['commerce', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const { product, quantity } = item;
   const totalPrice = product.price * quantity;
 
@@ -34,7 +39,7 @@ export function CartItem({ item, onUpdateQty, onRemove }: CartItemProps) {
       <div className="cart-item__body">
         <p className="cart-item__category">{product.category}</p>
         <h3 className="cart-item__name">
-          <Link to={getProductUrl(product)}>{product.name}</Link>
+          <LocalizedLink to={getProductUrl(product)}>{product.name}</LocalizedLink>
         </h3>
 
         <div className="cart-item__bottom">
@@ -43,7 +48,7 @@ export function CartItem({ item, onUpdateQty, onRemove }: CartItemProps) {
             <button
               className="cart-item__qty-btn"
               onClick={() => onUpdateQty(product.id, quantity - 1)}
-              aria-label="ลดจำนวน"
+              aria-label={t('commerce:cartItem.decrease')}
               id={`cart-decrease-${product.id}`}
             >
               <Minus size={13} />
@@ -55,13 +60,13 @@ export function CartItem({ item, onUpdateQty, onRemove }: CartItemProps) {
               min={1}
               max={product.stock}
               onChange={e => onUpdateQty(product.id, Number(e.target.value))}
-              aria-label={`จำนวน ${product.name}`}
+              aria-label={t('commerce:cartItem.quantityAria', { product: product.name })}
             />
             <button
               className="cart-item__qty-btn"
               onClick={() => onUpdateQty(product.id, quantity + 1)}
               disabled={quantity >= product.stock}
-              aria-label="เพิ่มจำนวน"
+              aria-label={t('commerce:cartItem.increase')}
               id={`cart-increase-${product.id}`}
             >
               <Plus size={13} />
@@ -71,10 +76,13 @@ export function CartItem({ item, onUpdateQty, onRemove }: CartItemProps) {
           {/* Price */}
           <div className="cart-item__price-col">
             <p className="cart-item__unit-price">
-              ฿{product.price.toLocaleString()} × {quantity}
+              {t('commerce:cartItem.unitPrice', {
+                price: formatCurrency(product.price, locale),
+                quantity,
+              })}
             </p>
             <p className="cart-item__total-price">
-              ฿{totalPrice.toLocaleString()}
+              {formatCurrency(totalPrice, locale)}
             </p>
           </div>
 
@@ -82,7 +90,7 @@ export function CartItem({ item, onUpdateQty, onRemove }: CartItemProps) {
           <button
             className="cart-item__remove"
             onClick={() => onRemove(product.id)}
-            aria-label={`ลบ ${product.name} ออกจากตะกร้า`}
+            aria-label={t('commerce:cartItem.removeAria', { product: product.name })}
             id={`cart-remove-${product.id}`}
           >
             <Trash2 size={16} />

@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import type { ComponentType } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ToastContainer } from './components/Toast';
@@ -15,10 +16,10 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { resetChatSocket, clearAllStoredChatHistory } from './utils/chatSocket';
 import { API_BASE_URL, createProductApi, updateProductApi, deleteProductApi } from './utils/api';
-import { UI_COPY } from './uiCopy';
+import { uiCopy } from './uiCopy';
 import { LocaleBoundary, LocalizedNotFound } from './i18n/LocaleBoundary';
 import { LegacyBuyerRedirect } from './i18n/LegacyBuyerRedirect';
-import { BUYER_ROUTE_PATHS, stripLocale } from './i18n/locales';
+import { BUYER_ROUTE_PATHS, resolveRootLocale, stripLocale } from './i18n/locales';
 
 // Helper to safely retry module imports without causing browser reload loops
 function lazyRetry<T extends ComponentType<any>>(
@@ -94,6 +95,7 @@ function AppLayout({
   handleUpdateProduct,
   addToast,
 }: any) {
+  const { t } = useTranslation(['common']);
   const location = useLocation();
   const routePathname = stripLocale(location.pathname);
 
@@ -379,11 +381,11 @@ function AppLayout({
                 onUpdateQty={cart.updateQty}
                 onRemove={productId => {
                   cart.removeItem(productId);
-                  addToast(UI_COPY.cart.removed, 'info', '🗑️');
+                  addToast(uiCopy.cart.removed(t), 'info', '🗑️');
                 }}
                 onClear={() => {
                   cart.clearCart();
-                  addToast(UI_COPY.cart.cleared, 'info', '🗑️');
+                  addToast(uiCopy.cart.cleared(t), 'info', '🗑️');
                 }}
                 onAddToCart={(p, qty) => handleAddToCart(p, qty)}
                 isWishlisted={id => wishlist.isWished(id)}
@@ -458,6 +460,8 @@ function AppLayout({
 }
 
 function App() {
+  const { t, i18n } = useTranslation(['common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const [productList, setProductList] = useState<Product[]>(() => {
     try {
       const savedCustom = localStorage.getItem('movemall_user_custom_products');
@@ -518,16 +522,16 @@ function App() {
 
   function handleAddToCart(product: Product, qty = 1) {
     cart.addItem(product, qty);
-    addToast(UI_COPY.cart.added(qty), 'success', '🛒');
+    addToast(uiCopy.cart.added(t, qty, locale), 'success', '🛒');
   }
 
   function handleToggleWishlist(product: Product) {
     const isWishedNow = wishlist.isWished(product.id);
     wishlist.toggle(product);
     if (!isWishedNow) {
-      addToast(UI_COPY.wishlist.added, 'info', '❤️');
+      addToast(uiCopy.wishlist.added(t), 'info', '❤️');
     } else {
-      addToast(UI_COPY.wishlist.removed, 'info', '🤍');
+      addToast(uiCopy.wishlist.removed(t), 'info', '🤍');
     }
   }
 

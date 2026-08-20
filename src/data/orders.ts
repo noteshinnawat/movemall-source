@@ -23,13 +23,7 @@ export interface Order {
 
 export const mockOrders: Order[] = [];
 
-export const STATUS_LABEL: Record<OrderStatus, string> = {
-  pending: '⏳ รอดำเนินการ',
-  processing: '⚙️ กำลังจัดเตรียม',
-  shipped: '🚚 กำลังจัดส่ง',
-  delivered: '✅ ส่งสำเร็จ',
-  cancelled: '❌ ยกเลิกแล้ว',
-};
+// Status labels live in public/locales/*/commerce.json under `orderStatus`.
 
 export const STATUS_COLOR: Record<OrderStatus, string> = {
   pending: 'var(--warning)',

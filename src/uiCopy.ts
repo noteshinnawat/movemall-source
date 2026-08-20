@@ -1,11 +1,19 @@
-export const UI_COPY = {
+// Shared buyer toast copy. Callers pass the active `t` so switching language
+// re-renders the callbacks that raise these toasts.
+
+import type { TFunction } from 'i18next';
+import { formatNumber } from './i18n/formatters';
+import type { Locale } from './i18n/locales';
+
+export const uiCopy = {
   cart: {
-    added: (quantity: number) => `เพิ่มลงตะกร้าแล้ว · ${quantity} ชิ้น`,
-    removed: 'ลบสินค้าออกจากตะกร้าแล้ว',
-    cleared: 'ล้างตะกร้าแล้ว',
+    added: (t: TFunction, quantity: number, locale: Locale) =>
+      t('common:toast.cartAdded', { count: formatNumber(quantity, locale) }),
+    removed: (t: TFunction) => t('common:toast.cartRemoved'),
+    cleared: (t: TFunction) => t('common:toast.cartCleared'),
   },
   wishlist: {
-    added: 'บันทึกสินค้าแล้ว',
-    removed: 'นำออกจากรายการโปรดแล้ว',
+    added: (t: TFunction) => t('common:toast.wishlistAdded'),
+    removed: (t: TFunction) => t('common:toast.wishlistRemoved'),
   },
 } as const;

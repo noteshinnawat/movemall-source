@@ -2,10 +2,14 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, ArrowRight, QrCode, CreditCard, Banknote } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { ShieldCheck, ArrowRight } from 'lucide-react';
 import { PromptPayModal } from '../components/PromptPayModal';
 import { fetchApi } from '../utils/api';
 import { saveOrder } from '../data/orders';
+import { useLocalizedPath } from '../i18n/LocalizedLink';
+import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import type { CartItem } from '../types';
 import './CheckoutPage.css';
 
@@ -17,22 +21,40 @@ interface CheckoutPageProps {
 }
 
 const SHIPPING_OPTIONS = [
-  { id: 'standard', icon: '📦', name: 'จัดส่งปกติ', desc: '3-5 วันทำการ', price: 50, free: false },
-  { id: 'express', icon: '🚀', name: 'จัดส่งด่วน', desc: '1-2 วันทำการ', price: 120, free: false },
-  { id: 'same-day', icon: '⚡', name: 'จัดส่งภายในวัน', desc: 'ภายใน 4 ชั่วโมง (กทม.)', price: 200, free: false },
+  { id: 'standard', icon: '📦', price: 50, free: false },
+  { id: 'express', icon: '🚀', price: 120, free: false },
+  { id: 'same-day', icon: '⚡', price: 200, free: false },
 ];
 
 const PAYMENT_METHODS = [
-  { id: 'promptpay', name: 'พร้อมเพย์', desc: 'สแกนจ่าย ไม่มีค่าธรรมเนียม', icon: '📱' },
-  { id: 'paylater', name: 'Movemall PayLater', desc: 'ผ่อน 0% สูงสุด 3 เดือน · วงเงิน ฿15,000', icon: '✨' },
-  { id: 'credit', name: 'บัตรเครดิต / เดบิต', desc: 'Visa, Mastercard, JCB · 3D Secure', icon: '💳' },
-  { id: 'cod', name: 'เก็บเงินปลายทาง', desc: 'จ่ายเมื่อได้รับสินค้า', icon: '💵' },
+  { id: 'promptpay', icon: '📱' },
+  { id: 'paylater', icon: '✨' },
+  { id: 'credit', icon: '💳' },
+  { id: 'cod', icon: '💵' },
 ];
 
-const STEPS = ['ที่อยู่', 'จัดส่ง', 'ชำระเงิน'];
+const STEP_IDS = ['address', 'shipping', 'payment'] as const;
+
+// Label ids are localized for display; the submitted value stays the canonical
+// Thai province name so shipping addresses in the order payload are unchanged.
+const PROVINCES = [
+  { id: 'bangkok', value: 'กรุงเทพมหานคร' },
+  { id: 'chiangMai', value: 'เชียงใหม่' },
+  { id: 'phuket', value: 'ภูเก็ต' },
+  { id: 'khonKaen', value: 'ขอนแก่น' },
+  { id: 'nonthaburi', value: 'นนทบุรี' },
+  { id: 'samutPrakan', value: 'สมุทรปราการ' },
+  { id: 'pathumThani', value: 'ปทุมธานี' },
+] as const;
+
+const PAYLATER_CREDIT_LIMIT = 15000;
 
 export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPageProps) {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation(['commerce', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const localizePath = useLocalizedPath();
+  const money = (value: number) => formatCurrency(value, locale);
   const currentUser = (() => {
     try {
       const uStr = localStorage.getItem('movemall_user');
@@ -134,7 +156,9 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
     });
 
     onClear();
-    navigate(`/order/success?id=${orderId}&total=${grandTotal}&method=${paymentMethod}`);
+    navigate(
+      localizePath(`/order/success?id=${orderId}&total=${grandTotal}&method=${paymentMethod}`)
+    );
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -151,15 +175,15 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
       {/* Header */}
       <div className="checkout__header">
         <div className="container">
-          <h1 className="checkout__header-title">💳 ชำระเงิน</h1>
-          <div className="checkout__steps" aria-label="ขั้นตอนการชำระเงิน">
-            {STEPS.map((s, i) => (
-              <div key={s} style={{ display: 'flex', alignItems: 'center' }}>
+          <h1 className="checkout__header-title">{t('commerce:checkout.title')}</h1>
+          <div className="checkout__steps" aria-label={t('commerce:checkout.stepsAria')}>
+            {STEP_IDS.map((stepId, i) => (
+              <div key={stepId} style={{ display: 'flex', alignItems: 'center' }}>
                 <div className={`checkout__step${i === step ? ' checkout__step--active' : i < step ? ' checkout__step--done' : ''}`}>
                   <span className="checkout__step-num">{i < step ? '✓' : i + 1}</span>
-                  {s}
+                  {t(`commerce:checkout.steps.${stepId}`)}
                 </div>
-                {i < STEPS.length - 1 && <div className="checkout__step-sep" />}
+                {i < STEP_IDS.length - 1 && <div className="checkout__step-sep" />}
               </div>
             ))}
           </div>
@@ -171,43 +195,41 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
           <div>
             {/* Address */}
             <div className="checkout__form-section">
-              <h2 className="checkout__section-title">📍 ที่อยู่จัดส่ง</h2>
+              <h2 className="checkout__section-title">{t('commerce:checkout.address.title')}</h2>
               <div className="checkout__form-grid">
                 <div className="checkout__form-group">
-                  <label className="checkout__label" htmlFor="checkout-fname">ชื่อ *</label>
-                  <input id="checkout-fname" className="checkout__input" placeholder="ชื่อ" required value={form.firstName} onChange={update('firstName')} />
+                  <label className="checkout__label" htmlFor="checkout-fname">{t('commerce:checkout.address.firstName')}</label>
+                  <input id="checkout-fname" className="checkout__input" placeholder={t('commerce:checkout.address.firstNamePlaceholder')} required value={form.firstName} onChange={update('firstName')} />
                 </div>
                 <div className="checkout__form-group">
-                  <label className="checkout__label" htmlFor="checkout-lname">นามสกุล *</label>
-                  <input id="checkout-lname" className="checkout__input" placeholder="นามสกุล" required value={form.lastName} onChange={update('lastName')} />
+                  <label className="checkout__label" htmlFor="checkout-lname">{t('commerce:checkout.address.lastName')}</label>
+                  <input id="checkout-lname" className="checkout__input" placeholder={t('commerce:checkout.address.lastNamePlaceholder')} required value={form.lastName} onChange={update('lastName')} />
                 </div>
                 <div className="checkout__form-group">
-                  <label className="checkout__label" htmlFor="checkout-phone">เบอร์โทรศัพท์ *</label>
+                  <label className="checkout__label" htmlFor="checkout-phone">{t('commerce:checkout.address.phone')}</label>
                   <input id="checkout-phone" className="checkout__input" placeholder="0812345678" type="tel" required value={form.phone} onChange={update('phone')} />
                 </div>
                 <div className="checkout__form-group checkout__form-group--full">
-                  <label className="checkout__label" htmlFor="checkout-address">ที่อยู่ *</label>
-                  <input id="checkout-address" className="checkout__input" placeholder="บ้านเลขที่ ถนน แขวง/ตำบล" required value={form.address} onChange={update('address')} />
+                  <label className="checkout__label" htmlFor="checkout-address">{t('commerce:checkout.address.street')}</label>
+                  <input id="checkout-address" className="checkout__input" placeholder={t('commerce:checkout.address.streetPlaceholder')} required value={form.address} onChange={update('address')} />
                 </div>
                 <div className="checkout__form-group">
-                  <label className="checkout__label" htmlFor="checkout-district">เขต/อำเภอ *</label>
-                  <input id="checkout-district" className="checkout__input" placeholder="เขต/อำเภอ" required value={form.district} onChange={update('district')} />
+                  <label className="checkout__label" htmlFor="checkout-district">{t('commerce:checkout.address.district')}</label>
+                  <input id="checkout-district" className="checkout__input" placeholder={t('commerce:checkout.address.districtPlaceholder')} required value={form.district} onChange={update('district')} />
                 </div>
                 <div className="checkout__form-group">
-                  <label className="checkout__label" htmlFor="checkout-province">จังหวัด *</label>
+                  <label className="checkout__label" htmlFor="checkout-province">{t('commerce:checkout.address.province')}</label>
                   <select id="checkout-province" className="checkout__select" required value={form.province} onChange={update('province')}>
-                    <option value="">เลือกจังหวัด</option>
-                    <option>กรุงเทพมหานคร</option>
-                    <option>เชียงใหม่</option>
-                    <option>ภูเก็ต</option>
-                    <option>ขอนแก่น</option>
-                    <option>นนทบุรี</option>
-                    <option>สมุทรปราการ</option>
-                    <option>ปทุมธานี</option>
+                    <option value="">{t('commerce:checkout.address.provincePlaceholder')}</option>
+                    {PROVINCES.map(province => (
+                      <option key={province.id} value={province.value}>
+                        {t(`commerce:checkout.provinces.${province.id}`)}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="checkout__form-group">
-                  <label className="checkout__label" htmlFor="checkout-zip">รหัสไปรษณีย์ *</label>
+                  <label className="checkout__label" htmlFor="checkout-zip">{t('commerce:checkout.address.zip')}</label>
                   <input id="checkout-zip" className="checkout__input" placeholder="10110" maxLength={5} required value={form.zip} onChange={update('zip')} />
                 </div>
               </div>
@@ -215,7 +237,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
 
             {/* Shipping */}
             <div className="checkout__form-section">
-              <h2 className="checkout__section-title">🚚 วิธีจัดส่ง</h2>
+              <h2 className="checkout__section-title">{t('commerce:checkout.shipping.title')}</h2>
               <div className="checkout__shipping-options">
                 {SHIPPING_OPTIONS.map(opt => (
                   <label
@@ -232,11 +254,15 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                     />
                     <span className="checkout__shipping-icon">{opt.icon}</span>
                     <div className="checkout__shipping-info">
-                      <p className="checkout__shipping-name">{opt.name}</p>
-                      <p className="checkout__shipping-desc">{opt.desc}</p>
+                      <p className="checkout__shipping-name">
+                        {t(`commerce:checkout.shipping.options.${opt.id}.name`)}
+                      </p>
+                      <p className="checkout__shipping-desc">
+                        {t(`commerce:checkout.shipping.options.${opt.id}.desc`)}
+                      </p>
                     </div>
                     <span className={`checkout__shipping-price${subtotal >= 299 ? ' checkout__shipping-price--free' : ''}`}>
-                      {subtotal >= 299 ? 'ฟรี' : `฿${opt.price}`}
+                      {subtotal >= 299 ? t('commerce:checkout.shipping.free') : money(opt.price)}
                     </span>
                   </label>
                 ))}
@@ -245,7 +271,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
 
             {/* Payment Methods */}
             <div className="checkout__form-section">
-              <h2 className="checkout__section-title">💳 วิธีการชำระเงิน</h2>
+              <h2 className="checkout__section-title">{t('commerce:checkout.payment.title')}</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                 {PAYMENT_METHODS.map(pay => {
                   const isCodRestricted = pay.id === 'cod' && (currentUser?.status === 'COD_RESTRICTED' || (currentUser?.trustScore !== undefined && currentUser?.trustScore < 60));
@@ -275,17 +301,21 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                         <span className="checkout__shipping-icon">{pay.icon}</span>
                         <div className="checkout__shipping-info">
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                            <p className="checkout__shipping-name">{pay.name}</p>
+                            <p className="checkout__shipping-name">
+                              {t(`commerce:checkout.payment.methods.${pay.id}.name`)}
+                            </p>
                             {isCodRestricted && (
                               <span style={{ fontSize: 10, background: '#DC2626', color: 'white', fontWeight: 800, padding: '1px 6px', borderRadius: 4 }}>
-                                ใช้ COD ไม่ได้
+                                {t('commerce:checkout.payment.codBlockedBadge')}
                               </span>
                             )}
                           </div>
                           <p className="checkout__shipping-desc">
                             {isCodRestricted
-                              ? 'COD ถูกระงับจากประวัติรับพัสดุ โปรดเลือกวิธีอื่น'
-                              : pay.desc}
+                              ? t('commerce:checkout.payment.codBlockedDesc')
+                              : t(`commerce:checkout.payment.methods.${pay.id}.desc`, {
+                                  limit: money(PAYLATER_CREDIT_LIMIT),
+                                })}
                           </p>
                         </div>
                       </label>
@@ -294,7 +324,9 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                     {paymentMethod === 'paylater' && pay.id === 'paylater' && (
                       <div style={{ background: '#EFF6FF', border: '1.5px solid #3B82F6', padding: 12, margin: '6px 0 10px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
                         <div style={{ fontSize: 12, fontWeight: 800, color: '#1E40AF' }}>
-                          เลือกระยะผ่อน · วงเงิน ฿15,000
+                          {t('commerce:checkout.payment.payLater.heading', {
+                            limit: money(PAYLATER_CREDIT_LIMIT),
+                          })}
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                           <button
@@ -312,9 +344,11 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                               fontSize: 11,
                             }}
                           >
-                            <div style={{ fontWeight: 800 }}>จ่ายเดือนหน้า</div>
-                            <div style={{ fontSize: 10, opacity: 0.9 }}>ดอกเบี้ย 0%</div>
-                            <div style={{ fontWeight: 900, marginTop: 2 }}>฿{grandTotal.toLocaleString()}/ด.</div>
+                            <div style={{ fontWeight: 800 }}>{t('commerce:checkout.payment.payLater.oneMonth')}</div>
+                            <div style={{ fontSize: 10, opacity: 0.9 }}>{t('commerce:checkout.payment.payLater.oneMonthNote')}</div>
+                            <div style={{ fontWeight: 900, marginTop: 2 }}>
+                              {t('commerce:checkout.payment.payLater.perMonth', { amount: money(grandTotal) })}
+                            </div>
                           </button>
 
                           <button
@@ -332,9 +366,15 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                               fontSize: 11,
                             }}
                           >
-                            <div style={{ fontWeight: 800 }}>ผ่อน 3 เดือน</div>
-                            <div style={{ fontSize: 10, color: payLaterPlan === '3month' ? '#FEF08A' : '#D97706', fontWeight: 900 }}>🔥 ฟรีดอกเบี้ย 0%</div>
-                            <div style={{ fontWeight: 900, marginTop: 2 }}>฿{Math.round(grandTotal / 3).toLocaleString()}/ด.</div>
+                            <div style={{ fontWeight: 800 }}>{t('commerce:checkout.payment.payLater.threeMonths')}</div>
+                            <div style={{ fontSize: 10, color: payLaterPlan === '3month' ? '#FEF08A' : '#D97706', fontWeight: 900 }}>
+                              {t('commerce:checkout.payment.payLater.threeMonthsNote')}
+                            </div>
+                            <div style={{ fontWeight: 900, marginTop: 2 }}>
+                              {t('commerce:checkout.payment.payLater.perMonth', {
+                                amount: money(Math.round(grandTotal / 3)),
+                              })}
+                            </div>
                           </button>
 
                           <button
@@ -352,9 +392,13 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                               fontSize: 11,
                             }}
                           >
-                            <div style={{ fontWeight: 800 }}>ผ่อน 6 เดือน</div>
-                            <div style={{ fontSize: 10, opacity: 0.9 }}>ดบ. 1.5%/ด.</div>
-                            <div style={{ fontWeight: 900, marginTop: 2 }}>฿{Math.round((grandTotal * 1.09) / 6).toLocaleString()}/ด.</div>
+                            <div style={{ fontWeight: 800 }}>{t('commerce:checkout.payment.payLater.sixMonths')}</div>
+                            <div style={{ fontSize: 10, opacity: 0.9 }}>{t('commerce:checkout.payment.payLater.sixMonthsNote')}</div>
+                            <div style={{ fontWeight: 900, marginTop: 2 }}>
+                              {t('commerce:checkout.payment.payLater.perMonth', {
+                                amount: money(Math.round((grandTotal * 1.09) / 6)),
+                              })}
+                            </div>
                           </button>
                         </div>
                       </div>
@@ -372,10 +416,10 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                   <span style={{ fontSize: '1.25rem' }}>🧾</span>
                   <div>
                     <h2 className="checkout__section-title" style={{ margin: 0, fontSize: '1.05rem', color: '#1E3A8A' }}>
-                      ใบกำกับภาษี
+                      {t('commerce:checkout.invoice.title')}
                     </h2>
                     <p style={{ fontSize: '0.8rem', color: '#64748B', margin: '2px 0 0 0' }}>
-                      รับเอกสารทางอีเมล
+                      {t('commerce:checkout.invoice.subtitle')}
                     </p>
                   </div>
                 </div>
@@ -387,7 +431,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                     onChange={e => setRequestInvoice(e.target.checked)}
                     style={{ width: '1.1rem', height: '1.1rem', accentColor: '#2563EB', cursor: 'pointer' }}
                   />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1D4ED8' }}>ขอใบกำกับภาษี</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1D4ED8' }}>{t('commerce:checkout.invoice.request')}</span>
                 </label>
               </div>
 
@@ -404,7 +448,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                         onChange={() => setInvoiceType('individual')}
                         style={{ accentColor: '#2563EB' }}
                       />
-                      บุคคลธรรมดา
+                      {t('commerce:checkout.invoice.individual')}
                     </label>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, color: invoiceType === 'corporate' ? '#2563EB' : '#475569' }}>
                       <input
@@ -415,18 +459,24 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                         onChange={() => setInvoiceType('corporate')}
                         style={{ accentColor: '#2563EB' }}
                       />
-                      นิติบุคคล / บริษัท
+                      {t('commerce:checkout.invoice.corporate')}
                     </label>
                   </div>
 
                   <div className="checkout__form-grid">
                     <div className="checkout__form-group checkout__form-group--full">
                       <label className="checkout__label">
-                        {invoiceType === 'individual' ? 'ชื่อ-นามสกุล (ตามบัตรประชาชน) *' : 'ชื่อบริษัท / องค์กร (ตาม ภ.พ.20) *'}
+                        {invoiceType === 'individual'
+                          ? t('commerce:checkout.invoice.nameIndividual')
+                          : t('commerce:checkout.invoice.nameCorporate')}
                       </label>
                       <input
                         className="checkout__input"
-                        placeholder={invoiceType === 'individual' ? 'เช่น นายสมชาย ใจดี' : 'เช่น บริษัท มูฟมอลล์ เทรดดิ้ง จำกัด'}
+                        placeholder={
+                          invoiceType === 'individual'
+                            ? t('commerce:checkout.invoice.namePlaceholderIndividual')
+                            : t('commerce:checkout.invoice.namePlaceholderCorporate')
+                        }
                         value={invoiceName}
                         onChange={e => setInvoiceName(e.target.value)}
                         required={requestInvoice}
@@ -435,12 +485,14 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
 
                     <div className="checkout__form-group">
                       <label className="checkout__label">
-                        {invoiceType === 'individual' ? 'เลขประจำตัวประชาชน 13 หลัก *' : 'เลขประจำตัวผู้เสียภาษี 13 หลัก *'}
+                        {invoiceType === 'individual'
+                          ? t('commerce:checkout.invoice.taxIdIndividual')
+                          : t('commerce:checkout.invoice.taxIdCorporate')}
                       </label>
                       <input
                         className="checkout__input"
                         maxLength={13}
-                        placeholder="13 หลัก"
+                        placeholder={t('commerce:checkout.invoice.taxIdPlaceholder')}
                         value={invoiceTaxId}
                         onChange={e => setInvoiceTaxId(e.target.value)}
                         required={requestInvoice}
@@ -449,11 +501,11 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
 
                     {invoiceType === 'corporate' && (
                       <div className="checkout__form-group">
-                        <label className="checkout__label">รหัสสาขา *</label>
+                        <label className="checkout__label">{t('commerce:checkout.invoice.branch')}</label>
                         <input
                           className="checkout__input"
                           maxLength={5}
-                          placeholder="00000 (สำนักงานใหญ่)"
+                          placeholder={t('commerce:checkout.invoice.branchPlaceholder')}
                           value={invoiceBranch}
                           onChange={e => setInvoiceBranch(e.target.value)}
                         />
@@ -461,7 +513,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                     )}
 
                     <div className="checkout__form-group checkout__form-group--full">
-                      <label className="checkout__label">อีเมลรับเอกสาร (PDF และ XML) *</label>
+                      <label className="checkout__label">{t('commerce:checkout.invoice.email')}</label>
                       <input
                         type="email"
                         className="checkout__input"
@@ -473,10 +525,10 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                     </div>
 
                     <div className="checkout__form-group checkout__form-group--full">
-                      <label className="checkout__label">ที่อยู่ตามทะเบียนภาษี *</label>
+                      <label className="checkout__label">{t('commerce:checkout.invoice.address')}</label>
                       <input
                         className="checkout__input"
-                        placeholder="อาคาร เลขที่ ถนน แขวง เขต จังหวัด รหัสไปรษณีย์"
+                        placeholder={t('commerce:checkout.invoice.addressPlaceholder')}
                         value={invoiceAddress || (form.address ? `${form.address} ${form.district} ${form.province} ${form.zip}`.trim() : '')}
                         onChange={e => setInvoiceAddress(e.target.value)}
                         required={requestInvoice}
@@ -486,7 +538,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                 </div>
               ) : (
                 <div style={{ fontSize: '0.8rem', color: '#64748B', background: '#F1F5F9', padding: '6px 10px' }}>
-                  หากไม่เลือก ระบบจะแนบใบเสร็จไปกับพัสดุ
+                  {t('commerce:checkout.invoice.optOutNote')}
                 </div>
               )}
             </div>
@@ -494,7 +546,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
 
           {/* Summary */}
           <div className="checkout__summary">
-            <h2 className="checkout__summary-title">สรุปคำสั่งซื้อ</h2>
+            <h2 className="checkout__summary-title">{t('commerce:checkout.summary.title')}</h2>
 
             <div className="checkout__summary-items">
               {items.map(item => (
@@ -502,10 +554,14 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                   <img src={item.product.images[0]} alt={item.product.name} className="checkout__summary-img" />
                   <div className="checkout__summary-item-info">
                     <p className="checkout__summary-item-name">{item.product.name}</p>
-                    <p className="checkout__summary-item-qty">× {item.quantity}</p>
+                    <p className="checkout__summary-item-qty">
+                      {t('commerce:checkout.summary.quantity', {
+                        quantity: formatNumber(item.quantity, locale),
+                      })}
+                    </p>
                   </div>
                   <span className="checkout__summary-item-price">
-                    ฿{(item.product.price * item.quantity).toLocaleString()}
+                    {money(item.product.price * item.quantity)}
                   </span>
                 </div>
               ))}
@@ -513,7 +569,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
 
             <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '8px 10px', fontSize: 11, color: '#64748B', display: 'flex', alignItems: 'center', gap: 6, margin: '10px 0' }}>
               <span>📦</span>
-              <span>แต่ละร้านจัดส่งแยกกัน</span>
+              <span>{t('commerce:checkout.summary.splitShipmentNote')}</span>
             </div>
 
             <div className="checkout__summary-divider" />
@@ -523,8 +579,8 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ background: '#06C755', color: '#fff', fontSize: 10, fontWeight: 900, padding: '2px 5px', borderRadius: 3 }}>LINE</span>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#166534' }}>รับแจ้งเตือนผ่าน LINE</div>
-                  <div style={{ fontSize: 11, color: '#15803D' }}>สถานะพัสดุและใบเสร็จ</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#166534' }}>{t('commerce:checkout.summary.lineTitle')}</div>
+                  <div style={{ fontSize: 11, color: '#15803D' }}>{t('commerce:checkout.summary.lineDesc')}</div>
                 </div>
               </div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 12, fontWeight: 700, color: '#166534' }}>
@@ -534,7 +590,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                   onChange={e => setNotifyViaLine(e.target.checked)}
                   style={{ width: 16, height: 16, accentColor: '#06C755', cursor: 'pointer' }}
                 />
-                เปิดรับ
+                {t('commerce:checkout.summary.lineOptIn')}
               </label>
             </div>
 
@@ -543,8 +599,13 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 20 }}>🪙</span>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: '#92400E' }}>Movemall Coins</div>
-                  <div style={{ fontSize: 11, color: '#B45309' }}>แลก {userCoins} Coins ลด ฿{userCoins}</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: '#92400E' }}>{t('commerce:checkout.summary.coinsTitle')}</div>
+                  <div style={{ fontSize: 11, color: '#B45309' }}>
+                    {t('commerce:checkout.summary.coinsDesc', {
+                      count: formatNumber(userCoins, locale),
+                      amount: money(userCoins),
+                    })}
+                  </div>
                 </div>
               </div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 12, fontWeight: 800, color: '#92400E' }}>
@@ -554,40 +615,44 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                   onChange={e => setUseCoins(e.target.checked)}
                   style={{ width: 16, height: 16, cursor: 'pointer' }}
                 />
-                ใช้ Coins
+                {t('commerce:checkout.summary.coinsUse')}
               </label>
             </div>
 
             <div className="checkout__summary-row">
-              <span className="checkout__summary-label">ยอดรวมสินค้า</span>
-              <span className="checkout__summary-value">฿{subtotal.toLocaleString()}</span>
+              <span className="checkout__summary-label">{t('commerce:checkout.summary.subtotal')}</span>
+              <span className="checkout__summary-value">{money(subtotal)}</span>
             </div>
             <div className="checkout__summary-row">
-              <span className="checkout__summary-label">ค่าส่ง</span>
+              <span className="checkout__summary-label">{t('commerce:checkout.summary.shipping')}</span>
               <span className={shippingCost === 0 ? 'checkout__summary-value--free' : 'checkout__summary-value'}>
-                {shippingCost === 0 ? 'ฟรี 🎉' : `฿${shippingCost}`}
+                {shippingCost === 0 ? t('commerce:checkout.summary.shippingFree') : money(shippingCost)}
               </span>
             </div>
             {useCoins && (
               <div className="checkout__summary-row" style={{ color: 'var(--success)' }}>
-                <span className="checkout__summary-label" style={{ color: 'var(--success)' }}>ส่วนลด Coins</span>
-                <span className="checkout__summary-value">-฿{coinDiscount.toLocaleString()}</span>
+                <span className="checkout__summary-label" style={{ color: 'var(--success)' }}>{t('commerce:checkout.summary.coinsDiscount')}</span>
+                <span className="checkout__summary-value">-{money(coinDiscount)}</span>
               </div>
             )}
             <div className="checkout__summary-divider" />
             <div className="checkout__summary-row checkout__summary-row--total">
               <div>
-                <div>ยอดชำระ</div>
+                <div>{t('commerce:checkout.summary.total')}</div>
                 <div style={{ fontSize: '0.75rem', fontWeight: 400, color: '#64748B' }}>
-                  รวม VAT 7% · ฿{(grandTotal * (7 / 107)).toFixed(2)}
+                  {t('commerce:checkout.summary.vatNote', {
+                    amount: money(Number((grandTotal * (7 / 107)).toFixed(2))),
+                  })}
                 </div>
               </div>
-              <span className="checkout__total-price">฿{grandTotal.toLocaleString()}</span>
+              <span className="checkout__total-price">{money(grandTotal)}</span>
             </div>
 
             <button type="submit" id="checkout-submit-btn" className="checkout__submit-btn">
               <ShieldCheck size={18} />
-              {paymentMethod === 'promptpay' ? 'สแกน QR เพื่อชำระ' : 'ยืนยันคำสั่งซื้อ'}
+              {paymentMethod === 'promptpay'
+                ? t('commerce:checkout.summary.submitPromptPay')
+                : t('commerce:checkout.summary.submitConfirm')}
               <ArrowRight size={16} />
             </button>
           </div>
