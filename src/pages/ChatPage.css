@@ -165,6 +165,25 @@
   font-size: 12px;
 }
 
+.chat-empty-thread {
+  margin: auto 0;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.chat-empty-thread__title {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary, #4B5563);
+}
+
+.chat-empty-thread__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted, #9CA3AF);
+}
+
 .chat-conv-item {
   display: flex;
   align-items: center;
