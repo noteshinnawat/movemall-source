@@ -3,58 +3,696 @@
   "reportingSubtitle": "Movemall Anti-Counterfeit & Scam Protection",
   "reportingProtectionDescription": "Get 100% back, or 200% for Mall products confirmed as counterfeit",
   "categories": {
-    "electronics": { "name": "Electronics & IT", "tag": "Up to 70% off" }, "fashion": { "name": "Fashion & Apparel", "tag": "Trending now" }, "beauty": { "name": "Beauty & Personal Care", "tag": "100% authentic" }, "home": { "name": "Home & Appliances", "tag": "Great home deals" }, "sports": { "name": "Sports & Outdoors", "tag": "Top sports brands" }, "food": { "name": "Food & Beverages", "tag": "Fresh and fast" }, "mom-baby": { "name": "Mom & Baby", "tag": "Safe for families" }, "pets": { "name": "Pet Supplies", "tag": "Food & toys" }
+    "electronics": {
+      "name": "Electronics & IT",
+      "tag": "Up to 70% off"
+    },
+    "fashion": {
+      "name": "Fashion & Apparel",
+      "tag": "Trending now"
+    },
+    "beauty": {
+      "name": "Beauty & Personal Care",
+      "tag": "100% authentic"
+    },
+    "home": {
+      "name": "Home & Appliances",
+      "tag": "Great home deals"
+    },
+    "sports": {
+      "name": "Sports & Outdoors",
+      "tag": "Top sports brands"
+    },
+    "food": {
+      "name": "Food & Beverages",
+      "tag": "Fresh and fast"
+    },
+    "mom-baby": {
+      "name": "Mom & Baby",
+      "tag": "Safe for families"
+    },
+    "pets": {
+      "name": "Pet Supplies",
+      "tag": "Food & toys"
+    }
   },
   "home": {
     "hero": {
-      "promotions": "Promotions", "previousSlide": "Previous slide", "nextSlide": "Next slide", "goToSlide": "Go to slide {{number}}",
-      "banners": { "b1": { "badge": "🔥 Daily mega sale", "title": "Tech Mega Expo 2026", "subtitle": "Up to 70% off IT gear • 0% installments for 10 months", "cta": "Shop tech deals" }, "b2": { "badge": "👑 SUPER BRAND DAY", "title": "Super Brand Day", "subtitle": "Up to 60% off Nike x Dyson • 100% authentic", "cta": "Shop top brands" }, "b3": { "badge": "⚡ PAYDAY BIG SALE", "title": "Mid-Month Payday Sale", "subtitle": "Vouchers up to ฿2,000 • Free shipping nationwide", "cta": "Claim vouchers" } },
-      "subBanners": { "sub1": { "tag": "👑 SUPER BRAND", "title": "100% authentic brands", "subtitle": "Double money back • 30-day free returns" }, "sub2": { "tag": "🚚 FREE SHIPPING", "title": "Free shipping nationwide", "subtitle": "Spend ฿99 • Earn Coins back" } }
+      "promotions": "Promotions",
+      "previousSlide": "Previous slide",
+      "nextSlide": "Next slide",
+      "goToSlide": "Go to slide {{number}}",
+      "banners": {
+        "b1": {
+          "badge": "🔥 Daily mega sale",
+          "title": "Tech Mega Expo 2026",
+          "subtitle": "Up to 70% off IT gear • 0% installments for 10 months",
+          "cta": "Shop tech deals"
+        },
+        "b2": {
+          "badge": "👑 SUPER BRAND DAY",
+          "title": "Super Brand Day",
+          "subtitle": "Up to 60% off Nike x Dyson • 100% authentic",
+          "cta": "Shop top brands"
+        },
+        "b3": {
+          "badge": "⚡ PAYDAY BIG SALE",
+          "title": "Mid-Month Payday Sale",
+          "subtitle": "Vouchers up to ฿2,000 • Free shipping nationwide",
+          "cta": "Claim vouchers"
+        }
+      },
+      "subBanners": {
+        "sub1": {
+          "tag": "👑 SUPER BRAND",
+          "title": "100% authentic brands",
+          "subtitle": "Double money back • 30-day free returns"
+        },
+        "sub2": {
+          "tag": "🚚 FREE SHIPPING",
+          "title": "Free shipping nationwide",
+          "subtitle": "Spend ฿99 • Earn Coins back"
+        }
+      }
     },
-    "shortcuts": { "ariaLabel": "Popular shortcuts", "items": { "live": "Live", "mall": "Mall", "flashSale": "Flash Sale", "vouchers": "Vouchers", "games": "Games & Coins", "tracking": "Track package", "compare": "Compare", "affiliate": "Affiliate" } },
-    "live": { "subtitle": "• Shop live, pinned hot deals & live-only codes", "viewAll": "View all live streams ({{count}})", "viewerCount": "{{count}} viewers", "watchChannel": "Watch {{channel}} live", "sendHeart": "Send a heart to this stream", "pinnedDiscount": "📌 Pinned · {{discount}}% off", "shopLive": "Shop live" },
-    "flash": { "heading": "Limited-time hot deals, up to 70% off", "endsIn": "⏰ Deal ends in:", "liveBuyers": "{{count}} people are buying now", "scrollLeft": "Scroll left", "scrollRight": "Scroll right", "viewAll": "View all deals", "discount": "-{{discount}}%", "lowestPrice": "👑 30-day lowest price", "sold": "🔥 {{percent}}% sold", "soldUrgent": "🔥 {{percent}}% sold • Hurry!", "buyNow": "Buy now" },
-    "categories": { "eyebrow": "EXPLORE CATEGORIES", "count": "{{count}} categories", "title": "🛍️ Popular categories", "subtitle": "Shop easily with deals up to 70% off", "deals": "✨ {{count}}+ great deals", "updatedDaily": "⚡ Updated daily", "viewAll": "View all ({{count}})", "categoryAria": "{{category}}, {{count}} products", "categoryDeals": "{{count}}+ deals" },
-    "mall": { "badge": "MALL", "title": "100% authentic official brands", "authentic": "🛡️ 100% authentic", "returns": "🔄 30-day free returns", "shipping": "🚚 Free shipping", "viewAll": "View all brands" },
-    "stores": { "title": "🏪 Popular stores & leading brands", "viewAll": "View all ({{count}})", "official": "Official MALL", "preferred": "⭐ Preferred store", "followers": "{{count}} followers", "voucher": "🎟️ {{amount}} off" },
-    "rewards": { "eyebrow": "MOVEMALL REWARDS", "ariaLabel": "Games and Coins", "title": "Games & rewards", "description": "Spin the wheel, check in, and earn Coins", "play": "Play now" },
-    "feed": { "eyebrow": "DAILY DISCOVER", "realtime": "Updated in real time", "title": "✨ Recommended for you", "descriptions": { "foryou": "🎯 Special deals and picks chosen for you", "bestseller": "🔥 This week's most ordered popular products", "deals": "⚡ The best-value products at 30%–70% off", "mall": "👑 100% authentic products from official brands and stores" }, "deals": "📦 {{count}}+ great deals", "freeShipping": "🚚 Free shipping nationwide", "tabsAria": "Recommended product categories", "tabs": { "forYou": { "title": "For you", "subtitle": "Handpicked for you", "badge": "Recommended" }, "bestSeller": { "title": "Best sellers", "subtitle": "Popular this week", "badge": "TOP HIT" }, "deals": { "title": "Hot deals", "subtitle": "Up to 70% off", "badge": "-70%" }, "mall": { "title": "Authentic Mall", "subtitle": "100% authenticity guarantee", "badge": "OFFICIAL" } }, "loadingProgress": "Loading... ({{visible}}/{{total}})", "viewMoreProgress": "View more ({{visible}}/{{total}})", "end": "You've viewed all {{count}} items" },
-    "video": { "realUserReview": "A real review clip from a customer", "verifiedReview": "🎥 Real-world test • 100% verified review" }
+    "shortcuts": {
+      "ariaLabel": "Popular shortcuts",
+      "items": {
+        "live": "Live",
+        "mall": "Mall",
+        "flashSale": "Flash Sale",
+        "vouchers": "Vouchers",
+        "games": "Games & Coins",
+        "tracking": "Track package",
+        "compare": "Compare",
+        "affiliate": "Affiliate"
+      }
+    },
+    "live": {
+      "subtitle": "• Shop live, pinned hot deals & live-only codes",
+      "viewAll": "View all live streams ({{count, number}})",
+      "viewerCount": "{{count}} viewers",
+      "watchChannel": "Watch {{channel}} live",
+      "sendHeart": "Send a heart to this stream",
+      "pinnedDiscount": "📌 Pinned · {{discount}}% off",
+      "shopLive": "Shop live"
+    },
+    "flash": {
+      "heading": "Limited-time hot deals, up to 70% off",
+      "endsIn": "⏰ Deal ends in:",
+      "scrollLeft": "Scroll left",
+      "scrollRight": "Scroll right",
+      "viewAll": "View all deals",
+      "discount": "-{{discount}}%",
+      "lowestPrice": "👑 30-day lowest price",
+      "sold": "🔥 {{percent}}% sold",
+      "soldUrgent": "🔥 {{percent}}% sold • Hurry!",
+      "buyNow": "Buy now",
+      "liveBuyers_one": "{{count, number}} person is buying now",
+      "liveBuyers_other": "{{count, number}} people are buying now"
+    },
+    "categories": {
+      "eyebrow": "EXPLORE CATEGORIES",
+      "title": "🛍️ Popular categories",
+      "subtitle": "Shop easily with deals up to 70% off",
+      "deals": "✨ {{count, number}}+ great deals",
+      "updatedDaily": "⚡ Updated daily",
+      "viewAll": "View all ({{count, number}})",
+      "categoryDeals": "{{count, number}}+ deals",
+      "count_one": "{{count, number}} category",
+      "count_other": "{{count, number}} categories",
+      "categoryAria_one": "{{category}}, {{count, number}} product",
+      "categoryAria_other": "{{category}}, {{count, number}} products"
+    },
+    "mall": {
+      "badge": "MALL",
+      "title": "100% authentic official brands",
+      "authentic": "🛡️ 100% authentic",
+      "returns": "🔄 30-day free returns",
+      "shipping": "🚚 Free shipping",
+      "viewAll": "View all brands"
+    },
+    "stores": {
+      "title": "🏪 Popular stores & leading brands",
+      "viewAll": "View all ({{count, number}})",
+      "official": "Official MALL",
+      "preferred": "⭐ Preferred store",
+      "voucher": "🎟️ {{amount}} off",
+      "followers_one": "{{count, number}} follower",
+      "followers_other": "{{count, number}} followers"
+    },
+    "rewards": {
+      "eyebrow": "MOVEMALL REWARDS",
+      "ariaLabel": "Games and Coins",
+      "title": "Games & rewards",
+      "description": "Spin the wheel, check in, and earn Coins",
+      "play": "Play now"
+    },
+    "feed": {
+      "eyebrow": "DAILY DISCOVER",
+      "realtime": "Updated in real time",
+      "title": "✨ Recommended for you",
+      "descriptions": {
+        "foryou": "🎯 Special deals and picks chosen for you",
+        "bestseller": "🔥 This week's most ordered popular products",
+        "deals": "⚡ The best-value products at 30%–70% off",
+        "mall": "👑 100% authentic products from official brands and stores"
+      },
+      "deals": "📦 {{count, number}}+ great deals",
+      "freeShipping": "🚚 Free shipping nationwide",
+      "tabsAria": "Recommended product categories",
+      "tabs": {
+        "forYou": {
+          "title": "For you",
+          "subtitle": "Handpicked for you",
+          "badge": "Recommended"
+        },
+        "bestSeller": {
+          "title": "Best sellers",
+          "subtitle": "Popular this week",
+          "badge": "TOP HIT"
+        },
+        "deals": {
+          "title": "Hot deals",
+          "subtitle": "Up to 70% off",
+          "badge": "-70%"
+        },
+        "mall": {
+          "title": "Authentic Mall",
+          "subtitle": "100% authenticity guarantee",
+          "badge": "OFFICIAL"
+        }
+      },
+      "loadingProgress": "Loading... ({{visible}}/{{total}})",
+      "viewMoreProgress": "View more ({{visible}}/{{total}})",
+      "end_one": "You've viewed all {{count, number}} item",
+      "end_other": "You've viewed all {{count, number}} items"
+    },
+    "video": {
+      "realUserReview": "A real review clip from a customer",
+      "verifiedReview": "🎥 Real-world test • 100% verified review"
+    }
   },
-  "shop": { "title": "🛍 Shop all products", "subtitle": "Quality products, great prices, fast delivery", "categoryChip": "{{icon}} {{category}}", "priceRange": "{{min}} – {{max}}", "noMaximum": "No maximum", "ratingChip": "{{stars}} and up", "selectedFilters": "Selected filters", "removeFilter": "Remove {{filter}} filter", "results": "{{count}} products found", "sortLabel": "Sort by:", "sortAria": "Sort products", "sort": { "popular": "Most popular", "newest": "Newest", "priceAsc": "Price: low to high", "priceDesc": "Price: high to low", "rating": "Top rated" }, "emptyTitle": "No products found", "emptySubtitle": "Try adjusting your filters", "clearAll": "Clear all filters" },
+  "shop": {
+    "title": "🛍 Shop all products",
+    "subtitle": "Quality products, great prices, fast delivery",
+    "categoryChip": "{{icon}} {{category}}",
+    "priceRange": "{{min}} – {{max}}",
+    "noMaximum": "No maximum",
+    "ratingChip": "{{stars}} and up",
+    "selectedFilters": "Selected filters",
+    "removeFilter": "Remove {{filter}} filter",
+    "sortLabel": "Sort by:",
+    "sortAria": "Sort products",
+    "sort": {
+      "popular": "Most popular",
+      "newest": "Newest",
+      "priceAsc": "Price: low to high",
+      "priceDesc": "Price: high to low",
+      "rating": "Top rated"
+    },
+    "emptyTitle": "No products found",
+    "emptySubtitle": "Try adjusting your filters",
+    "clearAll": "Clear all filters",
+    "results_one": "{{count, number}} product found",
+    "results_other": "{{count, number}} products found"
+  },
   "mall": {
-    "labels": { "superBrandFestival": "SUPER BRAND FESTIVAL", "dealsOfTheDay": "DEALS OF THE DAY", "exclusiveVouchers": "MALL EXCLUSIVE VOUCHERS", "flagshipDirectory": "OFFICIAL FLAGSHIP DIRECTORY", "mall": "MALL", "exclusiveDeals": "MALL EXCLUSIVE DEALS" },
-    "guarantees": { "authentic": "100% authentic (double money back)", "returns": "30-day free returns", "shipping": "Free shipping on every order", "warranty": "Official Thailand warranty" },
-    "hero": { "title": "Official leading brands, 100% authentic", "subtitle": "Authentic brand products with deals and official warranties", "officialBrands": "Official Brands", "authentic": "Authentic", "thirtyDays": "30 days", "freeReturns": "Free Returns" },
-    "spotlight": { "title": "Today's brand highlights", "endsIn": "Ends in:", "taxInvoice": "✓ Full tax invoice available", "installment": "✓ 0% installments for up to 10 months", "express": "✓ Same-day express delivery", "shopBrand": "Shop {{brand}} deals now", "claimExtra": "Claim extra discount" },
-    "highlights": { "apple": { "description": "Up to 25% off iPhone, iPad, Apple Watch, and genuine accessories, with a one-year Thailand warranty", "discount": "Up to 25% off" }, "nike": { "description": "Up to 50% off running shoes, apparel, and the latest collection, guaranteed 100% authentic", "discount": "Up to 50% off" }, "dyson": { "description": "World-class vacuum, air treatment, and hair styling technology, plus an extra ฿2,000 voucher", "discount": "฿2,000 voucher" }, "samsung": { "description": "Premium smartphones and smart TVs with 0% installments for up to 10 months and gifts worth ฿5,990", "discount": "Up to 40% off" } },
-    "vouchers": { "title": "Exclusive Mall product vouchers", "claimAll": "Claim all codes", "claim": "Claim code", "claimed": "Claimed", "items": { "mall": { "title": "Exclusive discount on Mall products", "discount": "{{discount}}% off", "minimum": "Minimum {{minimum}} (up to {{maximum}} off)", "expiry": "Expires in {{hours}} hours" }, "coins": { "title": "Movemall Coins cashback", "discount": "{{discount}}% back", "minimum": "Minimum {{minimum}} (up to {{coins}} Coins)", "expiry": "Valid for every brand" }, "tech": { "title": "Authentic tech & gadget deals", "discount": "{{amount}} off", "minimum": "Minimum {{minimum}} on Tech products", "expiry": "Limited quantity" }, "shipping": { "title": "Mall express free-shipping voucher", "discount": "Free shipping", "minimum": "No minimum, express delivery in {{minimumDays}}–{{maximumDays}} days", "expiry": "Unlimited use today" } } },
-    "directory": { "title": "Official stores and leading brands", "categories": { "all": "All", "electronics": "IT & Digital", "sports": "Sports & Fashion", "beauty": "Beauty", "home": "Appliances" }, "followers": "{{count}} followers", "follow": "+ Follow", "followed": "✓ Following", "visit": "Visit store" },
-    "products": { "title": "Special deals on authentic brand products", "tabs": { "hot": "Popular deals", "sale": "Biggest discounts", "new": "New launches", "electronics": "Authentic gadgets", "sports": "Sports & Fashion" }, "viewAll": "View all ({{count}})" },
-    "trust": { "heading": "Why shop from Official Mall brands?", "authenticTitle": "100% authentic products from manufacturers", "authenticDescription": "Sources and authorized distributors are verified", "returnsTitle": "30-day free returns", "returnsDescription": "Return free when an item is faulty or not as described", "shippingTitle": "Fast & secure delivery", "shippingDescription": "Secure packaging with damage protection", "warrantyTitle": "Official Thailand service warranty", "warrantyDescription": "Claims are accepted at official service centers" }
+    "labels": {
+      "superBrandFestival": "SUPER BRAND FESTIVAL",
+      "dealsOfTheDay": "DEALS OF THE DAY",
+      "exclusiveVouchers": "MALL EXCLUSIVE VOUCHERS",
+      "flagshipDirectory": "OFFICIAL FLAGSHIP DIRECTORY",
+      "mall": "MALL",
+      "exclusiveDeals": "MALL EXCLUSIVE DEALS"
+    },
+    "guarantees": {
+      "authentic": "100% authentic (double money back)",
+      "returns": "30-day free returns",
+      "shipping": "Free shipping on every order",
+      "warranty": "Official Thailand warranty"
+    },
+    "hero": {
+      "title": "Official leading brands, 100% authentic",
+      "subtitle": "Authentic brand products with deals and official warranties",
+      "officialBrands": "Official Brands",
+      "authentic": "Authentic",
+      "thirtyDays": "30 days",
+      "freeReturns": "Free Returns"
+    },
+    "spotlight": {
+      "title": "Today's brand highlights",
+      "endsIn": "Ends in:",
+      "taxInvoice": "✓ Full tax invoice available",
+      "installment": "✓ 0% installments for up to 10 months",
+      "express": "✓ Same-day express delivery",
+      "shopBrand": "Shop {{brand}} deals now",
+      "claimExtra": "Claim extra discount"
+    },
+    "highlights": {
+      "apple": {
+        "description": "Up to 25% off iPhone, iPad, Apple Watch, and genuine accessories, with a one-year Thailand warranty",
+        "discount": "Up to 25% off"
+      },
+      "nike": {
+        "description": "Up to 50% off running shoes, apparel, and the latest collection, guaranteed 100% authentic",
+        "discount": "Up to 50% off"
+      },
+      "dyson": {
+        "description": "World-class vacuum, air treatment, and hair styling technology, plus an extra ฿2,000 voucher",
+        "discount": "฿2,000 voucher"
+      },
+      "samsung": {
+        "description": "Premium smartphones and smart TVs with 0% installments for up to 10 months and gifts worth ฿5,990",
+        "discount": "Up to 40% off"
+      }
+    },
+    "vouchers": {
+      "title": "Exclusive Mall product vouchers",
+      "claimAll": "Claim all codes",
+      "claim": "Claim code",
+      "claimed": "Claimed",
+      "items": {
+        "mall": {
+          "title": "Exclusive discount on Mall products",
+          "discount": "{{discount}}% off",
+          "minimum": "Minimum {{minimum}} (up to {{maximum}} off)",
+          "expiry": "Expires in {{hours}} hours"
+        },
+        "coins": {
+          "title": "Movemall Coins cashback",
+          "discount": "{{discount}}% back",
+          "minimum": "Minimum {{minimum}} (up to {{coins}} Coins)",
+          "expiry": "Valid for every brand"
+        },
+        "tech": {
+          "title": "Authentic tech & gadget deals",
+          "discount": "{{amount}} off",
+          "minimum": "Minimum {{minimum}} on Tech products",
+          "expiry": "Limited quantity"
+        },
+        "shipping": {
+          "title": "Mall express free-shipping voucher",
+          "discount": "Free shipping",
+          "minimum": "No minimum, express delivery in {{minimumDays}}–{{maximumDays}} days",
+          "expiry": "Unlimited use today"
+        }
+      }
+    },
+    "directory": {
+      "title": "Official stores and leading brands",
+      "categories": {
+        "all": "All",
+        "electronics": "IT & Digital",
+        "sports": "Sports & Fashion",
+        "beauty": "Beauty",
+        "home": "Appliances"
+      },
+      "follow": "+ Follow",
+      "followed": "✓ Following",
+      "visit": "Visit store",
+      "followers_one": "{{count, compact}} follower",
+      "followers_other": "{{count, compact}} followers"
+    },
+    "products": {
+      "title": "Special deals on authentic brand products",
+      "tabs": {
+        "hot": "Popular deals",
+        "sale": "Biggest discounts",
+        "new": "New launches",
+        "electronics": "Authentic gadgets",
+        "sports": "Sports & Fashion"
+      },
+      "viewAll": "View all ({{count, number}})"
+    },
+    "trust": {
+      "heading": "Why shop from Official Mall brands?",
+      "authenticTitle": "100% authentic products from manufacturers",
+      "authenticDescription": "Sources and authorized distributors are verified",
+      "returnsTitle": "30-day free returns",
+      "returnsDescription": "Return free when an item is faulty or not as described",
+      "shippingTitle": "Fast & secure delivery",
+      "shippingDescription": "Secure packaging with damage protection",
+      "warrantyTitle": "Official Thailand service warranty",
+      "warrantyDescription": "Claims are accepted at official service centers"
+    }
   },
   "product": {
-    "notFound": "Product not found", "backToShop": "Continue shopping", "shareCopied": "Product link copied!", "breadcrumbAria": "Breadcrumbs", "backAria": "Go back to the previous page", "home": "Home", "allProducts": "All products", "topControls": "Product controls", "reportAria": "Report this product or store", "reportTitle": "Report this product or store for counterfeiting or fraud", "share": "Share product", "saveFavorite": "Save to favorites", "viewCart": "View cart", "demoVideo": "Product demonstration video", "visualSearchAria": "Find products similar to this image", "visualSearch": "Find similar images", "previousImage": "Previous image", "nextImage": "Next image", "imagePosition": "{{current}} / {{total}}", "goToImage": "Go to image {{number}}", "watchVideo": "Watch product video", "videoPreviewAlt": "Product video preview", "imageAlt": "{{name}}, image {{number}}", "reviewCount": "({{count}} reviews)", "inStock": "✓ {{count}} in stock", "lowStock": "⚠ Only {{count}} left", "discount": "{{discount}}% off", "optionsHint": "Tap to select a color, quantity, and installment plan", "optionsLabel": "Options:", "quantityItems": "Quantity: {{count}}", "installmentZero": "0% installments", "change": "Change >", "taxInvoiceBanner": "Tax invoice available — request it by email during checkout", "colorOptions": "Color options:", "quantity": "Quantity:", "totalStock": "{{count}} items in stock", "addToCart": "Add to cart", "buyNowAmount": "Buy now · {{amount}}", "chatStore": "Chat with store", "chat": "Chat", "storeLive": "{{store}} is live · {{count}} viewers", "livePromotion": "{{discount}}% off + free shipping during live", "joinStoreLive": "Watch this store live →", "storeRating": "⭐ {{rating}} ({{count}} reviews)", "chatResponse": "Chat response: {{rate}}", "visitStore": "Visit store", "reportStoreTitle": "Report this store for counterfeit products, imitation goods, or fraud", "report": "Report", "storeRecommendations": "Recommended from this store", "itemCount": "{{count}} items", "scrollLeft": "Scroll left", "scrollRight": "Scroll right", "viewAll": "View all →", "viewAllLabel": "View all", "itemCountArrow": "{{count}} items →", "descriptionTitle": "Product details", "noDescription": "No product description", "related": "Related products", "purchaseBarAria": "Product purchase controls", "chatNow": "Chat now", "buyNow": "Buy now", "savings": "Save {{amount}} · {{discount}}%", "fastAuthentic": "Fast delivery · Authenticity guaranteed", "drawerAria": "Product options and installments", "stockLabel": "Stock:", "decreaseQuantity": "Decrease quantity", "quantityAria": "Product quantity", "increaseQuantity": "Increase quantity", "lowStockPlain": "{{count}} items left",
-    "perks": { "freeShipping": "Free shipping on orders over {{amount}}", "returns": "Returns within 30 days", "securePayment": "100% secure payment", "authentic": "100% authenticity guarantee" },
-    "options": { "fashion": { "classicBlack": "Classic Black", "pearlWhite": "Pearl White", "navyBlue": "Navy Blue", "beige": "Beige" }, "electronics": { "spaceGray": "Space Gray", "silver": "Silver", "midnightBlue": "Midnight Blue", "starlight": "Starlight" }, "beauty": { "naturalGlow": "01 Natural Glow", "warmPeach": "02 Warm Peach", "softRose": "03 Soft Rose" }, "default": { "standard": "Standard", "proEdition": "Pro Edition", "classicBlack": "Classic Black" } },
-    "installments": { "full": "Pay in full", "popular": "Popular", "months": "0% for {{count}} months", "perMonth": "{{amount}}/month", "zeroInterest": "0% interest", "minimumTag": "{{amount}}+ order" },
-    "compliance": { "title": "🛡️ Product standards & licenses (Movemall AI Verified)", "governmentActive": "🟢 Government database: ACTIVE", "aiVerified": "✓ {{score}}% AI verified", "fdaNumber": "Thai FDA notification number:", "copiedFda": "Copied Thai FDA number {{number}}", "copy": "Copy", "tisiNumber": "Industrial standard (TISI):", "defaultTisi": "⚡ TIS 1195-2553", "countryOfOrigin": "Country of origin:", "halal": "Halal mark:" },
-    "recommendations": { "title": "You may also like", "subtitle": "Products often bought together", "forYou": "✨ For you", "bestSeller": "🔥 Best sellers", "deals": "⚡ Hot deals", "end": "You've seen them all", "viewAll": "View all products →", "loadMore": "View more ({{count}})" },
-    "drawer": { "optionTitle": "🎨 Color / product model", "chooseOne": "(choose one)", "installmentTitle": "💳 Installment plans (Movemall PayLater 0%)", "quantityTitle": "📦 Quantity", "netTotal": "Net total ({{count}} items):", "saveAmount": "Save {{amount}}", "buyNow": "Buy now · {{amount}}", "addToCart": "Add to cart · {{count}} items" },
-    "card": { "viewDetails": "View details for {{name}}", "nextImageAlt": "Next image of {{name}}", "openVideoReview": "Open the full review clip with sound", "reviewBy": "Review by @{{creator}}", "realReviewClip": "Real review clip", "unmute": "Unmute", "mute": "Mute", "imageCount": "{{count}} product images", "sponsored": "📢 Sponsored", "preferred": "⭐ Preferred", "badges": { "sale": "🔥 SALE", "new": "NEW", "hot": "🔥 HOT", "limited": "LIMIT", "mall": "👑 Mall" }, "removeWishlist": "Remove {{name}} from Wishlist", "addWishlist": "Save {{name}} to Wishlist", "discount": "-{{discount}}%", "taxInvoice": "🧾 Tax invoice", "hasVideoReview": "🎥 Video review", "freeShipping": "🚚 Free shipping", "installmentZero": "0% installments", "sold": "{{count}} sold", "addToCartNow": "Add to cart now", "addNamedToCart": "Add {{name}} to cart", "added": "Added", "addToCart": "Add to cart" }
+    "notFound": "Product not found",
+    "backToShop": "Continue shopping",
+    "shareCopied": "Product link copied!",
+    "breadcrumbAria": "Breadcrumbs",
+    "backAria": "Go back to the previous page",
+    "home": "Home",
+    "allProducts": "All products",
+    "topControls": "Product controls",
+    "reportAria": "Report this product or store",
+    "reportTitle": "Report this product or store for counterfeiting or fraud",
+    "share": "Share product",
+    "saveFavorite": "Save to favorites",
+    "viewCart": "View cart",
+    "demoVideo": "Product demonstration video",
+    "visualSearchAria": "Find products similar to this image",
+    "visualSearch": "Find similar images",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "imagePosition": "{{current}} / {{total}}",
+    "goToImage": "Go to image {{number}}",
+    "watchVideo": "Watch product video",
+    "videoPreviewAlt": "Product video preview",
+    "imageAlt": "{{name}}, image {{number}}",
+    "inStock": "✓ {{count, number}} in stock",
+    "lowStock": "⚠ Only {{count, number}} left",
+    "discount": "{{discount}}% off",
+    "optionsHint": "Tap to select a color, quantity, and installment plan",
+    "optionsLabel": "Options:",
+    "quantityItems": "Quantity: {{count, number}}",
+    "installmentZero": "0% installments",
+    "change": "Change >",
+    "taxInvoiceBanner": "Tax invoice available — request it by email during checkout",
+    "colorOptions": "Color options:",
+    "quantity": "Quantity:",
+    "addToCart": "Add to cart",
+    "buyNowAmount": "Buy now · {{amount}}",
+    "chatStore": "Chat with store",
+    "chat": "Chat",
+    "livePromotion": "{{discount}}% off + free shipping during live",
+    "joinStoreLive": "Watch this store live →",
+    "chatResponse": "Chat response: {{rate}}",
+    "visitStore": "Visit store",
+    "reportStoreTitle": "Report this store for counterfeit products, imitation goods, or fraud",
+    "report": "Report",
+    "storeRecommendations": "Recommended from this store",
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right",
+    "viewAll": "View all →",
+    "viewAllLabel": "View all",
+    "descriptionTitle": "Product details",
+    "noDescription": "No product description",
+    "related": "Related products",
+    "purchaseBarAria": "Product purchase controls",
+    "chatNow": "Chat now",
+    "buyNow": "Buy now",
+    "savings": "Save {{amount}} · {{discount}}%",
+    "fastAuthentic": "Fast delivery · Authenticity guaranteed",
+    "drawerAria": "Product options and installments",
+    "stockLabel": "Stock:",
+    "decreaseQuantity": "Decrease quantity",
+    "quantityAria": "Product quantity",
+    "increaseQuantity": "Increase quantity",
+    "perks": {
+      "freeShipping": "Free shipping on orders over {{amount}}",
+      "returns": "Returns within 30 days",
+      "securePayment": "100% secure payment",
+      "authentic": "100% authenticity guarantee"
+    },
+    "options": {
+      "fashion": {
+        "classicBlack": "Classic Black",
+        "pearlWhite": "Pearl White",
+        "navyBlue": "Navy Blue",
+        "beige": "Beige"
+      },
+      "electronics": {
+        "spaceGray": "Space Gray",
+        "silver": "Silver",
+        "midnightBlue": "Midnight Blue",
+        "starlight": "Starlight"
+      },
+      "beauty": {
+        "naturalGlow": "01 Natural Glow",
+        "warmPeach": "02 Warm Peach",
+        "softRose": "03 Soft Rose"
+      },
+      "default": {
+        "standard": "Standard",
+        "proEdition": "Pro Edition",
+        "classicBlack": "Classic Black"
+      }
+    },
+    "installments": {
+      "full": "Pay in full",
+      "popular": "Popular",
+      "perMonth": "{{amount}}/month",
+      "zeroInterest": "0% interest",
+      "minimumTag": "{{amount}}+ order",
+      "months_one": "0% for {{count, number}} month",
+      "months_other": "0% for {{count, number}} months"
+    },
+    "compliance": {
+      "title": "🛡️ Product standards & licenses (Movemall AI Verified)",
+      "governmentActive": "🟢 Government database: ACTIVE",
+      "aiVerified": "✓ {{score}}% AI verified",
+      "fdaNumber": "Thai FDA notification number:",
+      "copiedFda": "Copied Thai FDA number {{number}}",
+      "copy": "Copy",
+      "tisiNumber": "Industrial standard (TISI):",
+      "defaultTisi": "⚡ TIS 1195-2553",
+      "countryOfOrigin": "Country of origin:",
+      "halal": "Halal mark:"
+    },
+    "recommendations": {
+      "title": "You may also like",
+      "subtitle": "Products often bought together",
+      "forYou": "✨ For you",
+      "bestSeller": "🔥 Best sellers",
+      "deals": "⚡ Hot deals",
+      "end": "You've seen them all",
+      "viewAll": "View all products →",
+      "loadMore": "View more ({{count, number}})"
+    },
+    "drawer": {
+      "optionTitle": "🎨 Color / product model",
+      "chooseOne": "(choose one)",
+      "installmentTitle": "💳 Installment plans (Movemall PayLater 0%)",
+      "quantityTitle": "📦 Quantity",
+      "saveAmount": "Save {{amount}}",
+      "buyNow": "Buy now · {{amount}}",
+      "addToCart_one": "Add to cart · {{count, number}} item",
+      "addToCart_other": "Add to cart · {{count, number}} items",
+      "netTotal_one": "Net total ({{count, number}} item):",
+      "netTotal_other": "Net total ({{count, number}} items):"
+    },
+    "card": {
+      "viewDetails": "View details for {{name}}",
+      "nextImageAlt": "Next image of {{name}}",
+      "openVideoReview": "Open the full review clip with sound",
+      "reviewBy": "Review by @{{creator}}",
+      "realReviewClip": "Real review clip",
+      "unmute": "Unmute",
+      "mute": "Mute",
+      "sponsored": "📢 Sponsored",
+      "preferred": "⭐ Preferred",
+      "badges": {
+        "sale": "🔥 SALE",
+        "new": "NEW",
+        "hot": "🔥 HOT",
+        "limited": "LIMIT",
+        "mall": "👑 Mall"
+      },
+      "removeWishlist": "Remove {{name}} from Wishlist",
+      "addWishlist": "Save {{name}} to Wishlist",
+      "discount": "-{{discount}}%",
+      "taxInvoice": "🧾 Tax invoice",
+      "hasVideoReview": "🎥 Video review",
+      "freeShipping": "🚚 Free shipping",
+      "installmentZero": "0% installments",
+      "sold": "{{count, number}} sold",
+      "addToCartNow": "Add to cart now",
+      "addNamedToCart": "Add {{name}} to cart",
+      "added": "Added",
+      "addToCart": "Add to cart",
+      "imageCount_one": "{{count, number}} product image",
+      "imageCount_other": "{{count, number}} product images"
+    },
+    "itemCount_one": "{{count, number}} item",
+    "itemCount_other": "{{count, number}} items",
+    "itemCountArrow_one": "{{count, number}} item →",
+    "itemCountArrow_other": "{{count, number}} items →",
+    "lowStockPlain_one": "{{count, number}} item left",
+    "lowStockPlain_other": "{{count, number}} items left",
+    "reviewCount_one": "({{count, number}} review)",
+    "reviewCount_other": "({{count, number}} reviews)",
+    "storeLive_one": "{{store}} is live · {{count, compact}} viewer",
+    "storeLive_other": "{{store}} is live · {{count, compact}} viewers",
+    "storeRating_one": "⭐ {{rating}} ({{count, number}} review)",
+    "storeRating_other": "⭐ {{rating}} ({{count, number}} reviews)",
+    "totalStock_one": "{{count, number}} item in stock",
+    "totalStock_other": "{{count, number}} items in stock"
   },
   "store": {
-    "official": "Official Store", "preferred": "Preferred store", "defaultLocation": "Bangkok", "defaultShortLocation": "Bangkok", "following": "Following", "follow": "+ Follow store", "chat": "Chat with store", "reportTitle": "Report this store for counterfeit goods, copyright infringement, or fraud", "report": "Report this store", "liveNow": "LIVE now", "liveViewers": "👀 {{count}} watching", "livePromotion": "{{discount}}% off + free shipping during live", "joinLive": "🔴 Watch this store live →", "seoTitle": "{{store}} — Official store on Movemall | Shop authentic products online", "seoDescription": "Shop quality products from {{store}} on Movemall with easy ordering, free shipping, cash on delivery, exclusive codes, and daily live streams", "emptyProducts": "No products in this category",
-    "defaults": { "ownedBy": "{{name}}'s Store", "bio": "Official store, authentic products, fast delivery", "responseTime": "Within a few minutes", "responseTime15": "Within 15 minutes", "newStore": "Newly opened", "memberStore": "Movemall member store", "joinedOneYear": "Joined 1 year ago", "qualityDescription": "{{name}} · Authentic products, quality guaranteed", "immediately": "Immediately" },
-    "stats": { "rating": "Store rating", "response": "Chat response", "followers": "Store followers", "people": "people", "products": "All products", "items": "items", "location": "Store location" },
-    "vouchers": { "title": "Store vouchers", "subtitle": "Claim vouchers to apply instantly at checkout", "amountOff": "{{amount}} off", "spendThreshold": "When you spend {{amount}}", "percentOff": "{{discount}}% off", "percentCondition": "Spend {{threshold}} (up to {{maximum}} off)", "freeShipping": "🚚 Free-shipping code", "freeShippingCondition": "Free shipping with no minimum", "claim": "Claim code", "claimed": "Claimed" },
-    "tabs": { "all": "All products ({{count}})", "popular": "🔥 Best sellers", "sale": "⚡ Promotions & discounts" }
+    "official": "Official Store",
+    "preferred": "Preferred store",
+    "defaultLocation": "Bangkok",
+    "defaultShortLocation": "Bangkok",
+    "following": "Following",
+    "follow": "+ Follow store",
+    "chat": "Chat with store",
+    "reportTitle": "Report this store for counterfeit goods, copyright infringement, or fraud",
+    "report": "Report this store",
+    "liveNow": "LIVE now",
+    "liveViewers": "👀 {{count, compact}} watching",
+    "livePromotion": "{{discount}}% off + free shipping during live",
+    "joinLive": "🔴 Watch this store live →",
+    "seoTitle": "{{store}} — Official store on Movemall | Shop authentic products online",
+    "seoDescription": "Shop quality products from {{store}} on Movemall with easy ordering, free shipping, cash on delivery, exclusive codes, and daily live streams",
+    "emptyProducts": "No products in this category",
+    "defaults": {
+      "ownedBy": "{{name}}'s Store",
+      "bio": "Official store, authentic products, fast delivery",
+      "responseTime": "Within a few minutes",
+      "responseTime15": "Within 15 minutes",
+      "newStore": "Newly opened",
+      "memberStore": "Movemall member store",
+      "joinedOneYear": "Joined 1 year ago",
+      "qualityDescription": "{{name}} · Authentic products, quality guaranteed",
+      "immediately": "Immediately"
+    },
+    "stats": {
+      "rating": "Store rating",
+      "response": "Chat response",
+      "followers": "Store followers",
+      "people": "people",
+      "products": "All products",
+      "items": "items",
+      "location": "Store location"
+    },
+    "vouchers": {
+      "title": "Store vouchers",
+      "subtitle": "Claim vouchers to apply instantly at checkout",
+      "amountOff": "{{amount}} off",
+      "spendThreshold": "When you spend {{amount}}",
+      "percentOff": "{{discount}}% off",
+      "percentCondition": "Spend {{threshold}} (up to {{maximum}} off)",
+      "freeShipping": "🚚 Free-shipping code",
+      "freeShippingCondition": "Free shipping with no minimum",
+      "claim": "Claim code",
+      "claimed": "Claimed"
+    },
+    "tabs": {
+      "all": "All products ({{count, number}})",
+      "popular": "🔥 Best sellers",
+      "sale": "⚡ Promotions & discounts"
+    }
   },
-  "storesDirectory": { "title": "🏬 Official stores & leading brands", "subtitle": "Official and preferred stores in one place", "defaultDescription": "Official Movemall store with 100% authentic products", "storeRating": "Store rating", "followers": "Followers", "productCount": "{{count}} products", "allProducts": "All products", "visitStore": "Visit store →" },
-  "filters": { "ariaLabel": "Product filters", "title": "Filters", "clearAll": "Clear all", "categories": "Categories", "price": "Price", "minimum": "Minimum", "maximum": "Maximum", "minimumPrice": "Minimum price", "maximumPrice": "Maximum price", "applyPrice": "Apply price filter", "rating": "Rating", "andUp": "and up", "ratingAndUp": "{{rating}} stars and up", "promotions": "Promotions", "badges": { "sale": "🔥 Sale", "new": "✨ New", "hot": "⚡ Hot" }, "taxInvoice": "Tax invoice / e-Tax", "taxReady": "Tax invoice available", "taxReadyAria": "Stores that issue tax invoices" },
+  "storesDirectory": {
+    "title": "🏬 Official stores & leading brands",
+    "subtitle": "Official and preferred stores in one place",
+    "defaultDescription": "Official Movemall store with 100% authentic products",
+    "storeRating": "Store rating",
+    "followers": "Followers",
+    "allProducts": "All products",
+    "visitStore": "Visit store →",
+    "productCount_one": "{{count, number}} product",
+    "productCount_other": "{{count, number}} products"
+  },
+  "filters": {
+    "ariaLabel": "Product filters",
+    "title": "Filters",
+    "clearAll": "Clear all",
+    "categories": "Categories",
+    "price": "Price",
+    "minimum": "Minimum",
+    "maximum": "Maximum",
+    "minimumPrice": "Minimum price",
+    "maximumPrice": "Maximum price",
+    "applyPrice": "Apply price filter",
+    "rating": "Rating",
+    "andUp": "and up",
+    "ratingAndUp": "{{rating}} stars and up",
+    "promotions": "Promotions",
+    "badges": {
+      "sale": "🔥 Sale",
+      "new": "✨ New",
+      "hot": "⚡ Hot"
+    },
+    "taxInvoice": "Tax invoice / e-Tax",
+    "taxReady": "Tax invoice available",
+    "taxReadyAria": "Stores that issue tax invoices"
+  },
   "reviews": {
-    "movemallUser": "Movemall user", "verifiedProductReview": "Verified authentic product review", "maxImagesAlert": "You can attach up to 3 images", "today": "Today", "defaultReviewTitle": "Product review", "title": "Ratings & reviews from verified buyers ({{count}})", "closeForm": "Close form", "writeReview": "Write a review with photos/video", "total": "From {{count}} reviews", "stars": "{{count}} stars", "formTitle": "✍️ Write a product review with photos/video", "rateLabel": "Rating:", "namePlaceholder": "Your name *", "titlePlaceholder": "Review title (for example, Great quality)", "commentPlaceholder": "Share your thoughts about this product... *", "mediaLabel": "📸 Attach product photos & video (up to 3 images):", "compressing": "Compressing image...", "uploadImages": "+ Upload from device ({{count}}/{{max}})", "addSamplePhoto": "+ Add sample photo", "videoAttached": "✓ Video attached", "addVideo": "+ Add unboxing video", "previewAlt": "Image preview {{index}}", "submit": "Submit review", "sortLabel": "Sort:", "sort": { "recent": "Most recent", "helpful": "Most helpful", "highest": "Highest rating (5→1)", "lowest": "Lowest rating (1→5)" }, "emptyTitle": "No reviews match this filter", "emptyDescription": "Choose another filter to see more reviews", "viewAll": "View all reviews", "verifiedBuyer": "Verified buyer", "ratingOutOfFive": "{{rating}} out of 5 stars", "attachmentAlt": "Review attachment {{index}}", "enlargePhoto": "Click to enlarge photo", "helpful": "Helpful ({{count}})", "paginationInfo": "Showing reviews {{start}}–{{end}} of {{total}}", "previousPageAria": "Previous reviews page", "previousPage": "Previous", "nextPageAria": "Next reviews page", "nextPage": "Next", "enlargedPhotoAlt": "Enlarged review photo",
-    "filters": { "all": "All ({{count}})", "rating": "★ {{rating}} stars ({{count}})", "media": "📸 With photos/video ({{count}})", "comment": "💬 With comments ({{count}})" }
+    "movemallUser": "Movemall user",
+    "verifiedProductReview": "Verified authentic product review",
+    "maxImagesAlert": "You can attach up to 3 images",
+    "today": "Today",
+    "defaultReviewTitle": "Product review",
+    "title": "Ratings & reviews from verified buyers ({{count, number}})",
+    "closeForm": "Close form",
+    "writeReview": "Write a review with photos/video",
+    "formTitle": "✍️ Write a product review with photos/video",
+    "rateLabel": "Rating:",
+    "namePlaceholder": "Your name *",
+    "titlePlaceholder": "Review title (for example, Great quality)",
+    "commentPlaceholder": "Share your thoughts about this product... *",
+    "mediaLabel": "📸 Attach product photos & video (up to 3 images):",
+    "compressing": "Compressing image...",
+    "uploadImages": "+ Upload from device ({{count, number}}/{{max}})",
+    "addSamplePhoto": "+ Add sample photo",
+    "videoAttached": "✓ Video attached",
+    "addVideo": "+ Add unboxing video",
+    "previewAlt": "Image preview {{index}}",
+    "submit": "Submit review",
+    "sortLabel": "Sort:",
+    "sort": {
+      "recent": "Most recent",
+      "helpful": "Most helpful",
+      "highest": "Highest rating (5→1)",
+      "lowest": "Lowest rating (1→5)"
+    },
+    "emptyTitle": "No reviews match this filter",
+    "emptyDescription": "Choose another filter to see more reviews",
+    "viewAll": "View all reviews",
+    "verifiedBuyer": "Verified buyer",
+    "ratingOutOfFive": "{{rating}} out of 5 stars",
+    "attachmentAlt": "Review attachment {{index}}",
+    "enlargePhoto": "Click to enlarge photo",
+    "helpful": "Helpful ({{count, number}})",
+    "paginationInfo": "Showing reviews {{start}}–{{end}} of {{total}}",
+    "previousPageAria": "Previous reviews page",
+    "previousPage": "Previous",
+    "nextPageAria": "Next reviews page",
+    "nextPage": "Next",
+    "enlargedPhotoAlt": "Enlarged review photo",
+    "filters": {
+      "all": "All ({{count, number}})",
+      "rating": "★ {{rating}} stars ({{count, number}})",
+      "media": "📸 With photos/video ({{count, number}})",
+      "comment": "💬 With comments ({{count, number}})"
+    },
+    "stars_one": "{{count, number}} star",
+    "stars_other": "{{count, number}} stars",
+    "total_one": "From {{count, number}} review",
+    "total_other": "From {{count, number}} reviews"
   },
-  "reporting": { "title": "Report a store or prohibited product", "successTitle": "Report submitted", "successDescription": "We received your report and will review it within 24 hours. If counterfeiting or fraud is confirmed, you will receive a refund under our policy.", "understood": "Got it, close window", "targets": { "product": "📦 Reported product:", "store": "🏪 Reported store:", "order": "🧾 Reported order:" }, "storeName": "Store: {{store}}", "storeAndOrder": "Store: {{store}} • Order: #{{order}}", "typeLabel": "Report type", "types": { "fakeProduct": "🚫 Counterfeit or imitation product", "misleadingSpecs": "📦 Item not as described or false specifications", "scamOffplatform": "⚠️ Payment scam or incomplete delivery", "harassment": "💬 Harassment, abusive messages, or chat blocking", "noFdaTisi": "🏷️ Dangerous product or missing Thai FDA/TISI approval", "refundDenied": "↩️ Store refused a refund" }, "detailsLabel": "Details", "detailsPlaceholder": "Describe what happened and the damage caused", "evidenceLabel": "Evidence image link", "evidencePlaceholder": "For example: https://images.unsplash.com/... or upload an image link", "evidenceHint": "Attach a photo or video to speed up the review", "protectionTitle": "Request buyer protection and refund", "protectionDescription": "Get 100% back, or 200% for Mall products confirmed as counterfeit", "submitting": "Submitting...", "submit": "🚨 Submit report" }
+  "reporting": {
+    "title": "Report a store or prohibited product",
+    "successTitle": "Report submitted",
+    "successDescription": "We received your report and will review it within 24 hours. If counterfeiting or fraud is confirmed, you will receive a refund under our policy.",
+    "understood": "Got it, close window",
+    "targets": {
+      "product": "📦 Reported product:",
+      "store": "🏪 Reported store:",
+      "order": "🧾 Reported order:"
+    },
+    "storeName": "Store: {{store}}",
+    "storeAndOrder": "Store: {{store}} • Order: #{{order}}",
+    "typeLabel": "Report type",
+    "types": {
+      "fakeProduct": "🚫 Counterfeit or imitation product",
+      "misleadingSpecs": "📦 Item not as described or false specifications",
+      "scamOffplatform": "⚠️ Payment scam or incomplete delivery",
+      "harassment": "💬 Harassment, abusive messages, or chat blocking",
+      "noFdaTisi": "🏷️ Dangerous product or missing Thai FDA/TISI approval",
+      "refundDenied": "↩️ Store refused a refund"
+    },
+    "detailsLabel": "Details",
+    "detailsPlaceholder": "Describe what happened and the damage caused",
+    "evidenceLabel": "Evidence image link",
+    "evidencePlaceholder": "For example: https://images.unsplash.com/... or upload an image link",
+    "evidenceHint": "Attach a photo or video to speed up the review",
+    "protectionTitle": "Request buyer protection and refund",
+    "protectionDescription": "Get 100% back, or 200% for Mall products confirmed as counterfeit",
+    "submitting": "Submitting...",
+    "submit": "🚨 Submit report"
+  }
 }

@@ -11,9 +11,7 @@
     "visualSearchTitle": "Search by image (AI Visual Lens)",
     "visualSearch": "Search by image",
     "wishlist": "Wishlist",
-    "wishlistCount": "Wishlist, {{count}} items",
     "cart": "Cart",
-    "cartCount": "Shopping cart, {{count}} items",
     "chat": "Chat",
     "chatMessages": "Chat inbox",
     "mallAuthentic": "100% authentic brands",
@@ -43,7 +41,11 @@
       "crossbodyBag": "Minimal crossbody bag",
       "airFryer": "Digital air fryer",
       "ipad": "Powerful iPad Air M2"
-    }
+    },
+    "cartCount_one": "Shopping cart, {{count, number}} item",
+    "cartCount_other": "Shopping cart, {{count, number}} items",
+    "wishlistCount_one": "Wishlist, {{count, number}} item",
+    "wishlistCount_other": "Wishlist, {{count, number}} items"
   },
   "account": {
     "logout": "Log out",

@@ -27,7 +27,7 @@ import { products as allProducts } from '../data/products';
 import { getProductUrl } from '../utils/seo';
 import { ProductCard } from '../components/ProductCard';
 import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
-import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { formatCurrency } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { CartItem as CartItemType, Product } from '../types';
 import './CartPage.css';
@@ -236,7 +236,7 @@ export function CartPage({
               <h1 className="cart-main-title">
                 {t('commerce:cart.topbar.title')}
                 <span className="cart-items-pill">
-                  {t('commerce:cart.topbar.itemCount', { count: formatNumber(items.length, locale) })}
+                  {t('commerce:cart.topbar.itemCount', { count: items.length })}
                 </span>
               </h1>
             </div>
@@ -252,7 +252,7 @@ export function CartPage({
                 <Trash2 size={14} />
                 <span>
                   {t('commerce:cart.topbar.deleteSelected', {
-                    count: formatNumber(selectedIds.size, locale),
+                    count: selectedIds.size,
                   })}
                 </span>
               </button>
@@ -325,12 +325,12 @@ export function CartPage({
                 {isAllSelected ? <CheckSquare size={18} /> : <Square size={18} />}
               </span>
               <span className="cart-select-all-text">
-                {t('commerce:cart.selectAll', { count: formatNumber(items.length, locale) })}
+                {t('commerce:cart.selectAll', { count: items.length })}
               </span>
             </label>
 
             <span className="cart-selected-summary-badge">
-              {t('commerce:cart.selectedSummary', { count: formatNumber(selectedCount, locale) })}
+              {t('commerce:cart.selectedSummary', { count: selectedCount })}
             </span>
           </div>
 
@@ -566,7 +566,7 @@ export function CartPage({
                   <span className="cart-perk-title">{t('commerce:cart.perks.coinsTitle')}</span>
                   <p className="cart-perk-desc">
                     {t('commerce:cart.perks.coinsDesc', {
-                      count: formatNumber(userCoins, locale),
+                      count: userCoins,
                       max: money(50),
                     })}
                   </p>
@@ -592,14 +592,14 @@ export function CartPage({
             <h2 className="cart-summary-heading">
               {t('commerce:cart.summary.heading')}
               <span className="cart-summary-count">
-                {t('commerce:cart.summary.count', { count: formatNumber(selectedCount, locale) })}
+                {t('commerce:cart.summary.count', { count: selectedCount })}
               </span>
             </h2>
 
             <div className="cart-summary-breakdown">
               <div className="cart-summary-line">
                 <span className="cart-summary-line-label">
-                  {t('commerce:cart.summary.items', { count: formatNumber(selectedCount, locale) })}
+                  {t('commerce:cart.summary.items', { count: selectedCount })}
                 </span>
                 <span className="cart-summary-line-val">{money(selectedSubtotal)}</span>
               </div>
@@ -626,7 +626,7 @@ export function CartPage({
                 <div className="cart-summary-line cart-summary-line--coins">
                   <span className="cart-summary-line-label">
                     <Coins size={14} />{' '}
-                    {t('commerce:cart.summary.coins', { count: formatNumber(coinsDiscount, locale) })}
+                    {t('commerce:cart.summary.coins', { count: coinsDiscount })}
                   </span>
                   <span className="cart-summary-line-val">-{money(coinsDiscount)}</span>
                 </div>
@@ -674,7 +674,7 @@ export function CartPage({
               disabled={selectedCount === 0}
             >
               <span>
-                {t('commerce:cart.summary.checkout', { count: formatNumber(selectedCount, locale) })}
+                {t('commerce:cart.summary.checkout', { count: selectedCount })}
               </span>
               <ArrowRight size={18} />
             </button>
@@ -736,7 +736,7 @@ export function CartPage({
                 {isAllSelected ? <CheckSquare size={19} /> : <Square size={19} />}
               </span>
               <span className="cart-sticky-select-text">
-                {t('commerce:cart.dock.selectAll', { count: formatNumber(items.length, locale) })}
+                {t('commerce:cart.dock.selectAll', { count: items.length })}
               </span>
             </label>
           </div>
@@ -766,7 +766,7 @@ export function CartPage({
             disabled={selectedCount === 0}
           >
             <span>
-              {t('commerce:cart.dock.checkout', { count: formatNumber(selectedCount, locale) })}
+              {t('commerce:cart.dock.checkout', { count: selectedCount })}
             </span>
             <ArrowRight size={16} />
           </button>

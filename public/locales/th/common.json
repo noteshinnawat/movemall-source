@@ -56,7 +56,6 @@
     "dominantColors": "โทนสีหลัก:",
     "colorTitle": "โทนสี {{color}}",
     "results": "ผลการค้นหา",
-    "resultsWithCount": "ผลการค้นหา ({{count}} รายการ)",
     "onlyMall": "เฉพาะ Mall แท้",
     "searching": "กำลังค้นหาสินค้าที่ใกล้เคียง...",
     "emptyTitle": "เลือกรูปภาพเพื่อเริ่มการค้นหา",
@@ -66,16 +65,19 @@
     "clearFilters": "ล้างตัวกรองทั้งหมด",
     "match": "ตรงกัน {{score}}%",
     "addToCart": "ใส่ตะกร้า",
-    "viewProduct": "ดูสินค้า"
+    "viewProduct": "ดูสินค้า",
+    "resultsWithCount_one": "ผลการค้นหา ({{count, number}} รายการ)",
+    "resultsWithCount_other": "ผลการค้นหา ({{count, number}} รายการ)"
   },
   "toast": {
     "region": "การแจ้งเตือน",
     "close": "ปิดการแจ้งเตือน",
-    "cartAdded": "เพิ่มลงตะกร้าแล้ว · {{count}} ชิ้น",
     "cartRemoved": "ลบสินค้าออกจากตะกร้าแล้ว",
     "cartCleared": "ล้างตะกร้าแล้ว",
     "wishlistAdded": "บันทึกสินค้าแล้ว",
-    "wishlistRemoved": "นำออกจากรายการโปรดแล้ว"
+    "wishlistRemoved": "นำออกจากรายการโปรดแล้ว",
+    "cartAdded_one": "เพิ่มลงตะกร้าแล้ว · {{count, number}} ชิ้น",
+    "cartAdded_other": "เพิ่มลงตะกร้าแล้ว · {{count, number}} ชิ้น"
   },
   "accessibility": {
     "backToTop": "เลื่อนขึ้นด้านบนสุด",

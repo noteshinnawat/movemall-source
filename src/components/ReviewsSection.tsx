@@ -232,7 +232,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
       <div className="reviews-section__header">
         <h2 id="reviews-title" className="reviews-section__title">
           <Star size={20} style={{ color: 'var(--warning)' }} />
-          {t('catalog:reviews.title', { count: formatNumber(safeReviewCount, locale) })}
+          {t('catalog:reviews.title', { count: safeReviewCount })}
         </h2>
         <button
           className="reviews-section__write-btn"
@@ -252,7 +252,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
           <div className="reviews-summary__stars" aria-hidden="true">
             {'★'.repeat(ratingFloor) + '☆'.repeat(Math.max(0, 5 - ratingFloor))}
           </div>
-          <div className="reviews-summary__total">{t('catalog:reviews.total', { count: formatNumber(safeReviewCount, locale) })}</div>
+          <div className="reviews-summary__total">{t('catalog:reviews.total', { count: safeReviewCount })}</div>
         </div>
 
         {/* Rating Breakdown Bars */}
@@ -339,7 +339,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
                 <Image size={15} />
                 {isCompressing
                   ? t('catalog:reviews.compressing')
-                  : t('catalog:reviews.uploadImages', { count: formatNumber(formImages.length, locale), max: 3 })}
+                  : t('catalog:reviews.uploadImages', { count: formImages.length, max: 3 })}
               </button>
 
               <button
@@ -414,49 +414,49 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
             className={`reviews-filter-btn${activeFilter === 'all' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('all')}
           >
-            {t('catalog:reviews.filters.all', { count: formatNumber(countAll, locale) })}
+            {t('catalog:reviews.filters.all', { count: countAll })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === '5' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('5')}
           >
-            {t('catalog:reviews.filters.rating', { rating: 5, count: formatNumber(count5, locale) })}
+            {t('catalog:reviews.filters.rating', { rating: 5, count: count5 })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === '4' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('4')}
           >
-            {t('catalog:reviews.filters.rating', { rating: 4, count: formatNumber(count4, locale) })}
+            {t('catalog:reviews.filters.rating', { rating: 4, count: count4 })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === '3' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('3')}
           >
-            {t('catalog:reviews.filters.rating', { rating: 3, count: formatNumber(count3, locale) })}
+            {t('catalog:reviews.filters.rating', { rating: 3, count: count3 })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === '2' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('2')}
           >
-            {t('catalog:reviews.filters.rating', { rating: 2, count: formatNumber(count2, locale) })}
+            {t('catalog:reviews.filters.rating', { rating: 2, count: count2 })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === '1' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('1')}
           >
-            {t('catalog:reviews.filters.rating', { rating: 1, count: formatNumber(count1, locale) })}
+            {t('catalog:reviews.filters.rating', { rating: 1, count: count1 })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === 'media' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('media')}
           >
-            {t('catalog:reviews.filters.media', { count: formatNumber(countMedia, locale) })}
+            {t('catalog:reviews.filters.media', { count: countMedia })}
           </button>
           <button
             className={`reviews-filter-btn${activeFilter === 'comment' ? ' reviews-filter-btn--active' : ''}`}
             onClick={() => handleFilterChange('comment')}
           >
-            {t('catalog:reviews.filters.comment', { count: formatNumber(countComment, locale) })}
+            {t('catalog:reviews.filters.comment', { count: countComment })}
           </button>
         </div>
 
@@ -554,7 +554,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
                 disabled={helpfulGiven[review.id]}
               >
                 <ThumbsUp size={12} />
-                {t('catalog:reviews.helpful', { count: formatNumber(review.helpfulCount, locale) })}
+                {t('catalog:reviews.helpful', { count: review.helpfulCount })}
               </button>
             </article>
           ))

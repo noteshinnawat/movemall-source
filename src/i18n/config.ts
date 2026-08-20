@@ -1,7 +1,8 @@
 import i18n from 'i18next';
 import HttpBackend from 'i18next-http-backend';
 import { initReactI18next } from 'react-i18next';
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './locales';
+import { formatCompactNumber, formatNumber } from './formatters';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, resolveRootLocale } from './locales';
 
 export const NAMESPACES = [
   'common',
@@ -32,5 +33,14 @@ i18n
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
   });
+
+// Counts are passed to `t` as raw numbers so plural resolution works; these
+// formatters render them with the active locale's grouping and Latin digits.
+i18n.services.formatter?.add('number', (value, lng) =>
+  formatNumber(Number(value), resolveRootLocale(lng ?? null)),
+);
+i18n.services.formatter?.add('compact', (value, lng) =>
+  formatCompactNumber(Number(value), resolveRootLocale(lng ?? null)),
+);
 
 export default i18n;

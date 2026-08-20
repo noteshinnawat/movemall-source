@@ -602,7 +602,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                   <div style={{ fontSize: 12, fontWeight: 800, color: '#92400E' }}>{t('commerce:checkout.summary.coinsTitle')}</div>
                   <div style={{ fontSize: 11, color: '#B45309' }}>
                     {t('commerce:checkout.summary.coinsDesc', {
-                      count: formatNumber(userCoins, locale),
+                      count: userCoins,
                       amount: money(userCoins),
                     })}
                   </div>

@@ -11,7 +11,7 @@ import { mockLiveStreams } from '../data/liveStreams';
 import { parseRichText } from '../components/RichTextEditor';
 import { extractProductId, getProductUrl, updateProductSEO } from '../utils/seo';
 import { LocalizedLink as Link, useLocalizedPath } from '../i18n/LocalizedLink';
-import { formatCompactNumber, formatCurrency, formatNumber } from '../i18n/formatters';
+import { formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import { getDemoProductOptionKeys, getProductPerkInterpolation } from './ProductDetailPage.behavior';
 import type { Product } from '../types';
@@ -569,11 +569,11 @@ export function ProductDetailPage({
             <div className="product-detail__rating-row">
               <span className="product-detail__stars" aria-hidden="true">{stars}</span>
               <span className="product-detail__rating-num">{(product.rating ?? 5).toFixed(1)}</span>
-              <span className="product-detail__review-count">{t('catalog:product.reviewCount', { count: formatNumber(product.reviewCount ?? 0, locale) })}</span>
+              <span className="product-detail__review-count">{t('catalog:product.reviewCount', { count: product.reviewCount ?? 0 })}</span>
               <span className="product-detail__stock">
                 {(product.stock ?? 0) > 10
-                  ? t('catalog:product.inStock', { count: formatNumber(product.stock, locale) })
-                  : t('catalog:product.lowStock', { count: formatNumber(product.stock ?? 0, locale) })}
+                  ? t('catalog:product.inStock', { count: product.stock })
+                  : t('catalog:product.lowStock', { count: product.stock ?? 0 })}
               </span>
             </div>
 
@@ -602,7 +602,7 @@ export function ProductDetailPage({
                 <span className="product-detail__var-label">{t('catalog:product.optionsLabel')}</span>
                 <span className="product-detail__var-value">{selectedOptionLabel}</span>
                 <span className="product-detail__var-divider">•</span>
-                <span className="product-detail__var-qty">{t('catalog:product.quantityItems', { count: formatNumber(qty, locale) })}</span>
+                <span className="product-detail__var-qty">{t('catalog:product.quantityItems', { count: qty })}</span>
                 <span className="product-detail__var-divider">•</span>
                 <span className="product-detail__var-tag">{t('catalog:product.installmentZero')}</span>
               </div>
@@ -685,7 +685,7 @@ export function ProductDetailPage({
                   </button>
                 </div>
                 <span className="product-detail__desktop-stock-txt">
-                  {t('catalog:product.totalStock', { count: formatNumber(product.stock, locale) })}
+                  {t('catalog:product.totalStock', { count: product.stock })}
                 </span>
               </div>
 
@@ -859,7 +859,7 @@ export function ProductDetailPage({
                     <div style={{ fontSize: 13, fontWeight: 800 }}>
                       {t('catalog:product.storeLive', {
                         store: store.name,
-                        count: formatCompactNumber(activeLive.viewers, locale),
+                        count: activeLive.viewers,
                       })}
                     </div>
                     <div style={{ fontSize: 11, color: '#FBBF24' }}>
@@ -912,7 +912,7 @@ export function ProductDetailPage({
                     <div className="product-store-meta">
                       <span className="store-meta-rating">{t('catalog:product.storeRating', {
                         rating: store.rating ?? 5,
-                        count: formatNumber(store.reviewCount ?? 0, locale),
+                        count: store.reviewCount ?? 0,
                       })}</span>
                       <span className="store-meta-sep">•</span>
                       <span>{t('catalog:product.chatResponse', { rate: store.responseRate || '100%' })}</span>
@@ -968,7 +968,7 @@ export function ProductDetailPage({
                     <div className="product-store-products-title">
                       <span>{t('catalog:product.storeRecommendations')}</span>
                       <span className="product-store-count-chip">{t('catalog:product.itemCount', {
-                        count: formatNumber(store.productCount || storeProducts.length + 1, locale),
+                        count: store.productCount || storeProducts.length + 1,
                       })}</span>
                     </div>
 
@@ -1039,7 +1039,7 @@ export function ProductDetailPage({
                       <StoreIcon size={20} />
                       <span>{t('catalog:product.viewAllLabel')}</span>
                       <small>{t('catalog:product.itemCountArrow', {
-                        count: formatNumber(store.productCount || storeProducts.length + 1, locale),
+                        count: store.productCount || storeProducts.length + 1,
                       })}</small>
                     </Link>
                   </div>
@@ -1158,7 +1158,7 @@ export function ProductDetailPage({
                 {isLoadingMoreRecommended
                   ? t('common:loading')
                   : t('catalog:product.recommendations.loadMore', {
-                    count: formatNumber(recommendedProducts.length - visibleRecommendedCount, locale),
+                    count: recommendedProducts.length - visibleRecommendedCount,
                   })}
               </button>
             </div>
@@ -1252,7 +1252,7 @@ export function ProductDetailPage({
                     )}
                   </div>
                   <div className="product-drawer-stock-text">
-                    {t('catalog:product.stockLabel')} <strong>{t('catalog:product.itemCount', { count: formatNumber(product.stock, locale) })}</strong>
+                    {t('catalog:product.stockLabel')} <strong>{t('catalog:product.itemCount', { count: product.stock })}</strong>
                   </div>
                   <div className="product-drawer-selected-summary">
                     {t('catalog:product.optionsLabel')} <span className="product-drawer-summary-highlight">{selectedOptionLabel}</span> •{' '}
@@ -1327,7 +1327,7 @@ export function ProductDetailPage({
               <div className="product-drawer-section">
                 <div className="product-drawer-section-title">
                   <span>{t('catalog:product.drawer.quantityTitle')}</span>
-                  <small className="product-drawer-section-hint">{t('catalog:product.lowStockPlain', { count: formatNumber(product.stock, locale) })}</small>
+                  <small className="product-drawer-section-hint">{t('catalog:product.lowStockPlain', { count: product.stock })}</small>
                 </div>
                 <div className="product-drawer-qty-row">
                   <div className="product-detail__qty-control">
@@ -1375,7 +1375,7 @@ export function ProductDetailPage({
             {/* Footer Action Button */}
             <div className="product-drawer-footer">
               <div className="product-drawer-footer-summary">
-                <span className="product-drawer-footer-total-label">{t('catalog:product.drawer.netTotal', { count: formatNumber(qty, locale) })}</span>
+                <span className="product-drawer-footer-total-label">{t('catalog:product.drawer.netTotal', { count: qty })}</span>
                 <span className="product-drawer-footer-total-price">{formatCurrency(totalPrice ?? 0, locale)}</span>
                 {savings > 0 && (
                   <span className="product-drawer-footer-savings">
@@ -1397,7 +1397,7 @@ export function ProductDetailPage({
                 ) : (
                   <>
                     <ShoppingBag size={18} />
-                    <span>{t('catalog:product.drawer.addToCart', { count: formatNumber(qty, locale) })}</span>
+                    <span>{t('catalog:product.drawer.addToCart', { count: qty })}</span>
                   </>
                 )}
               </button>

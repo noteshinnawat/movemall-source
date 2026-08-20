@@ -5,9 +5,13 @@ import { getStoredOrders, STATUS_COLOR } from '../data/orders';
 import type { Order } from '../data/orders';
 import { ReportStoreModal } from '../components/ReportStoreModal';
 import { LocalizedLink } from '../i18n/LocalizedLink';
-import { formatCurrency, formatDate, formatNumber } from '../i18n/formatters';
+import { formatCurrency, formatDate } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import './OrdersPage.css';
+
+// The report payload reaches back-office tooling, so the reported names stay
+// locale-independent: order id, source product names and a neutral proper name.
+const REPORT_STORE_FALLBACK = 'Movemall Store';
 
 import { fetchMyOrdersApi } from '../utils/api';
 
@@ -154,7 +158,7 @@ export function OrdersPage() {
                             <p className="order-card__item-name">{item.name}</p>
                             <p className="order-card__item-qty">
                               {t('commerce:orders.itemQuantity', {
-                                count: formatNumber(item.quantity, locale),
+                                count: item.quantity,
                               })}
                             </p>
                           </div>
@@ -264,11 +268,8 @@ export function OrdersPage() {
           onClose={() => setReportingOrder(null)}
           targetType="ORDER"
           targetId={reportingOrder.id}
-          targetName={t('commerce:orders.reportTargetName', {
-            orderId: reportingOrder.id,
-            items: reportingOrder.items?.map((i: any) => i.name).join(', '),
-          })}
-          storeName={reportingOrder.storeName || t('commerce:orders.reportStoreFallback')}
+          targetName={`#${reportingOrder.id} (${reportingOrder.items?.map((i: any) => i.name).join(', ')})`}
+          storeName={reportingOrder.storeName || REPORT_STORE_FALLBACK}
           orderId={reportingOrder.id}
         />
       )}

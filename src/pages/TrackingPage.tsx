@@ -279,7 +279,7 @@ export function TrackingPage() {
           {orders.length > 0 && (
             <div className="tracking-quick-selector">
               <span className="tracking-quick-label">
-                {t('commerce:tracking.quickLabel', { count: formatNumber(orders.length, locale) })}
+                {t('commerce:tracking.quickLabel', { count: orders.length })}
               </span>
               <div className="tracking-quick-pills">
                 {orders.map(o => {
@@ -475,7 +475,7 @@ export function TrackingPage() {
               <h2 className="tracking-section-title">
                 <Package size={18} style={{ color: 'var(--primary)' }} />
                 {t('commerce:tracking.itemsTitle', {
-                  count: formatNumber(currentOrder.items.length, locale),
+                  count: currentOrder.items.length,
                 })}
               </h2>
 

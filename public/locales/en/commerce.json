@@ -11,19 +11,18 @@
     "topbar": {
       "back": "Go back",
       "title": "Shopping cart",
-      "itemCount": "{{count}} items",
-      "deleteSelected": "Delete selected ({{count}})",
+      "deleteSelected": "Delete selected ({{count, number}})",
       "deleteSelectedTitle": "Delete selected items",
       "clearAll": "Clear all",
-      "clearAllTitle": "Clear the entire cart"
+      "clearAllTitle": "Clear the entire cart",
+      "itemCount_one": "{{count, number}} item",
+      "itemCount_other": "{{count, number}} items"
     },
     "freeShipping": {
       "achieved": "🎉 You have unlocked <b>free shipping</b>",
       "remaining": "Add <b>{{amount}}</b> more for <b>free shipping</b>"
     },
     "itemsAria": "Products in your cart",
-    "selectAll": "Select all products ({{count}} items)",
-    "selectedSummary": "{{count}} pieces selected",
     "storeVoucher": "Store voucher",
     "storeVoucherTitle": "Claim the store voucher",
     "storeVoucherClaimed": "Voucher from {{store}} claimed successfully!",
@@ -55,24 +54,27 @@
       "voucherBadge": "-{{amount}}",
       "voucherAction": "Choose a code >",
       "coinsTitle": "Movemall Coins",
-      "coinsDesc": "You have {{count}} Coins · up to {{max}} off"
+      "coinsDesc_one": "You have {{count, number}} Coin · up to {{max}} off",
+      "coinsDesc_other": "You have {{count, number}} Coins · up to {{max}} off"
     },
     "summary": {
       "aria": "Order summary",
       "heading": "Order summary",
-      "count": "({{count}} pieces)",
-      "items": "Products ({{count}} pieces)",
       "savings": "Savings",
       "voucher": "Discount code",
-      "coins": "Coins ({{count}})",
+      "coins": "Coins ({{count, number}})",
       "shipping": "Shipping",
       "shippingFree": "Free {{amount}} 🎉",
       "totalTitle": "Total due",
       "totalTax": "VAT 7% included",
       "savingsBanner": "You save <b>{{amount}}</b>",
-      "checkout": "Proceed to checkout ({{count}})",
+      "checkout": "Proceed to checkout ({{count, number}})",
       "guaranteeAuthentic": "Movemall guarantees 100% authentic products or double your money back",
-      "guaranteeReturns": "Free returns within 30 days"
+      "guaranteeReturns": "Free returns within 30 days",
+      "count_one": "({{count, number}} piece)",
+      "count_other": "({{count, number}} pieces)",
+      "items_one": "Products ({{count, number}} piece)",
+      "items_other": "Products ({{count, number}} pieces)"
     },
     "recommendations": {
       "tag": "YOU MAY ALSO LIKE",
@@ -81,12 +83,16 @@
     },
     "dock": {
       "aria": "Checkout bar",
-      "selectAll": "All ({{count}})",
+      "selectAll": "All ({{count, number}})",
       "totalLabel": "Total:",
       "savings": "🔥 You save {{amount}}",
       "freeShippingHint": "🚚 Free shipping over {{amount}}",
-      "checkout": "Check out ({{count}})"
-    }
+      "checkout": "Check out ({{count, number}})"
+    },
+    "selectAll_one": "Select all products ({{count, number}} item)",
+    "selectAll_other": "Select all products ({{count, number}} items)",
+    "selectedSummary_one": "{{count, number}} piece selected",
+    "selectedSummary_other": "{{count, number}} pieces selected"
   },
   "cartItem": {
     "decrease": "Decrease quantity",
@@ -100,7 +106,8 @@
     "emptySubtitle": "Tap the heart icon on a product to save it for later",
     "emptyCta": "Browse products",
     "title": "Saved products (Wishlist)",
-    "count": "{{count}} items"
+    "count_one": "{{count, number}} item",
+    "count_other": "{{count, number}} items"
   },
   "checkout": {
     "title": "💳 Checkout",
@@ -213,7 +220,6 @@
       "lineDesc": "Parcel status and receipts",
       "lineOptIn": "Opt in",
       "coinsTitle": "Movemall Coins",
-      "coinsDesc": "Redeem {{count}} Coins for {{amount}} off",
       "coinsUse": "Use Coins",
       "subtotal": "Items subtotal",
       "shipping": "Shipping",
@@ -222,7 +228,9 @@
       "total": "Total due",
       "vatNote": "VAT 7% included · {{amount}}",
       "submitPromptPay": "Scan the QR code to pay",
-      "submitConfirm": "Confirm order"
+      "submitConfirm": "Confirm order",
+      "coinsDesc_one": "Redeem {{count, number}} Coin for {{amount}} off",
+      "coinsDesc_other": "Redeem {{count, number}} Coins for {{amount}} off"
     }
   },
   "promptPay": {
@@ -276,7 +284,6 @@
       "delivered": "✓ Completed",
       "processing": "⏳ Preparing"
     },
-    "itemQuantity": "Quantity: {{count}} pieces",
     "netTotal": "Order total: {{amount}}",
     "reportCta": "Report / flag a counterfeit",
     "reportTitle": "Report counterfeit, misdescribed items or fraud to request a refund",
@@ -286,8 +293,8 @@
     "emptyCta": "Start shopping",
     "fallbackProductName": "Movemall product",
     "fallbackAddress": "Shipping address",
-    "reportTargetName": "Order #{{orderId}} ({{items}})",
-    "reportStoreFallback": "A store on Movemall"
+    "itemQuantity_one": "Quantity: {{count, number}} piece",
+    "itemQuantity_other": "Quantity: {{count, number}} pieces"
   },
   "tracking": {
     "back": "Back to my orders",
@@ -299,7 +306,7 @@
     "foundToast": "Found the parcel for order #{{orderId}}",
     "notFoundToast": "Tracking number \"{{query}}\" was not found in your orders",
     "copiedToast": "Tracking number copied 📋",
-    "quickLabel": "📦 Your orders ({{count}}):",
+    "quickLabel": "📦 Your orders ({{count, number}}):",
     "trackingNoLabel": "Tracking number",
     "copyTitle": "Copy the tracking number",
     "copied": "Copied",
@@ -331,7 +338,6 @@
     "mapShipping": "🚚 {{carrier}} is delivering",
     "mapHub": "🏢 Movemall distribution hub",
     "mapDestination": "📍 Delivery address",
-    "itemsTitle": "Items in this order ({{count}} items)",
     "itemLine": "{{price}} × {{quantity}} pieces",
     "addressLabel": "Delivery address:",
     "subtotalLabel": "Items subtotal:",
@@ -343,7 +349,9 @@
     "notFoundDesc": "Check the tracking number or search from your order history",
     "emptyDesc": "Once you place an order, parcel status appears here",
     "shopCta": "Browse products",
-    "ordersCta": "View all orders"
+    "ordersCta": "View all orders",
+    "itemsTitle_one": "Items in this order ({{count, number}} item)",
+    "itemsTitle_other": "Items in this order ({{count, number}} items)"
   },
   "compare": {
     "minItemsAlert": "Keep at least one product in the comparison",
@@ -359,7 +367,6 @@
     "share": "Share comparison",
     "categoryLabel": "Category:",
     "modeDual": "⚡ Head-to-head 1 vs 1 (easy to read)",
-    "modeTable": "📊 Full table ({{count}} items)",
     "sideA": "Left product (A):",
     "sideB": "Right product (B):",
     "optionLabel": "{{index}}. {{name}}...",
@@ -371,7 +378,6 @@
     "changeProduct": "Change product",
     "specsTitle": "📊 Summary & spec comparison",
     "rowRating": "Review score",
-    "reviewCount": "({{count}} reviews)",
     "rowDiscount": "Promotional discount",
     "discountTag": "{{discount}}% off",
     "standardPrice": "Standard price",
@@ -381,7 +387,7 @@
     "shippingShort": "✓ Free shipping",
     "rowTags": "Tags and highlights",
     "rowDescription": "Detailed description",
-    "cornerLabel": "Products ({{count}}/4)",
+    "cornerLabel": "Products ({{count, number}}/4)",
     "addProduct": "Add product",
     "removeTitle": "Remove",
     "swapProduct": "Swap product",
@@ -410,8 +416,12 @@
     "modalAllCategories": "All categories",
     "modalCategoryOption": "{{icon}} {{category}}",
     "modalEmpty": "No products match your search, or this product is already added",
-    "modalRating": "⭐️ {{rating}} ({{count}})",
-    "modalSelect": "Select this one"
+    "modalRating": "⭐️ {{rating}} ({{count, number}})",
+    "modalSelect": "Select this one",
+    "modeTable_one": "📊 Full table ({{count, number}} item)",
+    "modeTable_other": "📊 Full table ({{count, number}} items)",
+    "reviewCount_one": "({{count, number}} review)",
+    "reviewCount_other": "({{count, number}} reviews)"
   },
   "lineConnect": {
     "demoProfile": {
@@ -470,7 +480,6 @@
       "statusLabel": "Latest status:",
       "statusValue": "📍 Out for delivery",
       "sampleProductAlt": "Sample product in the message",
-      "sampleProductName": "Sony WH-1000XM5 wireless headphones",
       "sampleProductQty": "Quantity 1 • total {{amount}}",
       "trackCta": "📍 Track live with GPS",
       "orderDetailCta": "View order details",

@@ -11,19 +11,18 @@
     "topbar": {
       "back": "ย้อนกลับ",
       "title": "ตะกร้าสินค้า",
-      "itemCount": "{{count}} รายการ",
-      "deleteSelected": "ลบที่เลือก ({{count}})",
+      "deleteSelected": "ลบที่เลือก ({{count, number}})",
       "deleteSelectedTitle": "ลบรายการที่เลือก",
       "clearAll": "ล้างทั้งหมด",
-      "clearAllTitle": "ล้างตะกร้าทั้งหมด"
+      "clearAllTitle": "ล้างตะกร้าทั้งหมด",
+      "itemCount_one": "{{count, number}} รายการ",
+      "itemCount_other": "{{count, number}} รายการ"
     },
     "freeShipping": {
       "achieved": "🎉 ได้รับสิทธิ์ <b>ส่งฟรี</b> แล้ว",
       "remaining": "อีก <b>{{amount}}</b> ได้ <b>ส่งฟรี</b>"
     },
     "itemsAria": "รายการสินค้าในตะกร้า",
-    "selectAll": "เลือกสินค้าทั้งหมด ({{count}} รายการ)",
-    "selectedSummary": "เลือกแล้ว {{count}} ชิ้น",
     "storeVoucher": "คูปองร้าน",
     "storeVoucherTitle": "เก็บคูปองร้านค้า",
     "storeVoucherClaimed": "เก็บคูปองส่วนลดร้านค้า {{store}} สำเร็จ!",
@@ -55,24 +54,27 @@
       "voucherBadge": "-{{amount}}",
       "voucherAction": "เลือกโค้ด >",
       "coinsTitle": "Movemall Coins",
-      "coinsDesc": "มี {{count}} Coins · ลดได้สูงสุด {{max}}"
+      "coinsDesc_one": "มี {{count, number}} Coins · ลดได้สูงสุด {{max}}",
+      "coinsDesc_other": "มี {{count, number}} Coins · ลดได้สูงสุด {{max}}"
     },
     "summary": {
       "aria": "สรุปคำสั่งซื้อ",
       "heading": "สรุปคำสั่งซื้อ",
-      "count": "({{count}} ชิ้น)",
-      "items": "สินค้า ({{count}} ชิ้น)",
       "savings": "ส่วนลด",
       "voucher": "โค้ดส่วนลด",
-      "coins": "Coins ({{count}})",
+      "coins": "Coins ({{count, number}})",
       "shipping": "ค่าจัดส่ง",
       "shippingFree": "ฟรี {{amount}} 🎉",
       "totalTitle": "ยอดชำระ",
       "totalTax": "รวม VAT 7%",
       "savingsBanner": "ประหยัด <b>{{amount}}</b>",
-      "checkout": "ดำเนินการชำระเงิน ({{count}})",
+      "checkout": "ดำเนินการชำระเงิน ({{count, number}})",
       "guaranteeAuthentic": "Movemall การันตี ได้รับสินค้าแท้ 100% หรือคืนเงิน 2 เท่า",
-      "guaranteeReturns": "คืนสินค้าได้ฟรีภายใน 30 วัน"
+      "guaranteeReturns": "คืนสินค้าได้ฟรีภายใน 30 วัน",
+      "count_one": "({{count, number}} ชิ้น)",
+      "count_other": "({{count, number}} ชิ้น)",
+      "items_one": "สินค้า ({{count, number}} ชิ้น)",
+      "items_other": "สินค้า ({{count, number}} ชิ้น)"
     },
     "recommendations": {
       "tag": "YOU MAY ALSO LIKE",
@@ -81,12 +83,16 @@
     },
     "dock": {
       "aria": "แถบชำระเงิน",
-      "selectAll": "ทั้งหมด ({{count}})",
+      "selectAll": "ทั้งหมด ({{count, number}})",
       "totalLabel": "รวม:",
       "savings": "🔥 ประหยัด {{amount}}",
       "freeShippingHint": "🚚 ส่งฟรีเมื่อครบ {{amount}}",
-      "checkout": "ชำระเงิน ({{count}})"
-    }
+      "checkout": "ชำระเงิน ({{count, number}})"
+    },
+    "selectAll_one": "เลือกสินค้าทั้งหมด ({{count, number}} รายการ)",
+    "selectAll_other": "เลือกสินค้าทั้งหมด ({{count, number}} รายการ)",
+    "selectedSummary_one": "เลือกแล้ว {{count, number}} ชิ้น",
+    "selectedSummary_other": "เลือกแล้ว {{count, number}} ชิ้น"
   },
   "cartItem": {
     "decrease": "ลดจำนวน",
@@ -100,7 +106,8 @@
     "emptySubtitle": "กดไอคอนหัวใจที่สินค้าเพื่อบันทึกไว้ดูภายหลังได้เลย",
     "emptyCta": "ไปเลือกดูสินค้า",
     "title": "สินค้าที่บันทึกไว้ (Wishlist)",
-    "count": "{{count}} รายการ"
+    "count_one": "{{count, number}} รายการ",
+    "count_other": "{{count, number}} รายการ"
   },
   "checkout": {
     "title": "💳 ชำระเงิน",
@@ -213,7 +220,6 @@
       "lineDesc": "สถานะพัสดุและใบเสร็จ",
       "lineOptIn": "เปิดรับ",
       "coinsTitle": "Movemall Coins",
-      "coinsDesc": "แลก {{count}} Coins ลด {{amount}}",
       "coinsUse": "ใช้ Coins",
       "subtotal": "ยอดรวมสินค้า",
       "shipping": "ค่าส่ง",
@@ -222,7 +228,9 @@
       "total": "ยอดชำระ",
       "vatNote": "รวม VAT 7% · {{amount}}",
       "submitPromptPay": "สแกน QR เพื่อชำระ",
-      "submitConfirm": "ยืนยันคำสั่งซื้อ"
+      "submitConfirm": "ยืนยันคำสั่งซื้อ",
+      "coinsDesc_one": "แลก {{count, number}} Coins ลด {{amount}}",
+      "coinsDesc_other": "แลก {{count, number}} Coins ลด {{amount}}"
     }
   },
   "promptPay": {
@@ -276,7 +284,6 @@
       "delivered": "✓ สำเร็จแล้ว",
       "processing": "⏳ กำลังเตรียมพัสดุ"
     },
-    "itemQuantity": "จำนวน: {{count}} ชิ้น",
     "netTotal": "ยอดสุทธิ: {{amount}}",
     "reportCta": "ร้องเรียน / แจ้งของปลอม",
     "reportTitle": "ร้องเรียนสินค้าปลอม ไม่ตรงปก หรือมิจฉาชีพ เพื่อขอเงินคืน",
@@ -286,8 +293,8 @@
     "emptyCta": "ไปช้อปปิ้งกันเลย",
     "fallbackProductName": "สินค้า Movemall",
     "fallbackAddress": "ที่อยู่จัดส่ง",
-    "reportTargetName": "คำสั่งซื้อ #{{orderId}} ({{items}})",
-    "reportStoreFallback": "ร้านค้าบน Movemall"
+    "itemQuantity_one": "จำนวน: {{count, number}} ชิ้น",
+    "itemQuantity_other": "จำนวน: {{count, number}} ชิ้น"
   },
   "tracking": {
     "back": "กลับสู่รายการคำสั่งซื้อ",
@@ -299,7 +306,7 @@
     "foundToast": "พบพัสดุสำหรับคำสั่งซื้อ #{{orderId}}",
     "notFoundToast": "ไม่พบหมายเลขพัสดุ \"{{query}}\" ในรายการคำสั่งซื้อของคุณ",
     "copiedToast": "คัดลอกหมายเลขพัสดุเรียบร้อยแล้ว 📋",
-    "quickLabel": "📦 รายการคำสั่งซื้อจริงของคุณ ({{count}}):",
+    "quickLabel": "📦 รายการคำสั่งซื้อจริงของคุณ ({{count, number}}):",
     "trackingNoLabel": "หมายเลขติดตามพัสดุ (Tracking No.)",
     "copyTitle": "คัดลอกหมายเลขพัสดุ",
     "copied": "คัดลอกแล้ว",
@@ -331,7 +338,6 @@
     "mapShipping": "🚚 {{carrier}} กำลังจัดส่ง",
     "mapHub": "🏢 ศูนย์กระจายสินค้า Movemall Hub",
     "mapDestination": "📍 ที่อยู่จัดส่งปลายทาง",
-    "itemsTitle": "รายการสินค้าในคำสั่งซื้อนี้ ({{count}} รายการ)",
     "itemLine": "{{price}} × {{quantity}} ชิ้น",
     "addressLabel": "ที่อยู่จัดส่งปลายทาง:",
     "subtotalLabel": "ยอดรวมค่าสินค้า:",
@@ -343,7 +349,9 @@
     "notFoundDesc": "ตรวจสอบเลขพัสดุ หรือลองค้นหาจากประวัติออเดอร์",
     "emptyDesc": "เมื่อสั่งซื้อแล้ว สถานะพัสดุจะแสดงที่นี่",
     "shopCta": "ไปเลือกซื้อสินค้า",
-    "ordersCta": "ดูคำสั่งซื้อทั้งหมด"
+    "ordersCta": "ดูคำสั่งซื้อทั้งหมด",
+    "itemsTitle_one": "รายการสินค้าในคำสั่งซื้อนี้ ({{count, number}} รายการ)",
+    "itemsTitle_other": "รายการสินค้าในคำสั่งซื้อนี้ ({{count, number}} รายการ)"
   },
   "compare": {
     "minItemsAlert": "ต้องมีสินค้าอย่างน้อย 1 รายการสำหรับการเปรียบเทียบ",
@@ -359,7 +367,6 @@
     "share": "แชร์ผลเทียบ",
     "categoryLabel": "หมวดหมู่:",
     "modeDual": "⚡ เทียบคู่ 1 vs 1 (อ่านง่าย)",
-    "modeTable": "📊 ตารางรวม ({{count}} ชิ้น)",
     "sideA": "สินค้าฝั่งซ้าย (A):",
     "sideB": "สินค้าฝั่งขวา (B):",
     "optionLabel": "{{index}}. {{name}}...",
@@ -371,7 +378,6 @@
     "changeProduct": "เปลี่ยนสินค้า",
     "specsTitle": "📊 สรุปข้อมูล & สเปกเปรียบเทียบ",
     "rowRating": "คะแนนรีวิว",
-    "reviewCount": "({{count}} รีวิว)",
     "rowDiscount": "ส่วนลดโปรโมชั่น",
     "discountTag": "ลด {{discount}}%",
     "standardPrice": "ราคามาตรฐาน",
@@ -381,7 +387,7 @@
     "shippingShort": "✓ จัดส่งฟรี 0 บาท",
     "rowTags": "แท็กและคุณสมบัติเด่น",
     "rowDescription": "คำอธิบายรายละเอียด",
-    "cornerLabel": "สินค้า ({{count}}/4)",
+    "cornerLabel": "สินค้า ({{count, number}}/4)",
     "addProduct": "เพิ่มสินค้า",
     "removeTitle": "ลบออก",
     "swapProduct": "สลับสินค้า",
@@ -410,8 +416,12 @@
     "modalAllCategories": "ทุกหมวดหมู่",
     "modalCategoryOption": "{{icon}} {{category}}",
     "modalEmpty": "ไม่พบสินค้าที่ตรงกับคำค้นหา หรือสินค้านี้ถูกเพิ่มไปแล้ว",
-    "modalRating": "⭐️ {{rating}} ({{count}})",
-    "modalSelect": "เลือกชิ้นนี้"
+    "modalRating": "⭐️ {{rating}} ({{count, number}})",
+    "modalSelect": "เลือกชิ้นนี้",
+    "modeTable_one": "📊 ตารางรวม ({{count, number}} ชิ้น)",
+    "modeTable_other": "📊 ตารางรวม ({{count, number}} ชิ้น)",
+    "reviewCount_one": "({{count, number}} รีวิว)",
+    "reviewCount_other": "({{count, number}} รีวิว)"
   },
   "lineConnect": {
     "demoProfile": {
@@ -470,7 +480,6 @@
       "statusLabel": "สถานะล่าสุด:",
       "statusValue": "📍 กำลังนำส่งโดยพนักงาน",
       "sampleProductAlt": "ตัวอย่างสินค้าในข้อความ",
-      "sampleProductName": "หูฟังไร้สาย Sony WH-1000XM5",
       "sampleProductQty": "จำนวน 1 ชิ้น • รวม {{amount}}",
       "trackCta": "📍 ติดตามพัสดุสดแบบ GPS",
       "orderDetailCta": "ดูรายละเอียดคำสั่งซื้อ",

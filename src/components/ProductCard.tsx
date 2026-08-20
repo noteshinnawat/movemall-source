@@ -318,7 +318,7 @@ export function ProductCard({
             ({formatNumber(safeReviewCount, locale)})
           </span>
           <span className="product-card__sold-count">
-            {t('catalog:product.card.sold', { count: formatNumber(safeSoldCount, locale) })}
+            {t('catalog:product.card.sold', { count: safeSoldCount })}
           </span>
         </div>
 

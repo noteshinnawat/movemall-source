@@ -11,9 +11,7 @@
     "visualSearchTitle": "ပုံဖြင့်ရှာရန် (AI Visual Lens)",
     "visualSearch": "ပုံဖြင့်ရှာရန်",
     "wishlist": "နှစ်သက်သောပစ္စည်းများ",
-    "wishlistCount": "နှစ်သက်သောပစ္စည်း {{count}} ခု",
     "cart": "ဈေးခြင်း",
-    "cartCount": "ဈေးခြင်းထဲတွင် ပစ္စည်း {{count}} ခု",
     "chat": "စကားပြောရန်",
     "chatMessages": "စကားပြောစာများ",
     "mallAuthentic": "100% ပစ္စည်းမှန် အမှတ်တံဆိပ်များ",
@@ -43,7 +41,11 @@
       "crossbodyBag": "ရိုးရှင်းသော လွယ်အိတ်",
       "airFryer": "ဒစ်ဂျစ်တယ် ဆီမဲ့အကြော်စက်",
       "ipad": "စွမ်းဆောင်ရည်မြင့် iPad Air M2"
-    }
+    },
+    "cartCount_one": "ဈေးခြင်းထဲတွင် ပစ္စည်း {{count, number}} ခု",
+    "cartCount_other": "ဈေးခြင်းထဲတွင် ပစ္စည်း {{count, number}} ခု",
+    "wishlistCount_one": "နှစ်သက်သောပစ္စည်း {{count, number}} ခု",
+    "wishlistCount_other": "နှစ်သက်သောပစ္စည်း {{count, number}} ခု"
   },
   "account": {
     "logout": "ထွက်ရန်",

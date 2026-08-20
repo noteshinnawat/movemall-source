@@ -23,3 +23,15 @@ test('translation catalogs have identical non-empty keys', async () => {
     }
   }
 });
+
+test('every order status has a commerce label in all languages', async () => {
+  const source = await readFile('src/data/orders.ts', 'utf8');
+  const union = source.match(/export type OrderStatus = ([^;]+);/)[1];
+  const statuses = [...union.matchAll(/'([^']+)'/g)].map(([, status]) => status).sort();
+  assert.ok(statuses.length > 0);
+
+  for (const language of languages) {
+    const catalog = JSON.parse(await readFile(`public/locales/${language}/commerce.json`, 'utf8'));
+    assert.deepEqual(Object.keys(catalog.orderStatus).sort(), statuses, `${language} orderStatus`);
+  }
+});

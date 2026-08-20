@@ -87,7 +87,7 @@ export function StoresDirectoryPage() {
                   <div className="store-card__stat-label">{t('catalog:storesDirectory.followers')}</div>
                 </div>
                 <div>
-                  <div className="store-card__stat-val">{t('catalog:storesDirectory.productCount', { count: formatNumber(store.productCount, locale) })}</div>
+                  <div className="store-card__stat-val">{t('catalog:storesDirectory.productCount', { count: store.productCount })}</div>
                   <div className="store-card__stat-label">{t('catalog:storesDirectory.allProducts')}</div>
                 </div>
               </div>

@@ -56,7 +56,6 @@
     "dominantColors": "အဓိကအရောင်များ:",
     "colorTitle": "အရောင် {{color}}",
     "results": "ရှာဖွေမှုရလဒ်များ",
-    "resultsWithCount": "ရှာဖွေမှုရလဒ်များ ({{count}} ခု)",
     "onlyMall": "Mall ပစ္စည်းမှန်များသာ",
     "searching": "ဆင်တူကုန်ပစ္စည်းများကို ရှာဖွေနေသည်...",
     "emptyTitle": "ရှာဖွေမှု စတင်ရန် ပုံတစ်ပုံ ရွေးပါ",
@@ -66,16 +65,19 @@
     "clearFilters": "စစ်ထုတ်မှုအားလုံး ရှင်းရန်",
     "match": "{{score}}% ကိုက်ညီမှု",
     "addToCart": "ဈေးခြင်းထဲ ထည့်ရန်",
-    "viewProduct": "ကုန်ပစ္စည်းကြည့်ရန်"
+    "viewProduct": "ကုန်ပစ္စည်းကြည့်ရန်",
+    "resultsWithCount_one": "ရှာဖွေမှုရလဒ်များ ({{count, number}} ခု)",
+    "resultsWithCount_other": "ရှာဖွေမှုရလဒ်များ ({{count, number}} ခု)"
   },
   "toast": {
     "region": "အသိပေးချက်များ",
     "close": "အသိပေးချက်ကို ပိတ်ရန်",
-    "cartAdded": "ခြင်းတောင်းထဲ ထည့်ပြီး · {{count}} ခု",
     "cartRemoved": "ခြင်းတောင်းမှ ဖယ်ရှားပြီး",
     "cartCleared": "ခြင်းတောင်း ရှင်းပြီး",
     "wishlistAdded": "ကုန်ပစ္စည်း သိမ်းပြီး",
-    "wishlistRemoved": "စိတ်ကြိုက်စာရင်းမှ ဖယ်ရှားပြီး"
+    "wishlistRemoved": "စိတ်ကြိုက်စာရင်းမှ ဖယ်ရှားပြီး",
+    "cartAdded_one": "ခြင်းတောင်းထဲ ထည့်ပြီး · {{count, number}} ခု",
+    "cartAdded_other": "ခြင်းတောင်းထဲ ထည့်ပြီး · {{count, number}} ခု"
   },
   "accessibility": {
     "backToTop": "စာမျက်နှာထိပ်သို့ ရွှေ့ရန်",

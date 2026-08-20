@@ -235,7 +235,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
               className={`compare-mode-btn ${mobileMode === 'table' ? 'compare-mode-btn--active' : ''}`}
               onClick={() => setMobileMode('table')}
             >
-              {t('commerce:compare.modeTable', { count: formatNumber(compareItems.length, locale) })}
+              {t('commerce:compare.modeTable', { count: compareItems.length })}
             </button>
           </div>
 
@@ -341,7 +341,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                     <span className="star-rating"><Star size={13} fill="#F59E0B" /> {dualItemA?.rating}</span>
                     <span className="sub-text">
                       {t('commerce:compare.reviewCount', {
-                        count: formatNumber(dualItemA?.reviewCount ?? 0, locale),
+                        count: dualItemA?.reviewCount ?? 0,
                       })}
                     </span>
                   </div>
@@ -349,7 +349,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                     <span className="star-rating"><Star size={13} fill="#F59E0B" /> {dualItemB?.rating}</span>
                     <span className="sub-text">
                       {t('commerce:compare.reviewCount', {
-                        count: formatNumber(dualItemB?.reviewCount ?? 0, locale),
+                        count: dualItemB?.reviewCount ?? 0,
                       })}
                     </span>
                   </div>
@@ -404,13 +404,13 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                 <div className="compare-spec-row-label">{t('commerce:compare.rowTags')}</div>
                 <div className="compare-spec-row-values">
                   <div className="compare-spec-val tags-val">
-                    {(dualItemA?.tags || []).map(t => (
-                      <span key={t} className="feature-tag">#{t}</span>
+                    {(dualItemA?.tags || []).map(tag => (
+                      <span key={tag} className="feature-tag">#{tag}</span>
                     ))}
                   </div>
                   <div className="compare-spec-val tags-val">
-                    {(dualItemB?.tags || []).map(t => (
-                      <span key={t} className="feature-tag">#{t}</span>
+                    {(dualItemB?.tags || []).map(tag => (
+                      <span key={tag} className="feature-tag">#{tag}</span>
                     ))}
                   </div>
                 </div>
@@ -436,7 +436,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                   <div className="corner-label">
                     <span>
                       {t('commerce:compare.cornerLabel', {
-                        count: formatNumber(compareItems.length, locale),
+                        count: compareItems.length,
                       })}
                     </span>
                     {compareItems.length < 4 && (
@@ -535,7 +535,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                     </div>
                     <div className="review-count">
                       {t('commerce:compare.reviewCount', {
-                        count: formatNumber(p.reviewCount ?? 0, locale),
+                        count: p.reviewCount ?? 0,
                       })}
                     </div>
                   </td>
@@ -610,8 +610,8 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                 {compareItems.map(p => (
                   <td key={p.id} className="compare-val-cell">
                     <div className="tags-container">
-                      {(p.tags || []).map(t => (
-                        <span key={t} className="feature-tag">#{t}</span>
+                      {(p.tags || []).map(tag => (
+                        <span key={tag} className="feature-tag">#{tag}</span>
                       ))}
                     </div>
                   </td>
@@ -713,7 +713,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                         <span className="rating">
                           {t('commerce:compare.modalRating', {
                             rating: product.rating ?? 5,
-                            count: formatNumber(product.reviewCount ?? 0, locale),
+                            count: product.reviewCount ?? 0,
                           })}
                         </span>
                       </div>

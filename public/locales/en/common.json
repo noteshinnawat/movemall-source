@@ -56,7 +56,6 @@
     "dominantColors": "Main colors:",
     "colorTitle": "Color {{color}}",
     "results": "Search results",
-    "resultsWithCount": "Search results ({{count}} items)",
     "onlyMall": "Authentic Mall products only",
     "searching": "Searching for similar products...",
     "emptyTitle": "Choose an image to start searching",
@@ -66,16 +65,19 @@
     "clearFilters": "Clear all filters",
     "match": "{{score}}% match",
     "addToCart": "Add to cart",
-    "viewProduct": "View product"
+    "viewProduct": "View product",
+    "resultsWithCount_one": "Search results ({{count, number}} item)",
+    "resultsWithCount_other": "Search results ({{count, number}} items)"
   },
   "toast": {
     "region": "Notifications",
     "close": "Close notification",
-    "cartAdded": "Added to cart · {{count}} pieces",
     "cartRemoved": "Removed from your cart",
     "cartCleared": "Cart cleared",
     "wishlistAdded": "Product saved",
-    "wishlistRemoved": "Removed from your wishlist"
+    "wishlistRemoved": "Removed from your wishlist",
+    "cartAdded_one": "Added to cart · {{count, number}} piece",
+    "cartAdded_other": "Added to cart · {{count, number}} pieces"
   },
   "accessibility": {
     "backToTop": "Scroll to the top of the page",

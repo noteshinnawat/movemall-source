@@ -9,7 +9,7 @@ import { FilterSidebar } from '../components/FilterSidebar';
 import { products as staticProducts, categories } from '../data/products';
 import { initialVideoClips } from '../data/videoClips';
 import { initialAdCampaigns } from '../data/mockAdsData';
-import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { formatCurrency } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { Product } from '../types';
 import type { FilterState } from '../components/FilterSidebar';
@@ -183,7 +183,7 @@ export function ShopPage({ products: propProducts, onAddToCart, isWishlisted, on
             {/* Toolbar */}
             <div className="shop__toolbar">
               <p className="shop__result-count">
-                {t('catalog:shop.results', { count: formatNumber(filtered.length, locale) })}
+                {t('catalog:shop.results', { count: filtered.length })}
               </p>
               <div className="shop__toolbar-right">
                 <span className="shop__sort-label">{t('catalog:shop.sortLabel')}</span>

@@ -23,6 +23,7 @@ import { resolveRootLocale } from '../i18n/locales';
 import './LineConnectModal.css';
 
 const SAMPLE_CARRIER = 'Flash Express (Next-Day)';
+const SAMPLE_SHIPPED_PRODUCT = 'Sony WH-1000XM5 Wireless Headphones';
 const SAMPLE_FLASH_PRODUCT = 'Nike Air Max 270 React Special Edition';
 const SAMPLE_FLASH_OLD_PRICE = 4200;
 const SAMPLE_FLASH_NEW_PRICE = 2940;
@@ -484,7 +485,7 @@ export function LineConnectModal({
                           className="line-flex-thumb"
                         />
                         <div className="line-flex-prod-info">
-                          <div className="line-flex-prod-name">{t('commerce:lineConnect.sim.sampleProductName')}</div>
+                          <div className="line-flex-prod-name">{SAMPLE_SHIPPED_PRODUCT}</div>
                           <div className="line-flex-prod-qty">
                             {t('commerce:lineConnect.sim.sampleProductQty', { amount: money(sampleTotal) })}
                           </div>

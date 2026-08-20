@@ -3,58 +3,696 @@
   "reportingSubtitle": "Movemall ၏ ကုန်ပစ္စည်းအတုနှင့် လိမ်လည်မှု ကာကွယ်ရေး",
   "reportingProtectionDescription": "အတုဖြစ်ကြောင်း အတည်ပြုပါက 100%၊ မောလ်ပစ္စည်းအတွက် 200% ပြန်ရ",
   "categories": {
-    "electronics": { "name": "အီလက်ထရွန်နစ်နှင့် IT", "tag": "70% အထိ လျှော့ဈေး" }, "fashion": { "name": "ဖက်ရှင်နှင့် အဝတ်အစား", "tag": "ခေတ်စားနေသည်" }, "beauty": { "name": "အလှအပနှင့် တစ်ကိုယ်ရေသုံး", "tag": "ပစ္စည်းမှန် 100%" }, "home": { "name": "အိမ်သုံးနှင့် လျှပ်စစ်ပစ္စည်း", "tag": "အိမ်သုံး အထူးဈေး" }, "sports": { "name": "အားကစားနှင့် ပြင်ပလှုပ်ရှားမှု", "tag": "နာမည်ကြီး အားကစားအမှတ်တံဆိပ်" }, "food": { "name": "အစားအသောက်နှင့် အဖျော်ယမကာ", "tag": "အရသာကောင်း၊ ပို့ဆောင်မြန်" }, "mom-baby": { "name": "မိခင်နှင့် ကလေး", "tag": "မိခင်ကလေး ဘေးကင်း" }, "pets": { "name": "အိမ်မွေးတိရစ္ဆာန်", "tag": "အစားအစာနှင့် ကစားစရာ" }
+    "electronics": {
+      "name": "အီလက်ထရွန်နစ်နှင့် IT",
+      "tag": "70% အထိ လျှော့ဈေး"
+    },
+    "fashion": {
+      "name": "ဖက်ရှင်နှင့် အဝတ်အစား",
+      "tag": "ခေတ်စားနေသည်"
+    },
+    "beauty": {
+      "name": "အလှအပနှင့် တစ်ကိုယ်ရေသုံး",
+      "tag": "ပစ္စည်းမှန် 100%"
+    },
+    "home": {
+      "name": "အိမ်သုံးနှင့် လျှပ်စစ်ပစ္စည်း",
+      "tag": "အိမ်သုံး အထူးဈေး"
+    },
+    "sports": {
+      "name": "အားကစားနှင့် ပြင်ပလှုပ်ရှားမှု",
+      "tag": "နာမည်ကြီး အားကစားအမှတ်တံဆိပ်"
+    },
+    "food": {
+      "name": "အစားအသောက်နှင့် အဖျော်ယမကာ",
+      "tag": "အရသာကောင်း၊ ပို့ဆောင်မြန်"
+    },
+    "mom-baby": {
+      "name": "မိခင်နှင့် ကလေး",
+      "tag": "မိခင်ကလေး ဘေးကင်း"
+    },
+    "pets": {
+      "name": "အိမ်မွေးတိရစ္ဆာန်",
+      "tag": "အစားအစာနှင့် ကစားစရာ"
+    }
   },
   "home": {
     "hero": {
-      "promotions": "ပရိုမိုးရှင်းများ", "previousSlide": "ယခင်ဆလိုက်", "nextSlide": "နောက်ဆလိုက်", "goToSlide": "ဆလိုက် {{number}} သို့ သွားရန်",
-      "banners": { "b1": { "badge": "🔥 နေ့စဉ် အကြီးစားလျှော့ဈေး", "title": "Tech Mega Expo 2026", "subtitle": "IT ပစ္စည်းများ 70% အထိ လျှော့ဈေး • 10 လ 0% အရစ်ကျ", "cta": "နည်းပညာအထူးဈေး ဝယ်ရန်" }, "b2": { "badge": "👑 SUPER BRAND DAY", "title": "Super Brand Day", "subtitle": "Nike x Dyson 60% အထိ လျှော့ဈေး • ပစ္စည်းမှန် 100%", "cta": "နာမည်ကြီးအမှတ်တံဆိပ် ဝယ်ရန်" }, "b3": { "badge": "⚡ PAYDAY BIG SALE", "title": "Mid-Month Payday Sale", "subtitle": "฿2,000 အထိ ကူပွန် • ထိုင်းနိုင်ငံအနှံ့ အခမဲ့ပို့ဆောင်", "cta": "ကူပွန်ရယူရန်" } },
-      "subBanners": { "sub1": { "tag": "👑 SUPER BRAND", "title": "ပစ္စည်းမှန် အမှတ်တံဆိပ် 100%", "subtitle": "ငွေနှစ်ဆပြန် • 30 ရက် အခမဲ့ပြန်ပို့" }, "sub2": { "tag": "🚚 FREE SHIPPING", "title": "ထိုင်းနိုင်ငံအနှံ့ အခမဲ့ပို့ဆောင်", "subtitle": "฿99 ပြည့်လျှင် • Coins ပြန်ရ" } }
+      "promotions": "ပရိုမိုးရှင်းများ",
+      "previousSlide": "ယခင်ဆလိုက်",
+      "nextSlide": "နောက်ဆလိုက်",
+      "goToSlide": "ဆလိုက် {{number}} သို့ သွားရန်",
+      "banners": {
+        "b1": {
+          "badge": "🔥 နေ့စဉ် အကြီးစားလျှော့ဈေး",
+          "title": "Tech Mega Expo 2026",
+          "subtitle": "IT ပစ္စည်းများ 70% အထိ လျှော့ဈေး • 10 လ 0% အရစ်ကျ",
+          "cta": "နည်းပညာအထူးဈေး ဝယ်ရန်"
+        },
+        "b2": {
+          "badge": "👑 SUPER BRAND DAY",
+          "title": "Super Brand Day",
+          "subtitle": "Nike x Dyson 60% အထိ လျှော့ဈေး • ပစ္စည်းမှန် 100%",
+          "cta": "နာမည်ကြီးအမှတ်တံဆိပ် ဝယ်ရန်"
+        },
+        "b3": {
+          "badge": "⚡ PAYDAY BIG SALE",
+          "title": "Mid-Month Payday Sale",
+          "subtitle": "฿2,000 အထိ ကူပွန် • ထိုင်းနိုင်ငံအနှံ့ အခမဲ့ပို့ဆောင်",
+          "cta": "ကူပွန်ရယူရန်"
+        }
+      },
+      "subBanners": {
+        "sub1": {
+          "tag": "👑 SUPER BRAND",
+          "title": "ပစ္စည်းမှန် အမှတ်တံဆိပ် 100%",
+          "subtitle": "ငွေနှစ်ဆပြန် • 30 ရက် အခမဲ့ပြန်ပို့"
+        },
+        "sub2": {
+          "tag": "🚚 FREE SHIPPING",
+          "title": "ထိုင်းနိုင်ငံအနှံ့ အခမဲ့ပို့ဆောင်",
+          "subtitle": "฿99 ပြည့်လျှင် • Coins ပြန်ရ"
+        }
+      }
     },
-    "shortcuts": { "ariaLabel": "လူကြိုက်များသော အမြန်မီနူး", "items": { "live": "တိုက်ရိုက်", "mall": "မောလ်", "flashSale": "Flash Sale", "vouchers": "ကူပွန်များ", "games": "ဂိမ်းနှင့် Coins", "tracking": "ပစ္စည်းခြေရာခံ", "compare": "နှိုင်းယှဉ်", "affiliate": "Affiliate" } },
-    "live": { "subtitle": "• တိုက်ရိုက်ဝယ်ယူ၊ အထူးဈေးပစ္စည်း ပင်ထိုးပြီး live-only ကုဒ်များ ရယူပါ", "viewAll": "တိုက်ရိုက်အားလုံး ကြည့်ရန် ({{count}})", "viewerCount": "ကြည့်ရှုသူ {{count}} ယောက်", "watchChannel": "{{channel}} တိုက်ရိုက် ကြည့်ရန်", "sendHeart": "ဤတိုက်ရိုက်သို့ နှလုံးသားပို့ရန်", "pinnedDiscount": "📌 ပင်ထိုးထားသည် · {{discount}}% လျှော့", "shopLive": "တိုက်ရိုက်ဝယ်ရန်" },
-    "flash": { "heading": "အချိန်ကန့်သတ် အထူးဈေး၊ 70% အထိ လျှော့", "endsIn": "⏰ အထူးဈေး ပြီးဆုံးရန်:", "liveBuyers": "ယခု ဝယ်ယူသူ {{count}} ယောက်", "scrollLeft": "ဘယ်ဘက်သို့ ရွှေ့ရန်", "scrollRight": "ညာဘက်သို့ ရွှေ့ရန်", "viewAll": "အထူးဈေးအားလုံး ကြည့်ရန်", "discount": "-{{discount}}%", "lowestPrice": "👑 30 ရက်အတွင်း အနိမ့်ဆုံးဈေး", "sold": "🔥 {{percent}}% ရောင်းပြီး", "soldUrgent": "🔥 {{percent}}% ရောင်းပြီး • မြန်မြန်ဝယ်ပါ!", "buyNow": "ယခုဝယ်ရန်" },
-    "categories": { "eyebrow": "အမျိုးအစားများ ရှာဖွေရန်", "count": "အမျိုးအစား {{count}} ခု", "title": "🛍️ လူကြိုက်များသော အမျိုးအစားများ", "subtitle": "လွယ်ကူစွာ ဝယ်ယူပြီး 70% အထိ လျှော့ဈေးရယူပါ", "deals": "✨ အထူးဈေး {{count}}+", "updatedDaily": "⚡ နေ့စဉ် အပ်ဒိတ်", "viewAll": "အားလုံးကြည့်ရန် ({{count}})", "categoryAria": "{{category}}၊ ကုန်ပစ္စည်း {{count}} ခု", "categoryDeals": "အထူးဈေး {{count}}+" },
-    "mall": { "badge": "မောလ်", "title": "တရားဝင် ပစ္စည်းမှန်အမှတ်တံဆိပ် 100%", "authentic": "🛡️ ပစ္စည်းမှန် 100%", "returns": "🔄 30 ရက် အခမဲ့ပြန်ပို့", "shipping": "🚚 အခမဲ့ပို့ဆောင်", "viewAll": "အမှတ်တံဆိပ်အားလုံး ကြည့်ရန်" },
-    "stores": { "title": "🏪 လူကြိုက်များသောဆိုင်များနှင့် ထိပ်တန်းအမှတ်တံဆိပ်များ", "viewAll": "အားလုံးကြည့်ရန် ({{count}})", "official": "တရားဝင် မောလ်", "preferred": "⭐ အကြံပြုဆိုင်", "followers": "နောက်လိုက် {{count}} ယောက်", "voucher": "🎟️ {{amount}} လျှော့" },
-    "rewards": { "eyebrow": "MOVEMALL ဆုလာဘ်များ", "ariaLabel": "ဂိမ်းနှင့် Coins", "title": "ဂိမ်းနှင့် ဆုလာဘ်များ", "description": "ကံစမ်းဘီးလှည့်၊ နေ့စဉ်ဝင်ပြီး Coins ရယူပါ", "play": "ယခုကစားရန်" },
-    "feed": { "eyebrow": "နေ့စဉ် ရှာဖွေတွေ့ရှိမှု", "realtime": "အချိန်နှင့်တပြေးညီ အပ်ဒိတ်", "title": "✨ သင့်အတွက် အကြံပြုကုန်ပစ္စည်းများ", "descriptions": { "foryou": "🎯 သင့်အတွက် အထူးရွေးချယ်ထားသော အထူးဈေးများ", "bestseller": "🔥 ယခုအပတ် အမှာများဆုံး လူကြိုက်များသောပစ္စည်းများ", "deals": "⚡ 30%–70% လျှော့ထားသော တန်ဖိုးအကောင်းဆုံးပစ္စည်းများ", "mall": "👑 တရားဝင်အမှတ်တံဆိပ်နှင့် ဆိုင်များမှ ပစ္စည်းမှန် 100%" }, "deals": "📦 အထူးဈေး {{count}}+", "freeShipping": "🚚 ထိုင်းနိုင်ငံအနှံ့ အခမဲ့ပို့ဆောင်", "tabsAria": "အကြံပြုကုန်ပစ္စည်း အမျိုးအစားများ", "tabs": { "forYou": { "title": "သင့်အတွက်", "subtitle": "သင့်အတွက် ရွေးချယ်ထားသည်", "badge": "အကြံပြု" }, "bestSeller": { "title": "ရောင်းအားကောင်း", "subtitle": "ယခုအပတ် လူကြိုက်များ", "badge": "ထိပ်တန်း" }, "deals": { "title": "အထူးလျှော့ဈေး", "subtitle": "70% အထိ လျှော့", "badge": "-70%" }, "mall": { "title": "ပစ္စည်းမှန် မောလ်", "subtitle": "ပစ္စည်းမှန် 100% အာမခံ", "badge": "တရားဝင်" } }, "loadingProgress": "တင်နေသည်... ({{visible}}/{{total}})", "viewMoreProgress": "ပိုမိုကြည့်ရန် ({{visible}}/{{total}})", "end": "ပစ္စည်း {{count}} ခုလုံး ကြည့်ပြီးပါပြီ" },
-    "video": { "realUserReview": "ဝယ်ယူသူ၏ တကယ့်သုံးသပ်ချက်ဗီဒီယို", "verifiedReview": "🎥 တကယ်အသုံးပြုစမ်းသပ်ထားသည် • သုံးသပ်ချက်မှန် 100%" }
+    "shortcuts": {
+      "ariaLabel": "လူကြိုက်များသော အမြန်မီနူး",
+      "items": {
+        "live": "တိုက်ရိုက်",
+        "mall": "မောလ်",
+        "flashSale": "Flash Sale",
+        "vouchers": "ကူပွန်များ",
+        "games": "ဂိမ်းနှင့် Coins",
+        "tracking": "ပစ္စည်းခြေရာခံ",
+        "compare": "နှိုင်းယှဉ်",
+        "affiliate": "Affiliate"
+      }
+    },
+    "live": {
+      "subtitle": "• တိုက်ရိုက်ဝယ်ယူ၊ အထူးဈေးပစ္စည်း ပင်ထိုးပြီး live-only ကုဒ်များ ရယူပါ",
+      "viewAll": "တိုက်ရိုက်အားလုံး ကြည့်ရန် ({{count, number}})",
+      "viewerCount": "ကြည့်ရှုသူ {{count}} ယောက်",
+      "watchChannel": "{{channel}} တိုက်ရိုက် ကြည့်ရန်",
+      "sendHeart": "ဤတိုက်ရိုက်သို့ နှလုံးသားပို့ရန်",
+      "pinnedDiscount": "📌 ပင်ထိုးထားသည် · {{discount}}% လျှော့",
+      "shopLive": "တိုက်ရိုက်ဝယ်ရန်"
+    },
+    "flash": {
+      "heading": "အချိန်ကန့်သတ် အထူးဈေး၊ 70% အထိ လျှော့",
+      "endsIn": "⏰ အထူးဈေး ပြီးဆုံးရန်:",
+      "scrollLeft": "ဘယ်ဘက်သို့ ရွှေ့ရန်",
+      "scrollRight": "ညာဘက်သို့ ရွှေ့ရန်",
+      "viewAll": "အထူးဈေးအားလုံး ကြည့်ရန်",
+      "discount": "-{{discount}}%",
+      "lowestPrice": "👑 30 ရက်အတွင်း အနိမ့်ဆုံးဈေး",
+      "sold": "🔥 {{percent}}% ရောင်းပြီး",
+      "soldUrgent": "🔥 {{percent}}% ရောင်းပြီး • မြန်မြန်ဝယ်ပါ!",
+      "buyNow": "ယခုဝယ်ရန်",
+      "liveBuyers_one": "ယခု ဝယ်ယူသူ {{count, number}} ယောက်",
+      "liveBuyers_other": "ယခု ဝယ်ယူသူ {{count, number}} ယောက်"
+    },
+    "categories": {
+      "eyebrow": "အမျိုးအစားများ ရှာဖွေရန်",
+      "title": "🛍️ လူကြိုက်များသော အမျိုးအစားများ",
+      "subtitle": "လွယ်ကူစွာ ဝယ်ယူပြီး 70% အထိ လျှော့ဈေးရယူပါ",
+      "deals": "✨ အထူးဈေး {{count, number}}+",
+      "updatedDaily": "⚡ နေ့စဉ် အပ်ဒိတ်",
+      "viewAll": "အားလုံးကြည့်ရန် ({{count, number}})",
+      "categoryDeals": "အထူးဈေး {{count, number}}+",
+      "count_one": "အမျိုးအစား {{count, number}} ခု",
+      "count_other": "အမျိုးအစား {{count, number}} ခု",
+      "categoryAria_one": "{{category}}၊ ကုန်ပစ္စည်း {{count, number}} ခု",
+      "categoryAria_other": "{{category}}၊ ကုန်ပစ္စည်း {{count, number}} ခု"
+    },
+    "mall": {
+      "badge": "မောလ်",
+      "title": "တရားဝင် ပစ္စည်းမှန်အမှတ်တံဆိပ် 100%",
+      "authentic": "🛡️ ပစ္စည်းမှန် 100%",
+      "returns": "🔄 30 ရက် အခမဲ့ပြန်ပို့",
+      "shipping": "🚚 အခမဲ့ပို့ဆောင်",
+      "viewAll": "အမှတ်တံဆိပ်အားလုံး ကြည့်ရန်"
+    },
+    "stores": {
+      "title": "🏪 လူကြိုက်များသောဆိုင်များနှင့် ထိပ်တန်းအမှတ်တံဆိပ်များ",
+      "viewAll": "အားလုံးကြည့်ရန် ({{count, number}})",
+      "official": "တရားဝင် မောလ်",
+      "preferred": "⭐ အကြံပြုဆိုင်",
+      "voucher": "🎟️ {{amount}} လျှော့",
+      "followers_one": "နောက်လိုက် {{count, number}} ယောက်",
+      "followers_other": "နောက်လိုက် {{count, number}} ယောက်"
+    },
+    "rewards": {
+      "eyebrow": "MOVEMALL ဆုလာဘ်များ",
+      "ariaLabel": "ဂိမ်းနှင့် Coins",
+      "title": "ဂိမ်းနှင့် ဆုလာဘ်များ",
+      "description": "ကံစမ်းဘီးလှည့်၊ နေ့စဉ်ဝင်ပြီး Coins ရယူပါ",
+      "play": "ယခုကစားရန်"
+    },
+    "feed": {
+      "eyebrow": "နေ့စဉ် ရှာဖွေတွေ့ရှိမှု",
+      "realtime": "အချိန်နှင့်တပြေးညီ အပ်ဒိတ်",
+      "title": "✨ သင့်အတွက် အကြံပြုကုန်ပစ္စည်းများ",
+      "descriptions": {
+        "foryou": "🎯 သင့်အတွက် အထူးရွေးချယ်ထားသော အထူးဈေးများ",
+        "bestseller": "🔥 ယခုအပတ် အမှာများဆုံး လူကြိုက်များသောပစ္စည်းများ",
+        "deals": "⚡ 30%–70% လျှော့ထားသော တန်ဖိုးအကောင်းဆုံးပစ္စည်းများ",
+        "mall": "👑 တရားဝင်အမှတ်တံဆိပ်နှင့် ဆိုင်များမှ ပစ္စည်းမှန် 100%"
+      },
+      "deals": "📦 အထူးဈေး {{count, number}}+",
+      "freeShipping": "🚚 ထိုင်းနိုင်ငံအနှံ့ အခမဲ့ပို့ဆောင်",
+      "tabsAria": "အကြံပြုကုန်ပစ္စည်း အမျိုးအစားများ",
+      "tabs": {
+        "forYou": {
+          "title": "သင့်အတွက်",
+          "subtitle": "သင့်အတွက် ရွေးချယ်ထားသည်",
+          "badge": "အကြံပြု"
+        },
+        "bestSeller": {
+          "title": "ရောင်းအားကောင်း",
+          "subtitle": "ယခုအပတ် လူကြိုက်များ",
+          "badge": "ထိပ်တန်း"
+        },
+        "deals": {
+          "title": "အထူးလျှော့ဈေး",
+          "subtitle": "70% အထိ လျှော့",
+          "badge": "-70%"
+        },
+        "mall": {
+          "title": "ပစ္စည်းမှန် မောလ်",
+          "subtitle": "ပစ္စည်းမှန် 100% အာမခံ",
+          "badge": "တရားဝင်"
+        }
+      },
+      "loadingProgress": "တင်နေသည်... ({{visible}}/{{total}})",
+      "viewMoreProgress": "ပိုမိုကြည့်ရန် ({{visible}}/{{total}})",
+      "end_one": "ပစ္စည်း {{count, number}} ခုလုံး ကြည့်ပြီးပါပြီ",
+      "end_other": "ပစ္စည်း {{count, number}} ခုလုံး ကြည့်ပြီးပါပြီ"
+    },
+    "video": {
+      "realUserReview": "ဝယ်ယူသူ၏ တကယ့်သုံးသပ်ချက်ဗီဒီယို",
+      "verifiedReview": "🎥 တကယ်အသုံးပြုစမ်းသပ်ထားသည် • သုံးသပ်ချက်မှန် 100%"
+    }
   },
-  "shop": { "title": "🛍 ကုန်ပစ္စည်းအားလုံး ဝယ်ရန်", "subtitle": "အရည်အသွေးကောင်း၊ ဈေးတန်၊ ပို့ဆောင်မြန်", "categoryChip": "{{icon}} {{category}}", "priceRange": "{{min}} – {{max}}", "noMaximum": "အများဆုံးမကန့်သတ်", "ratingChip": "{{stars}} နှင့်အထက်", "selectedFilters": "ရွေးထားသော စစ်ထုတ်မှုများ", "removeFilter": "{{filter}} စစ်ထုတ်မှုကို ဖယ်ရှားရန်", "results": "ကုန်ပစ္စည်း {{count}} ခု တွေ့ရှိသည်", "sortLabel": "အစီအစဉ်:", "sortAria": "ကုန်ပစ္စည်း စီရန်", "sort": { "popular": "လူကြိုက်အများဆုံး", "newest": "အသစ်ဆုံး", "priceAsc": "ဈေးနှုန်း: နိမ့်မှ မြင့်", "priceDesc": "ဈေးနှုန်း: မြင့်မှ နိမ့်", "rating": "အဆင့်သတ်မှတ်ချက်အမြင့်ဆုံး" }, "emptyTitle": "ကုန်ပစ္စည်း မတွေ့ပါ", "emptySubtitle": "စစ်ထုတ်မှုများကို ပြင်ဆင်ကြည့်ပါ", "clearAll": "စစ်ထုတ်မှုအားလုံး ရှင်းရန်" },
+  "shop": {
+    "title": "🛍 ကုန်ပစ္စည်းအားလုံး ဝယ်ရန်",
+    "subtitle": "အရည်အသွေးကောင်း၊ ဈေးတန်၊ ပို့ဆောင်မြန်",
+    "categoryChip": "{{icon}} {{category}}",
+    "priceRange": "{{min}} – {{max}}",
+    "noMaximum": "အများဆုံးမကန့်သတ်",
+    "ratingChip": "{{stars}} နှင့်အထက်",
+    "selectedFilters": "ရွေးထားသော စစ်ထုတ်မှုများ",
+    "removeFilter": "{{filter}} စစ်ထုတ်မှုကို ဖယ်ရှားရန်",
+    "sortLabel": "အစီအစဉ်:",
+    "sortAria": "ကုန်ပစ္စည်း စီရန်",
+    "sort": {
+      "popular": "လူကြိုက်အများဆုံး",
+      "newest": "အသစ်ဆုံး",
+      "priceAsc": "ဈေးနှုန်း: နိမ့်မှ မြင့်",
+      "priceDesc": "ဈေးနှုန်း: မြင့်မှ နိမ့်",
+      "rating": "အဆင့်သတ်မှတ်ချက်အမြင့်ဆုံး"
+    },
+    "emptyTitle": "ကုန်ပစ္စည်း မတွေ့ပါ",
+    "emptySubtitle": "စစ်ထုတ်မှုများကို ပြင်ဆင်ကြည့်ပါ",
+    "clearAll": "စစ်ထုတ်မှုအားလုံး ရှင်းရန်",
+    "results_one": "ကုန်ပစ္စည်း {{count, number}} ခု တွေ့ရှိသည်",
+    "results_other": "ကုန်ပစ္စည်း {{count, number}} ခု တွေ့ရှိသည်"
+  },
   "mall": {
-    "labels": { "superBrandFestival": "စူပါအမှတ်တံဆိပ် ပွဲတော်", "dealsOfTheDay": "ယနေ့အထူးဈေးများ", "exclusiveVouchers": "မောလ်သီးသန့် ကူပွန်များ", "flagshipDirectory": "တရားဝင် ထိပ်တန်းဆိုင်များ", "mall": "မောလ်", "exclusiveDeals": "မောလ်သီးသန့် အထူးဈေးများ" },
-    "guarantees": { "authentic": "ပစ္စည်းမှန် 100% (ငွေနှစ်ဆပြန်)", "returns": "30 ရက် အခမဲ့ပြန်ပို့", "shipping": "အမှာတိုင်း အခမဲ့ပို့ဆောင်", "warranty": "တရားဝင် ထိုင်းအာမခံ" },
-    "hero": { "title": "ထိပ်တန်း တရားဝင်အမှတ်တံဆိပ်များ၊ ပစ္စည်းမှန် 100%", "subtitle": "အထူးဈေးနှင့် တရားဝင်အာမခံပါသော အမှတ်တံဆိပ်ပစ္စည်းမှန်များ", "officialBrands": "တရားဝင် အမှတ်တံဆိပ်များ", "authentic": "ပစ္စည်းမှန်", "thirtyDays": "30 ရက်", "freeReturns": "အခမဲ့ပြန်ပို့" },
-    "spotlight": { "title": "ယနေ့ အမှတ်တံဆိပ်အထူးအစီအစဉ်", "endsIn": "ပြီးဆုံးရန်:", "taxInvoice": "✓ အခွန်ပြေစာအပြည့်အစုံ ရရှိနိုင်", "installment": "✓ 10 လအထိ 0% အရစ်ကျ", "express": "✓ တစ်ရက်တည်း အမြန်ပို့ဆောင်", "shopBrand": "{{brand}} အထူးဈေးကို ယခုဝယ်ရန်", "claimExtra": "အပိုလျှော့ဈေးကုဒ် ရယူရန်" },
-    "highlights": { "apple": { "description": "iPhone, iPad, Apple Watch နှင့် မူရင်းအပိုပစ္စည်းများ 25% အထိ လျှော့၊ ထိုင်းအာမခံ တစ်နှစ်", "discount": "25% အထိ လျှော့" }, "nike": { "description": "အပြေးဖိနပ်၊ အားကစားဝတ်စုံနှင့် နောက်ဆုံးကော်လက်ရှင် 50% အထိ လျှော့၊ ပစ္စည်းမှန် 100%", "discount": "50% အထိ လျှော့" }, "dyson": { "description": "ကမ္ဘာ့အဆင့် ဖုန်စုပ်၊ လေသန့်နှင့် ဆံပင်ပုံသွင်းနည်းပညာ၊ ฿2,000 အပိုကူပွန်", "discount": "฿2,000 ကူပွန်" }, "samsung": { "description": "ပရီမီယံစမတ်ဖုန်းနှင့် စမတ်တီဗီ၊ 10 လအထိ 0% အရစ်ကျနှင့် ฿5,990 တန် လက်ဆောင်", "discount": "40% အထိ လျှော့" } },
-    "vouchers": { "title": "မောလ်ပစ္စည်းများအတွက် သီးသန့်ကူပွန်", "claimAll": "ကုဒ်အားလုံး ရယူရန်", "claim": "ကုဒ်ရယူရန်", "claimed": "ရယူပြီး", "items": { "mall": { "title": "မောလ်ပစ္စည်း သီးသန့်လျှော့ဈေး", "discount": "{{discount}}% လျှော့", "minimum": "အနည်းဆုံး {{minimum}} ({{maximum}} အထိ လျှော့)", "expiry": "{{hours}} နာရီအတွင်း သက်တမ်းကုန်" }, "coins": { "title": "Movemall Coins ပြန်အမ်းငွေ", "discount": "{{discount}}% ပြန်ရ", "minimum": "အနည်းဆုံး {{minimum}} ({{coins}} Coins အထိ)", "expiry": "အမှတ်တံဆိပ်အားလုံးတွင် သုံးနိုင်" }, "tech": { "title": "ပစ္စည်းမှန် နည်းပညာနှင့် ကိရိယာ အထူးဈေး", "discount": "{{amount}} လျှော့", "minimum": "နည်းပညာပစ္စည်းများအတွက် အနည်းဆုံး {{minimum}}", "expiry": "အရေအတွက်ကန့်သတ်" }, "shipping": { "title": "မောလ် အမြန် အခမဲ့ပို့ဆောင်ကူပွန်", "discount": "အခမဲ့ပို့ဆောင်", "minimum": "အနည်းဆုံးမလို၊ {{minimumDays}}–{{maximumDays}} ရက်အတွင်း အမြန်ပို့", "expiry": "ယနေ့ အကန့်အသတ်မရှိ သုံးနိုင်" } } },
-    "directory": { "title": "တရားဝင်ဆိုင်များနှင့် ထိပ်တန်းအမှတ်တံဆိပ်များ", "categories": { "all": "အားလုံး", "electronics": "IT နှင့် ဒစ်ဂျစ်တယ်", "sports": "အားကစားနှင့် ဖက်ရှင်", "beauty": "အလှအပ", "home": "လျှပ်စစ်ပစ္စည်း" }, "followers": "နောက်လိုက် {{count}} ယောက်", "follow": "+ နောက်လိုက်ရန်", "followed": "✓ နောက်လိုက်နေသည်", "visit": "ဆိုင်သို့ ဝင်ရန်" },
-    "products": { "title": "ပစ္စည်းမှန် အမှတ်တံဆိပ်ပစ္စည်းများအတွက် အထူးဈေး", "tabs": { "hot": "လူကြိုက်များသော အထူးဈေး", "sale": "အကြီးဆုံးလျှော့ဈေး", "new": "အသစ်မိတ်ဆက်ပစ္စည်း", "electronics": "ပစ္စည်းမှန် gadgets", "sports": "အားကစားနှင့် ဖက်ရှင်" }, "viewAll": "အားလုံးကြည့်ရန် ({{count}})" },
-    "trust": { "heading": "တရားဝင် မောလ်အမှတ်တံဆိပ်များမှ ဘာကြောင့်ဝယ်သင့်သလဲ?", "authenticTitle": "ထုတ်လုပ်သူထံမှ ပစ္စည်းမှန် 100%", "authenticDescription": "အရင်းအမြစ်နှင့် တရားဝင်ဖြန့်ချိသူကို စစ်ဆေးထားသည်", "returnsTitle": "30 ရက် အခမဲ့ပြန်ပို့", "returnsDescription": "ပစ္စည်းချို့ယွင်း သို့မဟုတ် ဖော်ပြချက်နှင့်မကိုက်ပါက အခမဲ့ပြန်ပို့နိုင်", "shippingTitle": "မြန်ဆန်ပြီး လုံခြုံသောပို့ဆောင်မှု", "shippingDescription": "လုံခြုံစွာထုပ်ပိုးပြီး ပျက်စီးမှုအာမခံပါဝင်", "warrantyTitle": "တရားဝင် ထိုင်းဝန်ဆောင်မှုအာမခံ", "warrantyDescription": "တရားဝင်ဝန်ဆောင်မှုစင်တာတွင် အာမခံတောင်းနိုင်" }
+    "labels": {
+      "superBrandFestival": "စူပါအမှတ်တံဆိပ် ပွဲတော်",
+      "dealsOfTheDay": "ယနေ့အထူးဈေးများ",
+      "exclusiveVouchers": "မောလ်သီးသန့် ကူပွန်များ",
+      "flagshipDirectory": "တရားဝင် ထိပ်တန်းဆိုင်များ",
+      "mall": "မောလ်",
+      "exclusiveDeals": "မောလ်သီးသန့် အထူးဈေးများ"
+    },
+    "guarantees": {
+      "authentic": "ပစ္စည်းမှန် 100% (ငွေနှစ်ဆပြန်)",
+      "returns": "30 ရက် အခမဲ့ပြန်ပို့",
+      "shipping": "အမှာတိုင်း အခမဲ့ပို့ဆောင်",
+      "warranty": "တရားဝင် ထိုင်းအာမခံ"
+    },
+    "hero": {
+      "title": "ထိပ်တန်း တရားဝင်အမှတ်တံဆိပ်များ၊ ပစ္စည်းမှန် 100%",
+      "subtitle": "အထူးဈေးနှင့် တရားဝင်အာမခံပါသော အမှတ်တံဆိပ်ပစ္စည်းမှန်များ",
+      "officialBrands": "တရားဝင် အမှတ်တံဆိပ်များ",
+      "authentic": "ပစ္စည်းမှန်",
+      "thirtyDays": "30 ရက်",
+      "freeReturns": "အခမဲ့ပြန်ပို့"
+    },
+    "spotlight": {
+      "title": "ယနေ့ အမှတ်တံဆိပ်အထူးအစီအစဉ်",
+      "endsIn": "ပြီးဆုံးရန်:",
+      "taxInvoice": "✓ အခွန်ပြေစာအပြည့်အစုံ ရရှိနိုင်",
+      "installment": "✓ 10 လအထိ 0% အရစ်ကျ",
+      "express": "✓ တစ်ရက်တည်း အမြန်ပို့ဆောင်",
+      "shopBrand": "{{brand}} အထူးဈေးကို ယခုဝယ်ရန်",
+      "claimExtra": "အပိုလျှော့ဈေးကုဒ် ရယူရန်"
+    },
+    "highlights": {
+      "apple": {
+        "description": "iPhone, iPad, Apple Watch နှင့် မူရင်းအပိုပစ္စည်းများ 25% အထိ လျှော့၊ ထိုင်းအာမခံ တစ်နှစ်",
+        "discount": "25% အထိ လျှော့"
+      },
+      "nike": {
+        "description": "အပြေးဖိနပ်၊ အားကစားဝတ်စုံနှင့် နောက်ဆုံးကော်လက်ရှင် 50% အထိ လျှော့၊ ပစ္စည်းမှန် 100%",
+        "discount": "50% အထိ လျှော့"
+      },
+      "dyson": {
+        "description": "ကမ္ဘာ့အဆင့် ဖုန်စုပ်၊ လေသန့်နှင့် ဆံပင်ပုံသွင်းနည်းပညာ၊ ฿2,000 အပိုကူပွန်",
+        "discount": "฿2,000 ကူပွန်"
+      },
+      "samsung": {
+        "description": "ပရီမီယံစမတ်ဖုန်းနှင့် စမတ်တီဗီ၊ 10 လအထိ 0% အရစ်ကျနှင့် ฿5,990 တန် လက်ဆောင်",
+        "discount": "40% အထိ လျှော့"
+      }
+    },
+    "vouchers": {
+      "title": "မောလ်ပစ္စည်းများအတွက် သီးသန့်ကူပွန်",
+      "claimAll": "ကုဒ်အားလုံး ရယူရန်",
+      "claim": "ကုဒ်ရယူရန်",
+      "claimed": "ရယူပြီး",
+      "items": {
+        "mall": {
+          "title": "မောလ်ပစ္စည်း သီးသန့်လျှော့ဈေး",
+          "discount": "{{discount}}% လျှော့",
+          "minimum": "အနည်းဆုံး {{minimum}} ({{maximum}} အထိ လျှော့)",
+          "expiry": "{{hours}} နာရီအတွင်း သက်တမ်းကုန်"
+        },
+        "coins": {
+          "title": "Movemall Coins ပြန်အမ်းငွေ",
+          "discount": "{{discount}}% ပြန်ရ",
+          "minimum": "အနည်းဆုံး {{minimum}} ({{coins}} Coins အထိ)",
+          "expiry": "အမှတ်တံဆိပ်အားလုံးတွင် သုံးနိုင်"
+        },
+        "tech": {
+          "title": "ပစ္စည်းမှန် နည်းပညာနှင့် ကိရိယာ အထူးဈေး",
+          "discount": "{{amount}} လျှော့",
+          "minimum": "နည်းပညာပစ္စည်းများအတွက် အနည်းဆုံး {{minimum}}",
+          "expiry": "အရေအတွက်ကန့်သတ်"
+        },
+        "shipping": {
+          "title": "မောလ် အမြန် အခမဲ့ပို့ဆောင်ကူပွန်",
+          "discount": "အခမဲ့ပို့ဆောင်",
+          "minimum": "အနည်းဆုံးမလို၊ {{minimumDays}}–{{maximumDays}} ရက်အတွင်း အမြန်ပို့",
+          "expiry": "ယနေ့ အကန့်အသတ်မရှိ သုံးနိုင်"
+        }
+      }
+    },
+    "directory": {
+      "title": "တရားဝင်ဆိုင်များနှင့် ထိပ်တန်းအမှတ်တံဆိပ်များ",
+      "categories": {
+        "all": "အားလုံး",
+        "electronics": "IT နှင့် ဒစ်ဂျစ်တယ်",
+        "sports": "အားကစားနှင့် ဖက်ရှင်",
+        "beauty": "အလှအပ",
+        "home": "လျှပ်စစ်ပစ္စည်း"
+      },
+      "follow": "+ နောက်လိုက်ရန်",
+      "followed": "✓ နောက်လိုက်နေသည်",
+      "visit": "ဆိုင်သို့ ဝင်ရန်",
+      "followers_one": "နောက်လိုက် {{count, compact}} ယောက်",
+      "followers_other": "နောက်လိုက် {{count, compact}} ယောက်"
+    },
+    "products": {
+      "title": "ပစ္စည်းမှန် အမှတ်တံဆိပ်ပစ္စည်းများအတွက် အထူးဈေး",
+      "tabs": {
+        "hot": "လူကြိုက်များသော အထူးဈေး",
+        "sale": "အကြီးဆုံးလျှော့ဈေး",
+        "new": "အသစ်မိတ်ဆက်ပစ္စည်း",
+        "electronics": "ပစ္စည်းမှန် gadgets",
+        "sports": "အားကစားနှင့် ဖက်ရှင်"
+      },
+      "viewAll": "အားလုံးကြည့်ရန် ({{count, number}})"
+    },
+    "trust": {
+      "heading": "တရားဝင် မောလ်အမှတ်တံဆိပ်များမှ ဘာကြောင့်ဝယ်သင့်သလဲ?",
+      "authenticTitle": "ထုတ်လုပ်သူထံမှ ပစ္စည်းမှန် 100%",
+      "authenticDescription": "အရင်းအမြစ်နှင့် တရားဝင်ဖြန့်ချိသူကို စစ်ဆေးထားသည်",
+      "returnsTitle": "30 ရက် အခမဲ့ပြန်ပို့",
+      "returnsDescription": "ပစ္စည်းချို့ယွင်း သို့မဟုတ် ဖော်ပြချက်နှင့်မကိုက်ပါက အခမဲ့ပြန်ပို့နိုင်",
+      "shippingTitle": "မြန်ဆန်ပြီး လုံခြုံသောပို့ဆောင်မှု",
+      "shippingDescription": "လုံခြုံစွာထုပ်ပိုးပြီး ပျက်စီးမှုအာမခံပါဝင်",
+      "warrantyTitle": "တရားဝင် ထိုင်းဝန်ဆောင်မှုအာမခံ",
+      "warrantyDescription": "တရားဝင်ဝန်ဆောင်မှုစင်တာတွင် အာမခံတောင်းနိုင်"
+    }
   },
   "product": {
-    "notFound": "ကုန်ပစ္စည်း မတွေ့ပါ", "backToShop": "ဆက်လက်ဈေးဝယ်ရန်", "shareCopied": "ကုန်ပစ္စည်းလင့်ခ် ကူးယူပြီးပါပြီ!", "breadcrumbAria": "လမ်းညွှန်", "backAria": "ယခင်စာမျက်နှာသို့ ပြန်ရန်", "home": "ပင်မစာမျက်နှာ", "allProducts": "ကုန်ပစ္စည်းအားလုံး", "topControls": "ကုန်ပစ္စည်း ထိန်းချုပ်မှုများ", "reportAria": "ဤကုန်ပစ္စည်း သို့မဟုတ် ဆိုင်ကို တိုင်ကြားရန်", "reportTitle": "ကုန်ပစ္စည်းအတု သို့မဟုတ် လိမ်လည်မှုအတွက် တိုင်ကြားရန်", "share": "ကုန်ပစ္စည်းမျှဝေရန်", "saveFavorite": "အကြိုက်ဆုံးသို့ သိမ်းရန်", "viewCart": "ဈေးခြင်းကြည့်ရန်", "demoVideo": "ကုန်ပစ္စည်း သရုပ်ပြဗီဒီယို", "visualSearchAria": "ဤပုံနှင့်ဆင်တူသော ပစ္စည်းရှာရန်", "visualSearch": "ဆင်တူပုံ ရှာရန်", "previousImage": "ယခင်ပုံ", "nextImage": "နောက်ပုံ", "imagePosition": "{{current}} / {{total}}", "goToImage": "ပုံ {{number}} သို့ သွားရန်", "watchVideo": "ကုန်ပစ္စည်းဗီဒီယို ကြည့်ရန်", "videoPreviewAlt": "ကုန်ပစ္စည်းဗီဒီယို နမူနာ", "imageAlt": "{{name}}၊ ပုံ {{number}}", "reviewCount": "(သုံးသပ်ချက် {{count}} ခု)", "inStock": "✓ လက်ကျန် {{count}} ခု", "lowStock": "⚠ {{count}} ခုသာ ကျန်", "discount": "{{discount}}% လျှော့", "optionsHint": "အရောင်၊ အရေအတွက်နှင့် အရစ်ကျအစီအစဉ် ရွေးရန်နှိပ်ပါ", "optionsLabel": "ရွေးချယ်မှု:", "quantityItems": "အရေအတွက် {{count}}", "installmentZero": "0% အရစ်ကျ", "change": "ပြောင်းရန် >", "taxInvoiceBanner": "အခွန်ပြေစာ ရရှိနိုင်သည် — ငွေရှင်းချိန်တွင် အီးမေးလ်ဖြင့် တောင်းပါ", "colorOptions": "အရောင်ရွေးချယ်မှု:", "quantity": "အရေအတွက်:", "totalStock": "လက်ကျန် {{count}} ခု", "addToCart": "ဈေးခြင်းထဲ ထည့်ရန်", "buyNowAmount": "ယခုဝယ်ရန် · {{amount}}", "chatStore": "ဆိုင်နှင့် စကားပြောရန်", "chat": "စကားပြောရန်", "storeLive": "{{store}} တိုက်ရိုက်လွှင့်နေသည် · ကြည့်ရှုသူ {{count}} ယောက်", "livePromotion": "{{discount}}% လျှော့ + တိုက်ရိုက်တွင် အခမဲ့ပို့", "joinStoreLive": "ဤဆိုင်၏ တိုက်ရိုက်ကို ကြည့်ရန် →", "storeRating": "⭐ {{rating}} (သုံးသပ်ချက် {{count}} ခု)", "chatResponse": "စာပြန်နှုန်း: {{rate}}", "visitStore": "ဆိုင်သို့ ဝင်ရန်", "reportStoreTitle": "ကုန်ပစ္စည်းအတု၊ ပုံတူ သို့မဟုတ် လိမ်လည်မှုအတွက် ဆိုင်ကိုတိုင်ကြားရန်", "report": "တိုင်ကြားရန်", "storeRecommendations": "ဤဆိုင်မှ အကြံပြုကုန်ပစ္စည်းများ", "itemCount": "{{count}} ခု", "scrollLeft": "ဘယ်ဘက်သို့ ရွှေ့ရန်", "scrollRight": "ညာဘက်သို့ ရွှေ့ရန်", "viewAll": "အားလုံးကြည့်ရန် →", "viewAllLabel": "အားလုံးကြည့်ရန်", "itemCountArrow": "{{count}} ခု →", "descriptionTitle": "ကုန်ပစ္စည်း အသေးစိတ်", "noDescription": "ကုန်ပစ္စည်းဖော်ပြချက် မရှိပါ", "related": "ဆက်စပ်ကုန်ပစ္စည်းများ", "purchaseBarAria": "ကုန်ပစ္စည်းဝယ်ယူမှု ထိန်းချုပ်မှု", "chatNow": "ယခုစကားပြောရန်", "buyNow": "ယခုဝယ်ရန်", "savings": "{{amount}} ချွေတာ · {{discount}}%", "fastAuthentic": "ပို့ဆောင်မြန် · ပစ္စည်းမှန် အာမခံ", "drawerAria": "ကုန်ပစ္စည်းရွေးချယ်မှုနှင့် အရစ်ကျ", "stockLabel": "လက်ကျန်:", "decreaseQuantity": "အရေအတွက် လျှော့ရန်", "quantityAria": "ကုန်ပစ္စည်းအရေအတွက်", "increaseQuantity": "အရေအတွက် တိုးရန်", "lowStockPlain": "{{count}} ခု ကျန်",
-    "perks": { "freeShipping": "{{amount}} ပြည့်လျှင် အခမဲ့ပို့", "returns": "30 ရက်အတွင်း ပြန်ပို့နိုင်", "securePayment": "လုံခြုံသော ငွေပေးချေမှု 100%", "authentic": "ပစ္စည်းမှန် 100% အာမခံ" },
-    "options": { "fashion": { "classicBlack": "ဂန္ထဝင်အနက်ရောင်", "pearlWhite": "ပုလဲဖြူရောင်", "navyBlue": "ရေတပ်ပြာရောင်", "beige": "ဘေ့ချ်ရောင်" }, "electronics": { "spaceGray": "စပေ့စ်မီးခိုးရောင်", "silver": "ငွေရောင်", "midnightBlue": "သန်းခေါင်ယံပြာရောင်", "starlight": "စတားလိုက်ရောင်" }, "beauty": { "naturalGlow": "01 သဘာဝတောက်ပမှု", "warmPeach": "02 ပူနွေးမက်မွန်ရောင်", "softRose": "03 ပန်းရောင်နု" }, "default": { "standard": "စံမော်ဒယ်", "proEdition": "ပရီမီယံမော်ဒယ်", "classicBlack": "ဂန္ထဝင်အနက်ရောင်" } },
-    "installments": { "full": "အပြည့်ပေးချေရန်", "popular": "လူကြိုက်များ", "months": "{{count}} လ 0% အရစ်ကျ", "perMonth": "တစ်လ {{amount}}", "zeroInterest": "အတိုး 0%", "minimumTag": "{{amount}}+ အမှာ" },
-    "compliance": { "title": "🛡️ ကုန်ပစ္စည်းစံနှုန်းနှင့် လိုင်စင် (Movemall AI Verified)", "governmentActive": "🟢 အစိုးရဒေတာဘေ့စ်: ACTIVE", "aiVerified": "✓ AI စစ်ဆေးပြီး {{score}}%", "fdaNumber": "ထိုင်း FDA အသိပေးနံပါတ်:", "copiedFda": "ထိုင်း FDA နံပါတ် {{number}} ကို ကူးယူပြီး", "copy": "ကူးယူရန်", "tisiNumber": "စက်မှုစံနှုန်း (TISI):", "defaultTisi": "⚡ TIS 1195-2553", "countryOfOrigin": "ထုတ်လုပ်သည့်နိုင်ငံ:", "halal": "Halal အမှတ်တံဆိပ်:" },
-    "recommendations": { "title": "သင်နှစ်သက်နိုင်သည်", "subtitle": "အတူတကွ ဝယ်ယူလေ့ရှိသောပစ္စည်းများ", "forYou": "✨ သင့်အတွက်", "bestSeller": "🔥 ရောင်းအားကောင်း", "deals": "⚡ အထူးလျှော့ဈေး", "end": "အားလုံးကြည့်ပြီးပါပြီ", "viewAll": "ကုန်ပစ္စည်းအားလုံး ကြည့်ရန် →", "loadMore": "ပိုမိုကြည့်ရန် ({{count}})" },
-    "drawer": { "optionTitle": "🎨 အရောင် / ကုန်ပစ္စည်းမော်ဒယ်", "chooseOne": "(တစ်ခုရွေးပါ)", "installmentTitle": "💳 အရစ်ကျအစီအစဉ် (Movemall PayLater 0%)", "quantityTitle": "📦 အရေအတွက်", "netTotal": "စုစုပေါင်း ({{count}} ခု):", "saveAmount": "{{amount}} ချွေတာ", "buyNow": "ယခုဝယ်ရန် · {{amount}}", "addToCart": "ဈေးခြင်းထဲထည့်ရန် · {{count}} ခု" },
-    "card": { "viewDetails": "{{name}} အသေးစိတ်ကြည့်ရန်", "nextImageAlt": "{{name}} ၏ နောက်ပုံ", "openVideoReview": "အသံပါ သုံးသပ်ချက်ဗီဒီယိုအပြည့် ကြည့်ရန်", "reviewBy": "@{{creator}} ၏ သုံးသပ်ချက်", "realReviewClip": "တကယ့်သုံးသပ်ချက်ဗီဒီယို", "unmute": "အသံဖွင့်ရန်", "mute": "အသံပိတ်ရန်", "imageCount": "ကုန်ပစ္စည်းပုံ {{count}} ပုံ", "sponsored": "📢 Sponsored", "preferred": "⭐ အကြံပြု", "badges": { "sale": "🔥 SALE", "new": "အသစ်", "hot": "🔥 HOT", "limited": "LIMIT", "mall": "👑 မောလ်" }, "removeWishlist": "{{name}} ကို Wishlist မှ ဖယ်ရှားရန်", "addWishlist": "{{name}} ကို Wishlist သို့ သိမ်းရန်", "discount": "-{{discount}}%", "taxInvoice": "🧾 အခွန်ပြေစာ", "hasVideoReview": "🎥 ဗီဒီယိုသုံးသပ်ချက်", "freeShipping": "🚚 အခမဲ့ပို့", "installmentZero": "0% အရစ်ကျ", "sold": "{{count}} ခု ရောင်းပြီး", "addToCartNow": "ယခု ဈေးခြင်းထဲ ထည့်ရန်", "addNamedToCart": "{{name}} ကို ဈေးခြင်းထဲ ထည့်ရန်", "added": "ထည့်ပြီး", "addToCart": "ဈေးခြင်းထဲ ထည့်ရန်" }
+    "notFound": "ကုန်ပစ္စည်း မတွေ့ပါ",
+    "backToShop": "ဆက်လက်ဈေးဝယ်ရန်",
+    "shareCopied": "ကုန်ပစ္စည်းလင့်ခ် ကူးယူပြီးပါပြီ!",
+    "breadcrumbAria": "လမ်းညွှန်",
+    "backAria": "ယခင်စာမျက်နှာသို့ ပြန်ရန်",
+    "home": "ပင်မစာမျက်နှာ",
+    "allProducts": "ကုန်ပစ္စည်းအားလုံး",
+    "topControls": "ကုန်ပစ္စည်း ထိန်းချုပ်မှုများ",
+    "reportAria": "ဤကုန်ပစ္စည်း သို့မဟုတ် ဆိုင်ကို တိုင်ကြားရန်",
+    "reportTitle": "ကုန်ပစ္စည်းအတု သို့မဟုတ် လိမ်လည်မှုအတွက် တိုင်ကြားရန်",
+    "share": "ကုန်ပစ္စည်းမျှဝေရန်",
+    "saveFavorite": "အကြိုက်ဆုံးသို့ သိမ်းရန်",
+    "viewCart": "ဈေးခြင်းကြည့်ရန်",
+    "demoVideo": "ကုန်ပစ္စည်း သရုပ်ပြဗီဒီယို",
+    "visualSearchAria": "ဤပုံနှင့်ဆင်တူသော ပစ္စည်းရှာရန်",
+    "visualSearch": "ဆင်တူပုံ ရှာရန်",
+    "previousImage": "ယခင်ပုံ",
+    "nextImage": "နောက်ပုံ",
+    "imagePosition": "{{current}} / {{total}}",
+    "goToImage": "ပုံ {{number}} သို့ သွားရန်",
+    "watchVideo": "ကုန်ပစ္စည်းဗီဒီယို ကြည့်ရန်",
+    "videoPreviewAlt": "ကုန်ပစ္စည်းဗီဒီယို နမူနာ",
+    "imageAlt": "{{name}}၊ ပုံ {{number}}",
+    "inStock": "✓ လက်ကျန် {{count, number}} ခု",
+    "lowStock": "⚠ {{count, number}} ခုသာ ကျန်",
+    "discount": "{{discount}}% လျှော့",
+    "optionsHint": "အရောင်၊ အရေအတွက်နှင့် အရစ်ကျအစီအစဉ် ရွေးရန်နှိပ်ပါ",
+    "optionsLabel": "ရွေးချယ်မှု:",
+    "quantityItems": "အရေအတွက် {{count, number}}",
+    "installmentZero": "0% အရစ်ကျ",
+    "change": "ပြောင်းရန် >",
+    "taxInvoiceBanner": "အခွန်ပြေစာ ရရှိနိုင်သည် — ငွေရှင်းချိန်တွင် အီးမေးလ်ဖြင့် တောင်းပါ",
+    "colorOptions": "အရောင်ရွေးချယ်မှု:",
+    "quantity": "အရေအတွက်:",
+    "addToCart": "ဈေးခြင်းထဲ ထည့်ရန်",
+    "buyNowAmount": "ယခုဝယ်ရန် · {{amount}}",
+    "chatStore": "ဆိုင်နှင့် စကားပြောရန်",
+    "chat": "စကားပြောရန်",
+    "livePromotion": "{{discount}}% လျှော့ + တိုက်ရိုက်တွင် အခမဲ့ပို့",
+    "joinStoreLive": "ဤဆိုင်၏ တိုက်ရိုက်ကို ကြည့်ရန် →",
+    "chatResponse": "စာပြန်နှုန်း: {{rate}}",
+    "visitStore": "ဆိုင်သို့ ဝင်ရန်",
+    "reportStoreTitle": "ကုန်ပစ္စည်းအတု၊ ပုံတူ သို့မဟုတ် လိမ်လည်မှုအတွက် ဆိုင်ကိုတိုင်ကြားရန်",
+    "report": "တိုင်ကြားရန်",
+    "storeRecommendations": "ဤဆိုင်မှ အကြံပြုကုန်ပစ္စည်းများ",
+    "scrollLeft": "ဘယ်ဘက်သို့ ရွှေ့ရန်",
+    "scrollRight": "ညာဘက်သို့ ရွှေ့ရန်",
+    "viewAll": "အားလုံးကြည့်ရန် →",
+    "viewAllLabel": "အားလုံးကြည့်ရန်",
+    "descriptionTitle": "ကုန်ပစ္စည်း အသေးစိတ်",
+    "noDescription": "ကုန်ပစ္စည်းဖော်ပြချက် မရှိပါ",
+    "related": "ဆက်စပ်ကုန်ပစ္စည်းများ",
+    "purchaseBarAria": "ကုန်ပစ္စည်းဝယ်ယူမှု ထိန်းချုပ်မှု",
+    "chatNow": "ယခုစကားပြောရန်",
+    "buyNow": "ယခုဝယ်ရန်",
+    "savings": "{{amount}} ချွေတာ · {{discount}}%",
+    "fastAuthentic": "ပို့ဆောင်မြန် · ပစ္စည်းမှန် အာမခံ",
+    "drawerAria": "ကုန်ပစ္စည်းရွေးချယ်မှုနှင့် အရစ်ကျ",
+    "stockLabel": "လက်ကျန်:",
+    "decreaseQuantity": "အရေအတွက် လျှော့ရန်",
+    "quantityAria": "ကုန်ပစ္စည်းအရေအတွက်",
+    "increaseQuantity": "အရေအတွက် တိုးရန်",
+    "perks": {
+      "freeShipping": "{{amount}} ပြည့်လျှင် အခမဲ့ပို့",
+      "returns": "30 ရက်အတွင်း ပြန်ပို့နိုင်",
+      "securePayment": "လုံခြုံသော ငွေပေးချေမှု 100%",
+      "authentic": "ပစ္စည်းမှန် 100% အာမခံ"
+    },
+    "options": {
+      "fashion": {
+        "classicBlack": "ဂန္ထဝင်အနက်ရောင်",
+        "pearlWhite": "ပုလဲဖြူရောင်",
+        "navyBlue": "ရေတပ်ပြာရောင်",
+        "beige": "ဘေ့ချ်ရောင်"
+      },
+      "electronics": {
+        "spaceGray": "စပေ့စ်မီးခိုးရောင်",
+        "silver": "ငွေရောင်",
+        "midnightBlue": "သန်းခေါင်ယံပြာရောင်",
+        "starlight": "စတားလိုက်ရောင်"
+      },
+      "beauty": {
+        "naturalGlow": "01 သဘာဝတောက်ပမှု",
+        "warmPeach": "02 ပူနွေးမက်မွန်ရောင်",
+        "softRose": "03 ပန်းရောင်နု"
+      },
+      "default": {
+        "standard": "စံမော်ဒယ်",
+        "proEdition": "ပရီမီယံမော်ဒယ်",
+        "classicBlack": "ဂန္ထဝင်အနက်ရောင်"
+      }
+    },
+    "installments": {
+      "full": "အပြည့်ပေးချေရန်",
+      "popular": "လူကြိုက်များ",
+      "perMonth": "တစ်လ {{amount}}",
+      "zeroInterest": "အတိုး 0%",
+      "minimumTag": "{{amount}}+ အမှာ",
+      "months_one": "{{count, number}} လ 0% အရစ်ကျ",
+      "months_other": "{{count, number}} လ 0% အရစ်ကျ"
+    },
+    "compliance": {
+      "title": "🛡️ ကုန်ပစ္စည်းစံနှုန်းနှင့် လိုင်စင် (Movemall AI Verified)",
+      "governmentActive": "🟢 အစိုးရဒေတာဘေ့စ်: ACTIVE",
+      "aiVerified": "✓ AI စစ်ဆေးပြီး {{score}}%",
+      "fdaNumber": "ထိုင်း FDA အသိပေးနံပါတ်:",
+      "copiedFda": "ထိုင်း FDA နံပါတ် {{number}} ကို ကူးယူပြီး",
+      "copy": "ကူးယူရန်",
+      "tisiNumber": "စက်မှုစံနှုန်း (TISI):",
+      "defaultTisi": "⚡ TIS 1195-2553",
+      "countryOfOrigin": "ထုတ်လုပ်သည့်နိုင်ငံ:",
+      "halal": "Halal အမှတ်တံဆိပ်:"
+    },
+    "recommendations": {
+      "title": "သင်နှစ်သက်နိုင်သည်",
+      "subtitle": "အတူတကွ ဝယ်ယူလေ့ရှိသောပစ္စည်းများ",
+      "forYou": "✨ သင့်အတွက်",
+      "bestSeller": "🔥 ရောင်းအားကောင်း",
+      "deals": "⚡ အထူးလျှော့ဈေး",
+      "end": "အားလုံးကြည့်ပြီးပါပြီ",
+      "viewAll": "ကုန်ပစ္စည်းအားလုံး ကြည့်ရန် →",
+      "loadMore": "ပိုမိုကြည့်ရန် ({{count, number}})"
+    },
+    "drawer": {
+      "optionTitle": "🎨 အရောင် / ကုန်ပစ္စည်းမော်ဒယ်",
+      "chooseOne": "(တစ်ခုရွေးပါ)",
+      "installmentTitle": "💳 အရစ်ကျအစီအစဉ် (Movemall PayLater 0%)",
+      "quantityTitle": "📦 အရေအတွက်",
+      "saveAmount": "{{amount}} ချွေတာ",
+      "buyNow": "ယခုဝယ်ရန် · {{amount}}",
+      "addToCart_one": "ဈေးခြင်းထဲထည့်ရန် · {{count, number}} ခု",
+      "addToCart_other": "ဈေးခြင်းထဲထည့်ရန် · {{count, number}} ခု",
+      "netTotal_one": "စုစုပေါင်း ({{count, number}} ခု):",
+      "netTotal_other": "စုစုပေါင်း ({{count, number}} ခု):"
+    },
+    "card": {
+      "viewDetails": "{{name}} အသေးစိတ်ကြည့်ရန်",
+      "nextImageAlt": "{{name}} ၏ နောက်ပုံ",
+      "openVideoReview": "အသံပါ သုံးသပ်ချက်ဗီဒီယိုအပြည့် ကြည့်ရန်",
+      "reviewBy": "@{{creator}} ၏ သုံးသပ်ချက်",
+      "realReviewClip": "တကယ့်သုံးသပ်ချက်ဗီဒီယို",
+      "unmute": "အသံဖွင့်ရန်",
+      "mute": "အသံပိတ်ရန်",
+      "sponsored": "📢 Sponsored",
+      "preferred": "⭐ အကြံပြု",
+      "badges": {
+        "sale": "🔥 SALE",
+        "new": "အသစ်",
+        "hot": "🔥 HOT",
+        "limited": "LIMIT",
+        "mall": "👑 မောလ်"
+      },
+      "removeWishlist": "{{name}} ကို Wishlist မှ ဖယ်ရှားရန်",
+      "addWishlist": "{{name}} ကို Wishlist သို့ သိမ်းရန်",
+      "discount": "-{{discount}}%",
+      "taxInvoice": "🧾 အခွန်ပြေစာ",
+      "hasVideoReview": "🎥 ဗီဒီယိုသုံးသပ်ချက်",
+      "freeShipping": "🚚 အခမဲ့ပို့",
+      "installmentZero": "0% အရစ်ကျ",
+      "sold": "{{count, number}} ခု ရောင်းပြီး",
+      "addToCartNow": "ယခု ဈေးခြင်းထဲ ထည့်ရန်",
+      "addNamedToCart": "{{name}} ကို ဈေးခြင်းထဲ ထည့်ရန်",
+      "added": "ထည့်ပြီး",
+      "addToCart": "ဈေးခြင်းထဲ ထည့်ရန်",
+      "imageCount_one": "ကုန်ပစ္စည်းပုံ {{count, number}} ပုံ",
+      "imageCount_other": "ကုန်ပစ္စည်းပုံ {{count, number}} ပုံ"
+    },
+    "itemCount_one": "{{count, number}} ခု",
+    "itemCount_other": "{{count, number}} ခု",
+    "itemCountArrow_one": "{{count, number}} ခု →",
+    "itemCountArrow_other": "{{count, number}} ခု →",
+    "lowStockPlain_one": "{{count, number}} ခု ကျန်",
+    "lowStockPlain_other": "{{count, number}} ခု ကျန်",
+    "reviewCount_one": "(သုံးသပ်ချက် {{count, number}} ခု)",
+    "reviewCount_other": "(သုံးသပ်ချက် {{count, number}} ခု)",
+    "storeLive_one": "{{store}} တိုက်ရိုက်လွှင့်နေသည် · ကြည့်ရှုသူ {{count, compact}} ယောက်",
+    "storeLive_other": "{{store}} တိုက်ရိုက်လွှင့်နေသည် · ကြည့်ရှုသူ {{count, compact}} ယောက်",
+    "storeRating_one": "⭐ {{rating}} (သုံးသပ်ချက် {{count, number}} ခု)",
+    "storeRating_other": "⭐ {{rating}} (သုံးသပ်ချက် {{count, number}} ခု)",
+    "totalStock_one": "လက်ကျန် {{count, number}} ခု",
+    "totalStock_other": "လက်ကျန် {{count, number}} ခု"
   },
   "store": {
-    "official": "တရားဝင်ဆိုင်", "preferred": "အကြံပြုဆိုင်", "defaultLocation": "ဘန်ကောက်", "defaultShortLocation": "ဘန်ကောက်", "following": "နောက်လိုက်နေသည်", "follow": "+ ဆိုင်ကို နောက်လိုက်ရန်", "chat": "ဆိုင်နှင့် စကားပြောရန်", "reportTitle": "ကုန်ပစ္စည်းအတု၊ မူပိုင်ခွင့်ချိုးဖောက်မှု သို့မဟုတ် လိမ်လည်မှုအတွက် ဆိုင်ကိုတိုင်ကြားရန်", "report": "ဆိုင်ကိုတိုင်ကြားရန်", "liveNow": "ယခု LIVE", "liveViewers": "👀 {{count}} ယောက် ကြည့်နေသည်", "livePromotion": "{{discount}}% လျှော့ + တိုက်ရိုက်တွင် အခမဲ့ပို့", "joinLive": "🔴 ဤဆိုင်၏ တိုက်ရိုက်ကို ကြည့်ရန် →", "seoTitle": "{{store}} — Movemall တရားဝင်ဆိုင် | ပစ္စည်းမှန်များ အွန်လိုင်းဝယ်ရန်", "seoDescription": "{{store}} မှ အရည်အသွေးကောင်းပစ္စည်းများကို Movemall တွင် လွယ်ကူစွာမှာယူပြီး အခမဲ့ပို့ဆောင်မှု၊ COD၊ သီးသန့်ကုဒ်နှင့် နေ့စဉ်တိုက်ရိုက်များ ရယူပါ", "emptyProducts": "ဤအမျိုးအစားတွင် ကုန်ပစ္စည်းမရှိပါ",
-    "defaults": { "ownedBy": "{{name}} ၏ ဆိုင်", "bio": "တရားဝင်ဆိုင်၊ ပစ္စည်းမှန်၊ ပို့ဆောင်မြန်", "responseTime": "မိနစ်အနည်းငယ်အတွင်း", "responseTime15": "15 မိနစ်အတွင်း", "newStore": "အသစ်ဖွင့်ထားသောဆိုင်", "memberStore": "Movemall အဖွဲ့ဝင်ဆိုင်", "joinedOneYear": "လွန်ခဲ့သော 1 နှစ်က စတင်ခဲ့သည်", "qualityDescription": "{{name}} · ပစ္စည်းမှန်၊ အရည်အသွေးအာမခံ", "immediately": "ချက်ချင်း" },
-    "stats": { "rating": "ဆိုင်အဆင့်သတ်မှတ်ချက်", "response": "စာပြန်နှုန်း", "followers": "ဆိုင်နောက်လိုက်များ", "people": "ယောက်", "products": "ကုန်ပစ္စည်းအားလုံး", "items": "ခု", "location": "ဆိုင်တည်နေရာ" },
-    "vouchers": { "title": "ဆိုင်ကူပွန်များ", "subtitle": "ငွေရှင်းချိန်တွင် ချက်ချင်းအသုံးပြုရန် ကူပွန်ရယူပါ", "amountOff": "{{amount}} လျှော့", "spendThreshold": "{{amount}} ပြည့်လျှင်", "percentOff": "{{discount}}% လျှော့", "percentCondition": "{{threshold}} ပြည့်လျှင် ({{maximum}} အထိ လျှော့)", "freeShipping": "🚚 အခမဲ့ပို့ကုဒ်", "freeShippingCondition": "အနည်းဆုံးမလို အခမဲ့ပို့", "claim": "ကုဒ်ရယူရန်", "claimed": "ရယူပြီး" },
-    "tabs": { "all": "ကုန်ပစ္စည်းအားလုံး ({{count}})", "popular": "🔥 ရောင်းအားကောင်း", "sale": "⚡ ပရိုမိုးရှင်းနှင့် လျှော့ဈေး" }
+    "official": "တရားဝင်ဆိုင်",
+    "preferred": "အကြံပြုဆိုင်",
+    "defaultLocation": "ဘန်ကောက်",
+    "defaultShortLocation": "ဘန်ကောက်",
+    "following": "နောက်လိုက်နေသည်",
+    "follow": "+ ဆိုင်ကို နောက်လိုက်ရန်",
+    "chat": "ဆိုင်နှင့် စကားပြောရန်",
+    "reportTitle": "ကုန်ပစ္စည်းအတု၊ မူပိုင်ခွင့်ချိုးဖောက်မှု သို့မဟုတ် လိမ်လည်မှုအတွက် ဆိုင်ကိုတိုင်ကြားရန်",
+    "report": "ဆိုင်ကိုတိုင်ကြားရန်",
+    "liveNow": "ယခု LIVE",
+    "liveViewers": "👀 {{count, compact}} ယောက် ကြည့်နေသည်",
+    "livePromotion": "{{discount}}% လျှော့ + တိုက်ရိုက်တွင် အခမဲ့ပို့",
+    "joinLive": "🔴 ဤဆိုင်၏ တိုက်ရိုက်ကို ကြည့်ရန် →",
+    "seoTitle": "{{store}} — Movemall တရားဝင်ဆိုင် | ပစ္စည်းမှန်များ အွန်လိုင်းဝယ်ရန်",
+    "seoDescription": "{{store}} မှ အရည်အသွေးကောင်းပစ္စည်းများကို Movemall တွင် လွယ်ကူစွာမှာယူပြီး အခမဲ့ပို့ဆောင်မှု၊ COD၊ သီးသန့်ကုဒ်နှင့် နေ့စဉ်တိုက်ရိုက်များ ရယူပါ",
+    "emptyProducts": "ဤအမျိုးအစားတွင် ကုန်ပစ္စည်းမရှိပါ",
+    "defaults": {
+      "ownedBy": "{{name}} ၏ ဆိုင်",
+      "bio": "တရားဝင်ဆိုင်၊ ပစ္စည်းမှန်၊ ပို့ဆောင်မြန်",
+      "responseTime": "မိနစ်အနည်းငယ်အတွင်း",
+      "responseTime15": "15 မိနစ်အတွင်း",
+      "newStore": "အသစ်ဖွင့်ထားသောဆိုင်",
+      "memberStore": "Movemall အဖွဲ့ဝင်ဆိုင်",
+      "joinedOneYear": "လွန်ခဲ့သော 1 နှစ်က စတင်ခဲ့သည်",
+      "qualityDescription": "{{name}} · ပစ္စည်းမှန်၊ အရည်အသွေးအာမခံ",
+      "immediately": "ချက်ချင်း"
+    },
+    "stats": {
+      "rating": "ဆိုင်အဆင့်သတ်မှတ်ချက်",
+      "response": "စာပြန်နှုန်း",
+      "followers": "ဆိုင်နောက်လိုက်များ",
+      "people": "ယောက်",
+      "products": "ကုန်ပစ္စည်းအားလုံး",
+      "items": "ခု",
+      "location": "ဆိုင်တည်နေရာ"
+    },
+    "vouchers": {
+      "title": "ဆိုင်ကူပွန်များ",
+      "subtitle": "ငွေရှင်းချိန်တွင် ချက်ချင်းအသုံးပြုရန် ကူပွန်ရယူပါ",
+      "amountOff": "{{amount}} လျှော့",
+      "spendThreshold": "{{amount}} ပြည့်လျှင်",
+      "percentOff": "{{discount}}% လျှော့",
+      "percentCondition": "{{threshold}} ပြည့်လျှင် ({{maximum}} အထိ လျှော့)",
+      "freeShipping": "🚚 အခမဲ့ပို့ကုဒ်",
+      "freeShippingCondition": "အနည်းဆုံးမလို အခမဲ့ပို့",
+      "claim": "ကုဒ်ရယူရန်",
+      "claimed": "ရယူပြီး"
+    },
+    "tabs": {
+      "all": "ကုန်ပစ္စည်းအားလုံး ({{count, number}})",
+      "popular": "🔥 ရောင်းအားကောင်း",
+      "sale": "⚡ ပရိုမိုးရှင်းနှင့် လျှော့ဈေး"
+    }
   },
-  "storesDirectory": { "title": "🏬 တရားဝင်ဆိုင်များနှင့် ထိပ်တန်းအမှတ်တံဆိပ်များ", "subtitle": "တရားဝင်နှင့် အကြံပြုဆိုင်များကို တစ်နေရာတည်းတွင်", "defaultDescription": "ပစ္စည်းမှန် 100% ရောင်းသော တရားဝင် Movemall ဆိုင်", "storeRating": "ဆိုင်အဆင့်", "followers": "နောက်လိုက်များ", "productCount": "ကုန်ပစ္စည်း {{count}} ခု", "allProducts": "ကုန်ပစ္စည်းအားလုံး", "visitStore": "ဆိုင်သို့ ဝင်ရန် →" },
-  "filters": { "ariaLabel": "ကုန်ပစ္စည်း စစ်ထုတ်မှုများ", "title": "စစ်ထုတ်ရန်", "clearAll": "အားလုံးရှင်းရန်", "categories": "အမျိုးအစားများ", "price": "ဈေးနှုန်း", "minimum": "အနည်းဆုံး", "maximum": "အများဆုံး", "minimumPrice": "အနည်းဆုံးဈေး", "maximumPrice": "အများဆုံးဈေး", "applyPrice": "ဈေးနှုန်း စစ်ထုတ်ရန်", "rating": "အဆင့်သတ်မှတ်ချက်", "andUp": "နှင့်အထက်", "ratingAndUp": "{{rating}} ကြယ်နှင့်အထက်", "promotions": "ပရိုမိုးရှင်းများ", "badges": { "sale": "🔥 Sale", "new": "✨ အသစ်", "hot": "⚡ Hot" }, "taxInvoice": "အခွန်ပြေစာ / e-Tax", "taxReady": "အခွန်ပြေစာ ရရှိနိုင်", "taxReadyAria": "အခွန်ပြေစာထုတ်ပေးနိုင်သောဆိုင်များ" },
+  "storesDirectory": {
+    "title": "🏬 တရားဝင်ဆိုင်များနှင့် ထိပ်တန်းအမှတ်တံဆိပ်များ",
+    "subtitle": "တရားဝင်နှင့် အကြံပြုဆိုင်များကို တစ်နေရာတည်းတွင်",
+    "defaultDescription": "ပစ္စည်းမှန် 100% ရောင်းသော တရားဝင် Movemall ဆိုင်",
+    "storeRating": "ဆိုင်အဆင့်",
+    "followers": "နောက်လိုက်များ",
+    "allProducts": "ကုန်ပစ္စည်းအားလုံး",
+    "visitStore": "ဆိုင်သို့ ဝင်ရန် →",
+    "productCount_one": "ကုန်ပစ္စည်း {{count, number}} ခု",
+    "productCount_other": "ကုန်ပစ္စည်း {{count, number}} ခု"
+  },
+  "filters": {
+    "ariaLabel": "ကုန်ပစ္စည်း စစ်ထုတ်မှုများ",
+    "title": "စစ်ထုတ်ရန်",
+    "clearAll": "အားလုံးရှင်းရန်",
+    "categories": "အမျိုးအစားများ",
+    "price": "ဈေးနှုန်း",
+    "minimum": "အနည်းဆုံး",
+    "maximum": "အများဆုံး",
+    "minimumPrice": "အနည်းဆုံးဈေး",
+    "maximumPrice": "အများဆုံးဈေး",
+    "applyPrice": "ဈေးနှုန်း စစ်ထုတ်ရန်",
+    "rating": "အဆင့်သတ်မှတ်ချက်",
+    "andUp": "နှင့်အထက်",
+    "ratingAndUp": "{{rating}} ကြယ်နှင့်အထက်",
+    "promotions": "ပရိုမိုးရှင်းများ",
+    "badges": {
+      "sale": "🔥 Sale",
+      "new": "✨ အသစ်",
+      "hot": "⚡ Hot"
+    },
+    "taxInvoice": "အခွန်ပြေစာ / e-Tax",
+    "taxReady": "အခွန်ပြေစာ ရရှိနိုင်",
+    "taxReadyAria": "အခွန်ပြေစာထုတ်ပေးနိုင်သောဆိုင်များ"
+  },
   "reviews": {
-    "movemallUser": "Movemall အသုံးပြုသူ", "verifiedProductReview": "ပစ္စည်းမှန် အတည်ပြုသုံးသပ်ချက်", "maxImagesAlert": "ပုံ 3 ပုံအထိ ပူးတွဲနိုင်သည်", "today": "ယနေ့", "defaultReviewTitle": "ကုန်ပစ္စည်းသုံးသပ်ချက်", "title": "အတည်ပြုဝယ်ယူသူများ၏ အဆင့်နှင့် သုံးသပ်ချက် ({{count}})", "closeForm": "ဖောင်ပိတ်ရန်", "writeReview": "ပုံ/ဗီဒီယိုနှင့် သုံးသပ်ချက်ရေးရန်", "total": "သုံးသပ်ချက် {{count}} ခုမှ", "stars": "ကြယ် {{count}} ပွင့်", "formTitle": "✍️ ပုံ/ဗီဒီယိုနှင့် ကုန်ပစ္စည်းသုံးသပ်ချက် ရေးရန်", "rateLabel": "အဆင့်ပေးရန်:", "namePlaceholder": "သင့်အမည် *", "titlePlaceholder": "သုံးသပ်ချက်ခေါင်းစဉ် (ဥပမာ အရည်အသွေးကောင်း)", "commentPlaceholder": "ဤကုန်ပစ္စည်းအကြောင်း သင့်အမြင်ရေးပါ... *", "mediaLabel": "📸 ကုန်ပစ္စည်းပုံနှင့် ဗီဒီယို ပူးတွဲရန် (ပုံ 3 ပုံအထိ):", "compressing": "ပုံဖိုင်အရွယ် လျှော့နေသည်...", "uploadImages": "+ စက်မှပုံတင်ရန် ({{count}}/{{max}})", "addSamplePhoto": "+ နမူနာပုံ ထည့်ရန်", "videoAttached": "✓ ဗီဒီယို ပူးတွဲပြီး", "addVideo": "+ ဖောက်ထုတ်ဗီဒီယို ထည့်ရန်", "previewAlt": "ပုံနမူနာ {{index}}", "submit": "သုံးသပ်ချက် တင်ရန်", "sortLabel": "စီရန်:", "sort": { "recent": "အသစ်ဆုံး", "helpful": "အကူအညီအများဆုံး", "highest": "အဆင့်အမြင့်ဆုံး (5→1)", "lowest": "အဆင့်အနိမ့်ဆုံး (1→5)" }, "emptyTitle": "ဤစစ်ထုတ်မှုနှင့် ကိုက်ညီသော သုံးသပ်ချက်မရှိပါ", "emptyDescription": "သုံးသပ်ချက်များပိုကြည့်ရန် အခြားစစ်ထုတ်မှု ရွေးပါ", "viewAll": "သုံးသပ်ချက်အားလုံး ကြည့်ရန်", "verifiedBuyer": "အတည်ပြုဝယ်ယူသူ", "ratingOutOfFive": "ကြယ် 5 ပွင့်အနက် {{rating}} ပွင့်", "attachmentAlt": "သုံးသပ်ချက် ပူးတွဲဖိုင် {{index}}", "enlargePhoto": "ပုံချဲ့ရန် နှိပ်ပါ", "helpful": "အကူအညီဖြစ်သည် ({{count}})", "paginationInfo": "သုံးသပ်ချက် {{start}}–{{end}} ကို {{total}} ခုအနက် ပြနေသည်", "previousPageAria": "ယခင် သုံးသပ်ချက်စာမျက်နှာ", "previousPage": "ယခင်", "nextPageAria": "နောက် သုံးသပ်ချက်စာမျက်နှာ", "nextPage": "နောက်", "enlargedPhotoAlt": "ချဲ့ထားသော သုံးသပ်ချက်ပုံ",
-    "filters": { "all": "အားလုံး ({{count}})", "rating": "★ ကြယ် {{rating}} ပွင့် ({{count}})", "media": "📸 ပုံ/ဗီဒီယိုပါ ({{count}})", "comment": "💬 စာသားပါ ({{count}})" }
+    "movemallUser": "Movemall အသုံးပြုသူ",
+    "verifiedProductReview": "ပစ္စည်းမှန် အတည်ပြုသုံးသပ်ချက်",
+    "maxImagesAlert": "ပုံ 3 ပုံအထိ ပူးတွဲနိုင်သည်",
+    "today": "ယနေ့",
+    "defaultReviewTitle": "ကုန်ပစ္စည်းသုံးသပ်ချက်",
+    "title": "အတည်ပြုဝယ်ယူသူများ၏ အဆင့်နှင့် သုံးသပ်ချက် ({{count, number}})",
+    "closeForm": "ဖောင်ပိတ်ရန်",
+    "writeReview": "ပုံ/ဗီဒီယိုနှင့် သုံးသပ်ချက်ရေးရန်",
+    "formTitle": "✍️ ပုံ/ဗီဒီယိုနှင့် ကုန်ပစ္စည်းသုံးသပ်ချက် ရေးရန်",
+    "rateLabel": "အဆင့်ပေးရန်:",
+    "namePlaceholder": "သင့်အမည် *",
+    "titlePlaceholder": "သုံးသပ်ချက်ခေါင်းစဉ် (ဥပမာ အရည်အသွေးကောင်း)",
+    "commentPlaceholder": "ဤကုန်ပစ္စည်းအကြောင်း သင့်အမြင်ရေးပါ... *",
+    "mediaLabel": "📸 ကုန်ပစ္စည်းပုံနှင့် ဗီဒီယို ပူးတွဲရန် (ပုံ 3 ပုံအထိ):",
+    "compressing": "ပုံဖိုင်အရွယ် လျှော့နေသည်...",
+    "uploadImages": "+ စက်မှပုံတင်ရန် ({{count, number}}/{{max}})",
+    "addSamplePhoto": "+ နမူနာပုံ ထည့်ရန်",
+    "videoAttached": "✓ ဗီဒီယို ပူးတွဲပြီး",
+    "addVideo": "+ ဖောက်ထုတ်ဗီဒီယို ထည့်ရန်",
+    "previewAlt": "ပုံနမူနာ {{index}}",
+    "submit": "သုံးသပ်ချက် တင်ရန်",
+    "sortLabel": "စီရန်:",
+    "sort": {
+      "recent": "အသစ်ဆုံး",
+      "helpful": "အကူအညီအများဆုံး",
+      "highest": "အဆင့်အမြင့်ဆုံး (5→1)",
+      "lowest": "အဆင့်အနိမ့်ဆုံး (1→5)"
+    },
+    "emptyTitle": "ဤစစ်ထုတ်မှုနှင့် ကိုက်ညီသော သုံးသပ်ချက်မရှိပါ",
+    "emptyDescription": "သုံးသပ်ချက်များပိုကြည့်ရန် အခြားစစ်ထုတ်မှု ရွေးပါ",
+    "viewAll": "သုံးသပ်ချက်အားလုံး ကြည့်ရန်",
+    "verifiedBuyer": "အတည်ပြုဝယ်ယူသူ",
+    "ratingOutOfFive": "ကြယ် 5 ပွင့်အနက် {{rating}} ပွင့်",
+    "attachmentAlt": "သုံးသပ်ချက် ပူးတွဲဖိုင် {{index}}",
+    "enlargePhoto": "ပုံချဲ့ရန် နှိပ်ပါ",
+    "helpful": "အကူအညီဖြစ်သည် ({{count, number}})",
+    "paginationInfo": "သုံးသပ်ချက် {{start}}–{{end}} ကို {{total}} ခုအနက် ပြနေသည်",
+    "previousPageAria": "ယခင် သုံးသပ်ချက်စာမျက်နှာ",
+    "previousPage": "ယခင်",
+    "nextPageAria": "နောက် သုံးသပ်ချက်စာမျက်နှာ",
+    "nextPage": "နောက်",
+    "enlargedPhotoAlt": "ချဲ့ထားသော သုံးသပ်ချက်ပုံ",
+    "filters": {
+      "all": "အားလုံး ({{count, number}})",
+      "rating": "★ ကြယ် {{rating}} ပွင့် ({{count, number}})",
+      "media": "📸 ပုံ/ဗီဒီယိုပါ ({{count, number}})",
+      "comment": "💬 စာသားပါ ({{count, number}})"
+    },
+    "stars_one": "ကြယ် {{count, number}} ပွင့်",
+    "stars_other": "ကြယ် {{count, number}} ပွင့်",
+    "total_one": "သုံးသပ်ချက် {{count, number}} ခုမှ",
+    "total_other": "သုံးသပ်ချက် {{count, number}} ခုမှ"
   },
-  "reporting": { "title": "စည်းကမ်းချိုးဖောက်သော ဆိုင် သို့မဟုတ် ပစ္စည်းကို တိုင်ကြားရန်", "successTitle": "တိုင်ကြားချက် ပို့ပြီးပါပြီ", "successDescription": "သင့်တိုင်ကြားချက်ကို လက်ခံရရှိပြီး 24 နာရီအတွင်း စစ်ဆေးပါမည်။ ကုန်ပစ္စည်းအတု သို့မဟုတ် လိမ်လည်မှုဖြစ်ကြောင်း အတည်ပြုပါက မူဝါဒအရ ငွေပြန်ရပါမည်။", "understood": "နားလည်ပါပြီ၊ ပိတ်ရန်", "targets": { "product": "📦 တိုင်ကြားသော ကုန်ပစ္စည်း:", "store": "🏪 တိုင်ကြားသော ဆိုင်:", "order": "🧾 တိုင်ကြားသော အမှာ:" }, "storeName": "ဆိုင်: {{store}}", "storeAndOrder": "ဆိုင်: {{store}} • အမှာနံပါတ်: #{{order}}", "typeLabel": "တိုင်ကြားမှုအမျိုးအစား", "types": { "fakeProduct": "🚫 ကုန်ပစ္စည်းအတု သို့မဟုတ် ပုံတူ", "misleadingSpecs": "📦 ဖော်ပြချက်နှင့်မကိုက် သို့မဟုတ် အချက်အလက်အမှား", "scamOffplatform": "⚠️ ငွေပေးချေမှုလိမ်လည်ခြင်း သို့မဟုတ် ပစ္စည်းမစုံ", "harassment": "💬 နှောင့်ယှက်စာ၊ ရိုင်းစိုင်းစာ သို့မဟုတ် chat ပိတ်ခြင်း", "noFdaTisi": "🏷️ အန္တရာယ်ရှိသော သို့မဟုတ် Thai FDA/TISI မရှိသောပစ္စည်း", "refundDenied": "↩️ ဆိုင်မှ ငွေပြန်အမ်းရန် ငြင်းပယ်ခြင်း" }, "detailsLabel": "အသေးစိတ်", "detailsPlaceholder": "ဖြစ်ပျက်ခဲ့သည့်အရာနှင့် ထိခိုက်မှုကို ဖော်ပြပါ", "evidenceLabel": "အထောက်အထားပုံလင့်ခ်", "evidencePlaceholder": "ဥပမာ: https://images.unsplash.com/... သို့မဟုတ် ပုံလင့်ခ်တင်ပါ", "evidenceHint": "ပိုမိုမြန်ဆန်စွာ စစ်ဆေးနိုင်ရန် ပုံ သို့မဟုတ် ဗီဒီယို ပူးတွဲပါ", "protectionTitle": "ဝယ်ယူသူအကာအကွယ်နှင့် ငွေပြန်အမ်းမှု တောင်းရန်", "protectionDescription": "အတုဖြစ်ကြောင်း အတည်ပြုပါက 100%၊ Mall ပစ္စည်းအတွက် 200% ပြန်ရ", "submitting": "ပို့နေသည်...", "submit": "🚨 တိုင်ကြားချက် ပို့ရန်" }
+  "reporting": {
+    "title": "စည်းကမ်းချိုးဖောက်သော ဆိုင် သို့မဟုတ် ပစ္စည်းကို တိုင်ကြားရန်",
+    "successTitle": "တိုင်ကြားချက် ပို့ပြီးပါပြီ",
+    "successDescription": "သင့်တိုင်ကြားချက်ကို လက်ခံရရှိပြီး 24 နာရီအတွင်း စစ်ဆေးပါမည်။ ကုန်ပစ္စည်းအတု သို့မဟုတ် လိမ်လည်မှုဖြစ်ကြောင်း အတည်ပြုပါက မူဝါဒအရ ငွေပြန်ရပါမည်။",
+    "understood": "နားလည်ပါပြီ၊ ပိတ်ရန်",
+    "targets": {
+      "product": "📦 တိုင်ကြားသော ကုန်ပစ္စည်း:",
+      "store": "🏪 တိုင်ကြားသော ဆိုင်:",
+      "order": "🧾 တိုင်ကြားသော အမှာ:"
+    },
+    "storeName": "ဆိုင်: {{store}}",
+    "storeAndOrder": "ဆိုင်: {{store}} • အမှာနံပါတ်: #{{order}}",
+    "typeLabel": "တိုင်ကြားမှုအမျိုးအစား",
+    "types": {
+      "fakeProduct": "🚫 ကုန်ပစ္စည်းအတု သို့မဟုတ် ပုံတူ",
+      "misleadingSpecs": "📦 ဖော်ပြချက်နှင့်မကိုက် သို့မဟုတ် အချက်အလက်အမှား",
+      "scamOffplatform": "⚠️ ငွေပေးချေမှုလိမ်လည်ခြင်း သို့မဟုတ် ပစ္စည်းမစုံ",
+      "harassment": "💬 နှောင့်ယှက်စာ၊ ရိုင်းစိုင်းစာ သို့မဟုတ် chat ပိတ်ခြင်း",
+      "noFdaTisi": "🏷️ အန္တရာယ်ရှိသော သို့မဟုတ် Thai FDA/TISI မရှိသောပစ္စည်း",
+      "refundDenied": "↩️ ဆိုင်မှ ငွေပြန်အမ်းရန် ငြင်းပယ်ခြင်း"
+    },
+    "detailsLabel": "အသေးစိတ်",
+    "detailsPlaceholder": "ဖြစ်ပျက်ခဲ့သည့်အရာနှင့် ထိခိုက်မှုကို ဖော်ပြပါ",
+    "evidenceLabel": "အထောက်အထားပုံလင့်ခ်",
+    "evidencePlaceholder": "ဥပမာ: https://images.unsplash.com/... သို့မဟုတ် ပုံလင့်ခ်တင်ပါ",
+    "evidenceHint": "ပိုမိုမြန်ဆန်စွာ စစ်ဆေးနိုင်ရန် ပုံ သို့မဟုတ် ဗီဒီယို ပူးတွဲပါ",
+    "protectionTitle": "ဝယ်ယူသူအကာအကွယ်နှင့် ငွေပြန်အမ်းမှု တောင်းရန်",
+    "protectionDescription": "အတုဖြစ်ကြောင်း အတည်ပြုပါက 100%၊ Mall ပစ္စည်းအတွက် 200% ပြန်ရ",
+    "submitting": "ပို့နေသည်...",
+    "submit": "🚨 တိုင်ကြားချက် ပို့ရန်"
+  }
 }

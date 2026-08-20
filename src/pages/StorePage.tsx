@@ -12,7 +12,7 @@ import { mockLiveStreams } from '../data/liveStreams';
 import { fetchApi } from '../utils/api';
 import { generateSlug } from '../utils/slug';
 import { useLocalizedPath } from '../i18n/LocalizedLink';
-import { formatCompactNumber, formatCurrency, formatNumber } from '../i18n/formatters';
+import { formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { Product, Store } from '../types';
 import './StorePage.css';
@@ -310,7 +310,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
                     </span>
                     <span className="store-live-viewers">
                       {t('catalog:store.liveViewers', {
-                        count: formatCompactNumber(activeLive?.viewers ?? 0, locale),
+                        count: activeLive?.viewers ?? 0,
                       })}
                     </span>
                   </div>
@@ -444,7 +444,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
             className={`store-tab-item ${activeTab === 'all' ? 'store-tab-item--active' : ''}`}
             onClick={() => setActiveTab('all')}
           >
-            {t('catalog:store.tabs.all', { count: formatNumber(storeProducts.length, locale) })}
+            {t('catalog:store.tabs.all', { count: storeProducts.length })}
           </button>
           <button
             className={`store-tab-item ${activeTab === 'popular' ? 'store-tab-item--active' : ''}`}

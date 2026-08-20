@@ -11,9 +11,7 @@
     "visualSearchTitle": "ค้นหาด้วยรูปภาพ (AI Visual Lens)",
     "visualSearch": "ค้นหาด้วยรูปภาพ",
     "wishlist": "สินค้าที่ชอบ",
-    "wishlistCount": "สินค้าที่ชอบ {{count}} รายการ",
     "cart": "ตะกร้า",
-    "cartCount": "ตะกร้าสินค้า {{count}} รายการ",
     "chat": "แชท",
     "chatMessages": "กล่องข้อความแชท",
     "mallAuthentic": "แบรนด์ดังแท้ 100%",
@@ -43,7 +41,11 @@
       "crossbodyBag": "กระเป๋าสะพายข้าง มินิมอล",
       "airFryer": "หม้อทอดไร้น้ำมัน ดิจิทัล",
       "ipad": "iPad Air M2 ชิปเซ็ตแรง"
-    }
+    },
+    "cartCount_one": "ตะกร้าสินค้า {{count, number}} รายการ",
+    "cartCount_other": "ตะกร้าสินค้า {{count, number}} รายการ",
+    "wishlistCount_one": "สินค้าที่ชอบ {{count, number}} รายการ",
+    "wishlistCount_other": "สินค้าที่ชอบ {{count, number}} รายการ"
   },
   "account": {
     "logout": "ออกจากระบบ",

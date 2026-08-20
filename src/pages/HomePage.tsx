@@ -386,7 +386,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
             </span>
           </div>
           <Link to="/live" className="home-live-viewall-btn">
-            <span>{t('catalog:home.live.viewAll', { count: formatNumber(mockLiveStreams.length, locale) })}</span>
+            <span>{t('catalog:home.live.viewAll', { count: mockLiveStreams.length })}</span>
             <ArrowRight size={13} />
           </Link>
         </div>
@@ -466,7 +466,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
 
               <div className="home-flash-live-pulse">
                 <span className="home-flash-pulse-dot" />
-                <span>{t('catalog:home.flash.liveBuyers', { count: formatNumber(18, locale) })}</span>
+                <span>{t('catalog:home.flash.liveBuyers', { count: 18 })}</span>
               </div>
             </div>
 
@@ -561,7 +561,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
             <div className="home-category-badge-row">
               <span className="home-category-tag-badge">{t('catalog:home.categories.eyebrow')}</span>
               <span className="home-category-count-badge">
-              {t('catalog:home.categories.count', { count: formatNumber(categories.length, locale) })}
+              {t('catalog:home.categories.count', { count: categories.length })}
               </span>
             </div>
             <h2 id="categories-heading" className="home-category-main-title">
@@ -575,14 +575,14 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
           <div className="home-category-actions">
             <div className="home-category-perks">
               <div className="home-category-perk-chip">
-                <span>{t('catalog:home.categories.deals', { count: formatNumber(160, locale) })}</span>
+                <span>{t('catalog:home.categories.deals', { count: 160 })}</span>
               </div>
               <div className="home-category-perk-chip">
                 <span>{t('catalog:home.categories.updatedDaily')}</span>
               </div>
             </div>
             <Link to="/shop" className="home-category-viewall-btn">
-              <span>{t('catalog:home.categories.viewAll', { count: formatNumber(categories.length, locale) })}</span>
+              <span>{t('catalog:home.categories.viewAll', { count: categories.length })}</span>
               <ArrowRight size={14} />
             </Link>
           </div>
@@ -597,7 +597,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
               className="category-card"
               aria-label={t('catalog:home.categories.categoryAria', {
                 category: t(`catalog:categories.${cat.id}.name`),
-                count: formatNumber(cat.productCount, locale),
+                count: cat.productCount,
               })}
             >
               <div className="category-card__img-wrap">
@@ -618,7 +618,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
               </div>
               <div className="category-card__info">
                 <span className="category-card__name">{t(`catalog:categories.${cat.id}.name`)}</span>
-                <span className="category-card__count">{t('catalog:home.categories.categoryDeals', { count: formatNumber(cat.productCount, locale) })}</span>
+                <span className="category-card__count">{t('catalog:home.categories.categoryDeals', { count: cat.productCount })}</span>
               </div>
             </Link>
           ))}
@@ -690,7 +690,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
             {t('catalog:home.stores.title')}
           </h2>
           <Link to="/stores" className="section__view-all">
-            {t('catalog:home.stores.viewAll', { count: formatNumber(stores.length, locale) })} <ChevronRight size={14} />
+            {t('catalog:home.stores.viewAll', { count: stores.length })} <ChevronRight size={14} />
           </Link>
         </div>
 
@@ -707,7 +707,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                     {st.badge === 'official' ? t('catalog:home.stores.official') : t('catalog:home.stores.preferred')}
                   </span>
                   <span className="home-store-followers-small">
-                    {t('catalog:home.stores.followers', { count: formatNumber(st.followerCount, locale) })}
+                    {t('catalog:home.stores.followers', { count: st.followerCount })}
                   </span>
                 </div>
                 <div className="home-store-card-content">
@@ -790,7 +790,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
 
             <div className="home-feed-header-perks">
               <div className="home-feed-perk-item">
-                <span>{t('catalog:home.feed.deals', { count: formatNumber(160, locale) })}</span>
+                <span>{t('catalog:home.feed.deals', { count: 160 })}</span>
               </div>
               <div className="home-feed-perk-item">
                 <span>{t('catalog:home.feed.freeShipping')}</span>
@@ -905,7 +905,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
           <div className="home-feed-end-state" role="status">
             <div className="home-feed-end-line" />
             <span className="home-feed-end-text">
-              {t('catalog:home.feed.end', { count: formatNumber(personalizedProducts.length, locale) })}
+              {t('catalog:home.feed.end', { count: personalizedProducts.length })}
             </span>
             <div className="home-feed-end-line" />
           </div>

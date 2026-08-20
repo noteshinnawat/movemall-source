@@ -4,8 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { LocalizedLink } from '../i18n/LocalizedLink';
-import { formatNumber } from '../i18n/formatters';
-import { resolveRootLocale } from '../i18n/locales';
 import type { Product } from '../types';
 import './WishlistPage.css';
 
@@ -15,8 +13,7 @@ interface WishlistPageProps {
 }
 
 export function WishlistPage({ items, onAddToCart }: WishlistPageProps) {
-  const { t, i18n } = useTranslation(['commerce', 'common']);
-  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const { t } = useTranslation(['commerce', 'common']);
 
   if (items.length === 0) {
     return (
@@ -44,7 +41,7 @@ export function WishlistPage({ items, onAddToCart }: WishlistPageProps) {
             <Heart size={32} style={{ color: 'var(--accent)' }} fill="var(--accent)" />
             {t('commerce:wishlist.title')}
             <span className="wishlist__count-badge">
-              {t('commerce:wishlist.count', { count: formatNumber(items.length, locale) })}
+              {t('commerce:wishlist.count', { count: items.length })}
             </span>
           </h1>
         </div>

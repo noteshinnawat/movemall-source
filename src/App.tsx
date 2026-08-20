@@ -19,7 +19,7 @@ import { API_BASE_URL, createProductApi, updateProductApi, deleteProductApi } fr
 import { uiCopy } from './uiCopy';
 import { LocaleBoundary, LocalizedNotFound } from './i18n/LocaleBoundary';
 import { LegacyBuyerRedirect } from './i18n/LegacyBuyerRedirect';
-import { BUYER_ROUTE_PATHS, resolveRootLocale, stripLocale } from './i18n/locales';
+import { BUYER_ROUTE_PATHS, stripLocale } from './i18n/locales';
 
 // Helper to safely retry module imports without causing browser reload loops
 function lazyRetry<T extends ComponentType<any>>(
@@ -460,8 +460,7 @@ function AppLayout({
 }
 
 function App() {
-  const { t, i18n } = useTranslation(['common']);
-  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const { t } = useTranslation(['common']);
   const [productList, setProductList] = useState<Product[]>(() => {
     try {
       const savedCustom = localStorage.getItem('movemall_user_custom_products');
@@ -522,7 +521,7 @@ function App() {
 
   function handleAddToCart(product: Product, qty = 1) {
     cart.addItem(product, qty);
-    addToast(uiCopy.cart.added(t, qty, locale), 'success', '🛒');
+    addToast(uiCopy.cart.added(t, qty), 'success', '🛒');
   }
 
   function handleToggleWishlist(product: Product) {

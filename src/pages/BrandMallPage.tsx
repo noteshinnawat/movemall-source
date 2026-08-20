@@ -20,7 +20,6 @@ import { famousBrands } from '../data/brands';
 import { products as staticProducts } from '../data/products';
 import { ProductCard } from '../components/ProductCard';
 import { LocalizedLink } from '../i18n/LocalizedLink';
-import { formatCompactNumber, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import { getMallVoucherInterpolation } from './BrandMallPage.behavior';
 import type { MallVoucherNumericValues } from './BrandMallPage.behavior';
@@ -426,7 +425,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
                     <div className="brand-directory-meta">
                       <span className="brand-discount-badge">{brand.discountText}</span>
                       <span className="brand-followers-text">{t('catalog:mall.directory.followers', {
-                        count: formatCompactNumber(brand.followers, locale),
+                        count: brand.followers,
                       })}</span>
                     </div>
 
@@ -499,7 +498,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
 
           <div className="mall-view-all-container">
             <LocalizedLink to="/shop" className="mall-view-all-btn">
-              {t('catalog:mall.products.viewAll', { count: formatNumber(activeProducts.length, locale) })} <ChevronRight size={16} />
+              {t('catalog:mall.products.viewAll', { count: activeProducts.length })} <ChevronRight size={16} />
             </LocalizedLink>
           </div>
         </section>

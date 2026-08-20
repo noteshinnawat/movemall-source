@@ -11,19 +11,18 @@
     "topbar": {
       "back": "နောက်သို့",
       "title": "ဈေးဝယ်ခြင်းတောင်း",
-      "itemCount": "{{count}} ခု",
-      "deleteSelected": "ရွေးထားသည်များ ဖျက်ရန် ({{count}})",
+      "deleteSelected": "ရွေးထားသည်များ ဖျက်ရန် ({{count, number}})",
       "deleteSelectedTitle": "ရွေးထားသော ကုန်ပစ္စည်းများ ဖျက်ရန်",
       "clearAll": "အားလုံး ရှင်းရန်",
-      "clearAllTitle": "ခြင်းတောင်းတစ်ခုလုံး ရှင်းရန်"
+      "clearAllTitle": "ခြင်းတောင်းတစ်ခုလုံး ရှင်းရန်",
+      "itemCount_one": "{{count, number}} ခု",
+      "itemCount_other": "{{count, number}} ခု"
     },
     "freeShipping": {
       "achieved": "🎉 <b>အခမဲ့ပို့ဆောင်ခ</b> ရရှိပြီ",
       "remaining": "<b>{{amount}}</b> ထပ်ဝယ်ပါက <b>အခမဲ့ပို့ဆောင်ခ</b> ရမည်"
     },
     "itemsAria": "ခြင်းတောင်းထဲရှိ ကုန်ပစ္စည်းများ",
-    "selectAll": "ကုန်ပစ္စည်းအားလုံး ရွေးရန် ({{count}} ခု)",
-    "selectedSummary": "{{count}} ခု ရွေးထားသည်",
     "storeVoucher": "ဆိုင်ကူပွန်",
     "storeVoucherTitle": "ဆိုင်ကူပွန် ရယူရန်",
     "storeVoucherClaimed": "{{store}} ၏ လျှော့စျေးကူပွန်ကို ရယူပြီးပါပြီ!",
@@ -55,24 +54,27 @@
       "voucherBadge": "-{{amount}}",
       "voucherAction": "ကုဒ် ရွေးရန် >",
       "coinsTitle": "Movemall Coins",
-      "coinsDesc": "Coins {{count}} ရှိသည် · အများဆုံး {{max}} လျှော့နိုင်သည်"
+      "coinsDesc_one": "Coins {{count, number}} ရှိသည် · အများဆုံး {{max}} လျှော့နိုင်သည်",
+      "coinsDesc_other": "Coins {{count, number}} ရှိသည် · အများဆုံး {{max}} လျှော့နိုင်သည်"
     },
     "summary": {
       "aria": "မှာယူမှု အကျဉ်းချုပ်",
       "heading": "မှာယူမှု အကျဉ်းချုပ်",
-      "count": "({{count}} ခု)",
-      "items": "ကုန်ပစ္စည်း ({{count}} ခု)",
       "savings": "လျှော့စျေး",
       "voucher": "လျှော့စျေးကုဒ်",
-      "coins": "Coins ({{count}})",
+      "coins": "Coins ({{count, number}})",
       "shipping": "ပို့ဆောင်ခ",
       "shippingFree": "အခမဲ့ {{amount}} 🎉",
       "totalTitle": "ပေးချေရမည့် စုစုပေါင်း",
       "totalTax": "VAT 7% အပါအဝင်",
       "savingsBanner": "<b>{{amount}}</b> သက်သာသည်",
-      "checkout": "ငွေပေးချေရန် ({{count}})",
+      "checkout": "ငွေပေးချေရန် ({{count, number}})",
       "guaranteeAuthentic": "Movemall မှ ပစ္စည်းအစစ် 100% အာမခံ၊ မဟုတ်ပါက ငွေနှစ်ဆ ပြန်အမ်း",
-      "guaranteeReturns": "ရက် 30 အတွင်း အခမဲ့ ပြန်လည်ပေးပို့နိုင်သည်"
+      "guaranteeReturns": "ရက် 30 အတွင်း အခမဲ့ ပြန်လည်ပေးပို့နိုင်သည်",
+      "count_one": "({{count, number}} ခု)",
+      "count_other": "({{count, number}} ခု)",
+      "items_one": "ကုန်ပစ္စည်း ({{count, number}} ခု)",
+      "items_other": "ကုန်ပစ္စည်း ({{count, number}} ခု)"
     },
     "recommendations": {
       "tag": "YOU MAY ALSO LIKE",
@@ -81,12 +83,16 @@
     },
     "dock": {
       "aria": "ငွေပေးချေမှု ဘား",
-      "selectAll": "အားလုံး ({{count}})",
+      "selectAll": "အားလုံး ({{count, number}})",
       "totalLabel": "စုစုပေါင်း:",
       "savings": "🔥 {{amount}} သက်သာသည်",
       "freeShippingHint": "🚚 {{amount}} ပြည့်လျှင် အခမဲ့ပို့ဆောင်",
-      "checkout": "ငွေပေးချေရန် ({{count}})"
-    }
+      "checkout": "ငွေပေးချေရန် ({{count, number}})"
+    },
+    "selectAll_one": "ကုန်ပစ္စည်းအားလုံး ရွေးရန် ({{count, number}} ခု)",
+    "selectAll_other": "ကုန်ပစ္စည်းအားလုံး ရွေးရန် ({{count, number}} ခု)",
+    "selectedSummary_one": "{{count, number}} ခု ရွေးထားသည်",
+    "selectedSummary_other": "{{count, number}} ခု ရွေးထားသည်"
   },
   "cartItem": {
     "decrease": "အရေအတွက် လျှော့ရန်",
@@ -100,7 +106,8 @@
     "emptySubtitle": "နောင်ကြည့်ရန် ကုန်ပစ္စည်းပေါ်ရှိ နှလုံးအမှတ်ကို နှိပ်ပါ",
     "emptyCta": "ကုန်ပစ္စည်းများ ကြည့်ရန်",
     "title": "သိမ်းထားသော ကုန်ပစ္စည်းများ (Wishlist)",
-    "count": "{{count}} ခု"
+    "count_one": "{{count, number}} ခု",
+    "count_other": "{{count, number}} ခု"
   },
   "checkout": {
     "title": "💳 ငွေပေးချေရန်",
@@ -213,7 +220,6 @@
       "lineDesc": "ပစ္စည်းအခြေအနေနှင့် ပြေစာများ",
       "lineOptIn": "ဖွင့်ရန်",
       "coinsTitle": "Movemall Coins",
-      "coinsDesc": "Coins {{count}} လဲပြီး {{amount}} လျှော့ရန်",
       "coinsUse": "Coins သုံးရန်",
       "subtotal": "ကုန်ပစ္စည်း စုစုပေါင်း",
       "shipping": "ပို့ဆောင်ခ",
@@ -222,7 +228,9 @@
       "total": "ပေးချေရမည့် စုစုပေါင်း",
       "vatNote": "VAT 7% အပါအဝင် · {{amount}}",
       "submitPromptPay": "QR စကင်ဖတ်ပြီး ပေးချေရန်",
-      "submitConfirm": "မှာယူမှု အတည်ပြုရန်"
+      "submitConfirm": "မှာယူမှု အတည်ပြုရန်",
+      "coinsDesc_one": "Coins {{count, number}} လဲပြီး {{amount}} လျှော့ရန်",
+      "coinsDesc_other": "Coins {{count, number}} လဲပြီး {{amount}} လျှော့ရန်"
     }
   },
   "promptPay": {
@@ -276,7 +284,6 @@
       "delivered": "✓ ပြီးမြောက်ပြီး",
       "processing": "⏳ ပြင်ဆင်နေသည်"
     },
-    "itemQuantity": "အရေအတွက်: {{count}} ခု",
     "netTotal": "စုစုပေါင်း: {{amount}}",
     "reportCta": "တိုင်ကြားရန် / အတုအယောင် အကြောင်းကြားရန်",
     "reportTitle": "ပစ္စည်းအတု၊ ဖော်ပြချက်နှင့် မကိုက်ညီမှု သို့မဟုတ် လိမ်လည်မှုကို တိုင်ကြားပြီး ငွေပြန်အမ်း တောင်းရန်",
@@ -286,8 +293,8 @@
     "emptyCta": "ဈေးဝယ်ရန် သွားမည်",
     "fallbackProductName": "Movemall ကုန်ပစ္စည်း",
     "fallbackAddress": "ပို့ဆောင်ရန် လိပ်စာ",
-    "reportTargetName": "မှာယူမှု #{{orderId}} ({{items}})",
-    "reportStoreFallback": "Movemall ရှိ ဆိုင်တစ်ခု"
+    "itemQuantity_one": "အရေအတွက်: {{count, number}} ခု",
+    "itemQuantity_other": "အရေအတွက်: {{count, number}} ခု"
   },
   "tracking": {
     "back": "မှာယူမှုစာရင်းသို့ ပြန်သွားရန်",
@@ -299,7 +306,7 @@
     "foundToast": "မှာယူမှု #{{orderId}} အတွက် ပစ္စည်းကို တွေ့ရှိသည်",
     "notFoundToast": "ပစ္စည်းနံပါတ် \"{{query}}\" ကို သင့်မှာယူမှုများတွင် မတွေ့ပါ",
     "copiedToast": "ပစ္စည်းနံပါတ် ကူးယူပြီးပါပြီ 📋",
-    "quickLabel": "📦 သင့်မှာယူမှုများ ({{count}}):",
+    "quickLabel": "📦 သင့်မှာယူမှုများ ({{count, number}}):",
     "trackingNoLabel": "ပစ္စည်း ခြေရာခံနံပါတ်",
     "copyTitle": "ပစ္စည်းနံပါတ် ကူးယူရန်",
     "copied": "ကူးယူပြီး",
@@ -331,7 +338,6 @@
     "mapShipping": "🚚 {{carrier}} ပို့ဆောင်နေသည်",
     "mapHub": "🏢 Movemall ဖြန့်ဖြူးရေးစခန်း",
     "mapDestination": "📍 ပို့ဆောင်ရန် လိပ်စာ",
-    "itemsTitle": "ဤမှာယူမှုရှိ ကုန်ပစ္စည်းများ ({{count}} ခု)",
     "itemLine": "{{price}} × {{quantity}} ခု",
     "addressLabel": "ပို့ဆောင်ရန် လိပ်စာ:",
     "subtotalLabel": "ကုန်ပစ္စည်း စုစုပေါင်း:",
@@ -343,7 +349,9 @@
     "notFoundDesc": "ပစ္စည်းနံပါတ်ကို စစ်ဆေးပါ သို့မဟုတ် မှာယူမှုမှတ်တမ်းမှ ရှာကြည့်ပါ",
     "emptyDesc": "မှာယူပြီးပါက ပစ္စည်းအခြေအနေ ဤနေရာတွင် ပေါ်လာမည်",
     "shopCta": "ကုန်ပစ္စည်းများ ဝယ်ရန်",
-    "ordersCta": "မှာယူမှုအားလုံး ကြည့်ရန်"
+    "ordersCta": "မှာယူမှုအားလုံး ကြည့်ရန်",
+    "itemsTitle_one": "ဤမှာယူမှုရှိ ကုန်ပစ္စည်းများ ({{count, number}} ခု)",
+    "itemsTitle_other": "ဤမှာယူမှုရှိ ကုန်ပစ္စည်းများ ({{count, number}} ခု)"
   },
   "compare": {
     "minItemsAlert": "နှိုင်းယှဉ်ရန် ကုန်ပစ္စည်း အနည်းဆုံး တစ်ခု ရှိရမည်",
@@ -359,7 +367,6 @@
     "share": "နှိုင်းယှဉ်မှု မျှဝေရန်",
     "categoryLabel": "အမျိုးအစား:",
     "modeDual": "⚡ တစ်ခုချင်း နှိုင်းယှဉ် 1 vs 1 (ဖတ်ရလွယ်)",
-    "modeTable": "📊 ဇယားအပြည့် ({{count}} ခု)",
     "sideA": "ဘယ်ဘက် ကုန်ပစ္စည်း (A):",
     "sideB": "ညာဘက် ကုန်ပစ္စည်း (B):",
     "optionLabel": "{{index}}. {{name}}...",
@@ -371,7 +378,6 @@
     "changeProduct": "ကုန်ပစ္စည်း ပြောင်းရန်",
     "specsTitle": "📊 အကျဉ်းချုပ် & အသေးစိတ် နှိုင်းယှဉ်ချက်",
     "rowRating": "သုံးသပ်ချက် အဆင့်",
-    "reviewCount": "(သုံးသပ်ချက် {{count}} ခု)",
     "rowDiscount": "ပရိုမိုးရှင်း လျှော့စျေး",
     "discountTag": "{{discount}}% လျှော့",
     "standardPrice": "ပုံမှန်ဈေးနှုန်း",
@@ -381,7 +387,7 @@
     "shippingShort": "✓ အခမဲ့ ပို့ဆောင်မှု",
     "rowTags": "အမှတ်အသားနှင့် ထူးခြားချက်များ",
     "rowDescription": "အသေးစိတ် ဖော်ပြချက်",
-    "cornerLabel": "ကုန်ပစ္စည်း ({{count}}/4)",
+    "cornerLabel": "ကုန်ပစ္စည်း ({{count, number}}/4)",
     "addProduct": "ကုန်ပစ္စည်း ထည့်ရန်",
     "removeTitle": "ဖယ်ရှားရန်",
     "swapProduct": "ကုန်ပစ္စည်း လဲရန်",
@@ -410,8 +416,12 @@
     "modalAllCategories": "အမျိုးအစားအားလုံး",
     "modalCategoryOption": "{{icon}} {{category}}",
     "modalEmpty": "ရှာဖွေမှုနှင့် ကိုက်ညီသော ကုန်ပစ္စည်း မတွေ့ပါ သို့မဟုတ် ထည့်ပြီးဖြစ်သည်",
-    "modalRating": "⭐️ {{rating}} ({{count}})",
-    "modalSelect": "ဤအရာကို ရွေးရန်"
+    "modalRating": "⭐️ {{rating}} ({{count, number}})",
+    "modalSelect": "ဤအရာကို ရွေးရန်",
+    "modeTable_one": "📊 ဇယားအပြည့် ({{count, number}} ခု)",
+    "modeTable_other": "📊 ဇယားအပြည့် ({{count, number}} ခု)",
+    "reviewCount_one": "(သုံးသပ်ချက် {{count, number}} ခု)",
+    "reviewCount_other": "(သုံးသပ်ချက် {{count, number}} ခု)"
   },
   "lineConnect": {
     "demoProfile": {
@@ -470,7 +480,6 @@
       "statusLabel": "နောက်ဆုံး အခြေအနေ:",
       "statusValue": "📍 ဝန်ထမ်းမှ ပို့ဆောင်နေသည်",
       "sampleProductAlt": "စာတိုထဲရှိ နမူနာ ကုန်ပစ္စည်း",
-      "sampleProductName": "Sony WH-1000XM5 ကြိုးမဲ့ နားကြပ်",
       "sampleProductQty": "အရေအတွက် 1 • စုစုပေါင်း {{amount}}",
       "trackCta": "📍 GPS ဖြင့် တိုက်ရိုက် ခြေရာခံရန်",
       "orderDetailCta": "မှာယူမှု အသေးစိတ် ကြည့်ရန်",
