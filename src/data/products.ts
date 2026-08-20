@@ -82,16 +82,16 @@ export const banners: Banner[] = [
   {
     id: 'b1',
     title: 'Tech Mega Expo 2026',
-    subtitle: 'รวมสุดยอดสมาร์ทโฟน แล็ปท็อป และอุปกรณ์ไอทีลดสูงสุด 70% + ผ่อน 0% นาน 10 เดือน',
-    cta: 'ช้อปดีลไอทีเลย',
+    subtitle: 'อุปกรณ์ไอทีลดสูงสุด 70% • ผ่อน 0% 10 เดือน',
+    cta: 'ช้อปดีลไอที',
     ctaLink: '/shop?category=electronics',
     gradient: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 60%, #3B82F6 100%)',
     image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1000&q=80',
   },
   {
     id: 'b2',
-    title: 'Super Brand Day — Nike x Dyson',
-    subtitle: 'ดีลเด็ดแบรนด์ดังระดับโลก ลดแรงทะลุพิกัด 60% การันตีของแท้ 100% คืนเงิน 2 เท่า',
+    title: 'Super Brand Day',
+    subtitle: 'Nike x Dyson ลดสูงสุด 60% • ของแท้ 100%',
     cta: 'ช้อปแบรนด์ดัง',
     ctaLink: '/mall',
     gradient: 'linear-gradient(135deg, #831843 0%, #BE185D 60%, #EC4899 100%)',
@@ -100,8 +100,8 @@ export const banners: Banner[] = [
   {
     id: 'b3',
     title: 'Mid-Month Payday Sale',
-    subtitle: 'ช้อปสนั่นวันเงินเดือนออก! แจกคูปองลดเพิ่ม ฿2,000 + โค้ดส่งฟรีทั่วไทย 0 บาท',
-    cta: 'เก็บคูปองลดด่วน',
+    subtitle: 'คูปองลดสูงสุด ฿2,000 • ส่งฟรีทั่วไทย',
+    cta: 'เก็บคูปอง',
     ctaLink: '/vouchers',
     gradient: 'linear-gradient(135deg, #065F46 0%, #059669 60%, #10B981 100%)',
     image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1000&q=80',
@@ -111,7 +111,7 @@ export const banners: Banner[] = [
 export const subBanners = [
   {
     id: 'sub1',
-    title: 'Mall แบรนด์ดังแท้ 100%',
+    title: 'แบรนด์แท้ 100%',
     subtitle: 'คืนเงิน 2 เท่า • คืนฟรี 30 วัน',
     tag: '👑 SUPER BRAND',
     link: '/mall',
@@ -120,8 +120,8 @@ export const subBanners = [
   },
   {
     id: 'sub2',
-    title: 'ส่งฟรีทั่วไทย 0 บาท',
-    subtitle: 'ช้อปครบ ฿99 แจก Coins คืน 50%',
+    title: 'ส่งฟรีทั่วไทย',
+    subtitle: 'ครบ ฿99 • รับ Coins คืน',
     tag: '🚚 FREE SHIPPING',
     link: '/vouchers',
     bg: 'linear-gradient(135deg, #7C2D12 0%, #EA580C 100%)',

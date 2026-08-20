@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, ShoppingBag, Heart, Minus, Plus, Store as StoreIcon, MessageSquare, ShieldCheck, ChevronLeft, ChevronRight, Play, Video, Share2, Scale, Check, X, CreditCard, Sparkles, Flame, Zap, Loader2, Flag, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Heart, Minus, Plus, Store as StoreIcon, MessageSquare, ShieldCheck, ChevronLeft, ChevronRight, Play, Video, Share2, Check, X, CreditCard, Sparkles, Loader2, Flag } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { ReviewsSection } from '../components/ReviewsSection';
 import { ReportStoreModal } from '../components/ReportStoreModal';
@@ -122,39 +122,34 @@ export function ProductDetailPage({
     }
   }, [product, store]);
 
-  if (!product) {
-    return (
-      <div className="product-detail" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 64, marginBottom: 16 }}>😕</div>
-          <h1 style={{ marginBottom: 8 }}>ไม่พบสินค้า</h1>
-          <Link to="/shop" style={{ color: 'var(--primary-light)' }}>กลับไปช้อปต่อ</Link>
-        </div>
-      </div>
-    );
-  }
-
-  const storeProducts = sourceProducts.filter(p => p.storeId === product.storeId && p.id !== product.id).slice(0, 8);
-  const related = sourceProducts.filter(p => p.category === product.category && p.id !== product.id && p.storeId !== product.storeId).slice(0, 8);
-  const safeRating = product.rating ?? 5;
+  const productId = product?.id;
+  const productStoreId = product?.storeId;
+  const productCategory = product?.category || 'all';
+  const storeProducts = product
+    ? sourceProducts.filter(p => p.storeId === productStoreId && p.id !== productId).slice(0, 8)
+    : [];
+  const related = product
+    ? sourceProducts.filter(p => p.category === productCategory && p.id !== productId && p.storeId !== productStoreId).slice(0, 8)
+    : [];
+  const safeRating = product?.rating ?? 5;
   const fullStars = Math.min(5, Math.max(0, Math.floor(safeRating)));
   const stars = '★'.repeat(fullStars) + '☆'.repeat(Math.max(0, 5 - fullStars));
-  const productPrice = product.price ?? 0;
-  const productOrigPrice = product.originalPrice ?? 0;
+  const productPrice = product?.price ?? 0;
+  const productOrigPrice = product?.originalPrice ?? 0;
   const discount = productOrigPrice > productPrice && productOrigPrice > 0
     ? Math.round(((productOrigPrice - productPrice) / productOrigPrice) * 100)
     : null;
   const totalPrice = productPrice * qty;
   const savings = productOrigPrice > productPrice ? (productOrigPrice - productPrice) * qty : 0;
 
-  const userInterest = typeof window !== 'undefined' ? localStorage.getItem('mm_user_interest') || product.category : product.category;
+  const userInterest = typeof window !== 'undefined' ? localStorage.getItem('mm_user_interest') || productCategory : productCategory;
 
-  const recommendedProducts = [...sourceProducts]
-    .filter(p => p.id !== product.id)
+  const recommendedProducts = product ? [...sourceProducts]
+    .filter(p => p.id !== productId)
     .sort((a, b) => {
       if (recommendedTab === 'foryou') {
-        const aScore = (a.category === product.category ? 40 : a.category === userInterest ? 25 : 0) + (a.rating ?? 5) * 10 + (a.badge === 'sale' ? 15 : 0);
-        const bScore = (b.category === product.category ? 40 : b.category === userInterest ? 25 : 0) + (b.rating ?? 5) * 10 + (b.badge === 'sale' ? 15 : 0);
+        const aScore = (a.category === productCategory ? 40 : a.category === userInterest ? 25 : 0) + (a.rating ?? 5) * 10 + (a.badge === 'sale' ? 15 : 0);
+        const bScore = (b.category === productCategory ? 40 : b.category === userInterest ? 25 : 0) + (b.rating ?? 5) * 10 + (b.badge === 'sale' ? 15 : 0);
         return bScore - aScore;
       }
       if (recommendedTab === 'bestseller') {
@@ -170,7 +165,7 @@ export function ProductDetailPage({
         return bDisc - aDisc;
       }
       return 0;
-    });
+    }) : [];
 
   const displayedRecommended = recommendedProducts.slice(0, visibleRecommendedCount);
 
@@ -235,6 +230,18 @@ export function ProductDetailPage({
   useEffect(() => {
     setVisibleRecommendedCount(12);
   }, [id, recommendedTab]);
+
+  if (!product) {
+    return (
+      <div className="product-detail" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 64, marginBottom: 16 }}>😕</div>
+          <h1 style={{ marginBottom: 8 }}>ไม่พบสินค้า</h1>
+          <Link to="/shop" style={{ color: 'var(--primary-light)' }}>กลับไปช้อปต่อ</Link>
+        </div>
+      </div>
+    );
+  }
 
   const mediaList = [
     ...(product.videoUrl ? [{ type: 'video' as const, url: product.videoUrl, poster: (product.images && product.images[0]) || '' }] : []),
@@ -420,6 +427,18 @@ export function ProductDetailPage({
                   alt={product.name}
                   className="product-detail__main-image"
                 />
+              )}
+
+              {currentMedia?.type !== 'video' && onOpenVisualSearchWithImage && (
+                <button
+                  type="button"
+                  className="product-detail__visual-search"
+                  onClick={() => onOpenVisualSearchWithImage(currentMedia?.url || product.images?.[0] || '')}
+                  aria-label="ค้นหาสินค้าที่คล้ายภาพนี้"
+                >
+                  <Sparkles size={15} />
+                  <span>ค้นหาภาพคล้าย</span>
+                </button>
               )}
 
               {/* Navigation Arrows for Previous / Next Image */}

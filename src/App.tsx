@@ -15,6 +15,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { resetChatSocket } from './utils/chatSocket';
 import { API_BASE_URL, createProductApi, updateProductApi, deleteProductApi } from './utils/api';
+import { UI_COPY } from './uiCopy';
 
 // Helper to safely retry module imports without causing browser reload loops
 function lazyRetry<T extends ComponentType<any>>(
@@ -382,11 +383,11 @@ function AppLayout({
                 onUpdateQty={cart.updateQty}
                 onRemove={productId => {
                   cart.removeItem(productId);
-                  addToast('ลบสินค้าออกจากตะกร้าแล้ว', 'info', '🗑️');
+                  addToast(UI_COPY.cart.removed, 'info', '🗑️');
                 }}
                 onClear={() => {
                   cart.clearCart();
-                  addToast('ล้างตะกร้าสินค้าทั้งหมดแล้ว', 'info', '🗑️');
+                  addToast(UI_COPY.cart.cleared, 'info', '🗑️');
                 }}
                 onAddToCart={(p, qty) => handleAddToCart(p, qty)}
                 isWishlisted={id => wishlist.isWished(id)}
@@ -432,171 +433,6 @@ function AppLayout({
           <Route path="/returns" element={<HelpCenterPage initialTab="returns" />} />
           <Route path="/contact" element={<HelpCenterPage initialTab="contact" />} />
 
-          {/* Account Profile */}
-          <Route
-            path="/account"
-            element={
-              <main style={{ paddingTop: 'calc(var(--navbar-height) + var(--space-8))', minHeight: '80vh' }}>
-                <div className="container" style={{ maxWidth: 640 }}>
-                  <div style={{
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 0,
-                    padding: 'var(--space-8)',
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
-                      <div style={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: 0,
-                        background: 'var(--primary)',
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 24,
-                      }}>
-                        👤
-                      </div>
-                      <div>
-                        <h1 style={{ fontSize: 20, fontWeight: 800 }}>ผู้ใช้งาน Movemall</h1>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>user@movemall.local</p>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-                      <Link
-                        to="/seller"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: 'var(--space-3) var(--space-4)',
-                          background: 'var(--primary-subtle)',
-                          borderRadius: 0,
-                          border: '1px solid var(--primary-light)',
-                          fontWeight: 700,
-                          fontSize: 13,
-                          color: 'var(--primary-dark)',
-                        }}
-                      >
-                        <span>🏪 ศูนย์ผู้ขาย (Seller Centre)</span>
-                        <span>เข้าสู่แดชบอร์ด →</span>
-                      </Link>
-
-                      <Link
-                        to="/games"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: 'var(--space-3) var(--space-4)',
-                          background: 'var(--surface-hover)',
-                          borderRadius: 0,
-                          border: '1px solid var(--border)',
-                          fontWeight: 600,
-                          fontSize: 13,
-                        }}
-                      >
-                        <span>🎮 หมุนวงล้อและเช็กอิน</span>
-                        <span style={{ color: 'var(--primary)' }}>เล่นเกม →</span>
-                      </Link>
-
-                      <Link
-                        to="/vouchers"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: 'var(--space-3) var(--space-4)',
-                          background: 'var(--surface-hover)',
-                          borderRadius: 0,
-                          border: '1px solid var(--border)',
-                          fontWeight: 600,
-                          fontSize: 13,
-                        }}
-                      >
-                        <span>🎟️ โค้ดส่วนลดของฉัน</span>
-                        <span style={{ color: 'var(--primary)' }}>ดูโค้ด →</span>
-                      </Link>
-
-                      <Link
-                        to="/chat"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: 'var(--space-3) var(--space-4)',
-                          background: 'var(--surface-hover)',
-                          borderRadius: 0,
-                          border: '1px solid var(--border)',
-                          fontWeight: 600,
-                          fontSize: 13,
-                        }}
-                      >
-                        <span>💬 กล่องข้อความแชท</span>
-                        <span style={{ color: 'var(--primary)' }}>เปิดแชท →</span>
-                      </Link>
-
-                      <Link
-                        to="/orders"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: 'var(--space-3) var(--space-4)',
-                          background: 'var(--surface-hover)',
-                          borderRadius: 0,
-                          border: '1px solid var(--border)',
-                          fontWeight: 600,
-                          fontSize: 13,
-                        }}
-                      >
-                        <span>📦 ประวัติการสั่งซื้อ</span>
-                        <span style={{ color: 'var(--primary)' }}>ดูทั้งหมด →</span>
-                      </Link>
-
-                      <Link
-                        to="/wishlist"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: 'var(--space-3) var(--space-4)',
-                          background: 'var(--surface-hover)',
-                          borderRadius: 0,
-                          border: '1px solid var(--border)',
-                          fontWeight: 600,
-                          fontSize: 13,
-                        }}
-                      >
-                        <span>❤️ สินค้าที่บันทึกไว้ ({wishlist.count})</span>
-                        <span style={{ color: 'var(--primary)' }}>ดูทั้งหมด →</span>
-                      </Link>
-
-                      <Link
-                        to="/cart"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: 'var(--space-3) var(--space-4)',
-                          background: 'var(--surface-hover)',
-                          borderRadius: 0,
-                          border: '1px solid var(--border)',
-                          fontWeight: 600,
-                          fontSize: 13,
-                        }}
-                      >
-                        <span>🛒 ตะกร้าสินค้า ({cart.totalItems})</span>
-                        <span style={{ color: 'var(--primary)' }}>ดูทั้งหมด →</span>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </main>
-            }
-          />
 
           {/* PDPA & Legal Routes */}
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
@@ -702,16 +538,16 @@ function App() {
 
   function handleAddToCart(product: Product, qty = 1) {
     cart.addItem(product, qty);
-    addToast(`เพิ่มลงตะกร้าแล้ว · ${qty} ชิ้น`, 'success', '🛒');
+    addToast(UI_COPY.cart.added(qty), 'success', '🛒');
   }
 
   function handleToggleWishlist(product: Product) {
     const isWishedNow = wishlist.isWished(product.id);
     wishlist.toggle(product);
     if (!isWishedNow) {
-      addToast('บันทึกสินค้าแล้ว', 'info', '❤️');
+      addToast(UI_COPY.wishlist.added, 'info', '❤️');
     } else {
-      addToast('นำออกจากรายการโปรดแล้ว', 'info', '🤍');
+      addToast(UI_COPY.wishlist.removed, 'info', '🤍');
     }
   }
 

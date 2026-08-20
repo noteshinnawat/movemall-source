@@ -377,33 +377,20 @@
 }
 
 @media (max-width: 768px) {
-  /* Shopee / Lazada Style 1-Row Compact Horizontal Touch Scroll Bar */
   .quick-access-bar {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    gap: 12px;
-    padding: 10px 12px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px 4px;
+    padding: 10px 6px;
     margin-top: 10px;
     background: #FFFFFF;
     border: 1px solid var(--border);
   }
 
-  .quick-access-bar::-webkit-scrollbar {
-    display: none;
-  }
-
   .quick-access-item {
-    flex: 0 0 auto;
-    width: 68px;
+    min-width: 0;
+    width: auto;
     padding: 2px 0;
-    scroll-snap-align: start;
   }
 
   .quick-access-icon-box {
@@ -416,7 +403,8 @@
   .quick-access-label {
     font-size: 10px;
     font-weight: 700;
-    white-space: nowrap;
+    white-space: normal;
+    line-height: 1.25;
   }
 }
 
@@ -2181,6 +2169,5 @@
 .home-video-modal-buy-btn:hover {
   background: #1D4ED8;
 }
-
 
 

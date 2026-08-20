@@ -231,6 +231,30 @@
   backdrop-filter: blur(4px);
 }
 
+.product-detail__visual-search {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: var(--radius-md);
+  background: rgba(17, 24, 39, 0.82);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+
+.product-detail__visual-search:hover {
+  background: rgba(37, 99, 235, 0.92);
+}
+
 /* Gallery Navigation Arrows */
 .product-detail__nav-arrow {
   position: absolute;
@@ -2306,7 +2330,6 @@
 .product-detail__compliance-copy-btn:hover {
   background: #DBEAFE;
 }
-
 
 
 

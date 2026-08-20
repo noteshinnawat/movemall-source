@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Cookie } from 'lucide-react';
+import { Cookie } from 'lucide-react';
 import './CookieConsentBanner.css';
 
 export function CookieConsentBanner() {

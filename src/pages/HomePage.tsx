@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Zap, ChevronLeft, ChevronRight, Sparkles, X, ShoppingCart } from 'lucide-react';
+import { ArrowRight, Zap, ChevronLeft, ChevronRight, X, ShoppingCart } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { LiveStreamCard } from '../components/LiveStreamCard';
 import { products as staticProducts, categories, banners, subBanners } from '../data/products';
@@ -34,14 +34,14 @@ function useCountdown(targetSeconds: number) {
 
 
 const QUICK_SHORTCUTS = [
-  { icon: '🔴', label: 'Movemall LIVE', link: '/live', badge: 'LIVE' },
-  { icon: '👑', label: 'แบรนด์ดังแท้', link: '/mall', badge: 'MALL' },
+  { icon: '🔴', label: 'ไลฟ์', link: '/live', badge: 'LIVE' },
+  { icon: '👑', label: 'Mall', link: '/mall', badge: 'MALL' },
   { icon: '⚡', label: 'Flash Sale', link: '/flash-sale', badge: 'HOT' },
-  { icon: '🎟️', label: 'ศูนย์คูปองลด', link: '/vouchers', badge: 'โค้ดฟรี' },
-  { icon: '🎮', label: 'วงล้อ & Coins', link: '/games', badge: 'แจกเหรียญ' },
-  { icon: '🚚', label: 'ติดตามพัสดุสด', link: '/tracking', badge: 'GPS' },
-  { icon: '⚖️', label: 'เปรียบเทียบสเปก', link: '/compare', badge: 'ใหม่' },
-  { icon: '💰', label: 'นายหน้า Affiliate', link: '/affiliate', badge: 'ค่าคอม 10%' },
+  { icon: '🎟️', label: 'คูปอง', link: '/vouchers', badge: 'โค้ดฟรี' },
+  { icon: '🎮', label: 'เกม & Coins', link: '/games', badge: 'แจกเหรียญ' },
+  { icon: '🚚', label: 'ติดตามพัสดุ', link: '/tracking', badge: 'GPS' },
+  { icon: '⚖️', label: 'เปรียบเทียบ', link: '/compare', badge: 'ใหม่' },
+  { icon: '💰', label: 'Affiliate', link: '/affiliate', badge: 'ค่าคอม 10%' },
 ];
 
 const FEED_TABS = [
