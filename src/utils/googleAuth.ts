@@ -103,7 +103,7 @@ export async function promptGoogleAuth(clientId?: string): Promise<GoogleAuthRes
 
     if (loaded && window.google?.accounts?.oauth2) {
       try {
-        return await new Promise<GoogleAuthResult>((resolve) => {
+        return await new Promise<GoogleAuthResult>((resolve, reject) => {
           const client = window.google!.accounts.oauth2.initTokenClient({
             client_id: activeClientId,
             scope: 'email profile openid',
@@ -139,12 +139,12 @@ export async function promptGoogleAuth(clientId?: string): Promise<GoogleAuthRes
                 resolve({ accessToken: tokenResponse.access_token });
               } else {
                 console.warn('Google OAuth Token response error:', tokenResponse);
-                throw new Error('ไม่สามารถรับ Access Token จาก Google ได้');
+                reject(new Error('ไม่สามารถรับ Access Token จาก Google ได้'));
               }
             },
             error_callback: (err) => {
               console.warn('Google OAuth Prompt Error:', err);
-              throw new Error('การเข้าสู่ระบบด้วย Google ขัดข้อง หรือถูกปิดหน้าต่าง');
+              reject(new Error('การเข้าสู่ระบบด้วย Google ขัดข้อง หรือถูกปิดหน้าต่าง'));
             },
           });
 
