@@ -4,8 +4,9 @@ import { Star, ThumbsUp, Edit3, CheckCircle, Image, Video, X, Play, ArrowUpDown,
 import { getProductReviews, type ProductReview } from '../data/reviews';
 import { compressImage } from '../utils/mediaCompressor';
 import { fetchProductReviewsApi, submitProductReviewApi } from '../utils/api';
-import { formatDate, formatNumber } from '../i18n/formatters';
+import { formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
+import { createReviewDateMetadata, formatReviewDate } from './ReviewsSection.behavior';
 import './ReviewsSection.css';
 
 interface ReviewsSectionProps {
@@ -41,7 +42,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
             productId: r.productId || productId,
             userName: r.user?.name || t('catalog:reviews.movemallUser'),
             rating: r.rating || 5,
-            date: formatDate(r.createdAt, locale),
+            reviewedAt: r.createdAt,
             title: t('catalog:reviews.verifiedProductReview'),
             comment: r.comment,
             images: r.images,
@@ -124,7 +125,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
       productId,
       userName: formName.trim(),
       rating: formRating,
-      date: t('catalog:reviews.today'),
+      ...createReviewDateMetadata(),
       title: formTitle.trim() || t('catalog:reviews.defaultReviewTitle'),
       comment: formComment.trim(),
       images: formImages.length > 0 ? formImages : undefined,
@@ -509,7 +510,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
                     )}
                   </div>
                 </div>
-                <span className="review-item__date">{review.date}</span>
+                <span className="review-item__date">{formatReviewDate(review, locale)}</span>
               </div>
 
               <div className="review-item__rating" aria-label={t('catalog:reviews.ratingOutOfFive', { rating: review.rating })}>

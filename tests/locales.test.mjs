@@ -4,7 +4,9 @@ import {
   isBuyerLegacyPath, legacyRedirectTarget, localeFromPath, stripLocale, withLocale,
   replaceLocale, resolvePathLocale, resolveRootLocale,
 } from '../src/i18n/locales.ts';
-import { formatCurrency, formatNumber } from '../src/i18n/formatters.ts';
+import * as formatters from '../src/i18n/formatters.ts';
+
+const { formatCurrency, formatNumber } = formatters;
 
 test('reads and removes supported locale prefixes', () => {
   assert.equal(localeFromPath('/my/shop?q=shoe'), 'my');
@@ -48,4 +50,12 @@ test('formats THB and counts with the selected locale', () => {
   assert.match(formatCurrency(1500, 'th'), /1,500/);
   assert.match(formatCurrency(1500, 'en'), /1,500/);
   assert.equal(formatNumber(12500, 'en'), '12,500');
+});
+
+test('formats canonical audience metrics compactly with Latin digits in every locale', () => {
+  assert.equal(typeof formatters.formatCompactNumber, 'function');
+  assert.equal(formatters.formatCompactNumber(2400, 'th'), '2.4K');
+  assert.equal(formatters.formatCompactNumber(2400000, 'en'), '2.4M');
+  assert.equal(formatters.formatCompactNumber(2400, 'my'), '2.4\u00a0ထောင်');
+  assert.equal(formatters.formatCompactNumber(2400000, 'my'), '2.4\u00a0သန်း');
 });

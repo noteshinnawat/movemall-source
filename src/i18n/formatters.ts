@@ -22,6 +22,15 @@ export function formatNumber(value: number, locale: Locale): string {
   }).format(value);
 }
 
+export function formatCompactNumber(value: number, locale: Locale): string {
+  return new Intl.NumberFormat(localeTag(locale), {
+    notation: 'compact',
+    compactDisplay: 'short',
+    maximumFractionDigits: 1,
+    numberingSystem: 'latn',
+  }).format(value);
+}
+
 export function formatDate(value: Date | number | string, locale: Locale): string {
   return new Intl.DateTimeFormat(localeTag(locale), {
     dateStyle: 'medium',

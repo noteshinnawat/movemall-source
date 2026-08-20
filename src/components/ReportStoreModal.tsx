@@ -96,7 +96,7 @@ export function ReportStoreModal({
             <div>
               <h2 className="report-modal-title">{t('catalog:reporting.title')}</h2>
               <p className="report-modal-subtitle">
-                Movemall Anti-Counterfeit & Scam Protection
+                {t('catalog:reportingSubtitle')}
               </p>
             </div>
           </div>
@@ -203,7 +203,7 @@ export function ReportStoreModal({
                     <ShieldCheck size={16} color="#2563eb" /> {t('catalog:reporting.protectionTitle')}
                   </strong>
                   <span style={{ fontSize: '0.75rem', color: '#475569', display: 'block', marginTop: 2 }}>
-                    {t('catalog:reporting.protectionDescription')}
+                    {t('catalog:reportingProtectionDescription')}
                   </span>
                 </div>
               </label>

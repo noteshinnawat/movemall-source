@@ -205,7 +205,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
         hashtags: videoHashtags.split(' '),
         soundTitle: 'เสียงต้นฉบับ - My Creator Studio 🎵',
         category: selectedProduct.category,
-        viewers: '1.2k วิว',
+        viewers: 1_200,
         likesCount: 120,
         commentsCount: 8,
         sharesCount: 14,

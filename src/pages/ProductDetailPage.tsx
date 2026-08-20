@@ -11,9 +11,9 @@ import { mockLiveStreams } from '../data/liveStreams';
 import { parseRichText } from '../components/RichTextEditor';
 import { extractProductId, getProductUrl, updateProductSEO } from '../utils/seo';
 import { LocalizedLink as Link, useLocalizedPath } from '../i18n/LocalizedLink';
-import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { formatCompactNumber, formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
-import { getDemoProductOptionKeys } from './ProductDetailPage.behavior';
+import { getDemoProductOptionKeys, getProductPerkInterpolation } from './ProductDetailPage.behavior';
 import type { Product } from '../types';
 import './ProductDetailPage.css';
 
@@ -27,7 +27,7 @@ interface ProductDetailPageProps {
 }
 
 const PERKS = [
-  { icon: '🚚', textKey: 'product.perks.freeShipping' },
+  { icon: '🚚', textKey: 'product.perks.freeShipping', threshold: 299 },
   { icon: '↩️', textKey: 'product.perks.returns' },
   { icon: '🔒', textKey: 'product.perks.securePayment' },
   { icon: '⚡', textKey: 'product.perks.authentic' },
@@ -623,7 +623,11 @@ export function ProductDetailPage({
               {PERKS.map(perk => (
                 <div key={perk.textKey} className="product-detail__perk">
                   <span className="product-detail__perk-icon">{perk.icon}</span>
-                  <span className="product-detail__perk-text">{t(`catalog:${perk.textKey}`)}</span>
+                  <span className="product-detail__perk-text">
+                    {t(`catalog:${perk.textKey}`, perk.threshold === undefined
+                      ? {}
+                      : getProductPerkInterpolation(perk.threshold, locale))}
+                  </span>
                 </div>
               ))}
             </div>
@@ -853,7 +857,10 @@ export function ProductDetailPage({
                   </span>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 800 }}>
-                      {t('catalog:product.storeLive', { store: store.name, count: activeLive.viewers })}
+                      {t('catalog:product.storeLive', {
+                        store: store.name,
+                        count: formatCompactNumber(activeLive.viewers, locale),
+                      })}
                     </div>
                     <div style={{ fontSize: 11, color: '#FBBF24' }}>
                       {t('catalog:product.livePromotion', { discount: 50 })}

@@ -8,7 +8,7 @@ export interface Brand {
   category: string;
   discountText: string;
   tagline: string;
-  followers: string;
+  followers: number;
   isSuperBrand?: boolean;
 }
 
@@ -21,7 +21,7 @@ export const famousBrands: Brand[] = [
     category: 'electronics',
     discountText: 'ลดสูงสุด 20%',
     tagline: 'นวัตกรรมระดับโลก ของแท้ศูนย์ไทย 100%',
-    followers: '2.4M',
+    followers: 2_400_000,
     isSuperBrand: true,
   },
   {
@@ -32,7 +32,7 @@ export const famousBrands: Brand[] = [
     category: 'electronics',
     discountText: 'ลดสูงสุด 40%',
     tagline: 'สมาร์ทโฟนและเครื่องใช้ไฟฟ้าระดับพรีเมียม',
-    followers: '1.9M',
+    followers: 1_900_000,
     isSuperBrand: true,
   },
   {
@@ -43,7 +43,7 @@ export const famousBrands: Brand[] = [
     category: 'electronics',
     discountText: 'ลดสูงสุด 30%',
     tagline: 'ระบบเสียงและภาพระดับไฮเอนด์',
-    followers: '850K',
+    followers: 850_000,
   },
   {
     id: 'nike',
@@ -53,7 +53,7 @@ export const famousBrands: Brand[] = [
     category: 'sports',
     discountText: 'ลดสูงสุด 50%',
     tagline: 'Just Do It. รองเท้าและชุดกีฬาของแท้',
-    followers: '3.1M',
+    followers: 3_100_000,
     isSuperBrand: true,
   },
   {
@@ -64,7 +64,7 @@ export const famousBrands: Brand[] = [
     category: 'sports',
     discountText: 'ลดสูงสุด 45%',
     tagline: 'Impossible is Nothing',
-    followers: '2.8M',
+    followers: 2_800_000,
   },
   {
     id: 'dyson',
@@ -74,7 +74,7 @@ export const famousBrands: Brand[] = [
     category: 'home',
     discountText: 'รับคูปอง ฿2,000',
     tagline: 'เทคโนโลยีดูดฝุ่นและจัดแต่งทรงผมชั้นนำ',
-    followers: '920K',
+    followers: 920_000,
   },
   {
     id: 'loreal',
@@ -84,7 +84,7 @@ export const famousBrands: Brand[] = [
     category: 'beauty',
     discountText: 'ซื้อ 1 แถม 1',
     tagline: 'เพราะคุณคู่ควร เครื่องสำอางและสกินแคร์ระดับโลก',
-    followers: '1.7M',
+    followers: 1_700_000,
   },
   {
     id: 'xiaomi',
@@ -94,6 +94,6 @@ export const famousBrands: Brand[] = [
     category: 'electronics',
     discountText: 'ลดสูงสุด 55%',
     tagline: 'นวัตกรรมเพื่อทุกคน สมาร์ทโฮมและแก็ดเจ็ต',
-    followers: '2.1M',
+    followers: 2_100_000,
   },
 ];

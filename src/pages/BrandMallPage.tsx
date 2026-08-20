@@ -20,8 +20,10 @@ import { famousBrands } from '../data/brands';
 import { products as staticProducts } from '../data/products';
 import { ProductCard } from '../components/ProductCard';
 import { LocalizedLink } from '../i18n/LocalizedLink';
-import { formatNumber } from '../i18n/formatters';
+import { formatCompactNumber, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
+import { getMallVoucherInterpolation } from './BrandMallPage.behavior';
+import type { MallVoucherNumericValues } from './BrandMallPage.behavior';
 import type { Product } from '../types';
 import './BrandMallPage.css';
 
@@ -40,6 +42,7 @@ interface MallVoucher {
   minSpendKey: string;
   expiryKey: string;
   category: string;
+  values: MallVoucherNumericValues;
 }
 
 const MALL_VOUCHERS: MallVoucher[] = [
@@ -51,6 +54,7 @@ const MALL_VOUCHERS: MallVoucher[] = [
     minSpendKey: 'mall.vouchers.items.mall.minimum',
     expiryKey: 'mall.vouchers.items.mall.expiry',
     category: 'mall',
+    values: { discountPercent: 15, minimumSpend: 1_500, maximumDiscount: 1_000, expiryHours: 24 },
   },
   {
     id: 'mv-2',
@@ -60,6 +64,7 @@ const MALL_VOUCHERS: MallVoucher[] = [
     minSpendKey: 'mall.vouchers.items.coins.minimum',
     expiryKey: 'mall.vouchers.items.coins.expiry',
     category: 'coins',
+    values: { discountPercent: 20, minimumSpend: 800, maximumCoins: 300 },
   },
   {
     id: 'mv-3',
@@ -69,6 +74,7 @@ const MALL_VOUCHERS: MallVoucher[] = [
     minSpendKey: 'mall.vouchers.items.tech.minimum',
     expiryKey: 'mall.vouchers.items.tech.expiry',
     category: 'electronics',
+    values: { discountAmount: 300, minimumSpend: 2_990 },
   },
   {
     id: 'mv-4',
@@ -78,6 +84,7 @@ const MALL_VOUCHERS: MallVoucher[] = [
     minSpendKey: 'mall.vouchers.items.shipping.minimum',
     expiryKey: 'mall.vouchers.items.shipping.expiry',
     category: 'shipping',
+    values: { discountAmount: 0, minimumDeliveryDays: 1, maximumDeliveryDays: 2 },
   },
 ];
 
@@ -250,7 +257,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
         <section className="mall-spotlight-section">
           <div className="mall-section-header">
             <div className="mall-section-title-group">
-              <span className="mall-tag-red">SUPER BRAND FESTIVAL</span>
+              <span className="mall-tag-red">{t('catalog:mall.labels.superBrandFestival')}</span>
               <h2 className="mall-section-heading">{t('catalog:mall.spotlight.title')}</h2>
             </div>
             <div className="mall-countdown-box">
@@ -284,7 +291,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
           <div className="super-brand-card">
             <div className="super-brand-info">
               <div className="super-brand-label-row">
-                <span className="super-brand-pill">DEALS OF THE DAY</span>
+                <span className="super-brand-pill">{t('catalog:mall.labels.dealsOfTheDay')}</span>
                 <span className="super-brand-discount-badge">{t(`catalog:${activeHighlight.discountBadgeKey}`)}</span>
               </div>
               <h3 className="super-brand-title">{activeHighlight.campaignTitle}</h3>
@@ -323,7 +330,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
         <section className="mall-vouchers-section">
           <div className="mall-section-header">
             <div className="mall-section-title-group">
-              <span className="mall-tag-red">MALL EXCLUSIVE VOUCHERS</span>
+              <span className="mall-tag-red">{t('catalog:mall.labels.exclusiveVouchers')}</span>
               <h2 className="mall-section-heading">{t('catalog:mall.vouchers.title')}</h2>
             </div>
             <button
@@ -337,16 +344,17 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
           <div className="mall-vouchers-grid">
             {MALL_VOUCHERS.map(voucher => {
               const isClaimed = claimedVouchers[voucher.id];
+              const interpolation = getMallVoucherInterpolation(voucher.values, locale);
               return (
                 <div key={voucher.id} className={`mall-voucher-card ${isClaimed ? 'claimed' : ''}`}>
                   <div className="mall-voucher-left">
-                    <div className="mall-voucher-discount">{t(`catalog:${voucher.discountKey}`)}</div>
+                    <div className="mall-voucher-discount">{t(`catalog:${voucher.discountKey}`, interpolation)}</div>
                     <div className="mall-voucher-code">{voucher.code}</div>
                   </div>
                   <div className="mall-voucher-middle">
                     <h4 className="mall-voucher-title">{t(`catalog:${voucher.titleKey}`)}</h4>
-                    <p className="mall-voucher-min">{t(`catalog:${voucher.minSpendKey}`)}</p>
-                    <span className="mall-voucher-expiry">🕒 {t(`catalog:${voucher.expiryKey}`)}</span>
+                    <p className="mall-voucher-min">{t(`catalog:${voucher.minSpendKey}`, interpolation)}</p>
+                    <span className="mall-voucher-expiry">🕒 {t(`catalog:${voucher.expiryKey}`, interpolation)}</span>
                   </div>
                   <div className="mall-voucher-right">
                     <button
@@ -373,7 +381,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
         <section className="mall-directory-section">
           <div className="mall-section-header">
             <div className="mall-section-title-group">
-              <span className="mall-tag-red">OFFICIAL FLAGSHIP DIRECTORY</span>
+              <span className="mall-tag-red">{t('catalog:mall.labels.flagshipDirectory')}</span>
               <h2 className="mall-section-heading">{t('catalog:mall.directory.title')}</h2>
             </div>
             <div className="mall-category-filter-tabs-wrapper">
@@ -404,7 +412,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
                 <div key={brand.id} className="brand-directory-card">
                   {/* Brand Header Banner */}
                   <div className="brand-directory-banner" style={{ background: brand.banner }}>
-                    <span className="brand-directory-mall-tag">MALL</span>
+                    <span className="brand-directory-mall-tag">{t('catalog:mall.labels.mall')}</span>
                   </div>
 
                   {/* Brand Profile Details */}
@@ -413,11 +421,13 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
                       <img src={brand.logo} alt={brand.name} className="brand-directory-logo" />
                     </div>
                     <h3 className="brand-directory-name">{brand.name}</h3>
-                    <p className="brand-directory-tagline">{t(`catalog:mall.brandData.${brand.id}.tagline`)}</p>
+                    <p className="brand-directory-tagline">{brand.tagline}</p>
                     
                     <div className="brand-directory-meta">
-                      <span className="brand-discount-badge">{t(`catalog:mall.brandData.${brand.id}.discount`)}</span>
-                      <span className="brand-followers-text">{t('catalog:mall.directory.followers', { count: brand.followers })}</span>
+                      <span className="brand-discount-badge">{brand.discountText}</span>
+                      <span className="brand-followers-text">{t('catalog:mall.directory.followers', {
+                        count: formatCompactNumber(brand.followers, locale),
+                      })}</span>
                     </div>
 
                     {/* Action Buttons */}
@@ -446,7 +456,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
         <section className="mall-products-section">
           <div className="mall-section-header">
             <div className="mall-section-title-group">
-              <span className="mall-tag-red">MALL EXCLUSIVE DEALS</span>
+              <span className="mall-tag-red">{t('catalog:mall.labels.exclusiveDeals')}</span>
               <h2 className="mall-section-heading">{t('catalog:mall.products.title')}</h2>
             </div>
             

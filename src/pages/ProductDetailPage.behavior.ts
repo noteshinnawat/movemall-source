@@ -1,3 +1,6 @@
+import { formatCurrency } from '../i18n/formatters.ts';
+import type { Locale } from '../i18n/locales.ts';
+
 const DEMO_PRODUCT_OPTION_KEYS = {
   fashion: [
     'product.options.fashion.classicBlack',
@@ -29,4 +32,8 @@ export function getDemoProductOptionKeys(category: string): readonly string[] {
   }
 
   return DEMO_PRODUCT_OPTION_KEYS.default;
+}
+
+export function getProductPerkInterpolation(threshold: number, locale: Locale) {
+  return { amount: formatCurrency(threshold, locale) };
 }

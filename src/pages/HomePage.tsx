@@ -10,7 +10,7 @@ import { famousBrands } from '../data/brands';
 import { initialAdCampaigns } from '../data/mockAdsData';
 import { getProductUrl } from '../utils/seo';
 import { LocalizedLink as Link } from '../i18n/LocalizedLink';
-import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { formatCompactNumber, formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { Product } from '../types';
 import './HomePage.css';
@@ -119,7 +119,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
             hashtags: ['#MovemallLive', '#ลดราคา', '#ของแท้'],
             soundTitle: 'เสียงต้นฉบับ - Movemall Live 🎵',
             category: 'electronics',
-            viewers: t('catalog:home.live.viewerCount', { count: formatNumber(s.viewersCount || 1200, locale) }),
+            viewers: Number(s.viewersCount || 1200),
             likesCount: s.likesCount || 10000,
             commentsCount: 250,
             sharesCount: 95,
@@ -414,7 +414,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
               <div className="home-live-card-top">
                 <span className="home-live-tag">
                   <span className="home-live-tag-dot" />
-                  {ch.viewers}
+                  {formatCompactNumber(ch.viewers, locale)}
                 </span>
                 <span className="home-live-channel">{ch.channelName}</span>
               </div>
@@ -559,7 +559,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
         <div className="home-category-banner-header">
           <div className="home-category-title-block">
             <div className="home-category-badge-row">
-              <span className="home-category-tag-badge">EXPLORE CATEGORIES</span>
+              <span className="home-category-tag-badge">{t('catalog:home.categories.eyebrow')}</span>
               <span className="home-category-count-badge">
               {t('catalog:home.categories.count', { count: formatNumber(categories.length, locale) })}
               </span>
@@ -603,7 +603,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
               <div className="category-card__img-wrap">
                 <img
                   src={cat.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=240&q=80'}
-                  alt={cat.name}
+                  alt={t(`catalog:categories.${cat.id}.name`)}
                   className="category-card__img"
                   loading="lazy"
                 />
@@ -630,7 +630,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
         {/* ── Movemall Official Brand Mall Header Banner ── */}
         <div className="home-mall-banner">
           <div className="home-mall-banner-left">
-            <span className="home-mall-badge">MALL</span>
+            <span className="home-mall-badge">{t('catalog:home.mall.badge')}</span>
             <h2 id="mall-heading" className="home-mall-title">
               {t('catalog:home.mall.title')}
             </h2>
@@ -675,7 +675,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                 {brand.name.split(' ')[0]}
               </span>
               <span style={{ fontSize: 11, fontWeight: 700, color: '#DC2626' }}>
-                {t(`catalog:mall.brandData.${brand.id}.discount`)}
+                {brand.discountText}
               </span>
             </Link>
           ))}
@@ -751,7 +751,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
           <div className="home-games-promo-left">
             <div className="home-games-promo-icons">🎡 🎮 🎁</div>
             <div>
-              <div className="home-games-promo-badge">MOVEMALL REWARDS</div>
+              <div className="home-games-promo-badge">{t('catalog:home.rewards.eyebrow')}</div>
               <h3 className="home-games-promo-title">
                 {t('catalog:home.rewards.title')}
               </h3>
@@ -774,7 +774,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
           <div className="home-feed-banner-header">
             <div className="home-feed-title-block">
               <div className="home-feed-badge-row">
-                <span className="home-feed-tag-badge">DAILY DISCOVER</span>
+                <span className="home-feed-tag-badge">{t('catalog:home.feed.eyebrow')}</span>
                 <span className="home-feed-live-badge">
                   <span className="home-feed-live-dot" />
                   {t('catalog:home.feed.realtime')}
@@ -851,7 +851,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
             channelName="Fashionista Studio"
             streamerAvatar="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80"
             title="👗 ไลฟ์ลองชุดคอลเลกชั่น 2026 • ซื้อ 1 แถม 1"
-            viewers="920"
+            viewers={920}
             videoUrl="/videos/live-streamer-2.mp4"
             posterImage="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80"
             pinnedProduct={{

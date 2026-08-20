@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Play, Eye, ShoppingBag, ArrowRight, Heart } from 'lucide-react';
 import { LocalizedLink } from '../i18n/LocalizedLink';
-import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { formatCompactNumber, formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import './LiveStreamCard.css';
 
@@ -13,7 +13,7 @@ export interface LiveStreamCardProps {
   channelName?: string;
   streamerAvatar?: string;
   title?: string;
-  viewers?: string;
+  viewers?: number;
   videoUrl?: string;
   posterImage?: string;
   pinnedProduct?: {
@@ -30,7 +30,7 @@ export function LiveStreamCard({
   channelName = 'TechPro Official Live',
   streamerAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80',
   title = '🔥 แจกโค้ดลับ 50% ทุก 15 นาที + รีวิวแกะกล่องสินค้าใหม่',
-  viewers = '1.4k',
+  viewers = 1_400,
   videoUrl = '/videos/live-streamer-1.mp4',
   posterImage = 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=600&q=80',
   pinnedProduct = {
@@ -93,7 +93,7 @@ export function LiveStreamCard({
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div className="live-stream-viewer-count">
             <Eye size={12} style={{ display: 'inline', marginRight: 3 }} />
-            {viewers}
+            {formatCompactNumber(viewers, locale)}
           </div>
 
           <button

@@ -12,7 +12,7 @@ export interface LiveStreamChannel {
   hashtags: string[];
   soundTitle: string;
   category: string;
-  viewers: string;
+  viewers: number;
   likesCount: number;
   commentsCount: number;
   sharesCount: number;
@@ -45,7 +45,7 @@ export const mockLiveStreams: LiveStreamChannel[] = [
     hashtags: ['#TechProLive', '#หูฟังบลูทูธ', '#ไอทีลดราคา', '#MovemallLive'],
     soundTitle: 'เสียงต้นฉบับ - TechPro Official Studio 🎵',
     category: 'electronics',
-    viewers: '2.4k',
+    viewers: 2_400,
     likesCount: 14200,
     commentsCount: 342,
     sharesCount: 128,
@@ -81,7 +81,7 @@ export const mockLiveStreams: LiveStreamChannel[] = [
     hashtags: ['#ป้ายยาช้อปปิ้ง', '#เดรสสไตล์เกาหลี', '#ของดีบอกต่อ', '#MovemallCreator'],
     soundTitle: 'เพลงฮิตติดชาร์ต TikTok 2026 🎶',
     category: 'fashion',
-    viewers: '8.9k',
+    viewers: 8_900,
     likesCount: 24500,
     commentsCount: 512,
     sharesCount: 890,
@@ -116,7 +116,7 @@ export const mockLiveStreams: LiveStreamChannel[] = [
     hashtags: ['#BeautyGlow', '#หน้าใสไร้สิว', '#สกินแคร์เกาหลี'],
     soundTitle: 'เสียงบรรยายสด - หมอฟ้าพาผิวสวย 🎙️',
     category: 'beauty',
-    viewers: '3.1k',
+    viewers: 3_100,
     likesCount: 28400,
     commentsCount: 620,
     sharesCount: 240,
@@ -150,7 +150,7 @@ export const mockLiveStreams: LiveStreamChannel[] = [
     hashtags: ['#รองเท้าวิ่ง', '#NikeThailand', '#ป้ายยานักวิ่ง', '#ติดตะกร้า'],
     soundTitle: 'Energy Workout Beat - High Bass 🎧',
     category: 'sports',
-    viewers: '14.2k',
+    viewers: 14_200,
     likesCount: 42100,
     commentsCount: 890,
     sharesCount: 1540,
@@ -184,7 +184,7 @@ export const mockLiveStreams: LiveStreamChannel[] = [
     hashtags: ['#เครื่องดูดฝุ่นไร้สาย', '#SmartHome', '#ของใช้ในบ้าน'],
     soundTitle: 'เสียงบรรยายสด - Dyson Studio 🎙️',
     category: 'home',
-    viewers: '1.2k',
+    viewers: 1_200,
     likesCount: 8900,
     commentsCount: 180,
     sharesCount: 65,
@@ -218,7 +218,7 @@ export const mockLiveStreams: LiveStreamChannel[] = [
     hashtags: ['#แกะกล่อง', '#ของขวัญ', '#Unboxing', '#FlashDeals'],
     soundTitle: 'Unboxing Delight Chill Hop 🎵',
     category: 'electronics',
-    viewers: '4.8k',
+    viewers: 4_800,
     likesCount: 35100,
     commentsCount: 780,
     sharesCount: 310,

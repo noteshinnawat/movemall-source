@@ -12,7 +12,7 @@ import { mockLiveStreams } from '../data/liveStreams';
 import { fetchApi } from '../utils/api';
 import { generateSlug } from '../utils/slug';
 import { useLocalizedPath } from '../i18n/LocalizedLink';
-import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { formatCompactNumber, formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { Product, Store } from '../types';
 import './StorePage.css';
@@ -309,7 +309,9 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
                       <Radio size={11} /> {t('catalog:store.liveNow')}
                     </span>
                     <span className="store-live-viewers">
-                      {t('catalog:store.liveViewers', { count: activeLive?.viewers ?? '0' })}
+                      {t('catalog:store.liveViewers', {
+                        count: formatCompactNumber(activeLive?.viewers ?? 0, locale),
+                      })}
                     </span>
                   </div>
                   <div className="store-live-caption">

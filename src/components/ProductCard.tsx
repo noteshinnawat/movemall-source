@@ -61,6 +61,9 @@ export function ProductCard({
   const safeRating = Number(rating ?? 4.8);
   const safeReviewCount = Number(reviewCount ?? 0);
   const safeSoldCount = Number((product as any).soldCount ?? (safeReviewCount * 3 + 18));
+  const categoryLabel = t(`catalog:categories.${category}.name`, {
+    defaultValue: t('catalog:categoryFallback'),
+  });
 
   const reviewVideoSource = videoReview?.videoUrl || videoUrl;
   const hasVideoReview = Boolean(reviewVideoSource);
@@ -221,7 +224,7 @@ export function ProductCard({
           )}
           {isMall ? (
             <span className="product-card__badge-tag product-card__badge--mall">
-              👑 Mall
+              {t('catalog:product.card.badges.mall')}
             </span>
           ) : isPreferred ? (
             <span className="product-card__badge-tag product-card__badge--pref">
@@ -269,7 +272,7 @@ export function ProductCard({
           >
             {isMall && <span className="product-card__store-icon">👑</span>}
             <span className="product-card__store-name">
-              {store ? store.name : category}
+              {store ? store.name : categoryLabel}
             </span>
           </LocalizedLink>
           <span className="product-card__location">
