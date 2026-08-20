@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  localeFromPath, stripLocale, withLocale, replaceLocale, resolveRootLocale,
+  isBuyerLegacyPath, legacyRedirectTarget, localeFromPath, stripLocale, withLocale,
+  replaceLocale, resolveRootLocale,
 } from '../src/i18n/locales.ts';
 import { formatCurrency, formatNumber } from '../src/i18n/formatters.ts';
 
@@ -20,6 +21,18 @@ test('root locale uses saved supported value and otherwise Thai', () => {
   assert.equal(resolveRootLocale('en'), 'en');
   assert.equal(resolveRootLocale('jp'), 'th');
   assert.equal(resolveRootLocale(null), 'th');
+});
+
+test('legacy buyer routes redirect to Thai without changing URL state', () => {
+  assert.equal(legacyRedirectTarget('/shop?q=phone#top', null), '/th/shop?q=phone#top');
+  assert.equal(legacyRedirectTarget('/', 'my'), '/my');
+  assert.equal(legacyRedirectTarget('/jp/shop', null), null);
+});
+
+test('operational routes never enter buyer localization', () => {
+  for (const path of ['/seller', '/admin', '/affiliate', '/creator/studio', '/video/create']) {
+    assert.equal(isBuyerLegacyPath(path), false);
+  }
 });
 
 test('formats THB and counts with the selected locale', () => {
