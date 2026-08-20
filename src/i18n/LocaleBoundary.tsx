@@ -2,12 +2,17 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import i18n from './config';
-import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY, localeFromPath, withLocale } from './locales';
+import {
+  LOCALE_STORAGE_KEY,
+  localeFromPath,
+  resolvePathLocale,
+  withLocale,
+} from './locales';
 
 export function LocalizedNotFound() {
   const location = useLocation();
   const { t } = useTranslation('common');
-  const locale = localeFromPath(location.pathname) ?? DEFAULT_LOCALE;
+  const locale = resolvePathLocale(location.pathname);
 
   return (
     <div style={{
@@ -21,7 +26,9 @@ export function LocalizedNotFound() {
       textAlign: 'center',
     }}>
       <div style={{ fontSize: 48 }}>🔍</div>
-      <h1 style={{ fontSize: 24, fontWeight: 800 }}>404 — {t('errors.notFound')}</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 800 }}>
+        404 — {t('errors.notFound', { lng: locale })}
+      </h1>
       <Link
         to={withLocale('/', locale)}
         style={{
@@ -43,14 +50,13 @@ export function LocalizedNotFound() {
 export function LocaleBoundary() {
   const location = useLocation();
   const locale = localeFromPath(location.pathname);
+  const resolvedLocale = resolvePathLocale(location.pathname);
 
   useEffect(() => {
-    if (!locale) return;
-
-    void i18n.changeLanguage(locale);
-    document.documentElement.lang = locale;
-    localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-  }, [locale]);
+    void i18n.changeLanguage(resolvedLocale);
+    document.documentElement.lang = resolvedLocale;
+    if (locale) localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  }, [locale, resolvedLocale]);
 
   return locale ? <Outlet /> : <LocalizedNotFound />;
 }

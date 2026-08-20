@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   isBuyerLegacyPath, legacyRedirectTarget, localeFromPath, stripLocale, withLocale,
-  replaceLocale, resolveRootLocale,
+  replaceLocale, resolvePathLocale, resolveRootLocale,
 } from '../src/i18n/locales.ts';
 import { formatCurrency, formatNumber } from '../src/i18n/formatters.ts';
 
@@ -17,10 +17,19 @@ test('adds and replaces locale without losing search or hash', () => {
   assert.equal(replaceLocale('/th/shop?q=shoe#filters', 'my'), '/my/shop?q=shoe#filters');
 });
 
+test('adds locale to relative buyer destinations with slash separation', () => {
+  assert.equal(withLocale('shop?q=shoe#filters', 'en'), '/en/shop?q=shoe#filters');
+});
+
 test('root locale uses saved supported value and otherwise Thai', () => {
   assert.equal(resolveRootLocale('en'), 'en');
   assert.equal(resolveRootLocale('jp'), 'th');
   assert.equal(resolveRootLocale(null), 'th');
+});
+
+test('route locale resolution falls back to Thai for invalid prefixes', () => {
+  assert.equal(resolvePathLocale('/en/shop'), 'en');
+  assert.equal(resolvePathLocale('/jp/shop'), 'th');
 });
 
 test('legacy buyer routes redirect to Thai without changing URL state', () => {

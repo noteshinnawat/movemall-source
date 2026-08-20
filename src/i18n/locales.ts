@@ -56,14 +56,21 @@ export function stripLocale(path: string): string {
 }
 
 export function withLocale(path: string, locale: Locale): string {
-  const bare = stripLocale(path);
-  return bare === '/' ? `/${locale}` : `/${locale}${bare}`;
+  const [, pathname = '/', suffix = ''] = stripLocale(path).match(/^([^?#]*)(.*)$/u) ?? [];
+  const normalizedPathname = pathname.startsWith('/') ? pathname : `/${pathname}`;
+  return normalizedPathname === '/'
+    ? `/${locale}${suffix}`
+    : `/${locale}${normalizedPathname}${suffix}`;
 }
 
 export const replaceLocale = withLocale;
 
 export function resolveRootLocale(value: string | null): Locale {
   return isLocale(value) ? value : DEFAULT_LOCALE;
+}
+
+export function resolvePathLocale(pathname: string): Locale {
+  return localeFromPath(pathname) ?? DEFAULT_LOCALE;
 }
 
 function pathnameOnly(path: string): string {
