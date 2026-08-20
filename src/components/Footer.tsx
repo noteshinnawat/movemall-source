@@ -1,37 +1,8 @@
-import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { stripLocale } from '../i18n/locales';
 import './Footer.css';
-
-const COLUMNS = [
-  {
-    title: 'ช้อปปิ้ง',
-    links: [
-      { label: 'สินค้าทั้งหมด', href: '/shop' },
-      { label: 'อิเล็กทรอนิกส์', href: '/shop?category=electronics' },
-      { label: 'แฟชั่น', href: '/shop?category=fashion' },
-      { label: 'ความงาม', href: '/shop?category=beauty' },
-      { label: 'สินค้าลดราคา', href: '/shop?filter=sale' },
-    ],
-  },
-  {
-    title: 'บัญชี',
-    links: [
-      { label: 'ตะกร้าสินค้า', href: '/cart' },
-      { label: 'Wishlist', href: '/wishlist' },
-      { label: 'ประวัติคำสั่งซื้อ', href: '/orders' },
-      { label: 'ข้อมูลส่วนตัว', href: '/account' },
-    ],
-  },
-  {
-    title: 'ช่วยเหลือ',
-    links: [
-      { label: 'ศูนย์ช่วยเหลือ (FAQ)', href: '/help' },
-      { label: 'วิธีสั่งซื้อสินค้า', href: '/how-to-order' },
-      { label: 'การจัดส่งสินค้า', href: '/shipping' },
-      { label: 'นโยบายคืนสินค้า', href: '/returns' },
-      { label: 'ติดต่อเรา', href: '/contact' },
-    ],
-  },
-];
 
 const SOCIALS = [
   { icon: '📘', label: 'Facebook', href: '#' },
@@ -41,8 +12,40 @@ const SOCIALS = [
 ];
 
 export function Footer() {
+  const { t } = useTranslation('navigation');
   const location = useLocation();
-  const path = location.pathname;
+  const path = stripLocale(location.pathname);
+  const columns = [
+    {
+      title: t('footer.shoppingTitle'),
+      links: [
+        { label: t('footer.allProducts'), href: '/shop' },
+        { label: t('footer.electronics'), href: '/shop?category=electronics' },
+        { label: t('footer.fashion'), href: '/shop?category=fashion' },
+        { label: t('footer.beauty'), href: '/shop?category=beauty' },
+        { label: t('footer.sale'), href: '/shop?filter=sale' },
+      ],
+    },
+    {
+      title: t('footer.accountTitle'),
+      links: [
+        { label: t('footer.cart'), href: '/cart' },
+        { label: t('footer.wishlist'), href: '/wishlist' },
+        { label: t('footer.orders'), href: '/orders' },
+        { label: t('footer.profile'), href: '/account' },
+      ],
+    },
+    {
+      title: t('footer.helpTitle'),
+      links: [
+        { label: t('footer.helpFaq'), href: '/help' },
+        { label: t('footer.howToOrder'), href: '/how-to-order' },
+        { label: t('footer.shipping'), href: '/shipping' },
+        { label: t('footer.returns'), href: '/returns' },
+        { label: t('footer.contact'), href: '/contact' },
+      ],
+    },
+  ];
 
   // Do not render full footer on full-screen media pages (Video feed, Live stream, Studio)
   if (path === '/video' || path === '/live' || path.startsWith('/video/') || path.startsWith('/creator')) {
@@ -50,17 +53,17 @@ export function Footer() {
   }
 
   return (
-    <footer className="footer" aria-label="Footer">
+    <footer className="footer" aria-label={t('footer.ariaLabel')}>
       <div className="container">
         <div className="footer__top">
           {/* Brand */}
           <div className="footer__brand">
-            <Link to="/" className="footer__logo">
+            <LocalizedLink to="/" className="footer__logo">
               <div className="footer__logo-icon">🛍</div>
               <span className="footer__logo-text">Movemall</span>
-            </Link>
+            </LocalizedLink>
             <p className="footer__tagline">
-              ช้อปครบ ราคาดี ส่งไว มั่นใจทุกออเดอร์
+              {t('footer.tagline')}
             </p>
             <div className="footer__social">
               {SOCIALS.map(s => (
@@ -77,14 +80,14 @@ export function Footer() {
           </div>
 
           {/* Columns */}
-          {COLUMNS.map(col => (
+          {columns.map(col => (
             <div key={col.title} className="footer__col">
               <h3 className="footer__col-title">{col.title}</h3>
               <nav className="footer__links" aria-label={col.title}>
                 {col.links.map(link => (
-                  <Link key={link.label} to={link.href} className="footer__link">
+                  <LocalizedLink key={link.label} to={link.href} className="footer__link">
                     {link.label}
-                  </Link>
+                  </LocalizedLink>
                 ))}
               </nav>
             </div>
@@ -94,13 +97,13 @@ export function Footer() {
         {/* Bottom */}
         <div className="footer__bottom">
           <p className="footer__copy">
-            © 2026 Movemall. สงวนสิทธิ์ทั้งหมด 🇹🇭
+            {t('footer.copyright')}
           </p>
           <div className="footer__badges">
-            <span className="footer__badge">🔒 SSL Secured</span>
+            <span className="footer__badge">🔒 {t('footer.sslSecured')}</span>
             <span className="footer__badge">💳 PromptPay</span>
-            <span className="footer__badge">🏦 Banking</span>
-            <span className="footer__badge">📦 Free Return</span>
+            <span className="footer__badge">🏦 {t('footer.banking')}</span>
+            <span className="footer__badge">📦 {t('footer.freeReturn')}</span>
           </div>
         </div>
       </div>

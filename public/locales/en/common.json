@@ -1,5 +1,87 @@
 {
   "loading": "Loading...",
-  "actions": { "close": "Close", "back": "Back", "continue": "Continue", "retry": "Try again" },
-  "errors": { "generic": "Something went wrong. Please try again.", "notFound": "The page you requested was not found." }
+  "actions": {
+    "close": "Close",
+    "back": "Back",
+    "continue": "Continue",
+    "retry": "Try again",
+    "reload": "Reload page",
+    "goHome": "Go to homepage"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "notFound": "The page you requested was not found.",
+    "updateTitle": "A new version is available, or a temporary error occurred",
+    "updateDescription": "A new version is available. Please reload the page."
+  },
+  "cookie": {
+    "ariaLabel": "Cookie and privacy notice (PDPA)",
+    "title": "Cookie use",
+    "description": "We use cookies to operate the website and improve your experience.",
+    "details": "View details",
+    "essentialOnly": "Essential only",
+    "acceptAll": "Accept all"
+  },
+  "pwa": {
+    "ariaLabel": "Install the Movemall app",
+    "title": "Install Movemall",
+    "description": "Shop faster and get deal notifications.",
+    "install": "Install",
+    "close": "Close the app installation prompt",
+    "manualInstructions": "To install the Movemall app:\n- On iOS (Safari): tap Share, then select ‘Add to Home Screen’.\n- On Android (Chrome): open the three-dot menu, then select ‘Install app’."
+  },
+  "visualSearch": {
+    "cameraError": "Unable to open the camera. Allow camera access or upload an image instead.",
+    "detectedPrimary": "Primary detected subject",
+    "keywords": {
+      "popular": "popular",
+      "highQuality": "high quality",
+      "authentic": "authentic",
+      "readyToShip": "ready to ship"
+    },
+    "officialStore": "Official Movemall store",
+    "dialogLabel": "Movemall AI Lens visual search",
+    "title": "Movemall AI Lens — Visual search",
+    "subtitle": "Take or upload a photo to find products.",
+    "close": "Close visual search",
+    "tabs": {
+      "samples": "Popular samples",
+      "upload": "Upload image",
+      "camera": "Use live camera"
+    },
+    "sampleHint": "Or choose a sample image",
+    "uploadTitle": "Drop an image here or click to upload",
+    "uploadFormats": "Supports JPG, PNG, and WEBP files (up to 10 MB)",
+    "browse": "Choose an image from your device",
+    "retryCamera": "Try opening the camera again",
+    "capture": "Take photo",
+    "queryAlt": "Image used for Movemall AI Lens search",
+    "analyzing": "AI is analyzing product features and detecting objects...",
+    "detectedObjects": "Detected objects:",
+    "scanAnother": "Scan another image",
+    "dominantColors": "Main colors:",
+    "colorTitle": "Color {{color}}",
+    "results": "Search results",
+    "resultsWithCount": "Search results ({{count}} items)",
+    "onlyMall": "Authentic Mall products only",
+    "searching": "Searching for similar products...",
+    "emptyTitle": "Choose an image to start searching",
+    "emptyDescription": "Compare shapes, styles, and colors.",
+    "noResultsTitle": "No similar products match these filters",
+    "noResultsDescription": "Turn off a filter or scan another image.",
+    "clearFilters": "Clear all filters",
+    "match": "{{score}}% match",
+    "addToCart": "Add to cart",
+    "viewProduct": "View product"
+  },
+  "toast": {
+    "region": "Notifications",
+    "close": "Close notification"
+  },
+  "accessibility": {
+    "backToTop": "Scroll to the top of the page",
+    "backToTopTitle": "Scroll to top",
+    "backToTopText": "Top",
+    "loadingProducts": "Loading products"
+  }
 }

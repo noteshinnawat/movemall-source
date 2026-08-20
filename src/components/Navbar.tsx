@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Search,
   Heart,
@@ -18,6 +19,8 @@ import {
   LogOut,
 } from 'lucide-react';
 import { fetchUnreadNotificationCount, logoutApi } from '../utils/api';
+import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import './Navbar.css';
 
 interface NavbarProps {
@@ -27,26 +30,28 @@ interface NavbarProps {
   className?: string;
 }
 
-const TRENDING_KEYWORDS = [
-  'หูฟังบลูทูธไร้สาย ตัดเสียงรบกวน',
-  'เสื้อยืดโอเวอร์ไซส์ สไตล์เกาหลี',
-  'Dyson ไดร์เป่าผม Supersonic',
-  'รองเท้าวิ่ง Nike Air Zoom',
-  'เซรั่มบำรุงผิวหน้า กระจ่างใส',
-  'iPhone 16 Pro Max 256GB',
-  'กล้องถ่ายรูป Sony Alpha 7 IV',
-  'กระเป๋าสะพายข้าง มินิมอล',
-  'หม้อทอดไร้น้ำมัน ดิจิทัล',
-  'iPad Air M2 ชิปเซ็ตแรง',
-];
-
 export function Navbar({
   cartCount = 0,
   wishlistCount = 0,
   onOpenVisualSearch,
   className = '',
 }: NavbarProps) {
+  const { t } = useTranslation('navigation');
   const navigate = useNavigate();
+  const localizePath = useLocalizedPath();
+  const trendingKeywords = [
+    t('primary.trending.wirelessHeadphones'),
+    t('primary.trending.oversizedShirt'),
+    t('primary.trending.dysonHairDryer'),
+    t('primary.trending.nikeRunningShoes'),
+    t('primary.trending.faceSerum'),
+    t('primary.trending.iphone'),
+    t('primary.trending.sonyCamera'),
+    t('primary.trending.crossbodyBag'),
+    t('primary.trending.airFryer'),
+    t('primary.trending.ipad'),
+  ];
+  const trendingKeywordCount = trendingKeywords.length;
   const [keywordIndex, setKeywordIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -142,21 +147,21 @@ export function Navbar({
     logoutApi(); // เพิกถอน token ฝั่งเซิร์ฟเวอร์ด้วย ไม่ใช่แค่ลบทิ้งฝั่ง client
     setCurrentUser(null);
     window.dispatchEvent(new Event('movemall_auth_change'));
-    navigate('/login');
+    navigate(localizePath('/login'));
   }
 
   // Cycling keyword timer (3.2 seconds)
   useEffect(() => {
     const timer = setInterval(() => {
-      setKeywordIndex(prev => (prev + 1) % TRENDING_KEYWORDS.length);
+      setKeywordIndex(prev => (prev + 1) % trendingKeywordCount);
     }, 3200);
     return () => clearInterval(timer);
-  }, []);
+  }, [trendingKeywordCount]);
 
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const queryToSearch = searchQuery.trim() || TRENDING_KEYWORDS[keywordIndex];
-    navigate(`/shop?q=${encodeURIComponent(queryToSearch)}`);
+    const queryToSearch = searchQuery.trim() || trendingKeywords[keywordIndex];
+    navigate(localizePath(`/shop?q=${encodeURIComponent(queryToSearch)}`));
   }
 
   return (
@@ -169,33 +174,37 @@ export function Navbar({
             {(currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN') && (
               <>
                 <Link to="/admin" className="navbar__top-link" style={{ color: '#DC2626', fontWeight: 800 }}>
-                  👑 จัดการระบบ Super Admin
+                  👑 {t('primary.admin')}
                 </Link>
                 <span className="navbar__top-divider" />
               </>
             )}
             <Link to="/seller" className="navbar__top-link">
-              🏪 ศูนย์ผู้ขาย (Seller Centre)
+              🏪 {t('primary.sellerCentre')}
             </Link>
             <span className="navbar__top-divider" />
             <Link to="/affiliate" className="navbar__top-link" style={{ color: '#4F46E5' }}>
-              <Share2 size={12} /> นายหน้า Affiliate
+              <Share2 size={12} /> {t('primary.affiliate')}
             </Link>
             <span className="navbar__top-divider" />
-            <Link to="/tracking" className="navbar__top-link">
-              <Truck size={12} /> ติดตามพัสดุ
-            </Link>
+            <LocalizedLink to="/tracking" className="navbar__top-link">
+              <Truck size={12} /> {t('primary.tracking')}
+            </LocalizedLink>
             <span className="navbar__top-divider" />
-            <Link to="/help" className="navbar__top-link">
-              <HelpCircle size={12} /> ช่วยเหลือ
-            </Link>
+            <LocalizedLink to="/help" className="navbar__top-link">
+              <HelpCircle size={12} /> {t('primary.help')}
+            </LocalizedLink>
           </div>
 
           {/* Right Group: Notifications, Chat, Account */}
           <div className="navbar__top-group">
-            <Link to="/notifications" className="navbar__top-link" style={{ position: 'relative' }}>
+            <div className="navbar__language-switcher--desktop">
+              <LanguageSwitcher />
+            </div>
+            <span className="navbar__top-divider" />
+            <LocalizedLink to="/notifications" className="navbar__top-link" style={{ position: 'relative' }}>
               <Bell size={12} />
-              <span>การแจ้งเตือน</span>
+              <span>{t('primary.notifications')}</span>
               {unreadNotifCount > 0 && (
                 <span
                   style={{
@@ -210,15 +219,15 @@ export function Navbar({
                   {unreadNotifCount > 99 ? '99+' : unreadNotifCount}
                 </span>
               )}
-            </Link>
+            </LocalizedLink>
             <span className="navbar__top-divider" />
-            <Link to="/chat" className="navbar__top-link">
-              <MessageSquare size={12} /> แชทกับร้านค้า
-            </Link>
+            <LocalizedLink to="/chat" className="navbar__top-link">
+              <MessageSquare size={12} /> {t('primary.chatWithStore')}
+            </LocalizedLink>
             {/* Auth / Account State */}
             {currentUser ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Link
+                <LocalizedLink
                   to="/account"
                   className="navbar__top-link"
                   style={{ fontWeight: 700, color: '#1E40AF', display: 'flex', alignItems: 'center', gap: 6 }}
@@ -232,7 +241,7 @@ export function Navbar({
                   <span style={{ fontSize: 11, background: '#FEF3C7', color: '#D97706', padding: '1px 6px', borderRadius: 4, fontWeight: 800 }}>
                     🪙 {currentUser.coinsBalance ?? 100}
                   </span>
-                </Link>
+                </LocalizedLink>
                 <span className="navbar__top-divider" />
                 <button
                   type="button"
@@ -249,20 +258,20 @@ export function Navbar({
                     alignItems: 'center',
                     gap: 4,
                   }}
-                  title="ออกจากระบบ"
+                  title={t('account.logout')}
                 >
-                  <LogOut size={12} /> ออกจากระบบ
+                  <LogOut size={12} /> {t('account.logout')}
                 </button>
               </div>
             ) : (
               <>
-                <Link to="/register" className="navbar__top-link" style={{ color: '#D97706', fontWeight: 700 }}>
-                  🎁 สมัครสมาชิก (รับ 100.-)
-                </Link>
+                <LocalizedLink to="/register" className="navbar__top-link" style={{ color: '#D97706', fontWeight: 700 }}>
+                  🎁 {t('account.registerReward')}
+                </LocalizedLink>
                 <span className="navbar__top-divider" />
-                <Link to="/login" className="navbar__top-link">
-                  <User size={12} /> เข้าสู่ระบบ
-                </Link>
+                <LocalizedLink to="/login" className="navbar__top-link">
+                  <User size={12} /> {t('account.login')}
+                </LocalizedLink>
               </>
             )}
           </div>
@@ -273,10 +282,10 @@ export function Navbar({
       <div className="navbar__main-bar">
         <div className="navbar__main-inner">
           {/* Logo (Desktop only) */}
-          <Link to="/" className="navbar__logo" aria-label="Movemall Home">
+          <LocalizedLink to="/" className="navbar__logo" aria-label={t('primary.logoHome')}>
             <div className="navbar__logo-icon">🛍</div>
             <span className="navbar__logo-text">Movemall</span>
-          </Link>
+          </LocalizedLink>
 
           {/* Search Box with Cycling Placeholder Words & Camera Icon */}
           <div className="navbar__search">
@@ -296,14 +305,14 @@ export function Navbar({
                   onChange={e => setSearchQuery(e.target.value)}
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
-                  aria-label="ค้นหาสินค้า"
+                  aria-label={t('primary.searchProducts')}
                   autoComplete="off"
                 />
 
                 {!searchQuery && !isFocused && (
                   <div className="navbar__animated-placeholder" key={keywordIndex}>
                     <span className="navbar__animated-text">
-                      {TRENDING_KEYWORDS[keywordIndex]}
+                      {trendingKeywords[keywordIndex]}
                     </span>
                   </div>
                 )}
@@ -314,8 +323,8 @@ export function Navbar({
                 type="button"
                 className="navbar__visual-search-btn"
                 onClick={onOpenVisualSearch}
-                title="ค้นหาด้วยรูปภาพ (AI Visual Lens)"
-                aria-label="ค้นหาด้วยรูปภาพ"
+                title={t('primary.visualSearchTitle')}
+                aria-label={t('primary.visualSearch')}
               >
                 <Camera size={19} />
               </button>
@@ -323,7 +332,7 @@ export function Navbar({
               <button
                 type="submit"
                 className="navbar__search-submit-btn"
-                aria-label="ค้นหา"
+                aria-label={t('primary.searchProducts')}
               >
                 <Search size={16} />
               </button>
@@ -333,10 +342,10 @@ export function Navbar({
           {/* Actions Right (Wishlist, Cart, Chat) */}
           <div className="navbar__actions">
             {/* Wishlist (Desktop only) */}
-            <Link
+            <LocalizedLink
               to="/wishlist"
               className="navbar__action-btn navbar__wishlist-btn"
-              aria-label={`Wishlist ${wishlistCount} รายการ`}
+              aria-label={t('primary.wishlistCount', { count: wishlistCount })}
             >
               <div className="navbar__icon-badge-wrap">
                 <Heart size={20} />
@@ -346,16 +355,16 @@ export function Navbar({
                   </span>
                 )}
               </div>
-              <span className="navbar__action-label">สินค้าที่ชอบ</span>
-            </Link>
+              <span className="navbar__action-label">{t('primary.wishlist')}</span>
+            </LocalizedLink>
 
             {/* Cart Icon */}
-            <Link
+            <LocalizedLink
               to="/cart"
               id="navbar-cart-btn"
               className="navbar__action-btn navbar__cart-btn"
-              aria-label={`ตะกร้าสินค้า ${cartCount} รายการ`}
-              title="ตะกร้าสินค้า"
+              aria-label={t('primary.cartCount', { count: cartCount })}
+              title={t('primary.cart')}
             >
               <div className="navbar__icon-badge-wrap">
                 <ShoppingBag size={21} />
@@ -365,16 +374,16 @@ export function Navbar({
                   </span>
                 )}
               </div>
-              <span className="navbar__action-label">ตะกร้า</span>
-            </Link>
+              <span className="navbar__action-label">{t('primary.cart')}</span>
+            </LocalizedLink>
 
             {/* Chat Icon (แชทที่ส่งหาผู้ใช้) */}
-            <Link
+            <LocalizedLink
               to="/chat"
               id="navbar-chat-btn"
               className="navbar__action-btn navbar__chat-btn"
-              aria-label="แชทข้อความ"
-              title="กล่องข้อความแชท"
+              aria-label={t('primary.chatMessages')}
+              title={t('primary.chatMessages')}
             >
               <div className="navbar__icon-badge-wrap">
                 <MessageSquare size={21} />
@@ -384,8 +393,11 @@ export function Navbar({
                   </span>
                 )}
               </div>
-              <span className="navbar__action-label">แชท</span>
-            </Link>
+              <span className="navbar__action-label">{t('primary.chat')}</span>
+            </LocalizedLink>
+            <div className="navbar__language-switcher--mobile">
+              <LanguageSwitcher />
+            </div>
           </div>
         </div>
       </div>
@@ -393,48 +405,48 @@ export function Navbar({
       {/* ── Tier 3: Sub Deals Bar (Desktop only) ── */}
       <div className="navbar__sub-bar">
         <div className="navbar__sub-inner">
-          <Link to="/mall" className="navbar__sub-link" style={{ color: '#DC2626', fontWeight: 800 }}>
+          <LocalizedLink to="/mall" className="navbar__sub-link" style={{ color: '#DC2626', fontWeight: 800 }}>
             <span style={{ background: '#DC2626', color: 'white', fontSize: 9, padding: '1px 5px', fontWeight: 900 }}>MALL</span>
-            แบรนด์ดังแท้ 100%
-          </Link>
+            {t('primary.mallAuthentic')}
+          </LocalizedLink>
 
-          <Link to="/video" className="navbar__sub-link" style={{ color: '#2563EB', fontWeight: 800 }}>
-            <span style={{ background: '#F59E0B', color: '#111827', fontSize: 9, padding: '1px 5px', fontWeight: 900 }}>🟡 ตะกร้า</span>
-            🎬 Movemall Video
-          </Link>
+          <LocalizedLink to="/video" className="navbar__sub-link" style={{ color: '#2563EB', fontWeight: 800 }}>
+            <span style={{ background: '#F59E0B', color: '#111827', fontSize: 9, padding: '1px 5px', fontWeight: 900 }}>🟡 {t('primary.yellowBasket')}</span>
+            🎬 {t('primary.movemallVideo')}
+          </LocalizedLink>
 
-          <Link to="/live" className="navbar__sub-link" style={{ color: '#EF4444', fontWeight: 800 }}>
+          <LocalizedLink to="/live" className="navbar__sub-link" style={{ color: '#EF4444', fontWeight: 800 }}>
             <span className="navbar__live-dot" />
-            LIVE ไลฟ์สด
-          </Link>
+            {t('primary.live')}
+          </LocalizedLink>
 
-          <Link to="/games" className="navbar__sub-link" style={{ color: '#4F46E5' }}>
-            🎮 เล่นเกม & รับ Coins
-          </Link>
+          <LocalizedLink to="/games" className="navbar__sub-link" style={{ color: '#4F46E5' }}>
+            🎮 {t('primary.gamesCoins')}
+          </LocalizedLink>
 
-          <Link to="/flash-sale" className="navbar__sub-link" style={{ color: 'var(--error)' }}>
+          <LocalizedLink to="/flash-sale" className="navbar__sub-link" style={{ color: 'var(--error)' }}>
             <Zap size={13} />
-            Flash Sale
-          </Link>
+            {t('primary.flashSale')}
+          </LocalizedLink>
 
-          <Link to="/vouchers" className="navbar__sub-link" style={{ color: 'var(--primary-dark)' }}>
+          <LocalizedLink to="/vouchers" className="navbar__sub-link" style={{ color: 'var(--primary-dark)' }}>
             <Ticket size={13} />
-            ศูนย์คูปอง
-          </Link>
+            {t('primary.voucherCentre')}
+          </LocalizedLink>
 
-          <Link to="/compare" className="navbar__sub-link">
+          <LocalizedLink to="/compare" className="navbar__sub-link">
             <Scale size={13} />
-            เปรียบเทียบสเปก
-          </Link>
+            {t('primary.compareSpecs')}
+          </LocalizedLink>
 
-          <Link to="/stores" className="navbar__sub-link">
+          <LocalizedLink to="/stores" className="navbar__sub-link">
             <Store size={13} />
-            ร้านค้าทางการ
-          </Link>
+            {t('primary.officialStores')}
+          </LocalizedLink>
 
-          <Link to="/shop" className="navbar__sub-link" style={{ marginLeft: 'auto', color: 'var(--primary)' }}>
-            ดูสินค้าทั้งหมด (160+ ชิ้น) →
-          </Link>
+          <LocalizedLink to="/shop" className="navbar__sub-link" style={{ marginLeft: 'auto', color: 'var(--primary)' }}>
+            {t('primary.allProducts')}
+          </LocalizedLink>
         </div>
       </div>
     </header>

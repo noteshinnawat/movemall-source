@@ -1,10 +1,12 @@
 // src/components/BackToTopButton.tsx — Floating Back to Top Button
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronUp } from 'lucide-react';
 import './BackToTopButton.css';
 
 export function BackToTopButton() {
+  const { t } = useTranslation('common');
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -34,11 +36,11 @@ export function BackToTopButton() {
       type="button"
       className="back-to-top-btn"
       onClick={scrollToTop}
-      aria-label="เลื่อนขึ้นด้านบนสุด"
-      title="เลื่อนขึ้นบนสุด"
+      aria-label={t('accessibility.backToTop')}
+      title={t('accessibility.backToTopTitle')}
     >
       <ChevronUp size={20} className="back-to-top-icon" />
-      <span className="back-to-top-text">ขึ้นบนสุด</span>
+      <span className="back-to-top-text">{t('accessibility.backToTopText')}</span>
     </button>
   );
 }

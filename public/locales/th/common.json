@@ -1,5 +1,87 @@
 {
   "loading": "กำลังโหลด...",
-  "actions": { "close": "ปิด", "back": "ย้อนกลับ", "continue": "ดำเนินการต่อ", "retry": "ลองอีกครั้ง" },
-  "errors": { "generic": "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง", "notFound": "ไม่พบหน้าที่ต้องการ" }
+  "actions": {
+    "close": "ปิด",
+    "back": "ย้อนกลับ",
+    "continue": "ดำเนินการต่อ",
+    "retry": "ลองอีกครั้ง",
+    "reload": "โหลดหน้าเว็บใหม่",
+    "goHome": "กลับหน้าแรก"
+  },
+  "errors": {
+    "generic": "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง",
+    "notFound": "ไม่พบหน้าที่ต้องการ",
+    "updateTitle": "มีการอัปเดตเวอร์ชันใหม่ หรือพบข้อผิดพลาดชั่วคราว",
+    "updateDescription": "มีเวอร์ชันใหม่ กรุณาโหลดหน้าเว็บอีกครั้ง"
+  },
+  "cookie": {
+    "ariaLabel": "การแจ้งเตือนคุกกี้และความเป็นส่วนตัว (PDPA)",
+    "title": "การใช้คุกกี้",
+    "description": "เราใช้คุกกี้เพื่อให้เว็บไซต์ทำงานและปรับปรุงการใช้งาน",
+    "details": "ดูรายละเอียด",
+    "essentialOnly": "เฉพาะที่จำเป็น",
+    "acceptAll": "ยอมรับทั้งหมด"
+  },
+  "pwa": {
+    "ariaLabel": "ติดตั้งแอป Movemall",
+    "title": "ติดตั้ง Movemall",
+    "description": "ช้อปเร็วขึ้น พร้อมรับแจ้งเตือนดีล",
+    "install": "ติดตั้ง",
+    "close": "ปิดการแจ้งเตือนติดตั้งแอป",
+    "manualInstructions": "เพื่อติดตั้งแอป Movemall:\n- บน iOS (Safari): กดปุ่มแชร์ (Share) แล้วเลือก ‘เพิ่มไปยังหน้าจอโฮม’ (Add to Home Screen)\n- บน Android (Chrome): กดเมนู 3 จุด แล้วเลือก ‘ติดตั้งแอป’ (Install App)"
+  },
+  "visualSearch": {
+    "cameraError": "เปิดกล้องไม่ได้ โปรดอนุญาตสิทธิ์หรืออัปโหลดรูปแทน",
+    "detectedPrimary": "วัตถุหลักที่ตรวจพบ (Primary Subject)",
+    "keywords": {
+      "popular": "ยอดนิยม",
+      "highQuality": "คุณภาพสูง",
+      "authentic": "ของแท้",
+      "readyToShip": "พร้อมส่ง"
+    },
+    "officialStore": "ร้านค้าทางการ Movemall",
+    "dialogLabel": "ค้นหาด้วยรูปภาพ Movemall AI Lens",
+    "title": "Movemall AI Lens — ค้นหาด้วยรูปภาพ",
+    "subtitle": "ถ่ายหรืออัปโหลดรูปเพื่อค้นหาสินค้า",
+    "close": "ปิดหน้าต่างค้นหาด้วยรูปภาพ",
+    "tabs": {
+      "samples": "ภาพตัวอย่างยอดนิยม",
+      "upload": "อัปโหลดรูปภาพ",
+      "camera": "ถ่ายจากกล้องสด"
+    },
+    "sampleHint": "หรือเลือกรูปตัวอย่าง",
+    "uploadTitle": "ลากไฟล์รูปภาพมาวางที่นี่ หรือคลิกเพื่ออัปโหลด",
+    "uploadFormats": "รองรับไฟล์ JPG, PNG, WEBP (ขนาดสูงสุด 10 MB)",
+    "browse": "เลือกรูปภาพจากเครื่อง",
+    "retryCamera": "ลองเปิดกล้องใหม่อีกครั้ง",
+    "capture": "ถ่ายรูป",
+    "queryAlt": "รูปภาพที่ใช้ค้นหาด้วย Movemall AI Lens",
+    "analyzing": "AI กำลังวิเคราะห์ลักษณะสินค้าและตรวจจับวัตถุ...",
+    "detectedObjects": "วัตถุที่ตรวจพบ:",
+    "scanAnother": "สแกนรูปอื่น",
+    "dominantColors": "โทนสีหลัก:",
+    "colorTitle": "โทนสี {{color}}",
+    "results": "ผลการค้นหา",
+    "resultsWithCount": "ผลการค้นหา ({{count}} รายการ)",
+    "onlyMall": "เฉพาะ Mall แท้",
+    "searching": "กำลังค้นหาสินค้าที่ใกล้เคียง...",
+    "emptyTitle": "เลือกรูปภาพเพื่อเริ่มการค้นหา",
+    "emptyDescription": "เปรียบเทียบรูปทรง สไตล์ และโทนสี",
+    "noResultsTitle": "ไม่พบสินค้าที่ใกล้เคียงกับเงื่อนไขนี้",
+    "noResultsDescription": "ลองปิดตัวกรอง หรือเลือกสแกนรูปภาพอื่น",
+    "clearFilters": "ล้างตัวกรองทั้งหมด",
+    "match": "ตรงกัน {{score}}%",
+    "addToCart": "ใส่ตะกร้า",
+    "viewProduct": "ดูสินค้า"
+  },
+  "toast": {
+    "region": "การแจ้งเตือน",
+    "close": "ปิดการแจ้งเตือน"
+  },
+  "accessibility": {
+    "backToTop": "เลื่อนขึ้นด้านบนสุด",
+    "backToTopTitle": "เลื่อนขึ้นบนสุด",
+    "backToTopText": "ขึ้นบนสุด",
+    "loadingProducts": "กำลังโหลดสินค้า"
+  }
 }

@@ -1,7 +1,8 @@
 // src/components/PWAInstallPrompt.tsx — Add to Home Screen / Install App Banner
 
 import { useState, useEffect } from 'react';
-import { X, Smartphone, Download } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { X, Download } from 'lucide-react';
 import './PWAInstallPrompt.css';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -10,6 +11,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function PWAInstallPrompt() {
+  const { t } = useTranslation('common');
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
 
@@ -45,7 +47,7 @@ export function PWAInstallPrompt() {
         setShowPrompt(false);
       }
     } else {
-      alert('เพื่อติดตั้งแอป Movemall:\n- บน iOS (Safari): กดปุ่มแชร์ (Share) แล้วเลือก "เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)\n- บน Android (Chrome): กดเมนู 3 จุด แล้วเลือก "ติดตั้งแอป" (Install App)');
+      alert(t('pwa.manualInstructions'));
     }
   }
 
@@ -57,24 +59,24 @@ export function PWAInstallPrompt() {
   if (!showPrompt) return null;
 
   return (
-    <aside className="pwa-prompt" role="alert" aria-label="ติดตั้งแอป Movemall">
+    <aside className="pwa-prompt" role="alert" aria-label={t('pwa.ariaLabel')}>
       <div className="pwa-prompt__info">
         <span className="pwa-prompt__icon">🛍️</span>
         <div className="pwa-prompt__text">
-          <div className="pwa-prompt__title">ติดตั้ง Movemall</div>
-          <div className="pwa-prompt__desc">ช้อปเร็วขึ้น พร้อมรับแจ้งเตือนดีล</div>
+          <div className="pwa-prompt__title">{t('pwa.title')}</div>
+          <div className="pwa-prompt__desc">{t('pwa.description')}</div>
         </div>
       </div>
 
       <div className="pwa-prompt__actions">
         <button className="pwa-prompt__install-btn" onClick={handleInstall}>
           <Download size={12} style={{ display: 'inline', marginRight: 4 }} />
-          ติดตั้ง
+          {t('pwa.install')}
         </button>
         <button
           className="pwa-prompt__close-btn"
           onClick={handleDismiss}
-          aria-label="ปิดการแจ้งเตือน"
+          aria-label={t('pwa.close')}
         >
           <X size={16} />
         </button>
