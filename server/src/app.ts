@@ -308,20 +308,10 @@ io.on('connection', (socket) => {
       socket.to(sellerRoom).emit('receive_chat_message', msgPayload);
     }
 
-    // Save to Database asynchronously
-    try {
-      const { prismaWrite } = await import('./config/database.js');
-      await prismaWrite.chatMessage.create({
-        data: {
-          senderId: msgPayload.senderId,
-          recipientId: msgPayload.recipientId,
-          storeId: msgPayload.storeId,
-          text: msgPayload.text,
-        },
-      });
-    } catch (e) {
-      // Memory fallback if DB is in local sandbox
-    }
+    // ไม่บันทึกลง DB ที่นี่ — client ทุกตัวยิง POST /api/chat/messages คู่กันอยู่แล้ว
+    // เดิมเขียนทั้งสองทางทำให้ข้อความเดียวถูกบันทึกซ้ำ 2 แถว (เพิ่งเห็นตอนต่อ DB จริง
+    // เพราะก่อนหน้านี้การเขียนล้มเหลวเงียบ ๆ) ช่องทางนี้จึงเหลือหน้าที่กระจายสัญญาณอย่างเดียว
+    // และ REST เป็นแหล่งบันทึกทางเดียว ซึ่งทนกว่าเมื่อ socket หลุด
   });
 
   socket.on('disconnect', () => {
