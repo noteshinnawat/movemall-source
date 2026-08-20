@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Send,
   Store,
@@ -22,6 +23,9 @@ import {
   getStoredChatHistory,
   saveStoredChatHistory,
 } from '../utils/chatSocket';
+import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
+import { formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import './ChatPage.css';
 
 interface Message {
@@ -67,6 +71,9 @@ interface ConversationView {
 }
 
 export function ChatPage() {
+  const { t, i18n } = useTranslation(['engagement', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const localizePath = useLocalizedPath();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const storeParam = searchParams.get('store');
@@ -100,6 +107,8 @@ export function ChatPage() {
     const refId = refParam;
     const refName = refNameParam;
     if (sourceType && selectedStoreId && myUserId) {
+      // These labels are read by the seller CRM, so they stay in the source
+      // language rather than following the buyer's UI locale.
       const labelMap: Record<string, string> = {
         product: `สินค้า: ${decodeURIComponent(refName || refId || '')}`,
         store: `หน้าร้าน: ${decodeURIComponent(refName || '')}`,
@@ -217,7 +226,7 @@ export function ChatPage() {
         [data.storeId]: {
           ...(prev[data.storeId] || { unreadCount: 0 }),
           isOnline: data.isOnline,
-          lastActive: data.isOnline ? 'ออนไลน์' : 'ออฟไลน์',
+          lastActive: data.isOnline ? t('engagement:chat.online') : t('engagement:chat.offline'),
         },
       }));
     };
@@ -246,7 +255,7 @@ export function ChatPage() {
       socket.off('user_typing', handleUserTyping);
       socket.off('store_presence', handleStorePresence);
     };
-  }, [selectedStoreId, myUserId]);
+  }, [selectedStoreId, myUserId, t]);
 
   // รายการห้องแชทจริงของผู้ใช้คนนี้
   const [apiConversations, setApiConversations] = useState<ApiConversation[]>([]);
@@ -439,12 +448,8 @@ export function ChatPage() {
     }
   }
 
-  const quickQuestions = [
-    '📦 มีสินค้าพร้อมส่งไหมครับ?',
-    '📸 ขอดูรูปสินค้าจริงเพิ่มเติม',
-    '🧾 ขอใบกำกับภาษีได้ไหม?',
-    '🎟️ มีโค้ดส่วนลดพิเศษไหมครับ?',
-  ];
+  const quickQuestions = (['stock', 'photos', 'invoice', 'voucher'] as const)
+    .map(key => t(`engagement:chat.quickQuestions.${key}`));
 
   // ── รายการห้องแชท ──
   // เดิมสร้างจาก static store list ทั้งหมด ทำให้โชว์ทุกร้านในระบบเป็นห้องแชท
@@ -457,7 +462,7 @@ export function ChatPage() {
     const resolveDisplay = (storeId: string, conv?: ApiConversation) => {
       const staticStore = stores.find(st => st.id === storeId);
       return {
-        name: conv?.storeName || staticStore?.name || 'ร้านค้า',
+        name: conv?.storeName || staticStore?.name || t('engagement:chat.storeFallback'),
         logo: conv?.storeLogo || staticStore?.logo || '',
         isMall: conv?.isMall ?? (staticStore ? staticStore.badge === 'official' : false),
       };
@@ -496,7 +501,7 @@ export function ChatPage() {
       byId.set(selectedStoreId, {
         id: selectedStoreId,
         ...resolveDisplay(selectedStoreId),
-        lastMessage: 'เริ่มการสนทนา',
+        lastMessage: t('engagement:chat.startConversation'),
         lastTime: '',
         unreadCount: 0,
         isOnline: Boolean(convMeta[selectedStoreId]?.isOnline),
@@ -508,7 +513,7 @@ export function ChatPage() {
 
   const activeDisplay = conversationViews.find(c => c.id === selectedStoreId) || {
     id: selectedStoreId,
-    name: staticActiveStore?.name || 'ร้านค้า',
+    name: staticActiveStore?.name || t('engagement:chat.storeFallback'),
     logo: staticActiveStore?.logo || '',
     isMall: staticActiveStore?.badge === 'official',
     lastMessage: '',
@@ -545,21 +550,23 @@ export function ChatPage() {
                   if (window.history.length > 1) {
                     navigate(-1);
                   } else {
-                    navigate('/');
+                    navigate(localizePath('/'));
                   }
                 }}
-                aria-label="ย้อนกลับ"
-                title="ย้อนกลับ"
+                aria-label={t('engagement:chat.back')}
+                title={t('engagement:chat.back')}
               >
                 <ArrowLeft size={18} />
               </button>
               <h1 className="chat-sidebar__title">
-                💬 กล่องข้อความแชท
-                {totalUnread > 0 && <span className="chat-badge-count">{totalUnread}</span>}
+                {t('engagement:chat.inboxTitle')}
+                {totalUnread > 0 && (
+                  <span className="chat-badge-count">{formatNumber(totalUnread, locale)}</span>
+                )}
               </h1>
               {isSocketConnected && (
-                <span className="chat-live-badge" title="WebSocket Live Connected">
-                  <Radio size={10} className="chat-live-icon" /> สด
+                <span className="chat-live-badge" title={t('engagement:chat.liveBadgeTitle')}>
+                  <Radio size={10} className="chat-live-icon" /> {t('engagement:chat.liveBadge')}
                 </span>
               )}
             </div>
@@ -569,7 +576,7 @@ export function ChatPage() {
               <Search size={14} className="chat-search-icon" />
               <input
                 type="text"
-                placeholder="ค้นหาร้านค้า หรือข้อความ..."
+                placeholder={t('engagement:chat.searchPlaceholder')}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="chat-search-input"
@@ -582,19 +589,21 @@ export function ChatPage() {
                 className={`chat-filter-tab ${filterTab === 'all' ? 'chat-filter-tab--active' : ''}`}
                 onClick={() => setFilterTab('all')}
               >
-                ทั้งหมด ({conversationViews.length})
+                {t('engagement:chat.tabAll', { count: conversationViews.length })}
               </button>
               <button
                 className={`chat-filter-tab ${filterTab === 'unread' ? 'chat-filter-tab--active' : ''}`}
                 onClick={() => setFilterTab('unread')}
               >
-                ยังไม่อ่าน {totalUnread > 0 && `(${totalUnread})`}
+                {totalUnread > 0
+                  ? t('engagement:chat.tabUnreadCount', { count: totalUnread })
+                  : t('engagement:chat.tabUnread')}
               </button>
               <button
                 className={`chat-filter-tab ${filterTab === 'official' ? 'chat-filter-tab--active' : ''}`}
                 onClick={() => setFilterTab('official')}
               >
-                ร้าน Mall 👑
+                {t('engagement:chat.tabOfficial')}
               </button>
             </div>
           </div>
@@ -602,13 +611,19 @@ export function ChatPage() {
           <div className="chat-conv-list">
             {isLoadingConversations ? (
               <div className="chat-conv-empty">
-                <p>กำลังโหลดรายการแชท...</p>
+                <p>{t('engagement:chat.loading')}</p>
               </div>
             ) : filteredConversations.length === 0 ? (
               <div className="chat-conv-empty">
-                <p>{conversationViews.length === 0 ? 'ยังไม่มีการสนทนากับร้านค้า' : 'ไม่พบรายการแชทที่ตรงกับเงื่อนไข'}</p>
+                <p>
+                  {conversationViews.length === 0
+                    ? t('engagement:chat.emptyAll')
+                    : t('engagement:chat.emptyFiltered')}
+                </p>
                 {conversationViews.length === 0 && (
-                  <Link to="/stores" className="chat-browse-stores-link">เลือกดูร้านค้า</Link>
+                  <LocalizedLink to="/stores" className="chat-browse-stores-link">
+                    {t('engagement:chat.browseStores')}
+                  </LocalizedLink>
                 )}
               </div>
             ) : (
@@ -623,7 +638,9 @@ export function ChatPage() {
                   >
                     <div className="chat-avatar-wrapper">
                       <img src={conv.logo} alt={conv.name} className="chat-conv-avatar" />
-                      {conv.isOnline && <span className="chat-online-dot" title="ออนไลน์" />}
+                      {conv.isOnline && (
+                        <span className="chat-online-dot" title={t('engagement:chat.onlineDotTitle')} />
+                      )}
                     </div>
 
                     <div className="chat-conv-info">
@@ -654,7 +671,7 @@ export function ChatPage() {
         <section className={`chat-main ${mobileView === 'chat' ? 'chat-main--show-mobile' : ''}`}>
           {!selectedStoreId ? (
             <div className="chat-no-selection">
-              <p className="chat-no-selection__title">เลือกห้องสนทนาทางซ้ายเพื่อเริ่มแชท</p>
+              <p className="chat-no-selection__title">{t('engagement:chat.noSelection')}</p>
             </div>
           ) : (
             <>
@@ -665,11 +682,11 @@ export function ChatPage() {
                 <button
                   className="chat-back-btn"
                   onClick={handleBackToList}
-                  title="กลับหน้ารวมแชท"
-                  aria-label="ย้อนกลับไปหน้ารวมแชท"
+                  title={t('engagement:chat.backToListTitle')}
+                  aria-label={t('engagement:chat.backToListAria')}
                 >
                   <ArrowLeft size={18} />
-                  <span className="chat-back-text">แชททั้งหมด</span>
+                  <span className="chat-back-text">{t('engagement:chat.backToListText')}</span>
                 </button>
 
                 <div className="chat-avatar-wrapper">
@@ -681,11 +698,11 @@ export function ChatPage() {
                   <div className="chat-header-title-row">
                     <strong className="chat-header-name">{activeDisplay.name}</strong>
                     {activeDisplay.isMall && (
-                      <span className="chat-badge-official">Official Mall</span>
+                      <span className="chat-badge-official">{t('engagement:chat.officialMall')}</span>
                     )}
                     {isSocketConnected && (
                       <span className="chat-live-badge">
-                        <Radio size={9} /> เชื่อมต่อสด
+                        <Radio size={9} /> {t('engagement:chat.connectedLive')}
                       </span>
                     )}
                   </div>
@@ -700,10 +717,10 @@ export function ChatPage() {
               </div>
 
               <div className="chat-header-actions">
-                <Link to={`/store/${selectedStoreId}`} className="chat-visit-store-btn">
+                <LocalizedLink to={`/store/${selectedStoreId}`} className="chat-visit-store-btn">
                   <Store size={14} />
-                  <span className="chat-visit-text">หน้าร้าน</span>
-                </Link>
+                  <span className="chat-visit-text">{t('engagement:chat.visitStore')}</span>
+                </LocalizedLink>
               </div>
             </div>
 
@@ -711,13 +728,13 @@ export function ChatPage() {
             <div className="chat-messages" ref={messagesContainerRef}>
               <div className="chat-secure-banner">
                 <ShieldCheck size={14} className="chat-secure-icon" />
-                <span>การสนทนาได้รับการปกป้องโดย Movemall Buyer Protection ห้ามโอนเงินนอกระบบ</span>
+                <span>{t('engagement:chat.secureBanner')}</span>
               </div>
 
               {currentMsgs.length === 0 && (
                 <div className="chat-empty-thread">
-                  <p className="chat-empty-thread__title">ยังไม่มีข้อความกับร้านนี้</p>
-                  <p className="chat-empty-thread__hint">ทักไปได้เลย ร้านค้าจะเห็นข้อความของคุณทันที</p>
+                  <p className="chat-empty-thread__title">{t('engagement:chat.emptyThreadTitle')}</p>
+                  <p className="chat-empty-thread__hint">{t('engagement:chat.emptyThreadHint')}</p>
                 </div>
               )}
 
@@ -742,7 +759,7 @@ export function ChatPage() {
                     <span className="chat-typing-dot" />
                     <span className="chat-typing-dot" />
                   </div>
-                  <span className="chat-time">กำลังพิมพ์...</span>
+                  <span className="chat-time">{t('engagement:chat.typing')}</span>
                 </div>
               )}
             </div>
@@ -750,7 +767,7 @@ export function ChatPage() {
             {/* Quick Questions Strip */}
             <div className="chat-quick-questions">
               <span className="chat-quick-label">
-                <Sparkles size={12} /> ถามด่วน:
+                <Sparkles size={12} /> {t('engagement:chat.quickLabel')}
               </span>
               <div className="chat-quick-chips">
                 {quickQuestions.map((q, idx) => (
@@ -771,15 +788,15 @@ export function ChatPage() {
               <button
                 type="button"
                 className="chat-tool-btn"
-                title="แนบรูปภาพ"
-                onClick={() => handleSend(undefined, '📸 [ส่งรูปภาพสินค้าตัวอย่าง]')}
+                title={t('engagement:chat.attachImageTitle')}
+                onClick={() => handleSend(undefined, t('engagement:chat.attachImageMessage'))}
               >
                 <ImageIcon size={18} />
               </button>
               <button
                 type="button"
                 className="chat-tool-btn"
-                title="อีโมจิ"
+                title={t('engagement:chat.emojiTitle')}
                 onClick={() => setInputVal(prev => prev + ' 😊')}
               >
                 <Smile size={18} />
@@ -787,13 +804,13 @@ export function ChatPage() {
               <input
                 type="text"
                 className="chat-input"
-                placeholder={`พิมพ์ข้อความถึง ${activeDisplay.name}...`}
+                placeholder={t('engagement:chat.inputPlaceholder', { store: activeDisplay.name })}
                 value={inputVal}
                 onChange={handleInputChange}
               />
               <button type="submit" className="chat-send-btn">
                 <Send size={15} />
-                <span>ส่ง</span>
+                <span>{t('engagement:chat.send')}</span>
               </button>
             </form>
             </>

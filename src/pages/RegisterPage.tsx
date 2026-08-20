@@ -1,6 +1,7 @@
 // src/pages/RegisterPage.tsx — Customer Sign-Up & Registration Portal
 import { useState, useId } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   User,
   Mail,
@@ -26,12 +27,18 @@ import { promptGoogleAuth } from '../utils/googleAuth';
 import { initiateLineLogin } from '../utils/lineAuth';
 import './RegisterPage.css';
 import { getTurnstileToken } from '../utils/turnstile';
+import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
+import { formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 
 interface RegisterPageProps {
   onRegisterSuccess?: (name: string, role: 'buyer' | 'seller') => void;
 }
 
 export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
+  const { t, i18n } = useTranslation(['auth', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const localizePath = useLocalizedPath();
   const navigate = useNavigate();
 
   // Form Mode: 'phone' or 'email'
@@ -68,7 +75,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
 
   // Password Strength Calculation
   function getPasswordStrength(pass: string): { score: number; label: string; color: string } {
-    if (!pass) return { score: 0, label: 'ยังไม่ได้ระบุ', color: '#E5E7EB' };
+    if (!pass) return { score: 0, label: t('auth:register.passwordStrength.none'), color: '#E5E7EB' };
     let score = 0;
     if (pass.length >= 6) score += 1;
     if (pass.length >= 8) score += 1;
@@ -76,9 +83,9 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
     if (/[0-9]/.test(pass)) score += 1;
     if (/[^A-Za-z0-9]/.test(pass)) score += 1;
 
-    if (score <= 1) return { score: 1, label: 'ง่ายเกินไป', color: '#EF4444' };
-    if (score <= 3) return { score: 2, label: 'ปานกลาง', color: '#F59E0B' };
-    return { score: 3, label: 'ปลอดภัยสูง', color: '#10B981' };
+    if (score <= 1) return { score: 1, label: t('auth:register.passwordStrength.weak'), color: '#EF4444' };
+    if (score <= 3) return { score: 2, label: t('auth:register.passwordStrength.medium'), color: '#F59E0B' };
+    return { score: 3, label: t('auth:register.passwordStrength.strong'), color: '#10B981' };
   }
 
   const pwdStrength = getPasswordStrength(password);
@@ -90,23 +97,25 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
     setErrorMsg('');
 
     if (!name.trim()) {
-      setErrorMsg('กรุณากรอกชื่อ-นามสกุลของคุณ');
+      setErrorMsg(t('auth:validation.nameRequired'));
       return;
     }
     if (!targetValue.trim()) {
-      setErrorMsg(method === 'phone' ? 'กรุณากรอกเบอร์โทรศัพท์' : 'กรุณากรอกอีเมล');
+      setErrorMsg(method === 'phone'
+        ? t('auth:validation.phoneFieldRequired')
+        : t('auth:validation.emailFieldRequired'));
       return;
     }
     if (password.length < 6) {
-      setErrorMsg('รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร');
+      setErrorMsg(t('auth:validation.passwordTooShort'));
       return;
     }
     if (password !== confirmPassword) {
-      setErrorMsg('รหัสผ่านทั้งสองช่องไม่ตรงกัน');
+      setErrorMsg(t('auth:validation.passwordMismatch'));
       return;
     }
     if (!agreeTerms) {
-      setErrorMsg('กรุณากดยอมรับข้อกำหนดและนโยบายความเป็นส่วนตัว');
+      setErrorMsg(t('auth:validation.consentRequired'));
       return;
     }
 
@@ -184,7 +193,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
   async function handleFinalRegister() {
     const enteredOtp = otpDigits.join('');
     if (enteredOtp.length < 6) {
-      setErrorMsg('กรุณากรอกรหัส OTP 6 หลักให้ครบถ้วน');
+      setErrorMsg(t('auth:validation.otpIncomplete'));
       return;
     }
 
@@ -200,7 +209,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
         });
       } catch (verifyErr: any) {
         if (enteredOtp !== '123456' && enteredOtp !== demoOtp) {
-          setErrorMsg(verifyErr?.message || 'รหัส OTP ไม่ถูกต้องหรือหมดอายุ');
+          setErrorMsg(verifyErr?.message || t('auth:validation.otpInvalid'));
           setLoading(false);
           return;
         }
@@ -255,12 +264,12 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
 
   function handleCompleteAndStartShopping() {
     setWelcomeModal(null);
-    navigate('/');
+    navigate(localizePath('/'));
   }
 
   function handleGoToAccount() {
     setWelcomeModal(null);
-    navigate('/account');
+    navigate(localizePath('/account'));
   }
 
   // Handle 1-Click Social Sign-Up (Google / LINE / Facebook)
@@ -294,7 +303,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
 
         const finalUser = {
           id: res.user?.id,
-          name: res.user?.name || authRes.googleUser?.name || 'สมาชิก Google',
+          name: res.user?.name || authRes.googleUser?.name || t('auth:oauth.googleMemberFallback'),
           email: res.user?.email || authRes.googleUser?.email,
           avatarUrl: res.user?.avatarUrl || authRes.googleUser?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(res.user?.name || 'Google')}`,
           role: res.user?.role || 'BUYER',
@@ -325,12 +334,12 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
 
       // Facebook Handler — ยังไม่เปิดให้บริการ
       // เดิมสร้างบัญชีจากอีเมลปลอมที่ฝั่ง client กำหนดเอง โดยไม่ยืนยันตัวตนกับ Facebook
-      setErrorMsg('ขณะนี้ยังไม่เปิดให้สมัครสมาชิกด้วย Facebook กรุณาใช้ Google, LINE, อีเมล หรือเบอร์โทรศัพท์แทน');
+      setErrorMsg(t('auth:oauth.facebookRegisterUnavailable'));
       return;
     } catch (err: any) {
       console.warn('Social register error:', err);
       const providerLabel = provider === 'google' ? 'Google' : (provider === 'line' ? 'LINE' : 'Facebook');
-      setErrorMsg(`การเชื่อมต่อกับ ${providerLabel} ไม่สำเร็จ หรือถูกปิดหน้าต่าง กรุณาลองใหม่อีกครั้ง`);
+      setErrorMsg(t('auth:oauth.connectFailed', { provider: providerLabel }));
     } finally {
       setLoading(false);
     }
@@ -343,14 +352,14 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
         <aside className="reg-hero-side">
           <div className="reg-hero-content">
             <div className="reg-hero-badge">
-              <Sparkles size={15} /> สิทธิ์สมาชิกใหม่
+              <Sparkles size={15} /> {t('auth:register.heroBadge')}
             </div>
             <h1 className="reg-hero-title">
-              สมัครวันนี้ <br />
-              <span className="reg-hero-highlight">รับสิทธิ์ทันที 3 ต่อ</span>
+              {t('auth:register.heroTitle')} <br />
+              <span className="reg-hero-highlight">{t('auth:register.heroHighlight')}</span>
             </h1>
             <p className="reg-hero-desc">
-              ช้อป ดูไลฟ์ และสะสม Coins ได้ในที่เดียว
+              {t('auth:register.heroDesc')}
             </p>
 
             {/* Perks Cards */}
@@ -360,8 +369,8 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                   <Coins size={22} />
                 </div>
                 <div>
-                  <h3 className="reg-perk-title">รับ 100 Coins 🪙</h3>
-                  <p className="reg-perk-sub">ใช้ลดได้สูงสุด ฿100</p>
+                  <h3 className="reg-perk-title">{t('auth:register.perkCoinsTitle')}</h3>
+                  <p className="reg-perk-sub">{t('auth:register.perkCoinsSub')}</p>
                 </div>
               </div>
 
@@ -370,8 +379,8 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                   <Truck size={22} />
                 </div>
                 <div>
-                  <h3 className="reg-perk-title">คูปองส่งฟรี 🚚</h3>
-                  <p className="reg-perk-sub">ไม่มีขั้นต่ำ</p>
+                  <h3 className="reg-perk-title">{t('auth:register.perkShippingTitle')}</h3>
+                  <p className="reg-perk-sub">{t('auth:register.perkShippingSub')}</p>
                 </div>
               </div>
 
@@ -380,8 +389,8 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                   <Ticket size={22} />
                 </div>
                 <div>
-                  <h3 className="reg-perk-title">ลด 50% ออเดอร์แรก 🎟️</h3>
-                  <p className="reg-perk-sub">ลดสูงสุด ฿200</p>
+                  <h3 className="reg-perk-title">{t('auth:register.perkDiscountTitle')}</h3>
+                  <p className="reg-perk-sub">{t('auth:register.perkDiscountSub')}</p>
                 </div>
               </div>
             </div>
@@ -389,7 +398,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
             <div className="reg-hero-footer">
               <div className="reg-guarantee-tag">
                 <ShieldCheck size={16} color="#10B981" />
-                <span>สินค้าแท้ ชำระเงินปลอดภัย</span>
+                <span>{t('auth:register.guarantee')}</span>
               </div>
             </div>
           </div>
@@ -405,23 +414,25 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                   type="button"
                   className="reg-type-btn reg-type-btn--active"
                 >
-                  <User size={15} /> บัญชีผู้ซื้อ
+                  <User size={15} /> {t('auth:register.buyerAccount')}
                 </button>
-                <Link
+                <LocalizedLink
                   to="/seller/register"
                   className="reg-type-btn reg-type-btn--link"
                 >
-                  <Store size={15} /> เปิดร้าน →
-                </Link>
+                  <Store size={15} /> {t('auth:register.openStore')}
+                </LocalizedLink>
               </div>
 
               <h2 className="reg-card-title">
-                {step === 'form' ? 'สร้างบัญชี' : 'ยืนยัน OTP'}
+                {step === 'form' ? t('auth:register.titleForm') : t('auth:register.titleOtp')}
               </h2>
               <p className="reg-card-sub">
                 {step === 'form'
-                  ? 'กรอกข้อมูลเพื่อสมัครสมาชิก'
-                  : `กรอก OTP 6 หลักจาก ${method === 'phone' ? 'SMS' : 'อีเมล'} ${targetValue}`}
+                  ? t('auth:register.subtitleForm')
+                  : method === 'phone'
+                    ? t('auth:register.subtitleOtpSms', { target: targetValue })
+                    : t('auth:register.subtitleOtpEmail', { target: targetValue })}
               </p>
             </div>
 
@@ -444,7 +455,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                       setTargetValue('');
                     }}
                   >
-                    <Phone size={14} /> สมัครด้วยเบอร์โทรศัพท์
+                    <Phone size={14} /> {t('auth:register.methodPhone')}
                   </button>
                   <button
                     type="button"
@@ -454,14 +465,14 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                       setTargetValue('');
                     }}
                   >
-                    <Mail size={14} /> สมัครด้วยอีเมล
+                    <Mail size={14} /> {t('auth:register.methodEmail')}
                   </button>
                 </div>
 
                 {/* Name Input */}
                 <div className="reg-field">
                   <label className="reg-label" htmlFor="reg-name">
-                    ชื่อ-นามสกุล <span className="reg-required">*</span>
+                    {t('auth:register.nameLabel')} <span className="reg-required">*</span>
                   </label>
                   <div className="reg-input-wrap">
                     <User size={16} className="reg-input-icon" />
@@ -469,7 +480,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                       id="reg-name"
                       type="text"
                       required
-                      placeholder="เช่น สมชาย ใจดี"
+                      placeholder={t('auth:register.namePlaceholder')}
                       className="reg-input"
                       value={name}
                       onChange={e => setName(e.target.value)}
@@ -480,7 +491,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                 {/* Target Value Input (Phone or Email) */}
                 <div className="reg-field">
                   <label className="reg-label" htmlFor="reg-target">
-                    {method === 'phone' ? 'เบอร์โทรศัพท์มือถือ' : 'ที่อยู่อีเมล'}{' '}
+                    {method === 'phone' ? t('auth:register.phoneLabel') : t('auth:register.emailLabel')}{' '}
                     <span className="reg-required">*</span>
                   </label>
                   <div className="reg-input-wrap">
@@ -493,7 +504,9 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                       id="reg-target"
                       type={method === 'phone' ? 'tel' : 'email'}
                       required
-                      placeholder={method === 'phone' ? 'เช่น 0812345678' : 'เช่น yourname@example.com'}
+                      placeholder={method === 'phone'
+                        ? t('auth:register.phonePlaceholder')
+                        : t('auth:register.emailPlaceholder')}
                       className="reg-input"
                       value={targetValue}
                       onChange={e => setTargetValue(e.target.value)}
@@ -505,11 +518,11 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                 <div className="reg-field">
                   <div className="reg-label-row">
                     <label className="reg-label" htmlFor="reg-password">
-                      รหัสผ่านความปลอดภัย <span className="reg-required">*</span>
+                      {t('auth:register.passwordLabel')} <span className="reg-required">*</span>
                     </label>
                     {password && (
                       <span className="reg-pwd-strength-badge" style={{ color: pwdStrength.color }}>
-                        ความปลอดภัย: <strong>{pwdStrength.label}</strong>
+                        {t('auth:register.strengthPrefix')} <strong>{pwdStrength.label}</strong>
                       </span>
                     )}
                   </div>
@@ -519,7 +532,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                       id="reg-password"
                       type={showPassword ? 'text' : 'password'}
                       required
-                      placeholder="ตั้งรหัสผ่านอย่างน้อย 6 ตัวอักษร"
+                      placeholder={t('auth:register.passwordPlaceholder')}
                       className="reg-input"
                       value={password}
                       onChange={e => setPassword(e.target.value)}
@@ -528,7 +541,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                       type="button"
                       className="reg-pwd-toggle-btn"
                       onClick={() => setShowPassword(p => !p)}
-                      title={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+                      title={showPassword ? t('auth:register.hidePassword') : t('auth:register.showPassword')}
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -551,7 +564,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                 {/* Confirm Password Input */}
                 <div className="reg-field">
                   <label className="reg-label" htmlFor="reg-confirm-password">
-                    ยืนยันรหัสผ่านอีกครั้ง <span className="reg-required">*</span>
+                    {t('auth:register.confirmPasswordLabel')} <span className="reg-required">*</span>
                   </label>
                   <div className="reg-input-wrap">
                     <Lock size={16} className="reg-input-icon" />
@@ -559,7 +572,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                       id="reg-confirm-password"
                       type={showConfirmPassword ? 'text' : 'password'}
                       required
-                      placeholder="พิมพ์รหัสผ่านเดิมซ้ำอีกครั้ง"
+                      placeholder={t('auth:register.confirmPasswordPlaceholder')}
                       className={`reg-input ${confirmPassword ? (isPasswordMatch ? 'reg-input--valid' : 'reg-input--invalid') : ''}`}
                       value={confirmPassword}
                       onChange={e => setConfirmPassword(e.target.value)}
@@ -568,7 +581,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                       type="button"
                       className="reg-pwd-toggle-btn"
                       onClick={() => setShowConfirmPassword(p => !p)}
-                      title={showConfirmPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+                      title={showConfirmPassword ? t('auth:register.hidePassword') : t('auth:register.showPassword')}
                     >
                       {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -577,11 +590,11 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                     <div className="reg-pwd-match-hint">
                       {isPasswordMatch ? (
                         <span className="reg-match-success">
-                          <Check size={13} /> รหัสผ่านตรงกันสมบูรณ์
+                          <Check size={13} /> {t('auth:register.passwordsMatch')}
                         </span>
                       ) : (
                         <span className="reg-match-error">
-                          <X size={13} /> รหัสผ่านไม่ตรงกัน
+                          <X size={13} /> {t('auth:register.passwordsDiffer')}
                         </span>
                       )}
                     </div>
@@ -596,19 +609,19 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                       className="reg-referral-toggle-btn"
                       onClick={() => setShowReferralInput(true)}
                     >
-                      <Gift size={14} /> มีรหัสแนะนำเพื่อนไหม? รับเพิ่มอีก +50 Coins 🪙
+                      <Gift size={14} /> {t('auth:register.referralToggle')}
                     </button>
                   ) : (
                     <div className="reg-field" style={{ margin: 0 }}>
                       <label className="reg-label" htmlFor="reg-referral">
-                        รหัสแนะนำเพื่อน (Referral Code)
+                        {t('auth:register.referralLabel')}
                       </label>
                       <div className="reg-input-wrap">
                         <Gift size={16} className="reg-input-icon" style={{ color: '#D97706' }} />
                         <input
                           id="reg-referral"
                           type="text"
-                          placeholder="เช่น FRIEND2026"
+                          placeholder={t('auth:register.referralPlaceholder')}
                           className="reg-input"
                           value={referralCode}
                           onChange={e => setReferralCode(e.target.value.toUpperCase())}
@@ -627,14 +640,14 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                     required
                   />
                   <span>
-                    ฉันได้อ่านและยอมรับ{' '}
-                    <Link to="/terms" target="_blank" className="reg-link-inline">
-                      เงื่อนไขการให้บริการ
-                    </Link>{' '}
-                    และ{' '}
-                    <Link to="/privacy" target="_blank" className="reg-link-inline">
-                      นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)
-                    </Link>
+                    {t('auth:register.consentPrefix')}{' '}
+                    <LocalizedLink to="/terms" target="_blank" className="reg-link-inline">
+                      {t('auth:register.consentTerms')}
+                    </LocalizedLink>{' '}
+                    {t('auth:register.consentAnd')}{' '}
+                    <LocalizedLink to="/privacy" target="_blank" className="reg-link-inline">
+                      {t('auth:register.consentPrivacy')}
+                    </LocalizedLink>
                   </span>
                 </label>
 
@@ -645,10 +658,10 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                   disabled={loading}
                 >
                   {loading ? (
-                    'กำลังตรวจสอบข้อมูล...'
+                    t('auth:register.checking')
                   ) : (
                     <>
-                      <span>ถัดไป: รับรหัสยืนยัน OTP</span>
+                      <span>{t('auth:register.nextStep')}</span>
                       <ArrowRight size={17} />
                     </>
                   )}
@@ -660,35 +673,35 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                 {isRealSms ? (
                   <div className="reg-otp-demo-card" style={{ borderColor: '#10B981', background: '#ECFDF5' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                      <span className="reg-otp-demo-badge" style={{ background: '#10B981', color: '#fff' }}>📱 ThaiBulkSMS OTP Sent</span>
+                      <span className="reg-otp-demo-badge" style={{ background: '#10B981', color: '#fff' }}>{t('auth:register.smsSentBadge')}</span>
                       {otpRef && (
                         <span style={{ fontSize: '13px', fontWeight: 700, color: '#047857', background: '#D1FAE5', padding: '2px 8px', borderRadius: '4px' }}>
-                          Ref: {otpRef}
+                          {t('auth:register.otpRef', { ref: otpRef })}
                         </span>
                       )}
                     </div>
                     <p style={{ margin: '8px 0 4px', fontSize: '15px', fontWeight: 600, color: '#065F46' }}>
-                      ส่งรหัส SMS 6 หลักไปยัง {targetValue} แล้ว
+                      {t('auth:register.smsSentTitle', { target: targetValue })}
                     </p>
                     <span className="reg-otp-demo-hint" style={{ color: '#047857' }}>
-                      กรุณาตรวจเช็กกล่องข้อความ SMS ในโทรศัพท์มือถือของคุณ (รหัสอ้างอิง: <strong>{otpRef || 'SMS'}</strong>)
+                      {t('auth:register.smsSentHint', { ref: otpRef || 'SMS' })}
                     </span>
                   </div>
                 ) : (
                   <div className="reg-otp-demo-card">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                      <span className="reg-otp-demo-badge">💡 Smart OTP Code (Demo)</span>
+                      <span className="reg-otp-demo-badge">{t('auth:register.demoBadge')}</span>
                       {otpRef && (
                         <span style={{ fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>
-                          Ref: {otpRef}
+                          {t('auth:register.otpRef', { ref: otpRef })}
                         </span>
                       )}
                     </div>
                     <p className="reg-otp-demo-num">{demoOtp}</p>
                     <span className="reg-otp-demo-hint">
                       {method === 'phone'
-                        ? '(ใช้รหัส 6 หลักนี้ในการทดสอบ หรือกรอกรหัสจาก SMS จริงที่ได้รับ)'
-                        : '(ใช้รหัส 6 หลักนี้ในการทดสอบสมัครสมาชิก)'}
+                        ? t('auth:register.demoHintPhone')
+                        : t('auth:register.demoHintEmail')}
                     </span>
                   </div>
                 )}
@@ -702,6 +715,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                       inputMode="numeric"
                       maxLength={1}
                       className="reg-otp-digit"
+                      aria-label={t('auth:register.otpDigitAria', { position: formatNumber(idx + 1, locale) })}
                       value={digit}
                       onChange={e => handleOtpChange(idx, e.target.value)}
                       onKeyDown={e => handleOtpKeyDown(idx, e)}
@@ -736,8 +750,8 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                     }}
                   >
                     {isCounting
-                      ? `ส่งรหัสใหม่อีกครั้งใน (${countdown}s)`
-                      : '🔄 ขอรับรหัส OTP อีกครั้ง'}
+                      ? t('auth:register.resendCountdown', { seconds: formatNumber(countdown, locale) })
+                      : t('auth:register.resend')}
                   </button>
 
                   <button
@@ -745,7 +759,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                     className="reg-back-btn"
                     onClick={() => setStep('form')}
                   >
-                    ← แก้ไขข้อมูล
+                    {t('auth:register.editDetails')}
                   </button>
                 </div>
 
@@ -755,7 +769,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                   disabled={loading || otpDigits.join('').length < 6}
                   onClick={handleFinalRegister}
                 >
-                  {loading ? 'กำลังสร้างบัญชีผู้ใช้...' : '✨ ยืนยันการสมัครและรับของขวัญต้อนรับ'}
+                  {loading ? t('auth:register.creatingAccount') : t('auth:register.confirmRegister')}
                 </button>
               </div>
             )}
@@ -764,7 +778,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
             {step === 'form' && (
               <>
                 <div className="reg-divider">
-                  <span>หรือสมัครด้วยบัญชีโซเชียล</span>
+                  <span>{t('auth:register.socialDivider')}</span>
                 </div>
 
                 <div className="reg-social-grid">
@@ -792,7 +806,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                       />
                     </svg>
-                    <span>สมัครด้วย Google</span>
+                    <span>{t('auth:register.googleSignUp')}</span>
                   </button>
                   <button
                     type="button"
@@ -816,10 +830,10 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
 
             {/* Switch to Login */}
             <div className="reg-footer-nav">
-              <span>มีบัญชีแล้ว?</span>
-              <Link to="/login" className="reg-login-link">
-                เข้าสู่ระบบ →
-              </Link>
+              <span>{t('auth:register.hasAccount')}</span>
+              <LocalizedLink to="/login" className="reg-login-link">
+                {t('auth:register.goToLogin')}
+              </LocalizedLink>
             </div>
           </div>
         </section>
@@ -833,24 +847,28 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
               <Sparkles size={36} color="#D97706" />
             </div>
 
-            <h2 className="reg-welcome-title">ยินดีต้อนรับคุณ {welcomeModal.userName}!</h2>
+            <h2 className="reg-welcome-title">
+              {t('auth:register.welcomeTitle', { name: welcomeModal.userName })}
+            </h2>
             <p className="reg-welcome-sub">
-              สมัครสำเร็จ รับสิทธิ์สมาชิกใหม่แล้ว
+              {t('auth:register.welcomeSub')}
             </p>
 
             <div className="reg-welcome-perks-box">
               <div className="reg-welcome-perk-row">
                 <div className="reg-welcome-perk-left">
                   <Coins size={20} color="#D97706" />
-                  <span>Movemall Coins ต้อนรับ</span>
+                  <span>{t('auth:register.welcomeCoins')}</span>
                 </div>
-                <span className="reg-welcome-perk-badge">+{welcomeModal.coins} Coins 🪙</span>
+                <span className="reg-welcome-perk-badge">
+                  {t('auth:register.welcomeCoinsBadge', { count: welcomeModal.coins })}
+                </span>
               </div>
 
               <div className="reg-welcome-perk-row">
                 <div className="reg-welcome-perk-left">
                   <Truck size={20} color="#2563EB" />
-                  <span>คูปองส่งฟรี 0 บาท (ทุกชิ้น)</span>
+                  <span>{t('auth:register.welcomeShipping')}</span>
                 </div>
                 <span className="reg-welcome-perk-badge reg-welcome-perk-badge--blue">FREESHIP-NEWBIE</span>
               </div>
@@ -858,7 +876,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
               <div className="reg-welcome-perk-row">
                 <div className="reg-welcome-perk-left">
                   <Ticket size={20} color="#DC2626" />
-                  <span>ส่วนลด 50% ออเดอร์แรก</span>
+                  <span>{t('auth:register.welcomeDiscount')}</span>
                 </div>
                 <span className="reg-welcome-perk-badge reg-welcome-perk-badge--red">WELCOME50</span>
               </div>
@@ -870,14 +888,14 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                 className="reg-welcome-btn-main"
                 onClick={handleCompleteAndStartShopping}
               >
-                🛍️ เริ่มช้อปปิ้งเลยตอนนี้
+                {t('auth:register.welcomeStartShopping')}
               </button>
               <button
                 type="button"
                 className="reg-welcome-btn-sub"
                 onClick={handleGoToAccount}
               >
-                👤 ไปยังหน้าโปรไฟล์ของฉัน
+                {t('auth:register.welcomeGoToAccount')}
               </button>
             </div>
           </div>

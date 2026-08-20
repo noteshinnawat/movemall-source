@@ -3,6 +3,9 @@
 // Docs: https://developers.cloudflare.com/turnstile/
 
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { resolveRootLocale } from '../i18n/locales';
+import { turnstileLanguage } from '../utils/turnstile';
 
 // ประเภทของ window.turnstile ประกาศไว้ที่ src/utils/turnstile.ts ที่เดียว
 // เพื่อไม่ให้ชนกัน (TS2717) เมื่อมีสองไฟล์ประกาศ global เดียวกัน
@@ -29,6 +32,8 @@ export function TurnstileWidget({
   theme = 'light',
   className = '',
 }: TurnstileWidgetProps) {
+  const { i18n } = useTranslation();
+  const language = turnstileLanguage(resolveRootLocale(i18n.resolvedLanguage ?? i18n.language));
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const callbacksRef = useRef({ onSuccess, onError, onExpire });
@@ -62,6 +67,7 @@ export function TurnstileWidget({
           action: 'turnstile-spin-v1',
           appearance,
           theme,
+          language,
           callback: (token: string) => callbacksRef.current.onSuccess(token),
           'error-callback': () => {
             callbacksRef.current.onError?.();
@@ -84,7 +90,7 @@ export function TurnstileWidget({
         widgetIdRef.current = null;
       }
     };
-  }, [siteKey, appearance, theme]);
+  }, [siteKey, appearance, theme, language]);
 
   return <div ref={containerRef} className={className} />;
 }

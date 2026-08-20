@@ -84,5 +84,6 @@
     "backToTopTitle": "Scroll to top",
     "backToTopText": "Top",
     "loadingProducts": "Loading products"
-  }
+  },
+  "memberFallback": "Movemall member"
 }

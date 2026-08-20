@@ -84,5 +84,6 @@
     "backToTopTitle": "ထိပ်သို့ ရွှေ့ရန်",
     "backToTopText": "ထိပ်သို့",
     "loadingProducts": "ကုန်ပစ္စည်းများ တင်နေသည်"
-  }
+  },
+  "memberFallback": "Movemall အသုံးပြုသူ"
 }

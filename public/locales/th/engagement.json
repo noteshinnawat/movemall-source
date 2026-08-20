@@ -1,1 +1,74 @@
-{}
+{
+  "chat": {
+    "storeFallback": "ร้านค้า",
+    "online": "ออนไลน์",
+    "offline": "ออฟไลน์",
+    "startConversation": "เริ่มการสนทนา",
+    "back": "ย้อนกลับ",
+    "inboxTitle": "💬 กล่องข้อความแชท",
+    "liveBadge": "สด",
+    "liveBadgeTitle": "เชื่อมต่อสดผ่าน WebSocket",
+    "searchPlaceholder": "ค้นหาร้านค้า หรือข้อความ...",
+    "tabAll": "ทั้งหมด ({{count, number}})",
+    "tabUnread": "ยังไม่อ่าน",
+    "tabUnreadCount": "ยังไม่อ่าน ({{count, number}})",
+    "tabOfficial": "ร้าน Mall 👑",
+    "loading": "กำลังโหลดรายการแชท...",
+    "emptyAll": "ยังไม่มีการสนทนากับร้านค้า",
+    "emptyFiltered": "ไม่พบรายการแชทที่ตรงกับเงื่อนไข",
+    "browseStores": "เลือกดูร้านค้า",
+    "onlineDotTitle": "ออนไลน์",
+    "noSelection": "เลือกห้องสนทนาทางซ้ายเพื่อเริ่มแชท",
+    "backToListTitle": "กลับหน้ารวมแชท",
+    "backToListAria": "ย้อนกลับไปหน้ารวมแชท",
+    "backToListText": "แชททั้งหมด",
+    "officialMall": "Official Mall",
+    "connectedLive": "เชื่อมต่อสด",
+    "visitStore": "หน้าร้าน",
+    "secureBanner": "การสนทนาได้รับการปกป้องโดย Movemall Buyer Protection ห้ามโอนเงินนอกระบบ",
+    "emptyThreadTitle": "ยังไม่มีข้อความกับร้านนี้",
+    "emptyThreadHint": "ทักไปได้เลย ร้านค้าจะเห็นข้อความของคุณทันที",
+    "typing": "กำลังพิมพ์...",
+    "quickLabel": "ถามด่วน:",
+    "quickQuestions": {
+      "stock": "📦 มีสินค้าพร้อมส่งไหมครับ?",
+      "photos": "📸 ขอดูรูปสินค้าจริงเพิ่มเติม",
+      "invoice": "🧾 ขอใบกำกับภาษีได้ไหม?",
+      "voucher": "🎟️ มีโค้ดส่วนลดพิเศษไหมครับ?"
+    },
+    "attachImageTitle": "แนบรูปภาพ",
+    "attachImageMessage": "📸 [ส่งรูปภาพสินค้าตัวอย่าง]",
+    "emojiTitle": "อีโมจิ",
+    "inputPlaceholder": "พิมพ์ข้อความถึง {{store}}...",
+    "send": "ส่ง"
+  },
+  "notifications": {
+    "relative": {
+      "justNow": "เมื่อสักครู่",
+      "recently": "เมื่อเร็วๆ นี้",
+      "minutes_one": "{{count, number}} นาทีที่แล้ว",
+      "minutes_other": "{{count, number}} นาทีที่แล้ว",
+      "hours_one": "{{count, number}} ชั่วโมงที่แล้ว",
+      "hours_other": "{{count, number}} ชั่วโมงที่แล้ว",
+      "days_one": "{{count, number}} วันที่แล้ว",
+      "days_other": "{{count, number}} วันที่แล้ว"
+    },
+    "title": "การแจ้งเตือนของฉัน",
+    "unreadCount": "({{count, number}} ข้อความใหม่)",
+    "liveSync": "เชื่อมต่อกับระบบแจ้งเตือนฐานข้อมูลจริง (Live Sync)",
+    "markAllRead": "อ่านทั้งหมด",
+    "tabs": {
+      "all": "ทั้งหมด",
+      "orders": "📦 ออเดอร์",
+      "promos": "⚡ โปรโมชั่น",
+      "live": "🔴 ไลฟ์สด"
+    },
+    "signedOutTitle": "เข้าสู่ระบบเพื่อดูการแจ้งเตือน",
+    "signedOutSubtitle": "ดูออเดอร์ พัสดุ และสิทธิพิเศษ",
+    "signIn": "เข้าสู่ระบบ",
+    "signUp": "สมัครสมาชิก",
+    "loading": "กำลังโหลดการแจ้งเตือน...",
+    "emptyTitle": "ยังไม่มีการแจ้งเตือน",
+    "emptySubtitle": "รายการใหม่จะแสดงที่นี่"
+  }
+}

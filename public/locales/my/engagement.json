@@ -1,1 +1,74 @@
-{}
+{
+  "chat": {
+    "storeFallback": "ဆိုင်",
+    "online": "အွန်လိုင်း",
+    "offline": "အော့ဖ်လိုင်း",
+    "startConversation": "စကားစမြည် စတင်ရန်",
+    "back": "နောက်သို့",
+    "inboxTitle": "💬 စကားပြော စာတိုက်ပုံး",
+    "liveBadge": "တိုက်ရိုက်",
+    "liveBadgeTitle": "WebSocket ဖြင့် တိုက်ရိုက် ချိတ်ဆက်ထားသည်",
+    "searchPlaceholder": "ဆိုင် သို့မဟုတ် စာတို ရှာရန်...",
+    "tabAll": "အားလုံး ({{count, number}})",
+    "tabUnread": "မဖတ်ရသေး",
+    "tabUnreadCount": "မဖတ်ရသေး ({{count, number}})",
+    "tabOfficial": "Mall ဆိုင်များ 👑",
+    "loading": "စကားပြောစာရင်း ဖွင့်နေသည်...",
+    "emptyAll": "ဆိုင်များနှင့် စကားပြောမှု မရှိသေးပါ",
+    "emptyFiltered": "ဤစစ်ထုတ်မှုနှင့် ကိုက်ညီသော စကားပြောမှု မတွေ့ပါ",
+    "browseStores": "ဆိုင်များ ကြည့်ရန်",
+    "onlineDotTitle": "အွန်လိုင်း",
+    "noSelection": "စကားပြောရန် ဘယ်ဘက်မှ စကားပြောခန်း ရွေးပါ",
+    "backToListTitle": "စကားပြောစာရင်းသို့ ပြန်ရန်",
+    "backToListAria": "စကားပြောစာရင်းသို့ ပြန်သွားရန်",
+    "backToListText": "စကားပြောမှုအားလုံး",
+    "officialMall": "Official Mall",
+    "connectedLive": "တိုက်ရိုက် ချိတ်ဆက်ထားသည်",
+    "visitStore": "ဆိုင်သို့",
+    "secureBanner": "ဤစကားပြောမှုကို Movemall Buyer Protection မှ ကာကွယ်ထားသည် — စနစ်ပြင်ပတွင် ငွေမလွှဲပါနှင့်",
+    "emptyThreadTitle": "ဤဆိုင်နှင့် စာတို မရှိသေးပါ",
+    "emptyThreadHint": "စတင်နှုတ်ဆက်ပါ — ဆိုင်မှ သင့်စာတိုကို ချက်ချင်း မြင်ပါမည်",
+    "typing": "စာရိုက်နေသည်...",
+    "quickLabel": "အမြန် မေးခွန်းများ:",
+    "quickQuestions": {
+      "stock": "📦 ဤပစ္စည်း လက်ကျန် ရှိပါသလား?",
+      "photos": "📸 ပစ္စည်းအစစ်၏ ပုံများ ထပ်ကြည့်နိုင်မလား?",
+      "invoice": "🧾 အခွန်ပြေစာ ထုတ်ပေးနိုင်ပါသလား?",
+      "voucher": "🎟️ အထူး လျှော့စျေးကုဒ် ရှိပါသလား?"
+    },
+    "attachImageTitle": "ပုံ ပူးတွဲရန်",
+    "attachImageMessage": "📸 [နမူနာ ကုန်ပစ္စည်းပုံ ပို့ပြီး]",
+    "emojiTitle": "အီမိုဂျီ",
+    "inputPlaceholder": "{{store}} သို့ စာတိုရေးရန်...",
+    "send": "ပို့ရန်"
+  },
+  "notifications": {
+    "relative": {
+      "justNow": "ခုလေးတင်",
+      "recently": "မကြာသေးမီက",
+      "minutes_one": "လွန်ခဲ့သော {{count, number}} မိနစ်",
+      "minutes_other": "လွန်ခဲ့သော {{count, number}} မိနစ်",
+      "hours_one": "လွန်ခဲ့သော {{count, number}} နာရီ",
+      "hours_other": "လွန်ခဲ့သော {{count, number}} နာရီ",
+      "days_one": "လွန်ခဲ့သော {{count, number}} ရက်",
+      "days_other": "လွန်ခဲ့သော {{count, number}} ရက်"
+    },
+    "title": "ကျွန်ုပ်၏ အသိပေးချက်များ",
+    "unreadCount": "(အသစ် {{count, number}} ခု)",
+    "liveSync": "တိုက်ရိုက် ဒေတာဘေ့စ် အသိပေးချက်နှင့် ချိတ်ဆက်ထားသည် (Live Sync)",
+    "markAllRead": "အားလုံး ဖတ်ပြီးအဖြစ် မှတ်ရန်",
+    "tabs": {
+      "all": "အားလုံး",
+      "orders": "📦 မှာယူမှုများ",
+      "promos": "⚡ ပရိုမိုးရှင်း",
+      "live": "🔴 တိုက်ရိုက်"
+    },
+    "signedOutTitle": "အသိပေးချက်များ ကြည့်ရန် ဝင်ရောက်ပါ",
+    "signedOutSubtitle": "မှာယူမှု၊ ပစ္စည်းနှင့် အသင်းဝင် အခွင့်အရေးများ",
+    "signIn": "ဝင်ရန်",
+    "signUp": "အကောင့် ဖွင့်ရန်",
+    "loading": "အသိပေးချက်များ ဖွင့်နေသည်...",
+    "emptyTitle": "အသိပေးချက် မရှိသေးပါ",
+    "emptySubtitle": "အသစ်များ ဤနေရာတွင် ပေါ်လာမည်"
+  }
+}

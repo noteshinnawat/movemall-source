@@ -1,1 +1,74 @@
-{}
+{
+  "chat": {
+    "storeFallback": "Store",
+    "online": "Online",
+    "offline": "Offline",
+    "startConversation": "Start the conversation",
+    "back": "Go back",
+    "inboxTitle": "💬 Chat inbox",
+    "liveBadge": "Live",
+    "liveBadgeTitle": "Connected live over WebSocket",
+    "searchPlaceholder": "Search stores or messages...",
+    "tabAll": "All ({{count, number}})",
+    "tabUnread": "Unread",
+    "tabUnreadCount": "Unread ({{count, number}})",
+    "tabOfficial": "Mall stores 👑",
+    "loading": "Loading your chats...",
+    "emptyAll": "No conversations with stores yet",
+    "emptyFiltered": "No chats match this filter",
+    "browseStores": "Browse stores",
+    "onlineDotTitle": "Online",
+    "noSelection": "Choose a conversation on the left to start chatting",
+    "backToListTitle": "Back to all chats",
+    "backToListAria": "Back to the chat list",
+    "backToListText": "All chats",
+    "officialMall": "Official Mall",
+    "connectedLive": "Connected live",
+    "visitStore": "Visit store",
+    "secureBanner": "This conversation is protected by Movemall Buyer Protection — never transfer money outside the platform",
+    "emptyThreadTitle": "No messages with this store yet",
+    "emptyThreadHint": "Say hello — the store sees your message right away",
+    "typing": "Typing...",
+    "quickLabel": "Quick questions:",
+    "quickQuestions": {
+      "stock": "📦 Do you have this in stock?",
+      "photos": "📸 Could I see more photos of the actual item?",
+      "invoice": "🧾 Can you issue a tax invoice?",
+      "voucher": "🎟️ Do you have a special discount code?"
+    },
+    "attachImageTitle": "Attach a photo",
+    "attachImageMessage": "📸 [Sample product photo sent]",
+    "emojiTitle": "Emoji",
+    "inputPlaceholder": "Message {{store}}...",
+    "send": "Send"
+  },
+  "notifications": {
+    "relative": {
+      "justNow": "Just now",
+      "recently": "Recently",
+      "minutes_one": "{{count, number}} minute ago",
+      "minutes_other": "{{count, number}} minutes ago",
+      "hours_one": "{{count, number}} hour ago",
+      "hours_other": "{{count, number}} hours ago",
+      "days_one": "{{count, number}} day ago",
+      "days_other": "{{count, number}} days ago"
+    },
+    "title": "My notifications",
+    "unreadCount": "({{count, number}} new)",
+    "liveSync": "Connected to live database notifications (Live Sync)",
+    "markAllRead": "Mark all as read",
+    "tabs": {
+      "all": "All",
+      "orders": "📦 Orders",
+      "promos": "⚡ Promotions",
+      "live": "🔴 Live"
+    },
+    "signedOutTitle": "Sign in to see your notifications",
+    "signedOutSubtitle": "Orders, parcels and member perks",
+    "signIn": "Sign in",
+    "signUp": "Create an account",
+    "loading": "Loading notifications...",
+    "emptyTitle": "No notifications yet",
+    "emptySubtitle": "New items will appear here"
+  }
+}

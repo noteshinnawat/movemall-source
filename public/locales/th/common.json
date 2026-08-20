@@ -84,5 +84,6 @@
     "backToTopTitle": "เลื่อนขึ้นบนสุด",
     "backToTopText": "ขึ้นบนสุด",
     "loadingProducts": "กำลังโหลดสินค้า"
-  }
+  },
+  "memberFallback": "ผู้ใช้งาน Movemall"
 }
