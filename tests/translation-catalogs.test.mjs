@@ -35,3 +35,19 @@ test('every order status has a commerce label in all languages', async () => {
     assert.deepEqual(Object.keys(catalog.orderStatus).sort(), statuses, `${language} orderStatus`);
   }
 });
+
+test('single-category languages carry one wording across both plural forms', async () => {
+  for (const namespace of namespaces) {
+    for (const language of ['th', 'my']) {
+      const catalog = JSON.parse(await readFile(`public/locales/${language}/${namespace}.json`, 'utf8'));
+      const entries = new Map(flatten(catalog));
+      // Thai and Burmese resolve to `other` only, so `_one` exists solely to keep
+      // catalogs key-identical; it must never drift away from the live wording.
+      for (const [key, value] of entries) {
+        if (!key.endsWith('_one')) continue;
+        const other = entries.get(`${key.slice(0, -4)}_other`);
+        assert.equal(value, other, `${language}/${namespace}: ${key}`);
+      }
+    }
+  }
+});

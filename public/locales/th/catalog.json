@@ -91,7 +91,6 @@
     "live": {
       "subtitle": "• ช้อปสด ปักหมุดดีลลดแรง & โค้ดสดในไลฟ์",
       "viewAll": "ดูไลฟ์ทั้งหมด ({{count, number}} ช่อง)",
-      "viewerCount": "{{count}} คนดู",
       "watchChannel": "เข้าชมไลฟ์ {{channel}}",
       "sendHeart": "ส่งหัวใจให้ไลฟ์นี้",
       "pinnedDiscount": "📌 ปักหมุด -{{discount}}%",

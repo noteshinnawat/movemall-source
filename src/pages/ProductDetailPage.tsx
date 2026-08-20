@@ -572,7 +572,7 @@ export function ProductDetailPage({
               <span className="product-detail__review-count">{t('catalog:product.reviewCount', { count: product.reviewCount ?? 0 })}</span>
               <span className="product-detail__stock">
                 {(product.stock ?? 0) > 10
-                  ? t('catalog:product.inStock', { count: product.stock })
+                  ? t('catalog:product.inStock', { count: product.stock ?? 0 })
                   : t('catalog:product.lowStock', { count: product.stock ?? 0 })}
               </span>
             </div>
@@ -685,7 +685,7 @@ export function ProductDetailPage({
                   </button>
                 </div>
                 <span className="product-detail__desktop-stock-txt">
-                  {t('catalog:product.totalStock', { count: product.stock })}
+                  {t('catalog:product.totalStock', { count: product.stock ?? 0 })}
                 </span>
               </div>
 
@@ -1252,7 +1252,7 @@ export function ProductDetailPage({
                     )}
                   </div>
                   <div className="product-drawer-stock-text">
-                    {t('catalog:product.stockLabel')} <strong>{t('catalog:product.itemCount', { count: product.stock })}</strong>
+                    {t('catalog:product.stockLabel')} <strong>{t('catalog:product.itemCount', { count: product.stock ?? 0 })}</strong>
                   </div>
                   <div className="product-drawer-selected-summary">
                     {t('catalog:product.optionsLabel')} <span className="product-drawer-summary-highlight">{selectedOptionLabel}</span> •{' '}
@@ -1327,7 +1327,7 @@ export function ProductDetailPage({
               <div className="product-drawer-section">
                 <div className="product-drawer-section-title">
                   <span>{t('catalog:product.drawer.quantityTitle')}</span>
-                  <small className="product-drawer-section-hint">{t('catalog:product.lowStockPlain', { count: product.stock })}</small>
+                  <small className="product-drawer-section-hint">{t('catalog:product.lowStockPlain', { count: product.stock ?? 0 })}</small>
                 </div>
                 <div className="product-drawer-qty-row">
                   <div className="product-detail__qty-control">

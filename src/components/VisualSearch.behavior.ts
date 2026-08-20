@@ -1,3 +1,6 @@
+/** Neutral proper name used wherever a real store name is unavailable. */
+export const NEUTRAL_STORE_NAME = 'Movemall Store';
+
 const SYNTHETIC_MATCHING_TOKENS = ['ยอดนิยม', 'คุณภาพสูง', 'ของแท้', 'พร้อมส่ง'] as const;
 
 interface RankableVisualProduct {
@@ -45,5 +48,5 @@ export function rankVisualSearchProducts<T extends RankableVisualProduct>(
 }
 
 export function resolveVisualSearchStoreName(storeName: string | undefined) {
-  return storeName || 'Movemall Store';
+  return storeName || NEUTRAL_STORE_NAME;
 }

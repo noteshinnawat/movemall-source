@@ -91,7 +91,6 @@
     "live": {
       "subtitle": "• Shop live, pinned hot deals & live-only codes",
       "viewAll": "View all live streams ({{count, number}})",
-      "viewerCount": "{{count}} viewers",
       "watchChannel": "Watch {{channel}} live",
       "sendHeart": "Send a heart to this stream",
       "pinnedDiscount": "📌 Pinned · {{discount}}% off",

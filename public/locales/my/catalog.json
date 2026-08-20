@@ -91,7 +91,6 @@
     "live": {
       "subtitle": "• တိုက်ရိုက်ဝယ်ယူ၊ အထူးဈေးပစ္စည်း ပင်ထိုးပြီး live-only ကုဒ်များ ရယူပါ",
       "viewAll": "တိုက်ရိုက်အားလုံး ကြည့်ရန် ({{count, number}})",
-      "viewerCount": "ကြည့်ရှုသူ {{count}} ယောက်",
       "watchChannel": "{{channel}} တိုက်ရိုက် ကြည့်ရန်",
       "sendHeart": "ဤတိုက်ရိုက်သို့ နှလုံးသားပို့ရန်",
       "pinnedDiscount": "📌 ပင်ထိုးထားသည် · {{discount}}% လျှော့",

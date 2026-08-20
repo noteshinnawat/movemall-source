@@ -7,11 +7,8 @@ import { ReportStoreModal } from '../components/ReportStoreModal';
 import { LocalizedLink } from '../i18n/LocalizedLink';
 import { formatCurrency, formatDate } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
+import { NEUTRAL_STORE_NAME } from '../components/VisualSearch.behavior';
 import './OrdersPage.css';
-
-// The report payload reaches back-office tooling, so the reported names stay
-// locale-independent: order id, source product names and a neutral proper name.
-const REPORT_STORE_FALLBACK = 'Movemall Store';
 
 import { fetchMyOrdersApi } from '../utils/api';
 
@@ -268,8 +265,10 @@ export function OrdersPage() {
           onClose={() => setReportingOrder(null)}
           targetType="ORDER"
           targetId={reportingOrder.id}
-          targetName={`#${reportingOrder.id} (${reportingOrder.items?.map((i: any) => i.name).join(', ')})`}
-          storeName={reportingOrder.storeName || REPORT_STORE_FALLBACK}
+          // The report payload reaches back-office tooling, so these names stay
+          // locale-independent: order id, source product names, neutral fallback.
+          targetName={`#${reportingOrder.id} (${(reportingOrder.items ?? []).map((i: any) => i.name).join(', ')})`}
+          storeName={reportingOrder.storeName || NEUTRAL_STORE_NAME}
           orderId={reportingOrder.id}
         />
       )}
