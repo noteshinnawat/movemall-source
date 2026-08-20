@@ -47,7 +47,7 @@ export function ChatPage() {
   const storeParam = searchParams.get('store');
   const initialStoreId = stores.find(s => s.id === storeParam)?.id || stores[0].id;
 
-  // Resolve current active user or persistent guest ID
+  // ผู้ใช้ที่ล็อกอินอยู่ (ต้องมีเสมอ เพราะ /chat อยู่หลัง ProtectedRoute)
   const currentUser = (() => {
     try {
       const uStr = localStorage.getItem('movemall_user');
@@ -57,15 +57,10 @@ export function ChatPage() {
     }
   })();
 
-  const [myUserId] = useState<string>(() => {
-    if (currentUser?.id) return currentUser.id;
-    let storedGuest = localStorage.getItem('movemall_guest_user_id');
-    if (!storedGuest) {
-      storedGuest = `guest_${Math.random().toString(36).substring(2, 9)}`;
-      localStorage.setItem('movemall_guest_user_id', storedGuest);
-    }
-    return storedGuest;
-  });
+  // ตัวตนผู้ใช้มาจากบัญชีที่ล็อกอินเท่านั้น — เดิม fallback เป็น guest id ที่ client
+  // สร้างเอง ซึ่งใครก็เดา/ปลอมเพื่อเปิดห้องแชทของคนอื่นได้ (IDOR)
+  // เส้นทาง /chat ถูกครอบด้วย ProtectedRoute แล้ว จึงมี currentUser เสมอเมื่อมาถึงตรงนี้
+  const [myUserId] = useState<string>(() => currentUser?.id || '');
 
   const [selectedStoreId, setSelectedStoreId] = useState(initialStoreId);
 
@@ -105,41 +100,12 @@ export function ChatPage() {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<any>(null);
 
-  // Default seed messages across multiple shops
-  const initialSeedMessages: Record<string, Message[]> = {
-    'store-techpro': [
-      { id: 'm1', sender: 'store', text: 'สวัสดีครับ! ยินดีต้อนรับสู่ TechPro Official Store มีอะไรให้แอดมินดูแลสอบถามได้เลยครับ 😊', time: '10:15' },
-      { id: 'm2', sender: 'me', text: 'หูฟัง Premium Pro X มีของพร้อมส่งไหมครับ?', time: '10:16' },
-      { id: 'm3', sender: 'store', text: 'สินค้ามีพร้อมจัดส่งทันทีครับ สั่งซื้อวันนี้ก่อน 14:00 น. จัดส่งออกให้รอบวันนี้เลยครับผม 🚀', time: '10:17' },
-    ],
-    'store-fashionista': [
-      { id: 'm4', sender: 'store', text: 'Fashionista Studio สวัสดีค่ะ สอบถามไซส์หรือสีเสื้อผ้าเพิ่มเติมได้นะคะ ✨', time: '11:30' },
-      { id: 'm5', sender: 'store', text: 'พิเศษวันนี้! มีโปรโมชั่น ซื้อ 2 ชิ้นลดเพิ่ม 10% พร้อมส่งฟรีค่ะ 👗', time: '11:31' },
-    ],
-    'store-beautyglow': [
-      { id: 'm6', sender: 'store', text: 'BeautyGlow Official ยินดีให้บริการค่ะ สินค้าของแท้ 100% มีใบรับรองทุกชิ้นค่ะ 💖', time: 'เมื่อวาน' },
-    ],
-    'store-sportmax': [
-      { id: 'm7', sender: 'store', text: 'SportMax Thailand สวัสดีครับ รองเท้าวิ่งรุ่นใหม่เข้าสต็อกครบทุกไซส์แล้วนะครับ 🏃‍♂️', time: '2 วันที่แล้ว' },
-    ],
-  };
+  // ประวัติแชทจริง — เริ่มจาก cache ในเครื่อง แล้วให้ API/socket เติมของจริงทับ
+  const [messages, setMessages] = useState<Record<string, Message[]>>(() => getStoredChatHistory());
 
-  // Messages State (Merge LocalStorage + Seed)
-  const [messages, setMessages] = useState<Record<string, Message[]>>(() => {
-    const saved = getStoredChatHistory();
-    return { ...initialSeedMessages, ...saved };
-  });
-
-  // Conversation status (unread count, online status)
-  const [convMeta, setConvMeta] = useState<Record<string, ConversationMeta>>(() => {
-    const isAuth = !!currentUser;
-    return {
-      'store-techpro': { unreadCount: 0, lastActive: 'ออนไลน์', isOnline: true },
-      'store-fashionista': { unreadCount: isAuth ? 2 : 0, lastActive: 'ออนไลน์เมื่อ 5 นาทีที่แล้ว', isOnline: true },
-      'store-beautyglow': { unreadCount: isAuth ? 1 : 0, lastActive: 'ออนไลน์เมื่อ 1 ชม. ที่แล้ว', isOnline: false },
-      'store-sportmax': { unreadCount: 0, lastActive: 'ออนไลน์เมื่อ 3 ชม. ที่แล้ว', isOnline: false },
-    };
-  });
+  // สถานะห้องสนทนา — ยังไม่มีแหล่งข้อมูลจริง (presence/unread ฝั่งผู้ซื้อ)
+  // จึงเริ่มจากว่างเปล่า แล้วนับ unread จากข้อความที่เข้ามาจริงผ่าน socket
+  const [convMeta, setConvMeta] = useState<Record<string, ConversationMeta>>({});
 
   // Sync total unread count to LocalStorage & Navbar
   useEffect(() => {
@@ -192,6 +158,18 @@ export function ChatPage() {
           (m.sender === formattedMsg.sender && m.text === formattedMsg.text && m.time === formattedMsg.time)
         );
         if (isDuplicate) return prev;
+
+        // นับ unread จากข้อความที่เข้ามาจริง แทนตัวเลขที่เคย hardcode ไว้
+        if (formattedMsg.sender === 'store' && targetStoreId !== selectedStoreId) {
+          setConvMeta(meta => ({
+            ...meta,
+            [targetStoreId]: {
+              ...(meta[targetStoreId] || { lastActive: '', isOnline: false }),
+              unreadCount: (meta[targetStoreId]?.unreadCount || 0) + 1,
+            },
+          }));
+        }
+
         return {
           ...prev,
           [targetStoreId]: [...storeMsgs, formattedMsg],
@@ -307,7 +285,6 @@ export function ChatPage() {
       storeId: selectedStoreId,
       userId: myUserId,
       isTyping: true,
-      sender: 'me',
     });
 
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -316,7 +293,6 @@ export function ChatPage() {
         storeId: selectedStoreId,
         userId: myUserId,
         isTyping: false,
-        sender: 'me',
       });
     }, 1500);
   }
@@ -349,69 +325,20 @@ export function ChatPage() {
       storeId: selectedStoreId,
       userId: myUserId,
       text: textToSend.trim(),
-      sender: 'me',
     });
 
     // 3. Persist to Backend REST API (Async)
     try {
       fetchApi('/api/chat/messages', {
         method: 'POST',
-        headers: { 'x-user-id': myUserId },
         body: JSON.stringify({
           storeId: selectedStoreId,
           recipientId: selectedStoreId,
           text: textToSend.trim(),
-          senderRole: 'buyer',
         }),
       }).catch(() => {});
     } catch {
       // ignore
-    }
-
-    // 4. Intelligent Smart Assistant Reply (Triggered when chatting with default demo stores)
-    const isStandardDemoStore = ['store-techpro', 'store-fashionista', 'store-beautyglow', 'store-sportmax'].includes(selectedStoreId);
-    if (isStandardDemoStore) {
-      setTimeout(() => {
-        setIsStoreTyping(true);
-      }, 500);
-
-      setTimeout(() => {
-        setIsStoreTyping(false);
-
-        let replyText = `ขอบคุณสำหรับข้อความครับ ร้าน ${activeStore.name} ได้รับคำถามแล้ว แอดมินจะรีบดูแลให้ทันทีครับ! 😊`;
-
-        if (textToSend.includes('พร้อมส่ง') || textToSend.includes('ของไหม')) {
-          replyText = `มีสินค้าพร้อมส่งสต็อกแน่นๆ เลยครับผม สั่งซื้อตอนนี้จัดส่งรอบวันนี้ได้ทันทีครับ 📦⚡`;
-        } else if (textToSend.includes('รูป') || textToSend.includes('ขอดู')) {
-          replyText = `ภาพถ่ายสินค้าจริงจากสต็อกตามรูปนี้เลยครับ มั่นใจได้เลยว่าของแท้ 100% สวยตรงปกแน่นอนครับ ✨`;
-        } else if (textToSend.includes('ภาษี')) {
-          replyText = `ทางร้านสามารถออกใบกำกับภาษีเต็มรูปแบบได้ครับ เพียงกรอกข้อมูล Tax ID ในขั้นตอนชำระเงินได้เลยครับ 🧾`;
-        } else if (textToSend.includes('โค้ด') || textToSend.includes('ส่วนลด')) {
-          replyText = `มีโค้ดลดพิเศษ 10% หน้าร้านค้า เก็บโค้ดหน้าร้านแล้วนำมากดสั่งซื้อได้เลยครับผม 🎟️`;
-        }
-
-        const autoReply: Message = {
-          id: `reply-${Date.now()}`,
-          sender: 'store',
-          senderId: selectedStoreId,
-          recipientId: myUserId,
-          text: replyText,
-          time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
-        };
-
-        setMessages(prev => ({
-          ...prev,
-          [selectedStoreId]: [...(prev[selectedStoreId] || []), autoReply],
-        }));
-
-        // Broadcast reply to socket so seller center also syncs
-        emitChatMessage({
-          storeId: selectedStoreId,
-          userId: myUserId,
-          text: replyText,
-          sender: 'store',
-        });
-      }, 1200);
     }
   }
 
@@ -589,8 +516,12 @@ export function ChatPage() {
                 </div>
                 <div className="chat-header-sub">
                   <span className="chat-response-rate">● ตอบแชท {activeStore.responseRate}</span>
-                  <span className="chat-status-divider">•</span>
-                  <span className="chat-last-active">{convMeta[activeStore.id]?.lastActive || 'ออนไลน์'}</span>
+                  {convMeta[activeStore.id]?.lastActive && (
+                    <>
+                      <span className="chat-status-divider">•</span>
+                      <span className="chat-last-active">{convMeta[activeStore.id]?.lastActive}</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -609,6 +540,13 @@ export function ChatPage() {
               <ShieldCheck size={14} className="chat-secure-icon" />
               <span>การสนทนาได้รับการปกป้องโดย Movemall Buyer Protection ห้ามโอนเงินนอกระบบ</span>
             </div>
+
+            {currentMsgs.length === 0 && (
+              <div className="chat-empty-thread">
+                <p className="chat-empty-thread__title">ยังไม่มีข้อความกับร้านนี้</p>
+                <p className="chat-empty-thread__hint">ทักไปได้เลย ร้านค้าจะเห็นข้อความของคุณทันที</p>
+              </div>
+            )}
 
             {currentMsgs.map(msg => (
               <div
