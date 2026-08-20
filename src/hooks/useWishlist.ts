@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Product } from '../types';
-import { products as fallbackProducts } from '../data/products';
 import { syncUserWishlist, toggleUserWishlistItem, removeUserWishlistItem } from '../utils/api';
 
 const STORAGE_KEY = 'movemall_wishlist';
@@ -45,7 +44,6 @@ export function useWishlist(customProductsList?: Product[]) {
         const pool = [
           ...(customProductsList || []),
           ...localItems,
-          ...fallbackProducts,
         ];
         const poolMap = new Map<string, Product>();
         pool.forEach(p => poolMap.set(p.id, p));
@@ -145,4 +143,3 @@ export function useWishlist(customProductsList?: Product[]) {
 
   return { items, toggle, remove, isWished, count: items.length, isCloudSynced, syncCloud: performCloudSync };
 }
-

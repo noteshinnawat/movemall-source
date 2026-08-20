@@ -157,7 +157,7 @@ export function TrackingPage() {
         mapInstanceRef.current = null;
       }
     };
-  }, [currentOrder?.id, currentOrder?.status]);
+  }, [currentOrder]);
 
   function showToast(msg: string) {
     setToastMsg(msg);

@@ -70,7 +70,6 @@ const AccountPage      = lazyRetry(() => import('./pages/AccountPage').then(m =>
 const AdminPortalPage  = lazyRetry(() => import('./pages/AdminPortalPage').then(m => ({ default: m.AdminPortalPage })));
 const SellerRegisterPage = lazyRetry(() => import('./pages/SellerRegisterPage').then(m => ({ default: m.SellerRegisterPage })));
 const LineCallbackPage   = lazyRetry(() => import('./pages/LineCallbackPage').then(m => ({ default: m.LineCallbackPage })));
-import { products as initialProducts } from './data/products';
 import { useCart } from './hooks/useCart';
 import { useWishlist } from './hooks/useWishlist';
 import { useToast } from './hooks/useToast';
@@ -79,7 +78,6 @@ import './App.css';
 
 function AppLayout({
   productList,
-  setProductList,
   customClips,
   cart,
   wishlist,
@@ -144,6 +142,7 @@ function AppLayout({
 
       {/* Movemall AI Lens Visual Search Modal */}
       <VisualSearchModal
+        products={productList}
         isOpen={isVisualSearchOpen}
         onClose={() => {
           setIsVisualSearchOpen(false);
@@ -487,7 +486,7 @@ function AppLayout({
 
       {!isDistractionFreePage && <Footer />}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
-      {!isDistractionFreePage && <LiveActivityTicker />}
+      {!isDistractionFreePage && <LiveActivityTicker products={productList} />}
       {!isDistractionFreePage && <FloatingLiveWidget />}
       {!isProductDetailPage && !isLivePage && !isChatPage && !isAdminPage && <MobileBottomNav cartCount={cart.totalItems} />}
       {!isLivePage && !isVideoFeedPage && !isAdminPage && <BackToTopButton />}
@@ -503,33 +502,44 @@ function App() {
       if (savedCustom) {
         const parsed = JSON.parse(savedCustom);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const customIds = new Set(parsed.map((p: Product) => p.id));
-          return [...parsed, ...initialProducts.filter(p => !customIds.has(p.id))];
+          return parsed;
         }
       }
     } catch {
       // Ignore parse error
     }
-    return initialProducts;
+    return [];
   });
   const [customClips, setCustomClips] = useState<VideoClip[]>([]);
   const cart = useCart();
   const wishlist = useWishlist(productList);
   const { toasts, addToast, removeToast } = useToast();
 
-  // ── Sync Products Live from Supabase / Railway Backend ──
+  // โหลดแคตตาล็อกแบบแยก chunk และใช้ข้อมูลจาก API เมื่อพร้อม
   useEffect(() => {
-    async function loadProductsLive() {
+    let cancelled = false;
+
+    async function loadProductCatalog() {
+      const { products: fallbackProducts } = await import('./data/products');
+      if (cancelled) return;
+
+      const mergeWithCustomProducts = (baseProducts: Product[], currentProducts: Product[]) => {
+        const baseIds = new Set(baseProducts.map(p => p.id));
+        const customUserCreated = currentProducts.filter(
+          p => !baseIds.has(p.id) && (p.id.startsWith('p-custom-') || p.storeId?.startsWith('store-custom-'))
+        );
+        return [...baseProducts, ...customUserCreated];
+      };
+
+      // แสดงข้อมูลสำรองทันที ไม่รอเครือข่าย
+      setProductList(prev => mergeWithCustomProducts(fallbackProducts, prev));
+
       try {
         const res = await fetch(`${API_BASE_URL}/api/products?limit=200`);
         if (res.ok) {
           const data = await res.json();
-          if (data && Array.isArray(data.products) && data.products.length > 0) {
-            setProductList(prev => {
-              const liveIds = new Set(data.products.map((p: Product) => p.id));
-              const customUserCreated = prev.filter(p => !liveIds.has(p.id) && (p.id.startsWith('p-custom-') || p.storeId?.startsWith('store-custom-')));
-              return [...data.products, ...customUserCreated];
-            });
+          if (!cancelled && data && Array.isArray(data.products) && data.products.length > 0) {
+            setProductList(prev => mergeWithCustomProducts(data.products, prev));
             console.log(`[Movemall DB] ✅ Synced ${data.products.length} products live from Supabase PostgreSQL Database!`);
           }
         }
@@ -538,7 +548,10 @@ function App() {
       }
     }
 
-    loadProductsLive();
+    loadProductCatalog();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function handleAddToCart(product: Product, qty = 1) {
@@ -648,7 +661,6 @@ function App() {
     <BrowserRouter>
       <AppLayout
         productList={productList}
-        setProductList={setProductList}
         customClips={customClips}
         cart={cart}
         wishlist={wishlist}

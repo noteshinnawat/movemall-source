@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ShieldAlert,
@@ -394,7 +394,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
   const [isRefreshingData, setIsRefreshingData] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<string>('');
 
-  async function loadAllAdminData(showToast = false) {
+  const loadAllAdminData = useCallback(async (showToast = false) => {
     if (!isAuthorizedAdmin) return;
     setIsRefreshingData(true);
     try {
@@ -476,7 +476,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
     } finally {
       setIsRefreshingData(false);
     }
-  }
+  }, [isAuthorizedAdmin, currentUser]);
 
   useEffect(() => {
     if (!isAuthorizedAdmin) return;
@@ -487,7 +487,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
       const initialResults = localProducts.map(p => scanProductCompliance(p, `ร้านค้า #${p.storeId}`));
       setComplianceResults(initialResults);
     }
-  }, [isAuthorizedAdmin, localProducts]);
+  }, [isAuthorizedAdmin, localProducts, loadAllAdminData]);
 
   // 🤖 Handler: Run Full AI Batch Scan with Simulation
   async function handleRunAIBatchScan() {
@@ -4116,4 +4116,3 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
 }
 
 export default AdminPortalPage;
-

@@ -1,6 +1,6 @@
 // src/pages/VideoFeedPage.tsx — TikTok & Shopee Video Feed with AI Recommendation Algorithm
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Heart,
@@ -175,25 +175,6 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
     }
   }
 
-  // Keyboard Arrow Up / Down
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (isCommentsOpen) return;
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        handleNext();
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        handlePrev();
-      } else if (e.key === ' ') {
-        e.preventDefault();
-        setIsPlaying((prev) => !prev);
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeIndex, recommendedClips.length, isCommentsOpen]);
-
   // Tab Visibility Auto-pause & Route Cleanup
   useEffect(() => {
     function handleVisibilityChange() {
@@ -238,7 +219,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
     };
   }, []);
 
-  function handleNext() {
+  const handleNext = useCallback(() => {
     if (activeIndex < recommendedClips.length - 1) {
       const nextIdx = activeIndex + 1;
       setActiveIndex(nextIdx);
@@ -254,16 +235,35 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
       setActiveIndex(0); // loop back
     }
     setIsPlaying(true);
-  }
+  }, [activeIndex, recommendedClips]);
 
-  function handlePrev() {
+  const handlePrev = useCallback(() => {
     if (activeIndex > 0) {
       setActiveIndex((prev) => prev - 1);
     } else {
       setActiveIndex(recommendedClips.length - 1);
     }
     setIsPlaying(true);
-  }
+  }, [activeIndex, recommendedClips.length]);
+
+  // Keyboard Arrow Up / Down
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (isCommentsOpen) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        handleNext();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        handlePrev();
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        setIsPlaying((prev) => !prev);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleNext, handlePrev, isCommentsOpen]);
 
   function handleToggleLike(id: string, e?: React.MouseEvent) {
     e?.stopPropagation();

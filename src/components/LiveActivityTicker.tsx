@@ -2,17 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, CheckCircle } from 'lucide-react';
-import { products } from '../data/products';
+import { ShoppingBag } from 'lucide-react';
 import { getProductUrl } from '../utils/seo';
+import type { Product } from '../types';
 import './LiveActivityTicker.css';
 
 interface Activity {
-  product: (typeof products)[0];
+  product: Product;
   timeAgo: string;
 }
 
-export function LiveActivityTicker() {
+interface LiveActivityTickerProps {
+  products: Product[];
+}
+
+export function LiveActivityTicker({ products }: LiveActivityTickerProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
@@ -35,7 +39,7 @@ export function LiveActivityTicker() {
   const isHiddenRoute = hiddenRoutes.some(route => location.pathname.startsWith(route));
 
   useEffect(() => {
-    if (isHiddenRoute) return;
+    if (isHiddenRoute || products.length === 0) return;
 
     const showRandomActivity = () => {
       const randomProduct = products[Math.floor(Math.random() * products.length)];
@@ -60,7 +64,7 @@ export function LiveActivityTicker() {
       clearTimeout(initialTimer);
       clearInterval(interval);
     };
-  }, []);
+  }, [isHiddenRoute, products]);
 
   if (isHiddenRoute || !currentActivity) return null;
 

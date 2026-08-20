@@ -99,7 +99,7 @@ export function ShopPage({ products: propProducts, onAddToCart, isWishlisted, on
     }
 
     return result;
-  }, [filters, sort]);
+  }, [filters, sort, sourceProducts]);
 
   // Active filter chip labels
   const activeChips: { key: string; label: string; remove: () => void }[] = [];
