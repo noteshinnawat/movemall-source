@@ -63,6 +63,7 @@ interface ConversationView {
   lastMessage: string;
   lastTime: string;
   unreadCount: number;
+  isOnline: boolean;
 }
 
 export function ChatPage() {
@@ -205,6 +206,19 @@ export function ChatPage() {
       setIsStoreTyping(false);
     };
 
+    // สถานะออนไลน์จริงของร้าน วัดจาก socket ของร้านที่เชื่อมต่ออยู่
+    const handleStorePresence = (data: { storeId: string; isOnline: boolean }) => {
+      if (!data?.storeId) return;
+      setConvMeta(prev => ({
+        ...prev,
+        [data.storeId]: {
+          ...(prev[data.storeId] || { unreadCount: 0 }),
+          isOnline: data.isOnline,
+          lastActive: data.isOnline ? 'ออนไลน์' : 'ออฟไลน์',
+        },
+      }));
+    };
+
     const handleUserTyping = (data: { storeId: string; userId: string; isTyping: boolean; sender: string }) => {
       if (data.storeId === selectedStoreId && data.sender === 'store') {
         setIsStoreTyping(data.isTyping);
@@ -220,12 +234,14 @@ export function ChatPage() {
     socket.on('disconnect', handleDisconnect);
     socket.on('receive_chat_message', handleReceiveMessage);
     socket.on('user_typing', handleUserTyping);
+    socket.on('store_presence', handleStorePresence);
 
     return () => {
       socket.off('connect', handleConnect);
       socket.off('disconnect', handleDisconnect);
       socket.off('receive_chat_message', handleReceiveMessage);
       socket.off('user_typing', handleUserTyping);
+      socket.off('store_presence', handleStorePresence);
     };
   }, [selectedStoreId, myUserId]);
 
@@ -455,6 +471,7 @@ export function ChatPage() {
         lastMessage: lastLocal?.text || conv.lastMessage,
         lastTime: lastLocal?.time || conv.lastMessageTime,
         unreadCount: convMeta[conv.storeId]?.unreadCount ?? conv.unreadCount,
+        isOnline: Boolean(convMeta[conv.storeId]?.isOnline),
       });
     }
 
@@ -469,6 +486,7 @@ export function ChatPage() {
         lastMessage: lastLocal?.text || '',
         lastTime: lastLocal?.time || '',
         unreadCount: convMeta[storeId]?.unreadCount || 0,
+        isOnline: Boolean(convMeta[storeId]?.isOnline),
       });
     }
 
@@ -480,6 +498,7 @@ export function ChatPage() {
         lastMessage: 'เริ่มการสนทนา',
         lastTime: '',
         unreadCount: 0,
+        isOnline: Boolean(convMeta[selectedStoreId]?.isOnline),
       });
     }
 
@@ -494,6 +513,7 @@ export function ChatPage() {
     lastMessage: '',
     lastTime: '',
     unreadCount: 0,
+    isOnline: Boolean(convMeta[selectedStoreId]?.isOnline),
   };
 
   const filteredConversations = conversationViews.filter(conv => {
@@ -602,6 +622,7 @@ export function ChatPage() {
                   >
                     <div className="chat-avatar-wrapper">
                       <img src={conv.logo} alt={conv.name} className="chat-conv-avatar" />
+                      {conv.isOnline && <span className="chat-online-dot" title="ออนไลน์" />}
                     </div>
 
                     <div className="chat-conv-info">
@@ -652,6 +673,7 @@ export function ChatPage() {
 
                 <div className="chat-avatar-wrapper">
                   <img src={activeDisplay.logo} alt={activeDisplay.name} className="chat-conv-avatar" />
+                {activeDisplay.isOnline && <span className="chat-online-dot" />}
                 </div>
 
                 <div>

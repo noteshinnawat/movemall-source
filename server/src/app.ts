@@ -174,6 +174,7 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from './config/env.js';
 import { isTokenRevoked } from './services/tokenRevocation.service.js';
 import { canActAsStore, ChatIdentity } from './services/chatAccess.service.js';
+import { markStoreOnline, markSocketOffline, isStoreOnline } from './services/storePresence.service.js';
 
 // ── Socket.io Live Chat Room Handlers ──
 //
@@ -241,6 +242,12 @@ io.on('connection', (socket) => {
 
     const room = `chat:${data.storeId}:${customerId}`;
     socket.join(room);
+
+    // สมัครรับสถานะออนไลน์ของร้านนี้ แล้วส่งสถานะปัจจุบันให้ทันที
+    // ไม่ต้องรอให้ร้านเปลี่ยนสถานะก่อนถึงจะรู้
+    socket.join(`presence:${data.storeId}`);
+    socket.emit('store_presence', { storeId: data.storeId, isOnline: isStoreOnline(data.storeId) });
+
     console.log(`💬 Client ${socket.id} (user ${identity.userId}) joined chat room ${room}`);
   });
 
@@ -255,6 +262,12 @@ io.on('connection', (socket) => {
 
     const room = `seller:${data.storeId}`;
     socket.join(room);
+
+    // ร้านเพิ่งกลับมาออนไลน์ — บอกผู้ซื้อทุกคนที่เปิดห้องกับร้านนี้อยู่
+    if (markStoreOnline(data.storeId, socket.id)) {
+      io.to(`presence:${data.storeId}`).emit('store_presence', { storeId: data.storeId, isOnline: true });
+    }
+
     console.log(`🏪 Seller ${socket.id} joined store room ${room}`);
   });
 
@@ -315,6 +328,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    // ร้านที่ไม่เหลือ socket เฝ้าแล้ว ถือว่าออฟไลน์
+    for (const storeId of markSocketOffline(socket.id)) {
+      io.to(`presence:${storeId}`).emit('store_presence', { storeId, isOnline: false });
+    }
     console.log(`🔌 WebSocket Client disconnected: ${socket.id}`);
   });
 });
