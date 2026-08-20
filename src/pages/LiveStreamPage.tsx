@@ -1,6 +1,6 @@
 // src/pages/LiveStreamPage.tsx — TikTok & Shopee Video Vertical Swipe Feed with Yellow Basket
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingBag, Send, Eye, Volume2, VolumeX, X, Plus, Check, Share2, MessageCircle, ChevronUp, ChevronDown, Sparkles, Smile, Gift, ShoppingCart, Maximize2, Minimize2 } from 'lucide-react';
 import { mockLiveStreams } from '../data/liveStreams';
@@ -47,7 +47,10 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
   const [inputComment, setInputComment] = useState('');
   const [floatingChats, setFloatingChats] = useState<FloatingChatMsg[]>([]);
 
-  const activeCatalog = products && products.length > 0 ? products : staticProducts;
+  const activeCatalog = useMemo(
+    () => products && products.length > 0 ? products : staticProducts,
+    [products]
+  );
 
   useEffect(() => {
     async function loadLiveStreams() {
@@ -116,13 +119,20 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
       }
     }
     loadLiveStreams();
-  }, [products]);
+  }, [activeCatalog]);
 
   const touchStartY = useRef(0);
   const isScrolling = useRef(false);
 
   const currentStream = streamsList[activeIndex] || mockLiveStreams[0];
 
+  const handleNext = useCallback(() => {
+    setActiveIndex(prev => Math.min(prev + 1, Math.max(0, streamsList.length - 1)));
+  }, [streamsList.length]);
+
+  const handlePrev = useCallback(() => {
+    setActiveIndex(prev => Math.max(prev - 1, 0));
+  }, []);
 
   // Touch swipe handling
   function handleTouchStart(e: React.TouchEvent) {
@@ -184,7 +194,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
         v.muted = true;
       });
     };
-  }, [activeIndex]);
+  }, [handleNext, handlePrev]);
 
   // ── Floating Chat Overlay: simulate incoming comments ──
   useEffect(() => {
@@ -234,18 +244,6 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
 
     return () => clearInterval(interval);
   }, [activeIndex]);
-
-  function handleNext() {
-    if (activeIndex < mockLiveStreams.length - 1) {
-      setActiveIndex(prev => prev + 1);
-    }
-  }
-
-  function handlePrev() {
-    if (activeIndex > 0) {
-      setActiveIndex(prev => prev - 1);
-    }
-  }
 
   function handleToggleLike(id: string) {
     const isLiked = !!likedList[id];

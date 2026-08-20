@@ -307,7 +307,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 
   // ── Live Seller Chat State (Strict Store Isolated) ──
   const [sellerMessages, setSellerMessages] = useState<Record<string, any[]>>(() => {
-    const all = getStoredChatHistory();
+    const all = getStoredChatHistory(currentUser?.id || '');
     const filtered: Record<string, any[]> = {};
     Object.keys(all).forEach(k => {
       if (k.startsWith(`${currentStore.id}::`)) {
@@ -405,8 +405,8 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
           ...prev,
           [threadKey]: [...list, msg],
         };
-        const allStored = getStoredChatHistory();
-        saveStoredChatHistory({ ...allStored, [threadKey]: updated[threadKey] });
+        const allStored = getStoredChatHistory(currentUser?.id || '');
+        saveStoredChatHistory(currentUser?.id || '', { ...allStored, [threadKey]: updated[threadKey] });
         return updated;
       });
     };
@@ -418,7 +418,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
       socket.off('connect', handleConnect);
       socket.off('receive_chat_message', handleReceiveMsg);
     };
-  }, [currentStore.id, selectedCustomerId]);
+  }, [currentStore.id, selectedCustomerId, currentUser?.id]);
 
   function handleSellerSendMessage(e?: React.FormEvent, customText?: string) {
     if (e) e.preventDefault();
@@ -443,7 +443,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
         [threadKey]: [...list, newMsg],
         [selectedCustomerId]: [...list, newMsg],
       };
-      saveStoredChatHistory(updated);
+      saveStoredChatHistory(currentUser?.id || '', updated);
       return updated;
     });
     setSellerInputVal('');
@@ -491,10 +491,10 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
       delete next[threadKey];
       delete next[customerId];
       try {
-        const allStored = getStoredChatHistory();
+        const allStored = getStoredChatHistory(currentUser?.id || '');
         delete allStored[threadKey];
         delete allStored[customerId];
-        saveStoredChatHistory(allStored);
+        saveStoredChatHistory(currentUser?.id || '', allStored);
       } catch {}
       return next;
     });

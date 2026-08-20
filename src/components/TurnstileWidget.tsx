@@ -31,6 +31,11 @@ export function TurnstileWidget({
 }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
+  const callbacksRef = useRef({ onSuccess, onError, onExpire });
+
+  useEffect(() => {
+    callbacksRef.current = { onSuccess, onError, onExpire };
+  }, [onSuccess, onError, onExpire]);
 
   useEffect(() => {
     // Inject Cloudflare Turnstile script once
@@ -57,12 +62,12 @@ export function TurnstileWidget({
           action: 'turnstile-spin-v1',
           appearance,
           theme,
-          callback: onSuccess,
+          callback: (token: string) => callbacksRef.current.onSuccess(token),
           'error-callback': () => {
-            onError?.();
+            callbacksRef.current.onError?.();
           },
           'expired-callback': () => {
-            onExpire?.();
+            callbacksRef.current.onExpire?.();
           },
         });
       } else if (attempts < MAX_ATTEMPTS) {
@@ -79,7 +84,7 @@ export function TurnstileWidget({
         widgetIdRef.current = null;
       }
     };
-  }, [siteKey]);
+  }, [siteKey, appearance, theme]);
 
   return <div ref={containerRef} className={className} />;
 }

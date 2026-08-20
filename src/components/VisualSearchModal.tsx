@@ -19,13 +19,13 @@ import {
   Palette,
 } from 'lucide-react';
 import { VISUAL_SEARCH_SAMPLES, type VisualSample } from '../data/visualSearchSamples';
-import { products } from '../data/products';
 import { getStoreById } from '../data/stores';
 import { getProductUrl } from '../utils/seo';
 import type { Product } from '../types';
 import './VisualSearchModal.css';
 
 export interface VisualSearchModalProps {
+  products: Product[];
   isOpen: boolean;
   onClose: () => void;
   initialImage?: string | null;
@@ -44,6 +44,7 @@ interface DetectedObject {
 }
 
 export function VisualSearchModal({
+  products,
   isOpen,
   onClose,
   initialImage,
@@ -272,7 +273,7 @@ export function VisualSearchModal({
     scoredList.sort((a, b) => b.visualMatchScore - a.visualMatchScore);
 
     return scoredList;
-  }, [selectedImage, categoryFilter, onlyMall, activeObject]);
+  }, [selectedImage, categoryFilter, onlyMall, activeObject, products]);
 
   if (!isOpen) return null;
 
