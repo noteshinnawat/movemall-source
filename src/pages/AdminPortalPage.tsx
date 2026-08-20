@@ -1709,7 +1709,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
               <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', padding: '1.25rem', borderRadius: 6 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                   <div>
-                    <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>เช็คอินประจำวัน (Daily Check-in 7 Days):</span>
+                    <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>เช็กอิน 7 วัน</span>
                     <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: '2px 0 0 0' }}>วันแรก 10 Coins, วันที่ 7 รับ 100 Coins (มูลค่าเทียบเท่า ฿1 = 1 Coin)</p>
                   </div>
                   <button className="admin-btn-sm admin-btn-outline" onClick={() => alert('บันทึกอัตราเหรียญเรียบร้อย')}>
@@ -2456,7 +2456,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
             </div>
 
             <div className="admin-stat-card" style={{ borderLeft: '4px solid #7c3aed' }}>
-              <span className="admin-stat-label">📈 รายได้ค่าคอมมิชชั่นแพลตฟอร์ม</span>
+              <span className="admin-stat-label">📈 รายได้ค่าคอมมิชชัน</span>
               <div className="admin-stat-val" style={{ color: '#6d28d9' }}>฿92,500</div>
               <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Take Rate เฉลี่ย 5% GMV</span>
             </div>
@@ -4116,5 +4116,4 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
 }
 
 export default AdminPortalPage;
-
 

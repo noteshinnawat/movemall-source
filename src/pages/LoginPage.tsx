@@ -282,7 +282,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
             }}
           >
             <User size={14} style={{ display: 'inline', marginRight: 4 }} />
-            สำหรับผู้ซื้อ
+            ผู้ซื้อ
           </button>
           <button
             type="button"
@@ -294,17 +294,17 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
             }}
           >
             <Store size={14} style={{ display: 'inline', marginRight: 4 }} />
-            สำหรับร้านค้า / ผู้ขาย
+            ผู้ขาย
           </button>
         </div>
 
         <h1 className="auth-title">
-          {role === 'seller' ? 'เข้าสู่ระบบศูนย์ผู้ขาย Movemall' : 'ยินดีต้อนรับสู่ Movemall'}
+          {role === 'seller' ? 'เข้าสู่ศูนย์ผู้ขาย' : 'เข้าสู่ระบบ Movemall'}
         </h1>
         <p className="auth-sub">
           {role === 'seller'
-            ? 'เข้าถึงแดชบอร์ดจัดการสต็อก คำสั่งซื้อ และร้านค้าของคุณ'
-            : 'เข้าสู่ระบบเพื่อติดตามสถานะพัสดุ รับสิทธิพิเศษ และส่วนลดเฉพาะคุณ'}
+            ? 'จัดการสินค้า ออเดอร์ และร้านค้า'
+            : 'ติดตามออเดอร์และรับสิทธิพิเศษ'}
         </p>
 
         {/* Login Type Tabs (For Buyers) */}
@@ -318,7 +318,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 setErrorMsg('');
               }}
             >
-              <KeyRound size={14} /> รหัสผ่านทั่วไป
+              <KeyRound size={14} /> รหัสผ่าน
             </button>
             <button
               type="button"

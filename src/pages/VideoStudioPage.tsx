@@ -293,7 +293,7 @@ export function VideoStudioPage({ onPublishClip }: VideoStudioPageProps) {
           id: `cm-${Date.now()}`,
           userId: 'movemall-bot',
           userName: 'Movemall Video Bot 🤖',
-          text: 'คลิปสั้นของคุณผ่านการตรวจสอบและเริ่มเปิดขายผ่านตะกร้าสีเหลืองแล้ว 🎉',
+          text: 'เผยแพร่คลิปพร้อมตะกร้าแล้ว',
           time: 'เมื่อสักครู่',
           likesCount: 1,
           badge: 'ระบบ',
@@ -433,7 +433,7 @@ export function VideoStudioPage({ onPublishClip }: VideoStudioPageProps) {
                     {metadata.isOverLimit && (
                       <div className="studio-warning-banner">
                         <AlertTriangle size={16} color="#DC2626" />
-                        <span>คลิปมีความยาวเกิน 60 วินาที! ระบบจะตัดให้เหลือไม่เกิน 60 วินาทีอัตโนมัติ</span>
+                        <span>คลิปเกิน 60 วินาที ระบบจะตัดให้อัตโนมัติ</span>
                       </div>
                     )}
 
@@ -486,7 +486,7 @@ export function VideoStudioPage({ onPublishClip }: VideoStudioPageProps) {
                 </div>
 
                 <p className="studio-card-desc">
-                  เลือกสินค้าจาก Movemall มาปักในคลิป เมื่อผู้ชมกดซื้อจากตะกร้าเหลืองนี้ คุณจะได้รับค่าคอมมิชชั่นทันที!
+                  เลือกสินค้ามาปักในคลิปเพื่อรับค่าคอมมิชชัน
                 </p>
 
                 {/* Smart Product Picker Button & Search Input */}
@@ -551,7 +551,7 @@ export function VideoStudioPage({ onPublishClip }: VideoStudioPageProps) {
                           <div className="studio-pinned-meta">
                             <span className="studio-pinned-price">฿{item.price.toLocaleString()}</span>
                             <span className="studio-pinned-comm">
-                              คอมมิชชั่น ~฿{item.commissionAmount} ({item.commissionRate}%)
+                              คอมมิชชัน ~฿{item.commissionAmount} ({item.commissionRate}%)
                             </span>
                           </div>
                         </div>
@@ -571,9 +571,9 @@ export function VideoStudioPage({ onPublishClip }: VideoStudioPageProps) {
                 <div className="studio-earnings-card">
                   <DollarSign size={20} color="#10B981" />
                   <div className="studio-earnings-text">
-                    <span className="studio-earnings-title">รายได้ค่าคอมมิชชั่นโดยประมาณ</span>
+                    <span className="studio-earnings-title">ค่าคอมมิชชันโดยประมาณ</span>
                     <span className="studio-earnings-desc">
-                      รับสูงสุด <strong>฿{totalEstimatedCommission.toLocaleString()}</strong> ต่อ 1 คำสั่งซื้อจากคลิปนี้
+                      รับสูงสุด <strong>฿{totalEstimatedCommission.toLocaleString()}</strong> / ออเดอร์
                     </span>
                   </div>
                 </div>

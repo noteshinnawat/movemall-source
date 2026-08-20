@@ -23,10 +23,10 @@ const SHIPPING_OPTIONS = [
 ];
 
 const PAYMENT_METHODS = [
-  { id: 'promptpay', name: 'พร้อมเพย์ (PromptPay QR)', desc: 'สแกนจ่ายทันทีผ่านแอปธนาคารทุกแห่ง ฟรีค่าธรรมเนียม', icon: '📱' },
-  { id: 'paylater', name: 'Movemall PayLater (ผ่อนชำระ 0%)', desc: 'ช้อปก่อนจ่ายทีหลัง วงเงินคงเหลือ ฿15,000 (ผ่อน 0% สูงสุด 3 เดือน)', icon: '✨' },
-  { id: 'credit', name: 'บัตรเครดิต / เดบิต', desc: 'Visa, Mastercard, JCB ปลอดภัยด้วย 3D Secure', icon: '💳' },
-  { id: 'cod', name: 'เก็บเงินปลายทาง (COD)', desc: 'ชำระเงินกับพนักงานเมื่อได้รับสินค้า', icon: '💵' },
+  { id: 'promptpay', name: 'พร้อมเพย์', desc: 'สแกนจ่าย ไม่มีค่าธรรมเนียม', icon: '📱' },
+  { id: 'paylater', name: 'Movemall PayLater', desc: 'ผ่อน 0% สูงสุด 3 เดือน · วงเงิน ฿15,000', icon: '✨' },
+  { id: 'credit', name: 'บัตรเครดิต / เดบิต', desc: 'Visa, Mastercard, JCB · 3D Secure', icon: '💳' },
+  { id: 'cod', name: 'เก็บเงินปลายทาง', desc: 'จ่ายเมื่อได้รับสินค้า', icon: '💵' },
 ];
 
 const STEPS = ['ที่อยู่', 'จัดส่ง', 'ชำระเงิน'];
@@ -278,13 +278,13 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                             <p className="checkout__shipping-name">{pay.name}</p>
                             {isCodRestricted && (
                               <span style={{ fontSize: 10, background: '#DC2626', color: 'white', fontWeight: 800, padding: '1px 6px', borderRadius: 4 }}>
-                                🚫 ถูกระงับสิทธิ์ COD (Trust Score ต่ำ)
+                                ใช้ COD ไม่ได้
                               </span>
                             )}
                           </div>
                           <p className="checkout__shipping-desc">
                             {isCodRestricted
-                              ? 'คุณถูกระงับการสั่งแบบเก็บเงินปลายทางเนื่องจากมีประวัติปฏิเสธรับพัสดุ กรุณาชำระผ่าน PromptPay หรือ PayLater'
+                              ? 'COD ถูกระงับจากประวัติรับพัสดุ โปรดเลือกวิธีอื่น'
                               : pay.desc}
                           </p>
                         </div>
@@ -294,7 +294,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                     {paymentMethod === 'paylater' && pay.id === 'paylater' && (
                       <div style={{ background: '#EFF6FF', border: '1.5px solid #3B82F6', padding: 12, margin: '6px 0 10px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
                         <div style={{ fontSize: 12, fontWeight: 800, color: '#1E40AF' }}>
-                          ⚡ เลือกระยะเวลาผ่อนชำระ (วงเงินคงเหลือ ฿15,000):
+                          เลือกระยะผ่อน · วงเงิน ฿15,000
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                           <button
@@ -372,10 +372,10 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                   <span style={{ fontSize: '1.25rem' }}>🧾</span>
                   <div>
                     <h2 className="checkout__section-title" style={{ margin: 0, fontSize: '1.05rem', color: '#1E3A8A' }}>
-                      ใบกำกับภาษี / ใบเสร็จรับเงิน (e-Tax Ready)
+                      ใบกำกับภาษี
                     </h2>
                     <p style={{ fontSize: '0.8rem', color: '#64748B', margin: '2px 0 0 0' }}>
-                      ร้านค้าที่จด VAT จะออกใบกำกับภาษีเต็มรูปส่งตรงทางอีเมลของคุณทันที
+                      รับเอกสารทางอีเมล
                     </p>
                   </div>
                 </div>
@@ -387,7 +387,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                     onChange={e => setRequestInvoice(e.target.checked)}
                     style={{ width: '1.1rem', height: '1.1rem', accentColor: '#2563EB', cursor: 'pointer' }}
                   />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1D4ED8' }}>ขอใบกำกับภาษีเต็มรูป</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1D4ED8' }}>ขอใบกำกับภาษี</span>
                 </label>
               </div>
 
@@ -461,7 +461,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                     )}
 
                     <div className="checkout__form-group checkout__form-group--full">
-                      <label className="checkout__label">อีเมลสำหรับรับ e-Tax Invoice (PDF & XML) *</label>
+                      <label className="checkout__label">อีเมลรับเอกสาร (PDF และ XML) *</label>
                       <input
                         type="email"
                         className="checkout__input"
@@ -486,7 +486,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
                 </div>
               ) : (
                 <div style={{ fontSize: '0.8rem', color: '#64748B', background: '#F1F5F9', padding: '6px 10px' }}>
-                  ℹ️ หากไม่ขอใบกำกับภาษีเต็มรูป ระบบจะออกเป็นใบเสร็จรับเงิน/ใบส่งสินค้าตามปกติให้ในกล่องพัสดุ
+                  หากไม่เลือก ระบบจะแนบใบเสร็จไปกับพัสดุ
                 </div>
               )}
             </div>
@@ -513,7 +513,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
 
             <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '8px 10px', fontSize: 11, color: '#64748B', display: 'flex', alignItems: 'center', gap: 6, margin: '10px 0' }}>
               <span>📦</span>
-              <span>พัสดุจะถูกแยกจัดส่งจากแต่ละร้านค้า (ติดตามเลขพัสดุแยกกล่องได้)</span>
+              <span>แต่ละร้านจัดส่งแยกกัน</span>
             </div>
 
             <div className="checkout__summary-divider" />
@@ -523,8 +523,8 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ background: '#06C755', color: '#fff', fontSize: 10, fontWeight: 900, padding: '2px 5px', borderRadius: 3 }}>LINE</span>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#166534' }}>รับใบเสร็จและแจ้งเตือนพัสดุผ่าน LINE</div>
-                  <div style={{ fontSize: 11, color: '#15803D' }}>แจ้งเตือน Flash Express สดเข้าแชท</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#166534' }}>รับแจ้งเตือนผ่าน LINE</div>
+                  <div style={{ fontSize: 11, color: '#15803D' }}>สถานะพัสดุและใบเสร็จ</div>
                 </div>
               </div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 12, fontWeight: 700, color: '#166534' }}>
@@ -570,16 +570,16 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
             </div>
             {useCoins && (
               <div className="checkout__summary-row" style={{ color: 'var(--success)' }}>
-                <span className="checkout__summary-label" style={{ color: 'var(--success)' }}>ส่วนลดจาก Movemall Coins</span>
+                <span className="checkout__summary-label" style={{ color: 'var(--success)' }}>ส่วนลด Coins</span>
                 <span className="checkout__summary-value">-฿{coinDiscount.toLocaleString()}</span>
               </div>
             )}
             <div className="checkout__summary-divider" />
             <div className="checkout__summary-row checkout__summary-row--total">
               <div>
-                <div>ยอดชำระสุทธิ</div>
+                <div>ยอดชำระ</div>
                 <div style={{ fontSize: '0.75rem', fontWeight: 400, color: '#64748B' }}>
-                  (รวมภาษีมูลค่าเพิ่ม 7% แล้ว: ฿{(grandTotal * (7 / 107)).toFixed(2)})
+                  รวม VAT 7% · ฿{(grandTotal * (7 / 107)).toFixed(2)}
                 </div>
               </div>
               <span className="checkout__total-price">฿{grandTotal.toLocaleString()}</span>
@@ -587,7 +587,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
 
             <button type="submit" id="checkout-submit-btn" className="checkout__submit-btn">
               <ShieldCheck size={18} />
-              {paymentMethod === 'promptpay' ? 'ไปที่หน้าสแกน QR พร้อมเพย์' : 'ยืนยันคำสั่งซื้อ'}
+              {paymentMethod === 'promptpay' ? 'สแกน QR เพื่อชำระ' : 'ยืนยันคำสั่งซื้อ'}
               <ArrowRight size={16} />
             </button>
           </div>

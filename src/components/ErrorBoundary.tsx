@@ -71,7 +71,7 @@ export class ErrorBoundary extends Component<Props, State> {
             มีการอัปเดตเวอร์ชันใหม่ หรือพบข้อผิดพลาดชั่วคราว
           </h2>
           <p style={{ fontSize: 14, color: 'var(--text-muted, #6B7280)', maxWidth: 460, margin: '0 0 24px 0', lineHeight: 1.6 }}>
-            ระบบตรวจพบการอัปเดตไฟล์เวอร์ชันล่าสุด กรุณากดปุ่มโหลดหน้าเว็บใหม่เพื่อใช้งานต่อได้อย่างราบรื่น
+            มีเวอร์ชันใหม่ กรุณาโหลดหน้าเว็บอีกครั้ง
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
             <button

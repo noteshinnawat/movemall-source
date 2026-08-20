@@ -355,7 +355,7 @@ export function Navbar({
               id="navbar-cart-btn"
               className="navbar__action-btn navbar__cart-btn"
               aria-label={`ตะกร้าสินค้า ${cartCount} รายการ`}
-              title="รถเข็นสินค้า"
+              title="ตะกร้าสินค้า"
             >
               <div className="navbar__icon-badge-wrap">
                 <ShoppingBag size={21} />
@@ -409,7 +409,7 @@ export function Navbar({
           </Link>
 
           <Link to="/games" className="navbar__sub-link" style={{ color: '#4F46E5' }}>
-            🎮 เล่นเกมส์ & รับ Coins
+            🎮 เล่นเกม & รับ Coins
           </Link>
 
           <Link to="/flash-sale" className="navbar__sub-link" style={{ color: 'var(--error)' }}>

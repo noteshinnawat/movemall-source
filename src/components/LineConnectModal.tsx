@@ -629,7 +629,7 @@ export function LineConnectModal({
                 <div className="line-toggle-info">
                   <div className="line-toggle-label">
                     <Truck size={16} className="text-blue" />
-                    <strong>สถานะการจัดส่ง & เลขแทร็กกิ้ง (Shipping & Delivery)</strong>
+                    <strong>สถานะจัดส่งและเลขพัสดุ</strong>
                   </div>
                   <span className="line-toggle-sub">แจ้งเตือนเมื่อพัสดุถูกส่งออก และเมื่อพนักงานกำลังนำส่งถึงบ้าน</span>
                 </div>
@@ -677,7 +677,7 @@ export function LineConnectModal({
                 <div className="line-toggle-info">
                   <div className="line-toggle-label">
                     <Coins size={16} className="text-gold" />
-                    <strong>เตือนเช็คอินรับ Coins ประจำวัน (Daily Coins)</strong>
+                    <strong>เตือนเช็กอินรับ Coins</strong>
                   </div>
                   <span className="line-toggle-sub">สะกิดรับเหรียญฟรีทุกวัน เพื่อนำไปใช้แลกส่วนลดเงินสด</span>
                 </div>

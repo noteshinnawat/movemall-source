@@ -548,7 +548,7 @@ export function AccountPage() {
           {activeTab === 'profile' && (
             <div>
               <h1 className="account-section-title">โปรไฟล์ส่วนตัว (Personal Profile)</h1>
-              <p className="account-section-sub">จัดการข้อมูลส่วนตัว ระดับสมาชิก และตรวจสอบยอดสะสม Movemall Coins</p>
+              <p className="account-section-sub">ข้อมูลส่วนตัว สมาชิก และ Coins</p>
 
               <div className="account-card account-vip-card">
                 <div className="account-vip-card__header">
@@ -582,7 +582,7 @@ export function AccountPage() {
                     color: 'white',
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span>สะสมยอดช้อปอีก <strong>฿{currentTier.neededAmount.toLocaleString()}</strong> เพื่อเลื่อนเป็น <strong>{currentTier.nextTierName}</strong></span>
+                      <span>อีก <strong>฿{currentTier.neededAmount.toLocaleString()}</strong> ถึงระดับ <strong>{currentTier.nextTierName}</strong></span>
                       <span>ยอดช้อปสะสม ฿{totalSpent.toLocaleString()}</span>
                     </div>
                     <div style={{
@@ -642,7 +642,7 @@ export function AccountPage() {
                     </span>
                   </div>
                   <p style={{ margin: '4px 0 8px 0', fontSize: '0.8rem', color: '#64748b' }}>
-                    สถิติการรับพัสดุ COD <strong>100%</strong> • ไม่มีประวัติปฏิเสธรับสินค้าหรือสั่งเล่น • สิทธิ์ช้อปปลอดภัยสูงสุด
+                    รับพัสดุ COD <strong>100%</strong> · ไม่มีประวัติปฏิเสธรับ
                   </p>
                   <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', color: '#475569', flexWrap: 'wrap' }}>
                     <span>✅ สิทธิ์เก็บเงินปลายทาง (COD) ไม่จำกัดวงเงิน</span>
@@ -751,7 +751,7 @@ export function AccountPage() {
           {activeTab === 'security' && (
             <div>
               <h1 className="account-section-title">ยืนยันตัวตน & ความปลอดภัย (Security & OTP Hub)</h1>
-              <p className="account-section-sub">ยืนยันอีเมลและเบอร์โทรศัพท์เพื่อรับสิทธิ์ส่งฟรีและ 100 Movemall Coins ฟรี</p>
+              <p className="account-section-sub">ยืนยันข้อมูลเพื่อรับส่งฟรีและ 100 Coins</p>
 
               {/* Email Verification Card */}
               <div className="verify-card">
@@ -832,7 +832,7 @@ export function AccountPage() {
                 <div>
                   <h1 className="account-section-title">สมุดที่อยู่จัดส่งพัสดุ (Shipping Address Book)</h1>
                   <p className="account-section-sub" style={{ marginBottom: 0 }}>
-                    จัดการที่อยู่สำหรับจัดส่งพัสดุด่วน (บันทึกได้สูงสุดไม่เกิน 10 ที่อยู่)
+                    ที่อยู่จัดส่ง · สูงสุด 10 ที่อยู่
                   </p>
                 </div>
                 <div className="account-address-header-actions">
@@ -929,7 +929,7 @@ export function AccountPage() {
                   <div>
                     <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>สถานะสิทธิ์ Movemall PayLater</span>
                     <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#10b981', margin: '0.25rem 0' }}>✓ อนุมัติวงเงินแล้ว ฿15,000 บาท</h2>
-                    <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>วงเงินคงเหลือพร้อมใช้: ฿15,000.00 บาท | ดอกเบี้ย 0% สูงสุด 3 เดือน</p>
+                    <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>วงเงิน ฿15,000 · ผ่อน 0% สูงสุด 3 เดือน</p>
                   </div>
                 </div>
               </div>
@@ -944,7 +944,7 @@ export function AccountPage() {
                     <span style={{ background: '#06C755', color: '#fff', fontSize: '12px', fontWeight: 900, padding: '3px 7px', borderRadius: '4px' }}>LINE</span>
                     การแจ้งเตือนและบริการ Movemall x LINE Official
                   </h1>
-                  <p className="account-section-sub">รับใบเสร็จ, แจ้งเตือนสถานะพัสดุ Flash Express, และดีลลดแรงผ่าน LINE แบบเรียลไทม์</p>
+                  <p className="account-section-sub">รับใบเสร็จ สถานะพัสดุ และดีลผ่าน LINE</p>
                 </div>
                 <button
                   type="button"
@@ -953,7 +953,7 @@ export function AccountPage() {
                   onClick={() => setIsLineModalOpen(true)}
                 >
                   <Smartphone size={16} />
-                  {isLineConnected ? '📱 เปิดศูนย์ควบคุม & ดูตัวอย่าง LINE' : '🟢 เชื่อมต่อ LINE (+50 Coins)'}
+                  {isLineConnected ? '📱 ตั้งค่า LINE' : '🟢 เชื่อมต่อ LINE · +50 Coins'}
                 </button>
               </div>
 
@@ -963,12 +963,12 @@ export function AccountPage() {
                   <div>
                     <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>สถานะการเชื่อมต่อ LINE Official</span>
                     <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: isLineConnected ? '#06C755' : '#D97706', margin: '0.25rem 0' }}>
-                      {isLineConnected ? '🟢 เชื่อมต่อกับ Movemall เรียบร้อยแล้ว' : '⚠️ ยังไม่ได้เชื่อมต่อบัญชี LINE'}
+                      {isLineConnected ? '🟢 เชื่อมต่อแล้ว' : 'ยังไม่ได้เชื่อมต่อ LINE'}
                     </h2>
                     <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>
                       {isLineConnected
-                        ? 'คุณจะได้รับข้อความแจ้งเตือนคำสั่งซื้อและการจัดส่งพัสดุสดผ่าน LINE Official Account'
-                        : 'เชื่อมต่อบัญชี LINE ตอนนี้เพื่อรับโบนัสฟรี +50 Coins และรับเลขแทร็กกิ้งพัสดุทันทีเมื่อของออกจากร้าน'}
+                        ? 'รับสถานะออเดอร์และพัสดุผ่าน LINE'
+                        : 'เชื่อมต่อเพื่อรับ 50 Coins และสถานะพัสดุ'}
                     </p>
                   </div>
                   <button
@@ -990,7 +990,7 @@ export function AccountPage() {
                     <span>แจ้งเตือนพัสดุเรียลไทม์</span>
                   </div>
                   <p style={{ fontSize: '12px', color: '#6B7280', margin: 0, lineHeight: 1.4 }}>
-                    รับเลข Tracking No. Flash Express พร้อมลิงก์กดเปิดดูแผนที่สด GPS ทันทีเมื่อคนขับใกล้ถึงบ้าน
+                    รับเลขพัสดุและลิงก์ติดตาม GPS
                   </p>
                 </div>
 
@@ -1000,7 +1000,7 @@ export function AccountPage() {
                     <span>ใบเสร็จดิจิทัล (E-Receipt)</span>
                   </div>
                   <p style={{ fontSize: '12px', color: '#6B7280', margin: 0, lineHeight: 1.4 }}>
-                    สรุปยอดเงิน รายการสินค้า และประวัติการชำระเงินในรูปแบบ Flex Card สวยงาม เก็บเป็นหลักฐานได้
+                    รับใบเสร็จและประวัติชำระเงิน
                   </p>
                 </div>
 
@@ -1010,7 +1010,7 @@ export function AccountPage() {
                     <span>แจ้งเตือน Coins & Flash Sale</span>
                   </div>
                   <p style={{ fontSize: '12px', color: '#6B7280', margin: 0, lineHeight: 1.4 }}>
-                    สะกิดเช็คอินรับ Coins ทุกวัน และเตือนทันทีเมื่อสินค้าใน Wishlist จัดโปรลดแรง 50%
+                    เตือนเช็กอินและดีลสินค้าโปรด
                   </p>
                 </div>
               </div>

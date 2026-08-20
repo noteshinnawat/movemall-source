@@ -61,15 +61,15 @@ export function PWAInstallPrompt() {
       <div className="pwa-prompt__info">
         <span className="pwa-prompt__icon">🛍️</span>
         <div className="pwa-prompt__text">
-          <div className="pwa-prompt__title">ติดตั้งแอป Movemall ลงมือถือ</div>
-          <div className="pwa-prompt__desc">เปิดเต็มจอ โหลดไว ช้อปสะดวกกว่า พร้อมรับแจ้งเตือนดีลเด็ด</div>
+          <div className="pwa-prompt__title">ติดตั้ง Movemall</div>
+          <div className="pwa-prompt__desc">ช้อปเร็วขึ้น พร้อมรับแจ้งเตือนดีล</div>
         </div>
       </div>
 
       <div className="pwa-prompt__actions">
         <button className="pwa-prompt__install-btn" onClick={handleInstall}>
           <Download size={12} style={{ display: 'inline', marginRight: 4 }} />
-          ติดตั้งแอป
+          ติดตั้ง
         </button>
         <button
           className="pwa-prompt__close-btn"

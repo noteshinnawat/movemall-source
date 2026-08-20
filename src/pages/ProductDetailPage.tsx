@@ -386,8 +386,8 @@ export function ProductDetailPage({
                   <Link
                     to="/cart"
                     className="product-float-btn product-float-cart-link"
-                    aria-label="ดูรถเข็น"
-                    title="ดูรถเข็น"
+                    aria-label="ดูตะกร้า"
+                    title="ดูตะกร้า"
                   >
                     <ShoppingBag size={20} />
                     {cartCount > 0 && (
@@ -581,7 +581,7 @@ export function ProductDetailPage({
               <div style={{ marginTop: '0.75rem', padding: '0.6rem 0.85rem', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.825rem', color: '#1E40AF' }}>
                 <span style={{ fontSize: '1.1rem' }}>🧾</span>
                 <div>
-                  <strong>ร้านค้านี้ออกใบกำกับภาษีเต็มรูปได้ (e-Tax Ready)</strong> — เลือกขอใบกำกับภาษีในขั้นตอนชำระเงินเพื่อรับเอกสารทางอีเมลได้ทันที
+                  <strong>ออกใบกำกับภาษีได้</strong> — ขอรับทางอีเมลในขั้นตอนชำระเงิน
                 </div>
               </div>
             )}
@@ -642,7 +642,7 @@ export function ProductDetailPage({
                   onClick={handleAddToCart}
                 >
                   <ShoppingBag size={18} />
-                  <span>เพิ่มลงรถเข็น</span>
+                  <span>เพิ่มลงตะกร้า</span>
                 </button>
 
                 <button
@@ -701,7 +701,7 @@ export function ProductDetailPage({
                         className="product-detail__compliance-copy-btn"
                         onClick={() => {
                           navigator.clipboard.writeText(product.compliance?.fdaNumber || '');
-                          alert(`คัดลอกเลข อย. "${product.compliance?.fdaNumber}" สำเร็จ! สามารถนำไปเช็กได้ที่ระบบ อย.`);
+                          alert(`คัดลอกเลข อย. ${product.compliance?.fdaNumber} แล้ว`);
                         }}
                       >
                         คัดลอก
@@ -801,10 +801,10 @@ export function ProductDetailPage({
                   </span>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 800 }}>
-                      ร้าน {store.name} กำลังไลฟ์สดอยู่! ({activeLive.viewers} คนกำลังดู)
+                      {store.name} กำลังไลฟ์ · {activeLive.viewers} คนดู
                     </div>
                     <div style={{ fontSize: 11, color: '#FBBF24' }}>
-                      🔥 มีโค้ดลดพิเศษ 50% และโปรส่งฟรีในไลฟ์สดนี้
+                      ลด 50% + ส่งฟรีในไลฟ์
                     </div>
                   </div>
                 </div>
@@ -1020,9 +1020,9 @@ export function ProductDetailPage({
             <div className="product-recommend-title-wrap">
               <h2 className="product-detail__section-title">
                 <Sparkles size={18} className="product-recommend-sparkle-icon" />
-                คุณอาจจะชอบสิ่งนี้ (You May Also Like)
+                คุณอาจชอบ
               </h2>
-              <p className="product-recommend-subtitle">สินค้าคัดสรรพิเศษที่ผู้ซื้อสินค้านี้นิยมสั่งซื้อเพิ่ม</p>
+              <p className="product-recommend-subtitle">สินค้าที่มักซื้อด้วยกัน</p>
             </div>
 
             {/* Filter Tabs */}
@@ -1039,7 +1039,7 @@ export function ProductDetailPage({
                 className={`product-recommend-tab-btn${recommendedTab === 'bestseller' ? ' active' : ''}`}
                 onClick={() => setRecommendedTab('bestseller')}
               >
-                <span>🔥 ขายดียอดฮิต</span>
+                <span>🔥 ขายดี</span>
               </button>
               <button
                 type="button"
@@ -1069,16 +1069,16 @@ export function ProductDetailPage({
           {isLoadingMoreRecommended && (
             <div className="product-recommend-loading-state">
               <Loader2 size={24} className="animate-spin" style={{ color: 'var(--primary)', animation: 'spin 0.8s linear infinite' }} />
-              <span>กำลังโหลดสินค้าแนะนำเพิ่มเติม...</span>
+              <span>กำลังโหลด...</span>
             </div>
           )}
 
           {visibleRecommendedCount >= recommendedProducts.length ? (
             <div className="product-recommend-end-state">
               <span className="product-recommend-end-icon">✨</span>
-              <p className="product-recommend-end-text">คุณได้ดูสินค้าแนะนำทั้งหมดในหมวดนี้ครบแล้ว</p>
+              <p className="product-recommend-end-text">ดูครบแล้ว</p>
               <Link to="/shop" className="product-recommend-shop-link">
-                ไปที่หน้าแคตตาล็อกสินค้าทั้งหมด 160+ รายการ →
+                ดูสินค้าทั้งหมด →
               </Link>
             </div>
           ) : (
@@ -1089,7 +1089,7 @@ export function ProductDetailPage({
                 onClick={handleLoadMoreRecommended}
                 disabled={isLoadingMoreRecommended}
               >
-                {isLoadingMoreRecommended ? 'กำลังโหลด...' : `โหลดสินค้าแนะนำเพิ่มเติม (เหลือ ${recommendedProducts.length - visibleRecommendedCount}+)`}
+                {isLoadingMoreRecommended ? 'กำลังโหลด...' : `ดูเพิ่ม (${recommendedProducts.length - visibleRecommendedCount})`}
               </button>
             </div>
           )}
@@ -1119,10 +1119,10 @@ export function ProductDetailPage({
               id="sticky-add-cart-btn"
               className="product-sticky-cart-btn"
               onClick={handleAddToCart}
-              title="เพิ่มลงรถเข็น"
+              title="เพิ่มลงตะกร้า"
             >
               <ShoppingBag size={18} />
-              <span className="product-sticky-label">เพิ่มลงรถเข็น</span>
+              <span className="product-sticky-label">เพิ่มลงตะกร้า</span>
             </button>
           </div>
 
@@ -1133,17 +1133,17 @@ export function ProductDetailPage({
             onClick={handleBuyNow}
           >
             <div className="product-sticky-buy-price-row">
-              <span className="product-sticky-buy-text">สั่งซื้อสินค้าทันที</span>
+              <span className="product-sticky-buy-text">ซื้อเลย</span>
               <span className="product-sticky-buy-amount">฿{(totalPrice ?? 0).toLocaleString()}</span>
             </div>
             <div className="product-sticky-buy-discount-row">
               {savings > 0 ? (
                 <span className="product-sticky-savings-pill">
-                  🔥 ประหยัด ฿{(savings ?? 0).toLocaleString()} (ลด {discount}%)
+                  ประหยัด ฿{(savings ?? 0).toLocaleString()} · {discount}%
                 </span>
               ) : (
                 <span className="product-sticky-savings-pill">
-                  ⚡ จัดส่งด่วน • รับประกันของแท้
+                  ส่งไว · รับประกันของแท้
                 </span>
               )}
             </div>
@@ -1319,12 +1319,12 @@ export function ProductDetailPage({
                 {drawerAction === 'buy' ? (
                   <>
                     <CreditCard size={18} />
-                    <span>ยืนยันสั่งซื้อทันที (฿{(totalPrice ?? 0).toLocaleString()})</span>
+                    <span>ซื้อเลย · ฿{(totalPrice ?? 0).toLocaleString()}</span>
                   </>
                 ) : (
                   <>
                     <ShoppingBag size={18} />
-                    <span>ยืนยันเพิ่มลงรถเข็น ({qty} ชิ้น)</span>
+                    <span>เพิ่มลงตะกร้า · {qty} ชิ้น</span>
                   </>
                 )}
               </button>

@@ -175,7 +175,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
               เปรียบเทียบสเปกสินค้า (Product Comparison)
             </h1>
             <p className="compare-subtitle">
-              เปรียบเทียบคุณสมบัติ ราคา รีวิว และความคุ้มค่าแบบข้างต่อข้าง ช่วยให้คุณตัดสินใจได้แม่นยำที่สุด
+              เทียบราคา สเปก และรีวิวในหน้าเดียว
             </p>
           </div>
 
@@ -601,7 +601,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
           <div>
             <h4>💡 ทริปการช้อปอย่างคุ้มค่าบน Movemall</h4>
             <p>
-              สินค้าแท้ 100% ทุกรายการได้รับการรับรองความปลอดภัย คุณสามารถใช้ <strong>Movemall Coins</strong> ร่วมกับโค้ดส่งฟรี 
+              สินค้าแท้ พร้อมใช้ <strong>Movemall Coins</strong> และโค้ดส่งฟรี
               เพื่อรับส่วนลดเงินสดสูงสุดถึง 25% ในขั้นตอนชำระเงิน
             </p>
           </div>

@@ -77,7 +77,7 @@ export function FlashSalePage({ products, onAddToCart }: FlashSalePageProps) {
 
   function handleClaimVoucher(id: string, code: string) {
     setClaimedVouchers(prev => new Set([...prev, id]));
-    showToast(`🎉 เก็บโค้ดส่วนลด "${code}" สำเร็จแล้ว! ใช้ลดในหน้าชำระเงินได้ทันที`);
+    showToast(`เก็บโค้ด ${code} แล้ว`);
   }
 
   function showToast(msg: string) {
@@ -123,7 +123,7 @@ export function FlashSalePage({ products, onAddToCart }: FlashSalePageProps) {
                 ⚡ มหกรรมลดล้างสต็อก Flash Sale ลดสูงสุด 70%
               </h1>
               <p className="flash-hero__subtitle">
-                สินค้าราคาพิเศษเฉพาะช่วงเวลานี้ การันตีราคาถูกที่สุดในรอบ 30 วัน หมดแล้วหมดเลย!
+                ราคาพิเศษช่วงเวลาจำกัด
               </p>
             </div>
 

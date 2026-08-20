@@ -219,7 +219,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
                 ศูนย์รวมแบรนด์ดังทางการ การันตีแท้ 100%
               </h1>
               <p className="mall-hero-sub">
-                ช้อปสินค้าลิขสิทธิ์แท้ส่งตรงจากแบรนด์ชั้นนำ พร้อมส่วนลดพิเศษ โค้ดส่งฟรี และรับประกันศูนย์ไทย
+                สินค้าแท้จากแบรนด์ พร้อมดีลและประกันศูนย์
               </p>
             </div>
             <div className="mall-hero-stats">
@@ -484,7 +484,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
 
           <div className="mall-view-all-container">
             <Link to="/shop" className="mall-view-all-btn">
-              สำรวจสินค้าทางการทั้งหมด ({activeProducts.length} รายการ) <ChevronRight size={16} />
+              ดูทั้งหมด ({activeProducts.length}) <ChevronRight size={16} />
             </Link>
           </div>
         </section>
@@ -501,7 +501,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
               </div>
               <h4 className="mall-trust-title">สินค้าของแท้ 100% จากผู้ผลิต</h4>
               <p className="mall-trust-desc">
-                สินค้าทุกชิ้นผ่านการตรวจสอบเอกสารตัวแทนจำหน่ายอย่างเป็นทางการและส่งตรงจากแบรนด์ชั้นนำ
+                ตรวจสอบแหล่งที่มาและตัวแทนจำหน่ายแล้ว
               </p>
             </div>
 
@@ -511,7 +511,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
               </div>
               <h4 className="mall-trust-title">คืนสินค้าฟรี 30 วัน</h4>
               <p className="mall-trust-desc">
-                หากสินค้าชำรุด มีปัญหา หรือไม่ตรงตามที่ระบุ สามารถคืนสินค้าได้ฟรีง่ายๆ พร้อมรับเงินคืนเต็มจำนวน
+                คืนฟรีเมื่อสินค้ามีปัญหาหรือไม่ตรงรายละเอียด
               </p>
             </div>
 
@@ -521,7 +521,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
               </div>
               <h4 className="mall-trust-title">จัดส่งด่วนพิเศษ & ปลอดภัย</h4>
               <p className="mall-trust-desc">
-                พัสดุได้รับการแพ็กเกจจิ้งอย่างแน่นหนาพร้อมประกันความเสียหายระหว่างขนส่งทุกชิ้น
+                แพ็กปลอดภัย พร้อมประกันความเสียหาย
               </p>
             </div>
 
@@ -531,7 +531,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
               </div>
               <h4 className="mall-trust-title">รับประกันศูนย์บริการไทย</h4>
               <p className="mall-trust-desc">
-                หมดกังวลเรื่องการเคลม สามารถนำสินค้าเข้าตรวจเช็คหรือซ่อมได้ที่ศูนย์บริการทางการทั่วประเทศ
+                เคลมได้ที่ศูนย์บริการทางการ
               </p>
             </div>
           </div>

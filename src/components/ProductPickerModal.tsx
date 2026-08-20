@@ -101,7 +101,7 @@ export function ProductPickerModal({
           </div>
 
           <p className="picker-desc">
-            ค้นหาจากคลังสินค้ากว่า <strong>50,000+ รายการ</strong> เลือกสินค้าที่มีค่าคอมมิชชั่นสูงเพื่อเพิ่มยอดขายให้กับคลิปของคุณ
+            เลือกสินค้าจากคลังกว่า <strong>50,000 รายการ</strong>
           </p>
 
           {/* Search Input Bar */}
@@ -111,7 +111,7 @@ export function ProductPickerModal({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="พิมพ์ชื่อสินค้า, แบรนด์, หรือวางลิงก์สินค้าเพื่อค้นหาทันที..."
+              placeholder="ค้นหาสินค้า แบรนด์ หรือลิงก์"
               className="picker-search-input"
               autoFocus
             />
@@ -134,7 +134,7 @@ export function ProductPickerModal({
               className={`picker-filter-tab ${activeTab === 'high_commission' ? 'active' : ''}`}
               onClick={() => setActiveTab('high_commission')}
             >
-              <Percent size={13} /> ค่าคอมมิชชั่นสูงสุด (15-25%)
+              <Percent size={13} /> ค่าคอมมิชชันสูงสุด 15–25%
             </button>
             <button
               className={`picker-filter-tab ${activeTab === 'mall' ? 'active' : ''}`}
@@ -171,7 +171,7 @@ export function ProductPickerModal({
               onChange={(e) => setSortBy(e.target.value as any)}
               className="picker-select"
             >
-              <option value="commission">💰 เรียงตาม: ค่าคอมมิชชั่นสูงสุด</option>
+              <option value="commission">💰 ค่าคอมมิชชันสูงสุด</option>
               <option value="popular">⭐ เรียงตาม: ยอดขาย & รีวิว</option>
               <option value="price_low">🏷️ เรียงตาม: ราคา ต่ำ ➔ สูง</option>
               <option value="price_high">💎 เรียงตาม: ราคา สูง ➔ ต่ำ</option>
@@ -185,7 +185,7 @@ export function ProductPickerModal({
             <div className="picker-empty">
               <ShoppingBag size={44} color="#94A3B8" />
               <p className="picker-empty-title">ไม่พบสินค้าที่ตรงกับการค้นหา</p>
-              <span className="picker-empty-sub">ลองค้นหาด้วยคำสำคัญอื่น หรือเปลี่ยนหมวดหมู่สินค้า</span>
+              <span className="picker-empty-sub">ลองใช้คำอื่นหรือเปลี่ยนหมวดหมู่</span>
             </div>
           ) : (
             filteredProducts.map((p) => {
@@ -213,9 +213,9 @@ export function ProductPickerModal({
 
                     {/* Commission Pill */}
                     <div className="picker-item-comm-wrap">
-                      <span className="picker-item-comm-rate">คอมมิชชั่น {commRate}%</span>
+                      <span className="picker-item-comm-rate">คอมมิชชัน {commRate}%</span>
                       <span className="picker-item-comm-earn">
-                        รับเงินเข้ากระเป๋า <strong>+฿{commAmount.toLocaleString()}</strong> / ออเดอร์
+                        รับ <strong>+฿{commAmount.toLocaleString()}</strong> / ออเดอร์
                       </span>
                     </div>
                   </div>
@@ -250,7 +250,7 @@ export function ProductPickerModal({
         {/* Modal Footer Summary */}
         <div className="picker-footer">
           <span className="picker-footer-count">
-            แสดง <strong>{filteredProducts.length}</strong> จากคลังสินค้า 50,000+ รายการ
+            พบ <strong>{filteredProducts.length}</strong> รายการ
           </span>
           <button className="picker-footer-close-btn" onClick={onClose}>
             ปิดหน้าต่าง

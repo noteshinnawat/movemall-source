@@ -678,7 +678,7 @@ export function AffiliateRegisterModal({ isOpen, onClose, onSuccess }: Affiliate
                   <Share2 size={18} style={{ color: '#2563EB' }} />
                   <div>
                     <strong>ปักตะกร้าเหลือง & แชร์ลิงก์</strong>
-                    <span>รับค่าคอมมิชชั่น 15% ทันทีทุกออเดอร์</span>
+                    <span>รับค่าคอมมิชชัน 15% ทุกออเดอร์</span>
                   </div>
                 </div>
               </div>

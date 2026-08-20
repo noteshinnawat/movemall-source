@@ -129,7 +129,7 @@ export function VouchersPage() {
         <div className="container">
           <h1 className="vouchers-hero__title">🎟️ ศูนย์รวมโค้ดส่วนลด Movemall</h1>
           <p className="vouchers-hero__subtitle">
-            เก็บโค้ดส่งฟรี โค้ดส่วนลดเงินสด และคูปองเงินคืน นำไปใช้ลดเพิ่มตอนชำระเงินได้ทันที!
+            เก็บโค้ดแล้วใช้ได้ตอนชำระเงิน
           </p>
 
           <button

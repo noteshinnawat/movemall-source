@@ -59,9 +59,9 @@ export function OrderSuccessPage() {
           </div>
 
           <span className="order-success__badge">สั่งซื้อสำเร็จ 🎉</span>
-          <h1 className="order-success__title">ขอบคุณสำหรับการสั่งซื้อ!</h1>
+          <h1 className="order-success__title">ขอบคุณที่สั่งซื้อ</h1>
           <p className="order-success__subtitle">
-            เราได้รับคำสั่งซื้อของคุณเรียบร้อยแล้ว และกำลังเตรียมจัดส่งสินค้าอย่างรวดเร็วที่สุด
+            ร้านค้ากำลังเตรียมสินค้า
           </p>
 
           {isCOD && total !== null && (
@@ -76,8 +76,8 @@ export function OrderSuccessPage() {
               lineHeight: 1.5,
               borderRadius: '6px',
             }}>
-              <strong>💵 คำแนะนำสำหรับเก็บเงินปลายทาง (COD):</strong>
-              <div>กรุณาเตรียมเงินสดจำนวน <strong>฿{total.toLocaleString()}</strong> ไว้ล่วงหน้า และเตรียมรับสายโทรศัพท์จากพนักงานจัดส่ง Flash Express เมื่อพัสดุถึงบ้าน</div>
+              <strong>💵 เก็บเงินปลายทาง</strong>
+              <div>เตรียมเงิน <strong>฿{total.toLocaleString()}</strong> และรอรับสายจากพนักงานจัดส่ง</div>
             </div>
           )}
 
@@ -88,13 +88,13 @@ export function OrderSuccessPage() {
               <div className="order-success__line-texts">
                 <h3 className="order-success__line-title">
                   {isLineConnected
-                    ? '✓ เชื่อมต่อ LINE แจ้งเตือนพัสดุเรียบร้อยแล้ว'
-                    : '📲 รับการแจ้งเตือนพัสดุ & เลขแทร็กกิ้งผ่าน LINE ฟรี!'}
+                    ? '✓ เชื่อมต่อ LINE แล้ว'
+                    : '📲 ติดตามพัสดุผ่าน LINE'}
                 </h3>
                 <p className="order-success__line-desc">
                   {isLineConnected
-                    ? 'ระบบจะส่งเลขพัสดุ Flash Express และแจ้งเตือนเมื่อพนักงานนำส่งเข้าแชท LINE ของคุณอัตโนมัติ'
-                    : 'เชื่อมต่อบัญชี LINE รับทันที +50 Movemall Coins พร้อมรับใบเสร็จและแจ้งเตือนจัดส่งพัสดุสด'}
+                    ? 'เราจะแจ้งเลขพัสดุและสถานะจัดส่ง'
+                    : 'เชื่อมต่อแล้วรับ 50 Coins พร้อมใบเสร็จและสถานะพัสดุ'}
                 </p>
               </div>
             </div>
@@ -107,7 +107,7 @@ export function OrderSuccessPage() {
                   onClick={() => setIsLineModalOpen(true)}
                 >
                   <Sparkles size={16} />
-                  เชื่อมต่อ LINE ทันที (รับฟรี 50 Coins)
+                  เชื่อมต่อ LINE · รับ 50 Coins
                 </button>
               ) : (
                 <button

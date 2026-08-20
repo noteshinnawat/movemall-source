@@ -171,16 +171,16 @@ export function CartPage({
             <div className="cart-empty-icon-wrap">
               <ShoppingBag size={56} className="cart-empty-bag-icon" />
             </div>
-            <h1 className="cart-empty-title">รถเข็นของคุณยังว่างอยู่</h1>
+            <h1 className="cart-empty-title">ตะกร้ายังว่าง</h1>
             <p className="cart-empty-subtitle">
-              เลือกดูสินค้าคุณภาพดีลพิเศษ แบรนด์แท้ Mall และ Flash Sale ได้เลย
+              เลือกสินค้าที่ชอบแล้วกลับมาที่นี่
             </p>
             <div className="cart-empty-actions">
               <Link to="/shop" className="cart-empty-primary-btn" id="cart-empty-shop-btn">
-                ⚡ ช้อปสินค้าดีลเด็ด
+                ⚡ เริ่มช้อป
               </Link>
               <Link to="/mall" className="cart-empty-secondary-btn">
-                👑 สำรวจ Official Mall
+                👑 ดูสินค้า Mall
               </Link>
             </div>
 
@@ -226,7 +226,7 @@ export function CartPage({
             </button>
             <div className="cart-topbar-heading">
               <h1 className="cart-main-title">
-                รถเข็นสินค้า
+                ตะกร้าสินค้า
                 <span className="cart-items-pill">{items.length} รายการ</span>
               </h1>
             </div>
@@ -246,7 +246,7 @@ export function CartPage({
             <button
               className="cart-clear-all-header-btn"
               onClick={onClear}
-              title="ล้างรถเข็นทั้งหมด"
+              title="ล้างตะกร้าทั้งหมด"
             >
               ล้างทั้งหมด
             </button>
@@ -264,11 +264,11 @@ export function CartPage({
             <div className="cart-shipping-text-wrap">
               {remainingForFreeShipping === 0 ? (
                 <span className="cart-shipping-congrats">
-                  🎉 ยินดีด้วย! คุณได้รับสิทธิ์ <strong>จัดส่งฟรีทั่วไทย</strong> เรียบร้อยแล้ว
+                  🎉 ได้รับสิทธิ์ <strong>ส่งฟรี</strong> แล้ว
                 </span>
               ) : (
                 <span className="cart-shipping-hint">
-                  ช้อปเพิ่มอีกเพียง <strong>฿{remainingForFreeShipping.toLocaleString()}</strong> เพื่อรับสิทธิ์ <strong>ส่งฟรี ฿0</strong> (ขั้นต่ำ ฿299)
+                  อีก <strong>฿{remainingForFreeShipping.toLocaleString()}</strong> ได้ <strong>ส่งฟรี</strong>
                 </span>
               )}
             </div>
@@ -288,7 +288,7 @@ export function CartPage({
 
       <div className="container cart-layout-grid">
         {/* ── Left Column: Store-Grouped Cart Items ── */}
-        <section className="cart-items-column" aria-label="รายการสินค้าในรถเข็น">
+        <section className="cart-items-column" aria-label="รายการสินค้าในตะกร้า">
           {/* Select All Bar Header */}
           <div className="cart-select-all-header">
             <label className="cart-checkbox-label">
@@ -499,9 +499,9 @@ export function CartPage({
               <div className="cart-perk-left">
                 <Ticket size={18} className="cart-perk-icon cart-perk-icon--voucher" />
                 <div>
-                  <span className="cart-perk-title">โค้ดส่วนลด Movemall Voucher</span>
+                  <span className="cart-perk-title">โค้ดส่วนลด</span>
                   <p className="cart-perk-desc">
-                    {voucherApplied ? '✅ ใช้โค้ด "MOVEMALL50" ลด ฿50 สำเร็จ' : 'กดเพื่อเลือกหรือใส่โค้ดส่วนลด'}
+                    {voucherApplied ? 'ใช้ MOVEMALL50 ลด ฿50 แล้ว' : 'เลือกหรือใส่โค้ด'}
                   </p>
                 </div>
               </div>
@@ -523,7 +523,7 @@ export function CartPage({
                 <div>
                   <span className="cart-perk-title">Movemall Coins</span>
                   <p className="cart-perk-desc">
-                    คุณมี {userCoins} Coins (แลกเป็นส่วนลดได้สูงสุด ฿50)
+                    มี {userCoins} Coins · ลดได้สูงสุด ฿50
                   </p>
                 </div>
               </div>
@@ -551,14 +551,14 @@ export function CartPage({
 
             <div className="cart-summary-breakdown">
               <div className="cart-summary-line">
-                <span className="cart-summary-line-label">ยอดรวมสินค้า ({selectedCount} ชิ้น)</span>
+                <span className="cart-summary-line-label">สินค้า ({selectedCount} ชิ้น)</span>
                 <span className="cart-summary-line-val">฿{selectedSubtotal.toLocaleString()}</span>
               </div>
 
               {selectedSavings > 0 && (
                 <div className="cart-summary-line cart-summary-line--savings">
                   <span className="cart-summary-line-label">
-                    <Sparkles size={14} /> ส่วนลดสินค้า & โค้ด
+                    <Sparkles size={14} /> ส่วนลด
                   </span>
                   <span className="cart-summary-line-val">-฿{selectedSavings.toLocaleString()}</span>
                 </div>
@@ -567,7 +567,7 @@ export function CartPage({
               {voucherApplied && (
                 <div className="cart-summary-line cart-summary-line--voucher">
                   <span className="cart-summary-line-label">
-                    <Ticket size={14} /> ส่วนลด Movemall Voucher
+                    <Ticket size={14} /> โค้ดส่วนลด
                   </span>
                   <span className="cart-summary-line-val">-฿{voucherDiscount.toLocaleString()}</span>
                 </div>
@@ -576,14 +576,14 @@ export function CartPage({
               {useCoins && (
                 <div className="cart-summary-line cart-summary-line--coins">
                   <span className="cart-summary-line-label">
-                    <Coins size={14} /> ใช้ Movemall Coins ({coinsDiscount} เหรียญ)
+                    <Coins size={14} /> Coins ({coinsDiscount})
                   </span>
                   <span className="cart-summary-line-val">-฿{coinsDiscount.toLocaleString()}</span>
                 </div>
               )}
 
               <div className="cart-summary-line">
-                <span className="cart-summary-line-label">ค่าจัดส่งโดยประมาณ</span>
+                <span className="cart-summary-line-label">ค่าจัดส่ง</span>
                 {shippingFee === 0 ? (
                   <span className="cart-summary-line-val cart-summary-line-val--free">
                     ฟรี ฿0 🎉
@@ -598,8 +598,8 @@ export function CartPage({
 
             <div className="cart-summary-total-block">
               <div className="cart-summary-total-label-wrap">
-                <span className="cart-summary-total-title">ยอดรวมทั้งสิ้น</span>
-                <span className="cart-summary-total-tax">(รวมภาษีมูลค่าเพิ่ม 7%)</span>
+                <span className="cart-summary-total-title">ยอดชำระ</span>
+                <span className="cart-summary-total-tax">รวม VAT 7%</span>
               </div>
               <div className="cart-summary-total-amount">
                 ฿{finalTotal.toLocaleString()}
@@ -608,7 +608,7 @@ export function CartPage({
 
             {selectedSavings > 0 && (
               <div className="cart-summary-savings-banner">
-                🔥 คุณประหยัดไปได้ทั้งหมด <strong>฿{selectedSavings.toLocaleString()}</strong> ในคำสั่งซื้อนี้!
+                ประหยัด <strong>฿{selectedSavings.toLocaleString()}</strong>
               </div>
             )}
 

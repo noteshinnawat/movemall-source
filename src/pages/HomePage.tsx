@@ -554,14 +554,14 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
             <div className="home-category-badge-row">
               <span className="home-category-tag-badge">EXPLORE CATEGORIES</span>
               <span className="home-category-count-badge">
-                🔥 ครบครัน 8 หมวดหมู่หลัก
+              8 หมวดหมู่
               </span>
             </div>
             <h2 id="categories-heading" className="home-category-main-title">
-              🛍️ หมวดหมู่สินค้ายอดนิยม
+              🛍️ หมวดหมู่ยอดนิยม
             </h2>
             <p className="home-category-subtitle">
-              เลือกช้อปสินค้าตามหมวดหมู่ พร้อมดีลส่วนลดสูงสุด 70% และโค้ดส่งฟรีทุกวัน
+              ช้อปง่าย พร้อมดีลลดสูงสุด 70%
             </p>
           </div>
 
@@ -575,7 +575,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
               </div>
             </div>
             <Link to="/shop" className="home-category-viewall-btn">
-              <span>ดูหมวดหมู่ทั้งหมด ({categories.length})</span>
+              <span>ดูทั้งหมด ({categories.length})</span>
               <ArrowRight size={14} />
             </Link>
           </div>
@@ -743,15 +743,15 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
             <div>
               <div className="home-games-promo-badge">MOVEMALL REWARDS</div>
               <h3 className="home-games-promo-title">
-                ศูนย์รวมเกมส์ & เหรียญรางวัล (Games Hub)
+                เกมและรางวัล
               </h3>
               <p className="home-games-promo-desc">
-                หมุนวงล้อเสี่ยงโชค Lucky Wheel, เช็คอิน 7 วันรับเหรียญ Coins ใช้ลดราคาสินค้าได้จริงทุกออเดอร์!
+                หมุนวงล้อ เช็กอิน และรับ Coins
               </p>
             </div>
           </div>
           <div className="home-games-promo-cta">
-            <span>เข้าสู่เกมส์รูม & เช็คอินรับเหรียญ</span>
+            <span>เล่นเลย</span>
             <ArrowRight size={15} />
           </div>
         </Link>
@@ -883,8 +883,8 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
               <div className="home-feed-spinner" />
               <span>
                 {isLoadingMore
-                  ? `กำลังโหลดสินค้าเพิ่มเติม... (${visibleCount}/${personalizedProducts.length})`
-                  : `เลื่อนลงเพื่อโหลดต่อ หรือแตะที่นี่ (${visibleCount}/${personalizedProducts.length})`}
+                  ? `กำลังโหลด... (${visibleCount}/${personalizedProducts.length})`
+                  : `ดูเพิ่มเติม (${visibleCount}/${personalizedProducts.length})`}
               </span>
             </div>
           </div>
@@ -892,7 +892,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
           <div className="home-feed-end-state" role="status">
             <div className="home-feed-end-line" />
             <span className="home-feed-end-text">
-              🎉 คุณได้ดูสินค้าครบทั้งหมด {personalizedProducts.length} รายการแล้ว
+              ครบแล้ว {personalizedProducts.length} รายการ
             </span>
             <div className="home-feed-end-line" />
           </div>
@@ -974,4 +974,3 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
 }
 
 export default HomePage;
-

@@ -48,7 +48,7 @@ export function StoresDirectoryPage() {
         <div className="container">
           <h1 className="stores-hero__title">🏬 ร้านค้าทางการ & แบรนด์ชั้นนำ (Movemall Official)</h1>
           <p className="stores-hero__subtitle">
-            รวมร้านค้า Official Store และร้านแนะนำชั้นนำ พร้อมสินค้าแท้ 100% รับประกันคุณภาพและการจัดส่ง
+            ร้านทางการและร้านแนะนำในที่เดียว
           </p>
         </div>
       </section>

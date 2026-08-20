@@ -38,7 +38,7 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
     setTodayClaimed(true);
     setCheckedDays(prev => [...prev, 3]);
     setCoins(c => c + 30);
-    onRewardWon?.('คุณได้รับ 30 Coins จากการเช็คอินประจำวัน!');
+    onRewardWon?.('รับ 30 Coins จากการเช็กอินแล้ว');
   }
 
   function handleSpinWheel() {
@@ -82,12 +82,12 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
         <div className="container">
           <h1 className="games-hero__title">🎮 Movemall Games & ศูนย์รวมของรางวัล</h1>
           <p style={{ fontSize: 14, opacity: 0.9 }}>
-            เล่นเกมส์ประจำวัน หมุนวงล้อเสี่ยงโชค เช็คอินสะสมเหรียญ Coins นำไปใช้แลกส่วนลดสินค้าได้ทันที!
+            เล่นเกม เช็กอิน และรับ Coins ทุกวัน
           </p>
 
           <div className="games-hero__coins-badge">
             <Coins size={18} style={{ color: '#FCD34D' }} />
-            <span>เหรียญ Coins ของฉัน: <strong>{coins.toLocaleString()} Coins</strong> (มูลค่า ฿{coins})</span>
+            <span>Coins ของฉัน: <strong>{coins.toLocaleString()}</strong> · ฿{coins}</span>
           </div>
         </div>
       </section>
@@ -98,9 +98,9 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
           <div className="daily-checkin__header">
             <h2 className="daily-checkin__title">
               <Gift size={18} style={{ color: 'var(--primary)' }} />
-              เช็คอินต่อเนื่อง 7 วัน รับเหรียญ Coins ฟรี
+              เช็กอิน 7 วัน รับ Coins
             </h2>
-            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>เช็คอินติดต่อกัน 7 วัน รับโบนัสพิเศษ 100 Coins!</span>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ครบ 7 วัน รับเพิ่ม 100 Coins</span>
           </div>
 
           <div className="daily-grid">
@@ -130,7 +130,7 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
             onClick={handleCheckin}
             disabled={todayClaimed}
           >
-            {todayClaimed ? '✓ เช็คอินวันนี้เรียบร้อยแล้ว (กลับมาใหม่พรุ่งนี้)' : '🎁 กดเช็คอินรับ 30 Coins วันนี้!'}
+            {todayClaimed ? '✓ เช็กอินแล้ว กลับมาใหม่พรุ่งนี้' : '🎁 เช็กอินรับ 30 Coins'}
           </button>
         </section>
 
@@ -143,7 +143,7 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
               วงล้อหมุนลุ้นโชค (Lucky Spin Wheel)
             </h3>
             <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
-              หมุนฟรีวันละ 1 ครั้ง ลุ้นรับคูปองส่วนลดและ Coins สูงสุด 100 เหรียญ!
+              หมุนฟรีวันละครั้ง ลุ้นรับสูงสุด 100 Coins
             </p>
 
             <div className="wheel-wrapper">
@@ -241,7 +241,7 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
             </div>
 
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'auto' }}>
-              💡 สามารถนำ Coins ที่ได้ไปใช้เป็นส่วนลดเงินสดในหน้าชำระเงิน (1 Coin = 1 บาท)
+              1 Coin = ส่วนลด ฿1 ตอนชำระเงิน
             </div>
           </section>
         </div>

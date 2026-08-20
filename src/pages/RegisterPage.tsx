@@ -343,14 +343,14 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
         <aside className="reg-hero-side">
           <div className="reg-hero-content">
             <div className="reg-hero-badge">
-              <Sparkles size={15} /> สิทธิพิเศษเฉพาะสมาชิกใหม่ Movemall
+              <Sparkles size={15} /> สิทธิ์สมาชิกใหม่
             </div>
             <h1 className="reg-hero-title">
-              สมัครสมาชิกวันนี้ <br />
-              <span className="reg-hero-highlight">รับสิทธิประโยชน์ทันที 3 ต่อ!</span>
+              สมัครวันนี้ <br />
+              <span className="reg-hero-highlight">รับสิทธิ์ทันที 3 ต่อ</span>
             </h1>
             <p className="reg-hero-desc">
-              ร่วมเป็นส่วนหนึ่งของคอมมูนิตี้ช้อปปิ้ง มาร์เก็ตเพลสครบวงจร ดูไลฟ์สด วิดีโอสั้นติดตะกร้า และสะสมเหรียญ Coins ใช้แทนเงินสดได้จริง
+              ช้อป ดูไลฟ์ และสะสม Coins ได้ในที่เดียว
             </p>
 
             {/* Perks Cards */}
@@ -360,8 +360,8 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                   <Coins size={22} />
                 </div>
                 <div>
-                  <h3 className="reg-perk-title">รับฟรี 100 Movemall Coins 🪙</h3>
-                  <p className="reg-perk-sub">ใช้แลกเป็นส่วนลดเงินสดได้ทันที ฿100 ในทุกการสั่งซื้อ</p>
+                  <h3 className="reg-perk-title">รับ 100 Coins 🪙</h3>
+                  <p className="reg-perk-sub">ใช้ลดได้สูงสุด ฿100</p>
                 </div>
               </div>
 
@@ -370,8 +370,8 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                   <Truck size={22} />
                 </div>
                 <div>
-                  <h3 className="reg-perk-title">คูปองส่งฟรี 0 บาท ทั่วประเทศ 🚚</h3>
-                  <p className="reg-perk-sub">ไม่มีขั้นต่ำ ใช้ได้กับสินค้าทุกหมวดหมู่บน Movemall</p>
+                  <h3 className="reg-perk-title">คูปองส่งฟรี 🚚</h3>
+                  <p className="reg-perk-sub">ไม่มีขั้นต่ำ</p>
                 </div>
               </div>
 
@@ -380,8 +380,8 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                   <Ticket size={22} />
                 </div>
                 <div>
-                  <h3 className="reg-perk-title">โค้ดลด 50% ต้อนรับออเดอร์แรก 🎟️</h3>
-                  <p className="reg-perk-sub">ลดสูงสุด ฿200 สำหรับการช้อปครั้งแรกของคุณ</p>
+                  <h3 className="reg-perk-title">ลด 50% ออเดอร์แรก 🎟️</h3>
+                  <p className="reg-perk-sub">ลดสูงสุด ฿200</p>
                 </div>
               </div>
             </div>
@@ -389,7 +389,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
             <div className="reg-hero-footer">
               <div className="reg-guarantee-tag">
                 <ShieldCheck size={16} color="#10B981" />
-                <span>การันตีสินค้าแท้ 100% ปลอดภัย มั่นใจได้</span>
+                <span>สินค้าแท้ ชำระเงินปลอดภัย</span>
               </div>
             </div>
           </div>
@@ -405,23 +405,23 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                   type="button"
                   className="reg-type-btn reg-type-btn--active"
                 >
-                  <User size={15} /> สมาชิกผู้ซื้อทั่วไป
+                  <User size={15} /> บัญชีผู้ซื้อ
                 </button>
                 <Link
                   to="/seller/register"
                   className="reg-type-btn reg-type-btn--link"
                 >
-                  <Store size={15} /> เปิดร้านค้า / ผู้ขาย →
+                  <Store size={15} /> เปิดร้าน →
                 </Link>
               </div>
 
               <h2 className="reg-card-title">
-                {step === 'form' ? 'สร้างบัญชีผู้ใช้งานใหม่' : 'ยืนยันรหัสความปลอดภัย OTP'}
+                {step === 'form' ? 'สร้างบัญชี' : 'ยืนยัน OTP'}
               </h2>
               <p className="reg-card-sub">
                 {step === 'form'
-                  ? 'กรอกข้อมูลด้านล่างเพื่อเริ่มสัมผัสประสบการณ์ช้อปปิ้งสุดพิเศษ'
-                  : `กรุณากรอกรหัส OTP 6 หลักที่ได้รับทาง ${method === 'phone' ? 'SMS' : 'Email'} ${targetValue}`}
+                  ? 'กรอกข้อมูลเพื่อสมัครสมาชิก'
+                  : `กรอก OTP 6 หลักจาก ${method === 'phone' ? 'SMS' : 'อีเมล'} ${targetValue}`}
               </p>
             </div>
 
@@ -816,9 +816,9 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
 
             {/* Switch to Login */}
             <div className="reg-footer-nav">
-              <span>มีบัญชีสมาชิก Movemall อยู่แล้วใช่ไหม?</span>
+              <span>มีบัญชีแล้ว?</span>
               <Link to="/login" className="reg-login-link">
-                เข้าสู่ระบบที่นี่ →
+                เข้าสู่ระบบ →
               </Link>
             </div>
           </div>
@@ -835,7 +835,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
 
             <h2 className="reg-welcome-title">ยินดีต้อนรับคุณ {welcomeModal.userName}!</h2>
             <p className="reg-welcome-sub">
-              การสมัครสมาชิก Movemall ของคุณเสร็จสมบูรณ์แล้ว พร้อมรับสิทธิพิเศษต้อนรับสมาชิกใหม่เข้าสู่บัญชีของคุณทันที
+              สมัครสำเร็จ รับสิทธิ์สมาชิกใหม่แล้ว
             </p>
 
             <div className="reg-welcome-perks-box">

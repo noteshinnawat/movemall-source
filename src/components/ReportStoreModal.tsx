@@ -110,8 +110,8 @@ export function ReportStoreModal({
               ส่งรายงานสำเร็จเรียบร้อยแล้ว
             </h3>
             <p style={{ fontSize: '0.875rem', color: '#4b5563', lineHeight: 1.5, margin: '0 0 1.25rem 0' }}>
-              ทีมงานฝ่ายความปลอดภัย (Security & Trust Moderation) ได้รับข้อมูลแล้ว และกำลังดำเนินการตรวจสอบหลักฐานสินค้าภายใน 24 ชม.
-              หากพบว่าเป็นของปลอมหรือมีการหลอกลวง คุณจะได้รับเงินคืนเต็มจำนวน 100% ตามนโยบายคุ้มครองผู้ซื้อ Movemall
+              เราได้รับรายงานแล้ว และจะตรวจสอบภายใน 24 ชม.
+              หากยืนยันว่าเป็นของปลอมหรือการหลอกลวง คุณจะได้รับเงินคืนตามนโยบาย
             </p>
             <button className="report-modal-btn-primary" onClick={handleCloseModal}>
               เข้าใจแล้ว ปิดหน้าต่าง
@@ -135,7 +135,7 @@ export function ReportStoreModal({
             {/* Violation Category Picker */}
             <div className="report-form-group">
               <label className="report-form-label">
-                ประเภทการกระทำผิดหรือความเสียหาย <span style={{ color: '#dc2626' }}>*</span>
+                ประเภทรายงาน <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <select
                 className="report-form-select"
@@ -143,24 +143,24 @@ export function ReportStoreModal({
                 onChange={e => setViolationType(e.target.value)}
                 required
               >
-                <option value="FAKE_PRODUCT">🚫 สินค้าปลอม / ละเมิดลิขสิทธิ์ / เลียนแบบแบรนด์ดัง (Counterfeit)</option>
-                <option value="MISLEADING_SPECS">📦 สินค้าไม่ตรงปก / สเปกเท็จ / คุณภาพต่ำกว่าที่โฆษณา</option>
-                <option value="SCAM_OFFPLATFORM">⚠️ มิจฉาชีพ / หลอกลวงโอนเงินนอกระบบ / ส่งของไม่ครบ</option>
+                <option value="FAKE_PRODUCT">🚫 สินค้าปลอมหรือเลียนแบบ</option>
+                <option value="MISLEADING_SPECS">📦 สินค้าไม่ตรงปกหรือสเปกเท็จ</option>
+                <option value="SCAM_OFFPLATFORM">⚠️ หลอกโอนเงินหรือส่งของไม่ครบ</option>
                 <option value="HARASSMENT">💬 ร้านค้าส่งข้อความคุกคาม / หยาบคาย / บล็อกแชท</option>
-                <option value="NO_FDA_TISI">🏷️ สินค้าอันตราย / ไม่มีเลข อย. หรือ มอก. ตามกฎหมาย</option>
-                <option value="REFUND_DENIED">↩️ ร้านค้าปฏิเสธการคืนเงิน/คืนสินค้าที่มีสิทธิ์ถูกต้อง</option>
+                <option value="NO_FDA_TISI">🏷️ สินค้าอันตรายหรือไม่มี อย./มอก.</option>
+                <option value="REFUND_DENIED">↩️ ร้านค้าปฏิเสธการคืนเงิน</option>
               </select>
             </div>
 
             {/* Description Textarea */}
             <div className="report-form-group">
               <label className="report-form-label">
-                รายละเอียดเหตุการณ์ & ความเสียหายที่ได้รับ <span style={{ color: '#dc2626' }}>*</span>
+                รายละเอียด <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <textarea
                 className="report-form-textarea"
                 rows={3}
-                placeholder="โปรดระบุรายละเอียด เช่น ซื้อมาแล้วพบว่าโลโก้ไม่ตรง วัสดุเป็นพลาสติกเกรดต่ำ หรือกล่องไม่มีสติกเกอร์ของแท้..."
+                placeholder="เล่าเหตุการณ์และความเสียหายที่พบ"
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 required
@@ -170,7 +170,7 @@ export function ReportStoreModal({
             {/* Evidence Image URL */}
             <div className="report-form-group">
               <label className="report-form-label">
-                URL รูปภาพหลักฐาน (รูปถ่ายสินค้าจริง / ใบปะหน้า / กล่อง / แชท)
+                ลิงก์รูปหลักฐาน
               </label>
               <div style={{ position: 'relative' }}>
                 <input
@@ -182,7 +182,7 @@ export function ReportStoreModal({
                 />
               </div>
               <span className="report-form-hint">
-                💡 การแนบรูปภาพหรือวิดีโอแกะกล่องจะช่วยให้เจ้าหน้าที่อนุมัติเงินคืนได้รวดเร็วขึ้น
+                แนบรูปหรือวิดีโอเพื่อช่วยให้ตรวจสอบเร็วขึ้น
               </span>
             </div>
 
@@ -197,10 +197,10 @@ export function ReportStoreModal({
                 />
                 <div>
                   <strong style={{ fontSize: '0.85rem', color: '#1e3a8a', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <ShieldCheck size={16} color="#2563eb" /> ขอรับการคุ้มครองและเงินคืนเต็มจำนวน (Money-Back Guarantee)
+                    <ShieldCheck size={16} color="#2563eb" /> ขอรับความคุ้มครองและเงินคืน
                   </strong>
                   <span style={{ fontSize: '0.75rem', color: '#475569', display: 'block', marginTop: 2 }}>
-                    Movemall การันตีคืนเงิน 100% (หรือ 200% สำหรับ Mall) ทันทีที่ผลการตรวจพิสูจน์ยืนยันว่าเป็นสินค้าปลอม
+                    คืน 100% หรือ 200% สำหรับสินค้า Mall เมื่อยืนยันว่าเป็นของปลอม
                   </span>
                 </div>
               </label>

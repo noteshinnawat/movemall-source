@@ -205,10 +205,10 @@ export function NotificationsPage() {
                   <Bell size={28} />
                 </div>
                 <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: '#111827' }}>
-                  เข้าสู่ระบบเพื่อดูการแจ้งเตือนของคุณ
+                  เข้าสู่ระบบเพื่อดูการแจ้งเตือน
                 </h3>
                 <p style={{ color: '#6B7280', fontSize: 14, marginBottom: 24, maxWidth: 360, margin: '0 auto 24px' }}>
-                  ติดตามสถานะคำสั่งซื้อ พัสดุ โค้ดส่วนลด และสิทธิพิเศษของบัญชีคุณได้ที่นี่
+                  ดูออเดอร์ พัสดุ และสิทธิพิเศษ
                 </p>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
                   <button
@@ -240,7 +240,7 @@ export function NotificationsPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    สมัครสมาชิกใหม่
+                    สมัครสมาชิก
                   </button>
                 </div>
               </div>
@@ -273,10 +273,10 @@ export function NotificationsPage() {
               <div style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--text-muted)' }}>
                 <Inbox size={40} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
                 <p style={{ fontWeight: 600, fontSize: 15, color: '#374151', margin: '0 0 4px' }}>
-                  ยังไม่มีการแจ้งเตือนในหมวดหมู่นี้
+                  ยังไม่มีการแจ้งเตือน
                 </p>
                 <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>
-                  เมื่อมีออเดอร์ใหม่ โปรโมชั่น หรือโค้ดส่วนลด จะปรากฏที่นี่
+                  รายการใหม่จะแสดงที่นี่
                 </p>
               </div>
             )}

@@ -731,7 +731,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
       logoColor: '#F59E0B',
       category: 'WMS',
       categoryLabel: 'Local Thai POS & Logistics',
-      description: 'เชื่อมต่อสต็อกหน้าร้าน POS เข้ากับ Movemall และระบบรวมค่ายขนส่ง Flash, Kerry, J&T และไปรษณีย์ไทยเพื่อออกเลขแทร็กกิ้งอัตโนมัติ',
+      description: 'เชื่อมสต็อก POS และออกเลขพัสดุอัตโนมัติสำหรับ Flash, Kerry, J&T และไปรษณีย์ไทย',
       connected: false,
       syncHealth: 0,
       lastSyncedAt: 'ยังไม่เคยซิงค์',
@@ -6981,4 +6981,3 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 }
 
 export default SellerCenterPage;
-

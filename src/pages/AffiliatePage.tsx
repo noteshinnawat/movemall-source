@@ -128,7 +128,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
 
   function handleRegisterSuccess(newCreator: CreatorProfileData) {
     setCreatorProfile(newCreator);
-    onCopySuccess?.('ยินดีด้วย! บัญชีของคุณได้รับการอนุมัติเป็น Movemall Creator แล้ว 🎉');
+    onCopySuccess?.('อนุมัติบัญชี Creator แล้ว');
   }
 
   async function handleConfirmWithdraw(e: React.FormEvent) {
@@ -234,7 +234,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
       }
       setIsPublishing(false);
       setPublishedSuccess(true);
-      onCopySuccess?.('เผยแพร่วิดีโอสั้นติดตะกร้าสินค้าสำเร็จแล้ว! ไปดูในฟีดวิดีโอได้เลย');
+      onCopySuccess?.('เผยแพร่วิดีโอแล้ว');
     }, 800);
   }
 
@@ -253,8 +253,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
                 <span style={{ color: '#FDE047' }}>ด้วยการป้ายยา & ปักตะกร้าสินค้า 🛍️</span>
               </h1>
               <p className="affiliate-onboarding-desc">
-                รับค่าคอมมิชชั่นสูงสุด <strong>15 - 20% ทุกคำสั่งซื้อ</strong> แค่ลงคลิปวิดีโอสั้นติดตะกร้าสีเหลือง
-                หรือแชร์ลิงก์ให้เพื่อนซื้อ สมัครฟรี อนุมัติทันที พร้อมรับโบนัสแรกเข้า ฿500
+                รับค่าคอมมิชชันสูงสุด <strong>15–20%</strong> จากคลิปหรือลิงก์สินค้า
               </p>
 
               <div className="affiliate-onboarding-cta-row">
@@ -276,7 +275,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
               <div className="affiliate-perk-item">
                 <div className="affiliate-perk-icon">💰</div>
                 <div>
-                  <strong>ค่าคอมมิชชั่นสูงสุด 15-20%</strong>
+                  <strong>ค่าคอมมิชชันสูงสุด 15–20%</strong>
                   <span>รายได้ไม่จำกัด ถอนเข้าบัญชีธนาคารได้ทุกวัน</span>
                 </div>
               </div>
@@ -395,7 +394,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
           </div>
 
           <div className="affiliate-stat-box">
-            <span className="affiliate-stat-label">อัตราค่าคอมมิชชั่น</span>
+            <span className="affiliate-stat-label">อัตราค่าคอมมิชชัน</span>
             <div className="affiliate-stat-value" style={{ color: '#2563EB' }}>
               {creatorProfile?.commissionRate || 15}.0%
             </div>
@@ -415,17 +414,17 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
               <div className="affiliate-step-card">
                 <div className="affiliate-step-num">1</div>
                 <h4>สมัครฟรีใน 1 นาที</h4>
-                <p>กรอกข้อมูลตัวตน ช่องทางโซเชียลมีเดีย และผูกบัญชีธนาคารรับเงิน อนุมัติทันที</p>
+                <p>สมัครและผูกบัญชีรับเงิน</p>
               </div>
               <div className="affiliate-step-card">
                 <div className="affiliate-step-num">2</div>
                 <h4>ปักตะกร้า หรือ แชร์ลิงก์</h4>
-                <p>เลือกสินค้าที่ชอบจากคลังกว่า 50,000 ชิ้น ลงคลิปสั้นติดตะกร้าสีเหลือง หรือแชร์ลิงก์</p>
+                <p>เลือกสินค้าแล้วสร้างคลิปหรือลิงก์</p>
               </div>
               <div className="affiliate-step-card">
                 <div className="affiliate-step-num">3</div>
-                <h4>รับค่าคอมมิชชั่น 15%</h4>
-                <p>เมื่อมีคนสั่งซื้อผ่านลิงก์หรือตะกร้าของคุณ รับเงินเข้ากระเป๋าและกดถอนได้ทันที 24 ชม.</p>
+                <h4>รับค่าคอมมิชชัน 15%</h4>
+                <p>รับค่าคอมมิชชันเมื่อมีคำสั่งซื้อ</p>
               </div>
             </div>
           </section>
@@ -442,7 +441,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
                 สตูดิโอสร้างคลิปสั้นโซเชียลติดตะกร้า (ความยาว ≤60 วินาที)
               </h2>
               <p className="affiliate-studio-desc">
-                สร้างคลิปรีวิว/ป้ายยา พร้อมเครื่องมือตัดต่อ เลือกลงคลิป และปักตะกร้าสินค้าเพื่อรับค่าคอมมิชชั่นสูงสุด 15%
+                สร้างคลิป ปักสินค้า และรับค่าคอมมิชชัน
               </p>
             </div>
             <Link to="/video/create" className="affiliate-studio-btn">
@@ -458,7 +457,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
             อัปโหลดคลิปด่วนติดตะกร้าสินค้า (Quick Video Pin)
           </h2>
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 14 }}>
-            อัปโหลดวิดีโอรีวิว และเลือกสินค้าที่ต้องการปักหมุด คลิปของคุณจะไปแสดงในฟีดวิดีโอให้ลูกค้ากดซื้อได้ทันที
+            อัปโหลดคลิปและเลือกสินค้าที่ต้องการปัก
           </p>
 
           <form onSubmit={handlePublishVideo} className="affiliate-quick-form">
@@ -485,7 +484,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
               {/* Commission Preview Card */}
               <div className="affiliate-earning-preview-box">
                 <div>
-                  <span className="affiliate-earning-preview-lbl">ค่าคอมมิชชั่นที่คุณจะได้รับ ({creatorProfile?.commissionRate || 15}%):</span>
+                  <span className="affiliate-earning-preview-lbl">ค่าคอมมิชชัน {creatorProfile?.commissionRate || 15}%</span>
                   <div className="affiliate-earning-preview-val">+฿{estimatedCommission.toLocaleString()} / ออเดอร์</div>
                 </div>
                 <div style={{ fontSize: 24 }}>💰</div>
@@ -517,7 +516,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
               {publishedSuccess && (
                 <div className="affiliate-publish-success-msg">
                   <CheckCircle size={16} />
-                  <span>เผยแพร่วิดีโอสำเร็จแล้ว! <Link to="/video">ไปดูในฟีดวิดีโอ ➔</Link></span>
+                  <span>เผยแพร่แล้ว <Link to="/video">ดูวิดีโอ ➔</Link></span>
                 </div>
               )}
             </div>
@@ -531,7 +530,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
             สร้างลิงก์ป้ายยา (Affiliate Link Generator)
           </h2>
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 14 }}>
-            วางลิงก์สินค้า Movemall เพื่อแปลงเป็นลิงก์นายหน้าเฉพาะของคุณ ({activeRefCode}) นำไปแชร์บนโซเชียลมีเดียได้ทันที
+            วางลิงก์สินค้าเพื่อสร้างลิงก์ Creator ของคุณ ({activeRefCode})
           </p>
 
           <form onSubmit={handleGenerateLink} className="affiliate-input-group">
@@ -565,7 +564,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
         <div style={{ marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
             <Flame size={18} style={{ color: '#DC2626' }} />
-            สินค้าแนะนำ ค่าคอมมิชชั่นสูง (Top Commission Picks)
+            สินค้าค่าคอมมิชชันสูง
           </h2>
         </div>
 
@@ -644,10 +643,10 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
                     <strong className="affiliate-mobile-card-name">{p.name}</strong>
                     <div className="affiliate-mobile-card-prices">
                       <span className="affiliate-mobile-card-price">฿{p.price.toLocaleString()}</span>
-                      <span className="affiliate-mobile-card-rate">คอมมิชชั่น {p.commissionRate}%</span>
+                      <span className="affiliate-mobile-card-rate">คอมมิชชัน {p.commissionRate}%</span>
                     </div>
                     <div className="affiliate-mobile-card-earning">
-                      รายได้ที่คุณจะได้รับ: <strong>+฿{p.commissionAmount.toLocaleString()}</strong> / ออเดอร์
+                      รับ <strong>+฿{p.commissionAmount.toLocaleString()}</strong> / ออเดอร์
                     </div>
                   </div>
                 </div>

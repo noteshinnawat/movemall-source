@@ -292,7 +292,7 @@ function AppLayout({
             element={
               <LoginPage
                 onLoginSuccess={name => {
-                  addToast(`ยินดีต้อนรับคุณ ${name} เข้าสู่ระบบ!`, 'success', '👋');
+                  addToast(`ยินดีต้อนรับ ${name}`, 'success', '👋');
                 }}
               />
             }
@@ -303,8 +303,8 @@ function AppLayout({
             path="/register"
             element={
               <RegisterPage
-                onRegisterSuccess={name => {
-                  addToast(`ยินดีต้อนรับคุณ ${name}! สมัครสมาชิกและรับเหรียญต้อนรับสำเร็จ 🎉`, 'success', '🎁');
+                onRegisterSuccess={() => {
+                  addToast('สมัครสำเร็จ รับ Coins แล้ว', 'success', '🎁');
                 }}
               />
             }
@@ -498,7 +498,7 @@ function AppLayout({
                           fontSize: 13,
                         }}
                       >
-                        <span>🎮 เล่นเกมหมุนวงล้อ & เช็คอิน</span>
+                        <span>🎮 หมุนวงล้อและเช็กอิน</span>
                         <span style={{ color: 'var(--primary)' }}>เล่นเกม →</span>
                       </Link>
 
@@ -702,22 +702,22 @@ function App() {
 
   function handleAddToCart(product: Product, qty = 1) {
     cart.addItem(product, qty);
-    addToast(`เพิ่ม "${product.name}" ลงตะกร้าแล้ว (${qty} ชิ้น)`, 'success', '🛒');
+    addToast(`เพิ่มลงตะกร้าแล้ว · ${qty} ชิ้น`, 'success', '🛒');
   }
 
   function handleToggleWishlist(product: Product) {
     const isWishedNow = wishlist.isWished(product.id);
     wishlist.toggle(product);
     if (!isWishedNow) {
-      addToast(`บันทึก "${product.name}" ใน Wishlist แล้ว`, 'info', '❤️');
+      addToast('บันทึกสินค้าแล้ว', 'info', '❤️');
     } else {
-      addToast(`ลบ "${product.name}" ออกจาก Wishlist แล้ว`, 'info', '🤍');
+      addToast('นำออกจากรายการโปรดแล้ว', 'info', '🤍');
     }
   }
 
   function handlePublishClip(newClip: VideoClip) {
     setCustomClips(prev => [newClip, ...prev]);
-    addToast('🎉 เผยแพร่วิดีโอสั้นติดตะกร้าเหลืองสำเร็จแล้ว! พร้อมสร้างรายได้ทันที', 'success', '🎬');
+    addToast('เผยแพร่วิดีโอแล้ว', 'success', '🎬');
   }
 
   async function handleAddProduct(newProduct: Product) {
@@ -749,7 +749,7 @@ function App() {
     } catch (err) {
       console.warn('[Movemall API] Could not persist product to DB API, saved locally:', err);
     }
-    addToast(`ลงขายสินค้า "${newProduct.name}" สำเร็จแล้ว!`, 'success', '📦');
+    addToast('ลงขายสินค้าแล้ว', 'success', '📦');
   }
 
   async function handleDeleteProduct(id: string) {
@@ -800,7 +800,7 @@ function App() {
     } catch (err) {
       console.warn('[Movemall API] Could not update product on DB API:', err);
     }
-    addToast(`อัปเดตข้อมูลสินค้า "${updatedProduct.name}" สำเร็จแล้ว!`, 'success', '✏️');
+    addToast('อัปเดตสินค้าแล้ว', 'success', '✏️');
   }
 
   return (

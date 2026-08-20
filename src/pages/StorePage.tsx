@@ -70,7 +70,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
 
     const savedStoreLogo = localStorage.getItem('movemall_store_logo') || currentUser?.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(customName || 'Store')}`;
     const savedStoreBanner = localStorage.getItem('movemall_store_banner') || 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)';
-    const savedStoreBio = localStorage.getItem('movemall_store_bio') || 'ร้านค้าทางการในระบบ Movemall การันตีสินค้าแท้ 100% จัดส่งรวดเร็ว';
+    const savedStoreBio = localStorage.getItem('movemall_store_bio') || 'ร้านทางการ สินค้าแท้ จัดส่งไว';
 
     if (isMatchCustom || (customName && decodedId.includes(customName))) {
       return {
@@ -116,7 +116,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
         productCount: 0,
         followerCount: 1,
         location: 'กรุงเทพมหานคร',
-        description: isCurrentUserShop ? savedStoreBio : `ร้านค้า ${readableName} บนระบบ Movemall สินค้าของแท้ การันตีคุณภาพ`,
+        description: isCurrentUserShop ? savedStoreBio : `${readableName} · สินค้าแท้ รับประกันคุณภาพ`,
       };
     }
 
@@ -309,7 +309,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
                     {activeLive.caption}
                   </div>
                   <div className="store-live-promo">
-                    ⚡ โค้ดพิเศษในไลฟ์: ลด {activeLive.pinnedProduct.discountPct}% + ส่งฟรี 0 บาท
+                    ลด {activeLive.pinnedProduct.discountPct}% + ส่งฟรีในไลฟ์
                   </div>
                 </div>
               </div>

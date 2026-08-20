@@ -105,7 +105,7 @@ export function VisualSearchModal({
       setCameraActive(true);
     } catch (err: any) {
       console.error('Camera access error:', err);
-      setCameraError('ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตสิทธิ์การใช้งานกล้อง หรือใช้วิธีอัปโหลดรูปภาพ');
+      setCameraError('เปิดกล้องไม่ได้ โปรดอนุญาตสิทธิ์หรืออัปโหลดรูปแทน');
       setCameraActive(false);
     }
   }
@@ -293,7 +293,7 @@ export function VisualSearchModal({
             <div>
               <h2 className="vsearch-title">Movemall AI Lens — ค้นหาด้วยรูปภาพ</h2>
               <p className="vsearch-subtitle">
-                ถ่ายรูป อัปโหลด หรือเลือกไอเทมเพื่อค้นหาสินค้าที่ตรงใจด้วย AI Visual Recognition
+                ถ่ายหรืออัปโหลดรูปเพื่อค้นหาสินค้า
               </p>
             </div>
           </div>
@@ -343,7 +343,7 @@ export function VisualSearchModal({
                 {activeTab === 'samples' && (
                   <div className="vsearch-samples-grid">
                     <p className="vsearch-samples-hint">
-                      💡 คลิกเลือกภาพตัวอย่างเพื่อทดลองระบบสแกนค้นหาสินค้าอัจฉริยะได้ทันที:
+                      หรือเลือกรูปตัวอย่าง
                     </p>
                     <div className="vsearch-samples-list">
                       {VISUAL_SEARCH_SAMPLES.map(sample => (
@@ -565,14 +565,14 @@ export function VisualSearchModal({
             {isScanning ? (
               <div className="vsearch-loading-state">
                 <div className="vsearch-spinner" />
-                <p>AI กำลังค้นหาสินค้าที่ใกล้เคียงจากฐานข้อมูล 160+ รายการ...</p>
+                <p>กำลังค้นหาสินค้าที่ใกล้เคียง...</p>
               </div>
             ) : !selectedImage ? (
               <div className="vsearch-empty-prompt">
                 <div className="vsearch-empty-icon">📷</div>
                 <h3>เลือกรูปภาพเพื่อเริ่มการค้นหา</h3>
                 <p>
-                  ระบบจะเปรียบเทียบรูปทรง สไตล์ โทนสี และหมวดหมู่ เพื่อหาสินค้าที่ตรงกับความต้องการมากที่สุด
+                  เปรียบเทียบรูปทรง สไตล์ และโทนสี
                 </p>
               </div>
             ) : matchedProducts.length === 0 ? (

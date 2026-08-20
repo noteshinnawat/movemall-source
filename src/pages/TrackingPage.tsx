@@ -244,7 +244,7 @@ export function TrackingPage() {
                 ค้นหาและติดตามพัสดุ (Parcel Tracking)
               </h2>
               <p className="tracking-search-desc">
-                กรอกหมายเลขติดตามพัสดุ (Tracking No.) หรือหมายเลขคำสั่งซื้อ (Order ID)
+                กรอกเลขพัสดุหรือเลขคำสั่งซื้อ
               </p>
             </div>
           </div>
@@ -360,8 +360,8 @@ export function TrackingPage() {
                   </div>
                   <div className="tracking-line-subtitle">
                     {isLineConnected
-                      ? `ระบบจะส่งแจ้งเตือนสถานะพัสดุ (${trackingNumber}) เข้าแชท LINE อัตโนมัติเมื่อมีความเคลื่อนไหว`
-                      : 'ผูกบัญชี LINE 1-Click รับฟรี 50 Coins พร้อมรับแจ้งเตือนเมื่อพัสดุมีการเคลื่อนไหว'}
+                      ? `รับสถานะพัสดุ ${trackingNumber} ผ่าน LINE`
+                      : 'เชื่อมต่อ LINE รับ 50 Coins และสถานะพัสดุ'}
                   </div>
                 </div>
               </div>
@@ -443,7 +443,7 @@ export function TrackingPage() {
                     <span>เส้นทางการขนส่งพัสดุ (Logistics Route Overview)</span>
                   </div>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                    {currentOrder.status === 'delivered' ? '📍 พัสดุส่งถึงที่หมายแล้ว' : '🚚 ขนส่ง Flash Express กำลังดำเนินการส่ง'}
+                    {currentOrder.status === 'delivered' ? '📍 ส่งถึงแล้ว' : '🚚 Flash Express กำลังจัดส่ง'}
                   </span>
                 </div>
 
@@ -512,8 +512,8 @@ export function TrackingPage() {
             </h2>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16, maxWidth: 450, margin: '0 auto 16px' }}>
               {activeIdOrTracking
-                ? 'กรุณาตรวจสอบหมายเลขพัสดุใหม่อีกครั้ง หรือค้นหาจากประวัติคำสั่งซื้อจริงของคุณ'
-                : 'เมื่อคุณทำการสั่งซื้อสินค้าบน Movemall รายการพัสดุและสถานะการจัดส่งแบบเรียลไทม์จะปรากฏที่นี่ทันที'}
+                ? 'ตรวจสอบเลขพัสดุ หรือลองค้นหาจากประวัติออเดอร์'
+                : 'เมื่อสั่งซื้อแล้ว สถานะพัสดุจะแสดงที่นี่'}
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link to="/shop" className="tracking-view-orders-btn">

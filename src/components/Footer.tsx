@@ -60,7 +60,7 @@ export function Footer() {
               <span className="footer__logo-text">Movemall</span>
             </Link>
             <p className="footer__tagline">
-              แพลตฟอร์มช้อปปิ้งออนไลน์ที่ดีที่สุด สินค้าหลากหลาย ราคาโดน จัดส่งไว ปลอดภัย 100%
+              ช้อปครบ ราคาดี ส่งไว มั่นใจทุกออเดอร์
             </p>
             <div className="footer__social">
               {SOCIALS.map(s => (
