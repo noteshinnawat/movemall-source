@@ -28,3 +28,7 @@ export function nextLanguageOptionIndex(
   if (key === 'ArrowUp') return (currentIndex - 1 + optionCount) % optionCount;
   return (currentIndex + 1) % optionCount;
 }
+
+export function shouldCloseLanguageMenu(isOpen: boolean, key: string) {
+  return isOpen && key === 'Escape';
+}

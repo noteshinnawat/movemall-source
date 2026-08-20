@@ -33,13 +33,6 @@
   "visualSearch": {
     "cameraError": "ကင်မရာကို ဖွင့်၍မရပါ။ ကင်မရာ အသုံးပြုခွင့်ပေးပါ သို့မဟုတ် ပုံတစ်ပုံ အပ်လုဒ်လုပ်ပါ။",
     "detectedPrimary": "ရှာဖွေတွေ့ရှိသော အဓိကအရာ",
-    "keywords": {
-      "popular": "လူကြိုက်များသော",
-      "highQuality": "အရည်အသွေးမြင့်",
-      "authentic": "ပစ္စည်းမှန်",
-      "readyToShip": "ပို့ဆောင်ရန် အသင့်ရှိ"
-    },
-    "officialStore": "Movemall တရားဝင်ဆိုင်",
     "dialogLabel": "Movemall AI Lens ပုံဖြင့်ရှာဖွေမှု",
     "title": "Movemall AI Lens — ပုံဖြင့်ရှာဖွေမှု",
     "subtitle": "ကုန်ပစ္စည်းများ ရှာရန် ဓာတ်ပုံရိုက်ပါ သို့မဟုတ် ပုံတင်ပါ။",

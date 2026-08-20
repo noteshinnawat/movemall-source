@@ -42,3 +42,12 @@ test('language menu keyboard navigation moves through every option and wraps', a
   assert.equal(nextLanguageOptionIndex(1, 'Home', 3), 0);
   assert.equal(nextLanguageOptionIndex(1, 'End', 3), 2);
 });
+
+test('Escape closes an open language menu regardless of the focused descendant', async () => {
+  const { shouldCloseLanguageMenu } = await loadLanguageSwitcherBehavior();
+
+  assert.equal(typeof shouldCloseLanguageMenu, 'function');
+  assert.equal(shouldCloseLanguageMenu(true, 'Escape'), true);
+  assert.equal(shouldCloseLanguageMenu(false, 'Escape'), false);
+  assert.equal(shouldCloseLanguageMenu(true, 'ArrowDown'), false);
+});

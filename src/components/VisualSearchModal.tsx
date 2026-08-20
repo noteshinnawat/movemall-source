@@ -18,6 +18,11 @@ import {
   Palette,
 } from 'lucide-react';
 import { useLocalizedPath } from '../i18n/LocalizedLink';
+import {
+  createSyntheticSearchSubject,
+  rankVisualSearchProducts,
+  resolveVisualSearchStoreName,
+} from './VisualSearch.behavior';
 import { VISUAL_SEARCH_SAMPLES, type VisualSample } from '../data/visualSearchSamples';
 import { getStoreById } from '../data/stores';
 import { getProductUrl } from '../utils/seo';
@@ -188,19 +193,17 @@ export function VisualSearchModal({
         setCategoryFilter(foundSample.category);
       } else {
         // Synthesize dynamic AI bounding boxes & colors for uploaded/captured image
+        const syntheticSubject = createSyntheticSearchSubject(
+          t('visualSearch.detectedPrimary'),
+        );
         const syntheticObjects: DetectedObject[] = [
           {
             id: 'obj-gen-1',
-            label: t('visualSearch.detectedPrimary'),
+            label: syntheticSubject.label,
             category: 'all',
             confidence: 0.96,
             box: { top: 15, left: 15, width: 70, height: 70 },
-            suggestedKeywords: [
-              t('visualSearch.keywords.popular'),
-              t('visualSearch.keywords.highQuality'),
-              t('visualSearch.keywords.authentic'),
-              t('visualSearch.keywords.readyToShip'),
-            ],
+            suggestedKeywords: syntheticSubject.suggestedKeywords,
           },
         ];
         setDetectedObjects(syntheticObjects);
@@ -245,42 +248,23 @@ export function VisualSearchModal({
       });
     }
 
-    // Calculate score based on keyword relevance & category
-    const scoredList = list.map((p, idx) => {
-      let score = 75; // base score
-
-      if (categoryFilter === p.category) {
-        score += 15;
-      }
-
-      if (activeObject?.suggestedKeywords) {
-        activeObject.suggestedKeywords.forEach(kw => {
-          if (
-            p.name.toLowerCase().includes(kw.toLowerCase()) ||
-            p.tags.some(t => t.toLowerCase().includes(kw.toLowerCase()))
-          ) {
-            score += 4;
-          }
-        });
-      }
-
-      // Add deterministic natural variance
-      score = Math.min(99, Math.max(68, score + ((p.name.length * 7 + idx * 3) % 9)));
+    // Calculate score from canonical matching tokens, never translated UI copy.
+    const scoredList = rankVisualSearchProducts(
+      list,
+      categoryFilter,
+      activeObject?.suggestedKeywords ?? [],
+    ).map(p => {
       const store = p.storeId ? getStoreById(p.storeId) : undefined;
 
       return {
         ...p,
-        visualMatchScore: score,
         isMall: store?.badge === 'official',
-        storeName: store?.name || t('visualSearch.officialStore'),
+        storeName: resolveVisualSearchStoreName(store?.name),
       };
     });
 
-    // Sort by Visual Match Score descending
-    scoredList.sort((a, b) => b.visualMatchScore - a.visualMatchScore);
-
     return scoredList;
-  }, [selectedImage, categoryFilter, onlyMall, activeObject, products, t]);
+  }, [selectedImage, categoryFilter, onlyMall, activeObject, products]);
 
   if (!isOpen) return null;
 
@@ -630,7 +614,7 @@ export function VisualSearchModal({
                       </div>
 
                       <div className="vsearch-prod-details">
-                        <div className="vsearch-prod-store">{store?.name || t('visualSearch.officialStore')}</div>
+                        <div className="vsearch-prod-store">{resolveVisualSearchStoreName(store?.name)}</div>
                       <h4
                         className="vsearch-prod-title"
                         title={prod.name}

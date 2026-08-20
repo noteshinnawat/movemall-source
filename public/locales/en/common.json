@@ -33,13 +33,6 @@
   "visualSearch": {
     "cameraError": "Unable to open the camera. Allow camera access or upload an image instead.",
     "detectedPrimary": "Primary detected subject",
-    "keywords": {
-      "popular": "popular",
-      "highQuality": "high quality",
-      "authentic": "authentic",
-      "readyToShip": "ready to ship"
-    },
-    "officialStore": "Official Movemall store",
     "dialogLabel": "Movemall AI Lens visual search",
     "title": "Movemall AI Lens — Visual search",
     "subtitle": "Take or upload a photo to find products.",

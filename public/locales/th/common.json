@@ -33,13 +33,6 @@
   "visualSearch": {
     "cameraError": "เปิดกล้องไม่ได้ โปรดอนุญาตสิทธิ์หรืออัปโหลดรูปแทน",
     "detectedPrimary": "วัตถุหลักที่ตรวจพบ (Primary Subject)",
-    "keywords": {
-      "popular": "ยอดนิยม",
-      "highQuality": "คุณภาพสูง",
-      "authentic": "ของแท้",
-      "readyToShip": "พร้อมส่ง"
-    },
-    "officialStore": "ร้านค้าทางการ Movemall",
     "dialogLabel": "ค้นหาด้วยรูปภาพ Movemall AI Lens",
     "title": "Movemall AI Lens — ค้นหาด้วยรูปภาพ",
     "subtitle": "ถ่ายหรืออัปโหลดรูปเพื่อค้นหาสินค้า",

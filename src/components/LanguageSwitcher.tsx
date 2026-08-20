@@ -12,6 +12,7 @@ import {
   getLanguageSwitchTarget,
   isLanguageSwitcherExcluded,
   nextLanguageOptionIndex,
+  shouldCloseLanguageMenu,
   type LanguageMenuKey,
 } from './LanguageSwitcher.behavior';
 import './LanguageSwitcher.css';
@@ -44,24 +45,28 @@ export function LanguageSwitcher() {
         setIsOpen(false);
       }
     };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (shouldCloseLanguageMenu(isOpen, event.key)) {
+        event.preventDefault();
+        setIsOpen(false);
+        requestAnimationFrame(() => triggerRef.current?.focus());
+      }
+    };
 
     document.addEventListener('pointerdown', handleOutsidePointer);
+    document.addEventListener('keydown', handleEscape);
     const frame = requestAnimationFrame(() => {
       optionRefs.current[currentOptionIndex]?.focus();
     });
 
     return () => {
       document.removeEventListener('pointerdown', handleOutsidePointer);
+      document.removeEventListener('keydown', handleEscape);
       cancelAnimationFrame(frame);
     };
   }, [currentOptionIndex, isExcluded, isOpen]);
 
   if (isExcluded) return null;
-
-  function closeAndRestoreFocus() {
-    setIsOpen(false);
-    requestAnimationFrame(() => triggerRef.current?.focus());
-  }
 
   function chooseLanguage(locale: Locale) {
     const next = getLanguageSwitchTarget(
@@ -77,12 +82,6 @@ export function LanguageSwitcher() {
   }
 
   function handleOptionKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, index: number) {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      closeAndRestoreFocus();
-      return;
-    }
-
     if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
     const nextIndex = nextLanguageOptionIndex(
