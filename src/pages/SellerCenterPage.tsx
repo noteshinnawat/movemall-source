@@ -26,6 +26,7 @@ import {
 import { promptGoogleAuth } from '../utils/googleAuth';
 import { generateSlug } from '../utils/slug';
 import { getProductUrl } from '../utils/seo';
+import { canAccessSellerHub, isSellerRole } from '../utils/sellerAccess';
 import {
   getChatSocket,
   joinSellerChatRoom,
@@ -61,9 +62,10 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   // ── ด่านตรวจสิทธิ์ในหน้า (แทน ProtectedRoute ที่เคยเด้งกลับหน้าแรกแบบเงียบ ๆ) ──
   // ผู้ที่ล็อกอินอยู่แต่ยังไม่ได้เปิดร้าน (เช่น role BUYER) ต้องเห็นเหตุผลและปุ่มสมัครเปิดร้าน
   // ⚠️ นี่คือด่านระดับ UX เท่านั้น ด่านจริงอยู่ที่ API ฝั่งเซิร์ฟเวอร์ (requireRole + ownership)
-  const SELLER_ROLES = ['SELLER', 'CREATOR', 'SUPER_ADMIN', 'ADMIN'];
-  const hasSellerRole = SELLER_ROLES.includes(String(currentUser?.role || '').toUpperCase());
-  const isSignedIn = Boolean(currentUser) && Boolean(localStorage.getItem('movemall_jwt_token'));
+  const sellerToken = localStorage.getItem('movemall_jwt_token');
+  const hasSellerRole = isSellerRole(currentUser);
+  const isSignedIn = Boolean(currentUser) && Boolean(sellerToken);
+  const canLoadProtectedSellerData = canAccessSellerHub(currentUser, sellerToken);
 
   function handleLogout() {
     if (window.confirm('คุณต้องการออกจากระบบศูนย์ผู้ขาย Movemall ใช่หรือไม่?')) {
@@ -351,6 +353,8 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
 
   // Sync real chat messages for this specific store from DB
   useEffect(() => {
+    if (!canLoadProtectedSellerData) return;
+
     async function loadStoreChatHistory() {
       try {
         const res = await fetchApi<{ success: boolean; messages: any[] }>(`/api/chat/messages?storeId=${currentStore.id}`);
@@ -373,7 +377,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
       }
     }
     loadStoreChatHistory();
-  }, [currentStore.id]);
+  }, [canLoadProtectedSellerData, currentStore.id]);
 
   useEffect(() => {
     if (activeTab === 'chat' && sellerMessagesAreaRef.current) {
@@ -382,6 +386,8 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   }, [sellerMessages, selectedCustomerId, activeTab]);
 
   useEffect(() => {
+    if (!canLoadProtectedSellerData) return;
+
     const socket = getChatSocket();
     joinSellerChatRoom(currentStore.id);
     if (socket.connected) setIsSellerSocketConnected(true);
@@ -425,7 +431,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
       socket.off('connect', handleConnect);
       socket.off('receive_chat_message', handleReceiveMsg);
     };
-  }, [currentStore.id, selectedCustomerId, currentUser?.id]);
+  }, [canLoadProtectedSellerData, currentStore.id, selectedCustomerId, currentUser?.id]);
 
   function handleSellerSendMessage(e?: React.FormEvent, customText?: string) {
     if (e) e.preventDefault();
@@ -789,6 +795,8 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
   const [lastSyncTime, setLastSyncTime] = useState<string>(() => new Date().toLocaleTimeString('th-TH'));
 
   const syncSellerHubLive = useCallback(async (showNotification = false) => {
+    if (!canLoadProtectedSellerData) return;
+
     setIsRefreshingData(true);
     try {
       const [ordersRes, walletRes, campsRes, taxRes] = await Promise.all([
@@ -856,7 +864,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
     } finally {
       setIsRefreshingData(false);
     }
-  }, [currentStore.id, currentStore.name]);
+  }, [canLoadProtectedSellerData, currentStore.id, currentStore.name]);
 
   useEffect(() => {
     syncSellerHubLive(false);
