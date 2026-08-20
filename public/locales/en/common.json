@@ -1,0 +1,5 @@
+{
+  "loading": "Loading...",
+  "actions": { "close": "Close", "back": "Back", "continue": "Continue", "retry": "Try again" },
+  "errors": { "generic": "Something went wrong. Please try again.", "notFound": "The page you requested was not found." }
+}
