@@ -89,21 +89,64 @@ export function emitTypingStatus(data: {
 }
 
 // LocalStorage Persistence Helpers
-const LOCAL_STORAGE_CHAT_KEY = 'movemall_chat_messages_v1';
+//
+// cache ผูกกับบัญชีที่ล็อกอินอยู่เสมอ — เดิมใช้คีย์เดียวทั้งเครื่องและไม่เคยล้าง
+// ทำให้ห้องแชท (รวมข้อความ mock ที่เคย seed ไว้) ของบัญชีก่อนหน้าโผล่ข้ามผู้ใช้
+const CHAT_HISTORY_PREFIX = 'movemall_chat_messages_v2_';
 
-export function getStoredChatHistory(): Record<string, any[]> {
+/** คีย์รุ่นเก่าที่ไม่ผูกกับผู้ใช้ ต้องทิ้งทุกครั้งที่เจอ */
+const LEGACY_CHAT_HISTORY_KEY = 'movemall_chat_messages_v1';
+
+function historyKey(ownerId: string): string {
+  return `${CHAT_HISTORY_PREFIX}${ownerId}`;
+}
+
+function purgeLegacyChatHistory(): void {
   try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_CHAT_KEY);
+    localStorage.removeItem(LEGACY_CHAT_HISTORY_KEY);
+  } catch {
+    // storage ใช้ไม่ได้ — ไม่มีอะไรให้ล้างอยู่แล้ว
+  }
+}
+
+export function getStoredChatHistory(ownerId: string): Record<string, any[]> {
+  purgeLegacyChatHistory();
+  if (!ownerId) return {};
+  try {
+    const raw = localStorage.getItem(historyKey(ownerId));
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
   }
 }
 
-export function saveStoredChatHistory(history: Record<string, any[]>): void {
+export function saveStoredChatHistory(ownerId: string, history: Record<string, any[]>): void {
+  if (!ownerId) return;
   try {
-    localStorage.setItem(LOCAL_STORAGE_CHAT_KEY, JSON.stringify(history));
+    localStorage.setItem(historyKey(ownerId), JSON.stringify(history));
   } catch (e) {
     console.error('Failed to save chat history to localStorage', e);
+  }
+}
+
+/** ล้าง cache แชททั้งหมดในเครื่อง ใช้ตอนสลับบัญชี/ออกจากระบบ */
+export function clearAllStoredChatHistory(): void {
+  purgeLegacyChatHistory();
+  try {
+    // ตัวเลข unread บน Navbar ก็เป็นของบัญชีเดิม ต้องรีเซ็ตพร้อมกัน
+    localStorage.removeItem('movemall_chat_unread_count');
+    window.dispatchEvent(new Event('movemall_chat_change'));
+  } catch {
+    // storage ใช้ไม่ได้
+  }
+  try {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(CHAT_HISTORY_PREFIX)) keys.push(k);
+    }
+    keys.forEach(k => localStorage.removeItem(k));
+  } catch {
+    // storage ใช้ไม่ได้
   }
 }

@@ -13,7 +13,7 @@ import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { VisualSearchModal } from './components/VisualSearchModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { resetChatSocket } from './utils/chatSocket';
+import { resetChatSocket, clearAllStoredChatHistory } from './utils/chatSocket';
 import { API_BASE_URL, createProductApi, updateProductApi, deleteProductApi } from './utils/api';
 import { UI_COPY } from './uiCopy';
 
@@ -101,9 +101,14 @@ function AppLayout({
   }, [location.pathname, location.search]);
 
   // สลับบัญชี/ออกจากระบบ: ตัด socket เดิมทิ้ง ไม่ให้ค้างด้วย token ของ session ก่อนหน้า
+  // และล้าง cache แชทในเครื่อง ไม่ให้ห้องของบัญชีก่อนหน้าค้างอยู่ในกล่องข้อความ
   useEffect(() => {
-    window.addEventListener('movemall_auth_change', resetChatSocket);
-    return () => window.removeEventListener('movemall_auth_change', resetChatSocket);
+    const handleAuthChange = () => {
+      resetChatSocket();
+      clearAllStoredChatHistory();
+    };
+    window.addEventListener('movemall_auth_change', handleAuthChange);
+    return () => window.removeEventListener('movemall_auth_change', handleAuthChange);
   }, []);
 
   const isProductDetailPage = location.pathname.startsWith('/product/');

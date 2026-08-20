@@ -70,6 +70,9 @@ export function ChatPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const storeParam = searchParams.get('store');
+  const sourceParam = searchParams.get('source');
+  const refParam = searchParams.get('ref');
+  const refNameParam = searchParams.get('refName') || searchParams.get('storeId') || '';
   // ไม่มี ?store= ก็ยังไม่เลือกห้องใด — รอรายการจริงโหลดเสร็จแล้วค่อยเลือกห้องล่าสุด
   // เดิม default เป็น stores[0] ทำให้เปิดหน้าแชทแล้วเจอร้านที่ไม่เคยคุยด้วย
   const initialStoreId = stores.find(s => s.id === storeParam)?.id || storeParam || '';
@@ -93,9 +96,9 @@ export function ChatPage() {
 
   // ── Source Tracking: write source info to localStorage so seller CRM can display it ──
   useEffect(() => {
-    const sourceType = searchParams.get('source'); // 'product' | 'store' | 'live' | 'video'
-    const refId = searchParams.get('ref');
-    const refName = searchParams.get('refName') || searchParams.get('storeId') || '';
+    const sourceType = sourceParam; // 'product' | 'store' | 'live' | 'video'
+    const refId = refParam;
+    const refName = refNameParam;
     if (sourceType && selectedStoreId && myUserId) {
       const labelMap: Record<string, string> = {
         product: `สินค้า: ${decodeURIComponent(refName || refId || '')}`,
@@ -116,7 +119,7 @@ export function ChatPage() {
         localStorage.setItem(key, JSON.stringify(existing));
       } catch {}
     }
-  }, [selectedStoreId, myUserId]); // run once per store selection
+  }, [selectedStoreId, myUserId, sourceParam, refParam, refNameParam]);
 
   const [mobileView, setMobileView] = useState<'list' | 'chat'>(storeParam ? 'chat' : 'list');
   const [filterTab, setFilterTab] = useState<'all' | 'unread' | 'official'>('all');
@@ -128,7 +131,7 @@ export function ChatPage() {
   const typingTimeoutRef = useRef<any>(null);
 
   // ประวัติแชทจริง — เริ่มจาก cache ในเครื่อง แล้วให้ API/socket เติมของจริงทับ
-  const [messages, setMessages] = useState<Record<string, Message[]>>(() => getStoredChatHistory());
+  const [messages, setMessages] = useState<Record<string, Message[]>>(() => getStoredChatHistory(myUserId));
 
   // สถานะห้องสนทนา — ยังไม่มีแหล่งข้อมูลจริง (presence/unread ฝั่งผู้ซื้อ)
   // จึงเริ่มจากว่างเปล่า แล้วนับ unread จากข้อความที่เข้ามาจริงผ่าน socket
@@ -147,8 +150,8 @@ export function ChatPage() {
 
   // Save to LocalStorage whenever messages change
   useEffect(() => {
-    saveStoredChatHistory(messages);
-  }, [messages]);
+    saveStoredChatHistory(myUserId, messages);
+  }, [myUserId, messages]);
 
   // Connect WebSocket & Register Socket listeners
   useEffect(() => {
@@ -324,15 +327,12 @@ export function ChatPage() {
   }, [selectedStoreId, myUserId]);
 
   // Handle URL param changes
+  // เดิมเปิดห้องให้เฉพาะร้านที่มีใน static data ทำให้ทักร้านจริงจาก DB แล้วห้องไม่สลับ
   useEffect(() => {
-    if (storeParam) {
-      const found = stores.find(s => s.id === storeParam);
-      if (found) {
-        setSelectedStoreId(found.id);
-        setMobileView('chat');
-        markConversationRead(found.id);
-      }
-    }
+    if (!storeParam) return;
+    setSelectedStoreId(storeParam);
+    setMobileView('chat');
+    markConversationRead(storeParam);
   }, [storeParam]);
 
   // Keep window at top when switching chat on mobile
@@ -453,12 +453,13 @@ export function ChatPage() {
   const conversationViews: ConversationView[] = (() => {
     const byId = new Map<string, ConversationView>();
 
+    // ข้อมูลร้านจาก API มาก่อนเสมอ — static data เป็นแค่ fallback ตอน API ยังไม่ตอบ
     const resolveDisplay = (storeId: string, conv?: ApiConversation) => {
       const staticStore = stores.find(st => st.id === storeId);
       return {
-        name: staticStore?.name || conv?.storeName || 'ร้านค้า',
-        logo: staticStore?.logo || conv?.storeLogo || '',
-        isMall: staticStore ? staticStore.badge === 'official' : Boolean(conv?.isMall),
+        name: conv?.storeName || staticStore?.name || 'ร้านค้า',
+        logo: conv?.storeLogo || staticStore?.logo || '',
+        isMall: conv?.isMall ?? (staticStore ? staticStore.badge === 'official' : false),
       };
     };
 
@@ -689,14 +690,10 @@ export function ChatPage() {
                     )}
                   </div>
                   <div className="chat-header-sub">
-                    {staticActiveStore && (
-                      <span className="chat-response-rate">● ตอบแชท {staticActiveStore.responseRate}</span>
-                    )}
+                    {/* เดิมโชว์ "ตอบแชท 99%" จาก static store data ซึ่งเป็นตัวเลขปลอม
+                        ยังไม่มีสถิติจริงจาก API จึงเหลือเฉพาะสถานะออนไลน์จาก socket */}
                     {convMeta[selectedStoreId]?.lastActive && (
-                      <>
-                        <span className="chat-status-divider">•</span>
-                        <span className="chat-last-active">{convMeta[selectedStoreId]?.lastActive}</span>
-                      </>
+                      <span className="chat-last-active">{convMeta[selectedStoreId]?.lastActive}</span>
                     )}
                   </div>
                 </div>
