@@ -1,8 +1,11 @@
 // src/components/VideoClipInGridCard.tsx — In-Grid Short Video Clip Card with Yellow Basket
 
 import { useRef, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Play, ShoppingBag, Heart, Sparkles, Volume2, VolumeX, Eye } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Play, Heart, Sparkles } from 'lucide-react';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import type { VideoClip } from '../types';
 import './VideoClipInGridCard.css';
 
@@ -12,6 +15,8 @@ interface VideoClipInGridCardProps {
 }
 
 export function VideoClipInGridCard({ clip, onOpenBasket }: VideoClipInGridCardProps) {
+  const { t, i18n } = useTranslation(['engagement']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [likesCount, setLikesCount] = useState(clip.likesCount);
@@ -59,14 +64,14 @@ export function VideoClipInGridCard({ clip, onOpenBasket }: VideoClipInGridCardP
       {/* Top Header Tags */}
       <div className="video-grid-top">
         <span className="video-grid-tag-video">
-          <Sparkles size={11} /> วิดีโอสั้น
+          <Sparkles size={11} /> {t('engagement:video.grid.shortVideoTag')}
         </span>
         <button
           className={`video-grid-like-btn ${isLiked ? 'liked' : ''}`}
           onClick={handleLike}
         >
           <Heart size={12} fill={isLiked ? '#EF4444' : 'none'} color={isLiked ? '#EF4444' : '#FFFFFF'} />
-          <span>{likesCount.toLocaleString()}</span>
+          <span>{formatNumber(likesCount, locale)}</span>
         </button>
       </div>
 
@@ -83,20 +88,20 @@ export function VideoClipInGridCard({ clip, onOpenBasket }: VideoClipInGridCardP
       <div className="video-grid-bottom">
         {pinned && (
           <div className="video-grid-basket">
-            <span className="video-grid-basket-pill">🟡 ตะกร้าสีเหลือง</span>
+            <span className="video-grid-basket-pill">{t('engagement:video.grid.basketPill')}</span>
             <div className="video-grid-basket-body">
               <img src={pinned.image} alt={pinned.name} className="video-grid-basket-thumb" />
               <div className="video-grid-basket-info">
                 <span className="video-grid-basket-title">{pinned.name}</span>
-                <span className="video-grid-basket-price">฿{pinned.price.toLocaleString()}</span>
+                <span className="video-grid-basket-price">{formatCurrency(pinned.price, locale)}</span>
               </div>
             </div>
           </div>
         )}
 
-        <Link to="/video" className="video-grid-watch-btn">
-          <Play size={13} fill="currentColor" /> ดูคลิปเต็ม & ช้อปตะกร้าเหลือง
-        </Link>
+        <LocalizedLink to="/video" className="video-grid-watch-btn">
+          <Play size={13} fill="currentColor" /> {t('engagement:video.grid.watchFull')}
+        </LocalizedLink>
       </div>
     </div>
   );

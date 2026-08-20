@@ -1,102 +1,93 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Ticket, Check, Sparkles, Truck, Coins, Store } from 'lucide-react';
+import { fetchApi } from '../utils/api';
+import { formatCurrency, formatDate } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import './VouchersPage.css';
 
-interface Voucher {
+type VoucherType = 'shipping' | 'platform' | 'cashback' | 'store';
+
+interface MockVoucher {
   id: string;
-  type: 'shipping' | 'platform' | 'cashback' | 'store';
+  type: VoucherType;
+  catalogKey: string;
+}
+
+interface DisplayVoucher {
+  id: string;
+  type: VoucherType;
   discount: string;
   minSpend: string;
   expiry: string;
   storeName?: string;
 }
 
-const MOCK_VOUCHERS: Voucher[] = [
-  {
-    id: 'v-ship-1',
-    type: 'shipping',
-    discount: 'ส่งฟรี ฿0',
-    minSpend: 'ขั้นต่ำ ฿0 ทั่วไทย',
-    expiry: 'หมดอายุใน 3 วัน',
-  },
-  {
-    id: 'v-ship-2',
-    type: 'shipping',
-    discount: 'ส่วนลดค่าส่ง ฿40',
-    minSpend: 'ขั้นต่ำ ฿150',
-    expiry: 'หมดอายุสิ้นเดือนนี้',
-  },
-  {
-    id: 'v-plat-1',
-    type: 'platform',
-    discount: 'ลด 15% สูงสุด ฿300',
-    minSpend: 'เมื่อช้อปครบ ฿1,000',
-    expiry: 'ใช้ได้กับสินค้าทุกหมวดหมู่',
-  },
-  {
-    id: 'v-plat-2',
-    type: 'platform',
-    discount: 'ลดทันที ฿100',
-    minSpend: 'เมื่อช้อปครบ ฿600',
-    expiry: 'สำหรับลูกค้าทั่วไป',
-  },
-  {
-    id: 'v-coin-1',
-    type: 'cashback',
-    discount: 'รับเงินคืน 20% Coins',
-    minSpend: 'คืนสูงสุด 200 Coins',
-    expiry: 'ใช้เป็นส่วนลดออเดอร์ถัดไป',
-  },
-  {
-    id: 'v-store-1',
-    type: 'store',
-    discount: 'ลด ฿50 ประจำร้าน',
-    minSpend: 'เมื่อซื้อครบ ฿500',
-    storeName: 'TechPro Official Store',
-    expiry: 'เฉพาะร้าน TechPro',
-  },
-  {
-    id: 'v-store-2',
-    type: 'store',
-    discount: 'ลด 10% ประจำร้าน',
-    minSpend: 'เมื่อซื้อครบ ฿800',
-    storeName: 'Fashionista Studio',
-    expiry: 'เฉพาะร้าน Fashionista',
-  },
+const MOCK_VOUCHERS: MockVoucher[] = [
+  { id: 'v-ship-1', type: 'shipping', catalogKey: 'vShip1' },
+  { id: 'v-ship-2', type: 'shipping', catalogKey: 'vShip2' },
+  { id: 'v-plat-1', type: 'platform', catalogKey: 'vPlat1' },
+  { id: 'v-plat-2', type: 'platform', catalogKey: 'vPlat2' },
+  { id: 'v-coin-1', type: 'cashback', catalogKey: 'vCoin1' },
+  { id: 'v-store-1', type: 'store', catalogKey: 'vStore1', },
+  { id: 'v-store-2', type: 'store', catalogKey: 'vStore2' },
 ];
 
-import { fetchApi } from '../utils/api';
+const MOCK_STORE_NAMES: Record<string, string> = {
+  'v-store-1': 'TechPro Official Store',
+  'v-store-2': 'Fashionista Studio',
+};
+
+const FILTER_IDS = ['all', 'shipping', 'platform', 'cashback', 'store'] as const;
 
 export function VouchersPage() {
-  const [filter, setFilter] = useState<'all' | 'shipping' | 'platform' | 'cashback' | 'store'>('all');
+  const { t, i18n } = useTranslation(['engagement']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+
+  const [filter, setFilter] = useState<(typeof FILTER_IDS)[number]>('all');
   const [claimed, setClaimed] = useState<Record<string, boolean>>({});
-  const [voucherList, setVoucherList] = useState<Voucher[]>(MOCK_VOUCHERS);
+  const [apiVouchers, setApiVouchers] = useState<DisplayVoucher[] | null>(null);
 
   useEffect(() => {
     async function loadVouchersFromDb() {
       try {
         const res = await fetchApi<{ vouchers: any[] }>('/api/vouchers');
         if (res && Array.isArray(res.vouchers) && res.vouchers.length > 0) {
-          const mapped: Voucher[] = res.vouchers.map(v => ({
+          const mapped: DisplayVoucher[] = res.vouchers.map(v => ({
             id: v.id || v.code,
             type: v.discountType === 'free_shipping' ? 'shipping' : v.storeId ? 'store' : 'platform',
-            discount: v.discountType === 'free_shipping' ? 'ส่งฟรี ฿45' : v.discountType === 'percentage' ? `ลด ${v.value}%` : `ลด ฿${v.value}`,
-            minSpend: Number(v.minSpend) > 0 ? `เมื่อช้อปครบ ฿${Number(v.minSpend).toLocaleString()}` : 'ไม่มีขั้นต่ำ',
-            expiry: `หมดอายุ ${new Date(v.expiryDate).toLocaleDateString('th-TH')}`,
+            discount: v.discountType === 'free_shipping'
+              ? t('engagement:vouchers.api.freeShipping', { amount: formatCurrency(45, locale) })
+              : v.discountType === 'percentage'
+                ? t('engagement:vouchers.api.percentOff', { percent: v.value })
+                : t('engagement:vouchers.api.amountOff', { amount: formatCurrency(v.value, locale) }),
+            minSpend: Number(v.minSpend) > 0
+              ? t('engagement:vouchers.api.minSpend', { amount: formatCurrency(Number(v.minSpend), locale) })
+              : t('engagement:vouchers.api.noMinimum'),
+            expiry: t('engagement:vouchers.api.expiresOn', { date: formatDate(v.expiryDate, locale) }),
             storeName: v.store?.name,
           }));
-          setVoucherList(prev => {
-            const apiIds = new Set(mapped.map(m => m.id));
-            const remaining = prev.filter(p => !apiIds.has(p.id));
-            return [...mapped, ...remaining];
-          });
+          setApiVouchers(mapped);
         }
       } catch {
-        // Fallback
+        // Fallback to the mock catalog below
       }
     }
     loadVouchersFromDb();
-  }, []);
+  }, [t, locale]);
+
+  const mockDisplayVouchers: DisplayVoucher[] = MOCK_VOUCHERS.map(v => ({
+    id: v.id,
+    type: v.type,
+    discount: t(`engagement:vouchers.mock.${v.catalogKey}.discount`),
+    minSpend: t(`engagement:vouchers.mock.${v.catalogKey}.minSpend`),
+    expiry: t(`engagement:vouchers.mock.${v.catalogKey}.expiry`),
+    storeName: MOCK_STORE_NAMES[v.id],
+  }));
+
+  const voucherList: DisplayVoucher[] = apiVouchers
+    ? [...apiVouchers, ...mockDisplayVouchers.filter(m => !apiVouchers.some(a => a.id === m.id))]
+    : mockDisplayVouchers;
 
   const filteredVouchers = filter === 'all'
     ? voucherList
@@ -122,14 +113,13 @@ export function VouchersPage() {
     setClaimed(allClaimed);
   }
 
-
   return (
     <main className="vouchers-page">
       <section className="vouchers-hero">
         <div className="container">
-          <h1 className="vouchers-hero__title">🎟️ ศูนย์รวมโค้ดส่วนลด Movemall</h1>
+          <h1 className="vouchers-hero__title">{t('engagement:vouchers.heroTitle')}</h1>
           <p className="vouchers-hero__subtitle">
-            เก็บโค้ดแล้วใช้ได้ตอนชำระเงิน
+            {t('engagement:vouchers.heroSubtitle')}
           </p>
 
           <button
@@ -150,7 +140,7 @@ export function VouchersPage() {
             }}
           >
             <Sparkles size={15} />
-            เก็บโค้ดทั้งหมดในคลิกเดียว
+            {t('engagement:vouchers.claimAll')}
           </button>
         </div>
       </section>
@@ -162,35 +152,35 @@ export function VouchersPage() {
             className={`voucher-chip${filter === 'all' ? ' voucher-chip--active' : ''}`}
             onClick={() => setFilter('all')}
           >
-            ทั้งหมด
+            {t('engagement:vouchers.filters.all')}
           </button>
           <button
             className={`voucher-chip${filter === 'shipping' ? ' voucher-chip--active' : ''}`}
             onClick={() => setFilter('shipping')}
           >
             <Truck size={14} style={{ display: 'inline', marginRight: 4 }} />
-            โค้ดส่งฟรี
+            {t('engagement:vouchers.filters.shipping')}
           </button>
           <button
             className={`voucher-chip${filter === 'platform' ? ' voucher-chip--active' : ''}`}
             onClick={() => setFilter('platform')}
           >
             <Ticket size={14} style={{ display: 'inline', marginRight: 4 }} />
-            โค้ดส่วนลด Movemall
+            {t('engagement:vouchers.filters.platform')}
           </button>
           <button
             className={`voucher-chip${filter === 'cashback' ? ' voucher-chip--active' : ''}`}
             onClick={() => setFilter('cashback')}
           >
             <Coins size={14} style={{ display: 'inline', marginRight: 4 }} />
-            รับเงินคืน Coins
+            {t('engagement:vouchers.filters.cashback')}
           </button>
           <button
             className={`voucher-chip${filter === 'store' ? ' voucher-chip--active' : ''}`}
             onClick={() => setFilter('store')}
           >
             <Store size={14} style={{ display: 'inline', marginRight: 4 }} />
-            โค้ดจากร้านค้า
+            {t('engagement:vouchers.filters.store')}
           </button>
         </div>
 
@@ -203,7 +193,7 @@ export function VouchersPage() {
             >
               <div className="voucher-ticket__left">
                 <span className="voucher-ticket__type">
-                  {v.storeName ? v.storeName : v.type === 'shipping' ? '🚚 โค้ดส่งฟรี' : v.type === 'cashback' ? '💰 เงินคืน Coins' : '🎟️ คูปองส่วนลด'}
+                  {v.storeName ? v.storeName : t(`engagement:vouchers.typeLabels.${v.type === 'store' ? 'platform' : v.type}`)}
                 </span>
                 <div className="voucher-ticket__discount">{v.discount}</div>
                 <div className="voucher-ticket__min">{v.minSpend}</div>
@@ -218,10 +208,10 @@ export function VouchersPage() {
                 {claimed[v.id] ? (
                   <>
                     <Check size={13} style={{ display: 'inline', marginRight: 2 }} />
-                    เก็บแล้ว
+                    {t('engagement:vouchers.claimed')}
                   </>
                 ) : (
-                  'เก็บโค้ด'
+                  t('engagement:vouchers.claim')
                 )}
               </button>
             </div>

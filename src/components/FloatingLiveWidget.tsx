@@ -2,17 +2,23 @@
 
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Play } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { X } from 'lucide-react';
+import { useLocalizedPath } from '../i18n/LocalizedLink';
+import { stripLocale } from '../i18n/locales';
 import './FloatingLiveWidget.css';
 
 export function FloatingLiveWidget() {
+  const { t } = useTranslation(['engagement']);
   const location = useLocation();
   const navigate = useNavigate();
+  const localizePath = useLocalizedPath();
   const [isOpen, setIsOpen] = useState(true);
 
   // Do not show widget on /live, /video, /creator, /checkout, /cart, or /order pages
   const hiddenRoutes = ['/live', '/video', '/creator', '/checkout', '/cart', '/order'];
-  const isHiddenRoute = hiddenRoutes.some(route => location.pathname.startsWith(route));
+  const routePathname = stripLocale(location.pathname);
+  const isHiddenRoute = hiddenRoutes.some(route => routePathname.startsWith(route));
 
   if (isHiddenRoute || !isOpen) {
     return null;
@@ -21,8 +27,8 @@ export function FloatingLiveWidget() {
   return (
     <div
       className="floating-live-widget"
-      onClick={() => navigate('/live')}
-      title="คลิกเพื่อเข้าชมไลฟ์สด"
+      onClick={() => navigate(localizePath('/live'))}
+      title={t('engagement:live.floatingWidget.clickToWatch')}
     >
       <div className="floating-live-video-box">
         <video
@@ -45,7 +51,7 @@ export function FloatingLiveWidget() {
             e.stopPropagation();
             setIsOpen(false);
           }}
-          aria-label="ปิดหน้าต่างไลฟ์"
+          aria-label={t('engagement:live.floatingWidget.close')}
         >
           <X size={12} />
         </button>
@@ -53,7 +59,7 @@ export function FloatingLiveWidget() {
 
       <div className="floating-live-footer">
         <span className="floating-live-title">TechPro Live 50%</span>
-        <span className="floating-live-cta">ดูสด →</span>
+        <span className="floating-live-cta">{t('engagement:live.floatingWidget.watchNow')}</span>
       </div>
     </div>
   );

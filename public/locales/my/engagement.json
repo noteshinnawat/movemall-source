@@ -70,5 +70,284 @@
     "loading": "အသိပေးချက်များ ဖွင့်နေသည်...",
     "emptyTitle": "အသိပေးချက် မရှိသေးပါ",
     "emptySubtitle": "အသစ်များ ဤနေရာတွင် ပေါ်လာမည်"
+  },
+  "live": {
+    "floatingWidget": {
+      "clickToWatch": "တိုက်ရိုက်ထုတ်လွှင့်မှု ကြည့်ရန် နှိပ်ပါ",
+      "close": "တိုက်ရိုက် ဝင်းဒိုး ပိတ်ရန်",
+      "watchNow": "တိုက်ရိုက်ကြည့်ရန် →"
+    },
+    "ticker": {
+      "soldTitle": "ပစ္စည်း ရောင်းချပြီး",
+      "secondsAgo": "စက္ကန့် {{seconds, number}} အလွန်က"
+    },
+    "stream": {
+      "tabFollowing": "စောင့်ကြည့်နေသော",
+      "tabForYou": "သင့်အတွက် (LIVE)",
+      "exitFullscreen": "မျက်နှာပြင်အပြည့် ပိတ်ရန်",
+      "enterFullscreen": "မျက်နှာပြင်အပြည့် ပြရန် (ဘားများ ဖျောက်ရန်)",
+      "myCart": "ကျွန်ုပ်၏ ခြင်းတောင်း",
+      "unmute": "အသံဖွင့်ရန်",
+      "mute": "အသံပိတ်ရန်",
+      "backHome": "ပင်မစာမျက်နှာသို့",
+      "discountPct": "{{percent, number}}% လျှော့",
+      "liveDealTag": "တိုက်ရိုက် ဒီးလ်",
+      "buyNow": "⚡ ချက်ချင်း မှာယူရန်",
+      "freeShipping": "အခမဲ့ ပို့ဆောင်ခ",
+      "viewAllProductsTitle": "ဤတိုက်ရိုက်ထုတ်လွှင့်မှုရှိ ကုန်ပစ္စည်းအားလုံး ကြည့်ရန်",
+      "commentPlaceholder": "ရိုက်ရန်...",
+      "sendHeart": "နှလုံးသား / နှင်းဆီ ပို့ရန်",
+      "sendGift": "လက်ဆောင် ပို့ရန်",
+      "shareTitle": "ဤတိုက်ရိုက်ထုတ်လွှင့်မှု မျှဝေရန်",
+      "shareToast": "{{channel}} ၏ တိုက်ရိုက်ထုတ်လွှင့်မှုကို မျှဝေပြီးပါပြီ!",
+      "commentsHeader": "မှတ်ချက်များ ({{count, number}})",
+      "commentInputPlaceholder": "မှတ်ချက် ထည့်ရန်...",
+      "basketHeader": "ဤကလစ်ရှိ ကုန်ပစ္စည်းများ ({{channel}})",
+      "pinnedTag": "🔥 ဤကလစ်တွင် ပင်ထိုးထားသည်",
+      "addToCart": "ခြင်းတောင်းထဲ ထည့်ရန်",
+      "prevClip": "ယခင်ကလစ် (Arrow Up)",
+      "nextClip": "နောက်ကလစ် (Arrow Down)",
+      "demoProductName": "တိုက်ရိုက် အထူးကမ်းလှမ်းချက်",
+      "demoProductDescription": "ဤတိုက်ရိုက်ထုတ်လွှင့်မှုအတွင်းသာ ရရှိနိုင်သော အထူးလျှော့စျေး",
+      "viewersSuffix": "{{count}} ကြည့်နေသည်",
+      "myCommentUser": "သင် (ကျွန်ုပ်)",
+      "myCommentTime": "ခုလေးတင်",
+      "myCommentBadge": "အသုံးပြုသူ",
+      "myFloatingChatUser": "ကျွန်ုပ်"
+    }
+  },
+  "video": {
+    "grid": {
+      "shortVideoTag": "ဗီဒီယိုတို",
+      "basketPill": "🟡 အဝါရောင် ခြင်းတောင်း",
+      "watchFull": "ဗီဒီယိုအပြည့် ကြည့်ပြီး အဝါရောင်ခြင်းတောင်းမှ ဝယ်ရန်"
+    },
+    "basket": {
+      "pill": "🟡 အဝါရောင် ခြင်းတောင်း",
+      "heading": "ဤကလစ်ရှိ ကုန်ပစ္စည်းများ ({{count, number}})",
+      "close": "ပိတ်ရန်",
+      "tabLabel": "#{{index, number}} {{name}}...",
+      "sold": "{{count, number}}+ ရောင်းပြီး",
+      "exclusiveDeal": "⚡ ကလစ်အထူး ကမ်းလှမ်းချက်",
+      "perkAuthentic": "100% ပစ္စည်းအစစ် အာမခံ",
+      "perkShipping": "🚚 အနည်းဆုံးကန့်သတ်ချက်မရှိ အခမဲ့ပို့ဆောင်ခ",
+      "perkPayLater": "💳 0% PayLater အရစ်ကျ",
+      "qtyLabel": "အရေအတွက်",
+      "viewDetail": "အသေးစိတ် အပြည့်အစုံ ကြည့်ရန်",
+      "added": "ခြင်းတောင်းထဲ ထည့်ပြီး",
+      "addToCart": "ခြင်းတောင်းထဲ ထည့်ရန်",
+      "buyNow": "ချက်ချင်း မှာယူရန်",
+      "demoDescription": "Movemall Short Video ကလစ်မှ တိုက်ရိုက် မှာယူသော ပစ္စည်းအစစ်"
+    },
+    "feed": {
+      "toastTimeAgo": "စက္ကန့် {{seconds, number}} အလွန်က",
+      "myCommentUser": "သင် (Movemall အသုံးပြုသူ)",
+      "myCommentTime": "ခုလေးတင်",
+      "myCommentBadge": "တိုက်ရိုက်ကြည့်သူ",
+      "linkCopied": "ဗီဒီယိုကလစ် လင့်ခ်ကို ကူးယူပြီးပါပြီ!",
+      "tabForYou": "သင့်အတွက်",
+      "tabTrending": "လူကြိုက်များသော",
+      "tabMall": "Mall စစ်မှန်ကြောင်း",
+      "exitFullscreen": "မျက်နှာပြင်အပြည့် ပိတ်ရန်",
+      "enterFullscreen": "မျက်နှာပြင်အပြည့် ပြရန် (ဘားများ ဖျောက်ရန်)",
+      "searchProducts": "ကုန်ပစ္စည်း ရှာရန်",
+      "createClip": "ဗီဒီယိုကလစ် ဖန်တီးရန်",
+      "createClipShort": "ဖန်တီးရန်",
+      "categories": {
+        "all": "🔥 အားလုံး",
+        "electronics": "🎧 အီလက်ထရွန်နစ် & ကိရိယာများ",
+        "fashion": "👗 ဖက်ရှင်",
+        "beauty": "💄 အလှအပ & အသားအရေ",
+        "home": "🏠 အိမ်သုံးပစ္စည်းများ",
+        "sports": "🏃 အားကစား & ကျန်းမာရေး",
+        "food": "🍔 အစားအစာ & မုန့်",
+        "toys": "🧱 အရုပ် & မော်ဒယ်",
+        "baby": "👶 မိခင်နှင့်ကလေး"
+      },
+      "prevClip": "ယခင်ကလစ် (အပေါ်သို့ လှိမ့်ပါ)",
+      "nextClip": "နောက်ကလစ် (အောက်သို့ လှိမ့်ပါ)",
+      "unmute": "အသံဖွင့်ရန်",
+      "mute": "အသံပိတ်ရန်",
+      "following": "စောင့်ကြည့်နေသည်",
+      "follow": "စောင့်ကြည့်ရန်",
+      "justPurchased": "တစ်စုံတစ်ယောက် ဤပစ္စည်းကို ခုလေးတင် ဝယ်လိုက်သည် ({{timeAgo}})",
+      "basketPill": "🟡 အဝါရောင် ခြင်းတောင်း #{{id}}",
+      "viewProduct": "⚡ ကုန်ပစ္စည်း ကြည့်ရန်",
+      "buyNow": "ချက်ချင်း မှာယူရန်",
+      "commentsHeader": "မှတ်ချက်များ ({{count, number}})",
+      "commentPlaceholder": "ဤနေရာတွင် မှတ်ချက် ရေးပါ..."
+    }
+  },
+  "games": {
+    "heroTitle": "🎮 Movemall ဂိမ်းများ & ဆုလာဘ်စင်တာ",
+    "heroSubtitle": "ဂိမ်းများ ကစားပြီး၊ ဝင်ရောက်မှတ်တမ်းတင်ကာ နေ့စဉ် Coins ရယူပါ",
+    "myCoins": "ကျွန်ုပ်၏ Coins: <b>{{coins}}</b> · {{amount}}",
+    "checkin": {
+      "title": "ရက် 7 ရက် ဝင်ရောက်မှတ်တမ်းတင်ပြီး Coins ရယူပါ",
+      "goal": "ရက် 7 ရက် ပြည့်ပါက Coins 100 ထပ်ရမည်",
+      "dayLabel": "{{day, number}} ရက်မြောက်",
+      "claimed": "✓ ရရှိပြီး",
+      "today": "ယနေ့",
+      "pending": "စောင့်ဆိုင်းဆဲ",
+      "buttonClaimed": "✓ ဝင်ရောက်မှတ်တမ်းတင်ပြီး — မနက်ဖြန် ပြန်လာပါ",
+      "buttonClaim": "🎁 ဝင်ရောက်ပြီး Coins 30 ရယူရန်",
+      "toast": "ဝင်ရောက်မှတ်တမ်းတင်ခြင်းဖြင့် Coins 30 ရရှိပါသည်"
+    },
+    "wheel": {
+      "title": "ကံစမ်းဝိုင်း (Lucky Spin Wheel)",
+      "subtitle": "တစ်နေ့လျှင် တစ်ကြိမ် အခမဲ့ လှည့်ပြီး Coins 100 အထိ ရယူပါ",
+      "won": "🎉 သင်ရရှိသည်: {{prize}}!",
+      "spinning": "လှည့်နေသည်...",
+      "spin": "ယခု လှည့်ရန်!",
+      "toast": "🎉 ဂုဏ်ယူပါသည်! သင်ရရှိသော ဆု \"{{prize}}\"",
+      "prizes": {
+        "discountCode": "{{amount}} လျှော့ကုဒ်",
+        "coins": "Coins {{amount, number}}",
+        "freeShipping": "အခမဲ့ပို့ဆောင်ခ ကုဒ်",
+        "percentOff": "{{amount, number}}% လျှော့"
+      }
+    },
+    "cards": {
+      "title": "လျှို့ဝှက်ကတ် (Mystery Cards)",
+      "subtitle": "ကတ် 3 ခုမှ 1 ခုကို ရွေးနှိပ်ပြီး လျှို့ဝှက်ဆု ဖွင့်ကြည့်ပါ",
+      "cardLabel": "ကတ် {{index, number}}",
+      "tapToOpen": "ဖွင့်ရန် နှိပ်ပါ",
+      "toast": "🎴 ကတ်ဖွင့်ပြီးပါပြီ! သင်ရရှိသည် {{reward}}",
+      "rewards": [
+        "🎟️ ฿80 လျှော့",
+        "💰 Coins 80",
+        "🚚 အခမဲ့ပို့ဆောင်ခ ကုဒ်"
+      ],
+      "footnote": "1 Coin = ငွေပေးချေချိန် {{amount}} လျှော့"
+    }
+  },
+  "flashSale": {
+    "badge": "MOVEMALL FLASH DEALS",
+    "title": "⚡ Flash Sale ကုန်ပစ္စည်း ရှင်းလင်းရောင်းချမှု — 70% အထိ လျှော့",
+    "subtitle": "ကန့်သတ်ကာလအတွက် အထူးဈေးနှုန်း",
+    "timerLabel": "ဤအပတ်စဉ် ကုန်ဆုံးရန်",
+    "unitHours": "နာရီ",
+    "unitMinutes": "မိနစ်",
+    "unitSeconds": "စက္ကန့်",
+    "liveTraffic": "ဝယ်သူ {{count, number}} ယောက် ဤဒီးလ်ကို ဝယ်ယူရန် စောင့်နေသည်",
+    "slots": {
+      "s0": {
+        "label": "ယခု လျှော့စျေးရောင်းချနေသည် 🔴",
+        "desc": "02:45:18 တွင် ကုန်ဆုံးမည်"
+      },
+      "s1": {
+        "label": "နောက်အပတ်စဉ် ⏰",
+        "desc": "18:00 တွင် စတင်မည်"
+      },
+      "s2": {
+        "label": "ညနေခင်း ဒီးလ်ပူများ 🌙",
+        "desc": "21:00 တွင် စတင်မည်"
+      },
+      "s3": {
+        "label": "Midnight Sale ⚡",
+        "desc": "ယနေ့ည သန်းခေါင်ယံ"
+      }
+    },
+    "vouchersTitle": "🎟️ ဤ Flash Sale အပတ်စဉ်အတွက် လျှို့ဝှက် ကူပွန်များ",
+    "vouchers": {
+      "fv1": {
+        "discount": "฿50 လျှော့",
+        "minSpend": "အနည်းဆုံး ฿300",
+        "tag": "⚡ လျင်မြန်ကုဒ်"
+      },
+      "fv2": {
+        "discount": "15% လျှော့",
+        "minSpend": "အနည်းဆုံး ฿800",
+        "tag": "🔥 လူကြိုက်အများဆုံး"
+      },
+      "fv3": {
+        "discount": "အခမဲ့ ပို့ဆောင်ခ",
+        "minSpend": "အနည်းဆုံးကန့်သတ်ချက် မရှိ",
+        "tag": "🚚 အခမဲ့ပို့ဆောင်ခ"
+      }
+    },
+    "claimed": "ရယူပြီး",
+    "claim": "ကုဒ် ရယူရန်",
+    "categories": {
+      "all": "🔥 အားလုံး",
+      "electronics": "🎧 အီလက်ထရွန်နစ် & ကိရိယာများ",
+      "fashion": "👗 ဖက်ရှင်",
+      "beauty": "💄 အလှအပ & အသားအရေ",
+      "home": "🏠 အိမ်သုံးပစ္စည်းများ"
+    },
+    "bestPriceTag": "👑 ရက် 30 အတွင်း အသက်ဆုံးဈေး",
+    "soldPct": "🔥 {{percent, number}}% ရောင်းပြီး",
+    "stockLeft": "(ကျန် {{count, number}} ခု)",
+    "opensAt": "{{time}} တွင် ဖွင့်မည်",
+    "buyNow": "အမြန် မှာယူရန်",
+    "reminded": "✓ သတိပေးချက် ထားပြီး",
+    "remindMe": "🔔 ကျွန်ုပ်ကို သတိပေးပါ",
+    "reminderCancelled": "\"{{product}}\" ၏ သတိပေးချက်ကို ပယ်ဖျက်ပြီး",
+    "reminderSet": "🔔 သတိပေးချက် ထားပြီးပါပြီ! ဤ Flash Sale အပတ်စဉ် မစခင် အသိပေးပါမည်",
+    "voucherClaimedToast": "ကုဒ် {{code}} ရယူပြီး"
+  },
+  "vouchers": {
+    "heroTitle": "🎟️ Movemall ကူပွန်စင်တာ",
+    "heroSubtitle": "ကုဒ်ရယူပြီး ငွေပေးချေချိန်တွင် သုံးပါ",
+    "claimAll": "တစ်ချက်နှိပ်ပြီး ကုဒ်အားလုံး ရယူရန်",
+    "filters": {
+      "all": "အားလုံး",
+      "shipping": "အခမဲ့ပို့ဆောင်ခ ကုဒ်",
+      "platform": "Movemall လျှော့စျေးကုဒ်",
+      "cashback": "Coins ငွေပြန်အမ်း",
+      "store": "ဆိုင်ကုဒ်"
+    },
+    "typeLabels": {
+      "shipping": "🚚 အခမဲ့ပို့ဆောင်ခ ကုဒ်",
+      "cashback": "💰 Coins ငွေပြန်အမ်း",
+      "platform": "🎟️ လျှော့စျေး ကူပွန်"
+    },
+    "claimed": "ရယူပြီး",
+    "claim": "ကုဒ် ရယူရန်",
+    "mock": {
+      "vShip1": {
+        "discount": "အခမဲ့ ပို့ဆောင်ခ ฿0",
+        "minSpend": "အနည်းဆုံးကန့်သတ်ချက်မရှိ တစ်နိုင်ငံလုံး",
+        "expiry": "ရက် 3 ရက်အတွင်း သက်တမ်းကုန်"
+      },
+      "vShip2": {
+        "discount": "ပို့ဆောင်ခ ฿40 လျှော့",
+        "minSpend": "အနည်းဆုံး ฿150",
+        "expiry": "ဤလကုန်တွင် သက်တမ်းကုန်"
+      },
+      "vPlat1": {
+        "discount": "15% လျှော့ (အများဆုံး ฿300)",
+        "minSpend": "฿1,000 အထက် မှာယူပါက",
+        "expiry": "အမျိုးအစားအားလုံးတွင် သုံးနိုင်သည်"
+      },
+      "vPlat2": {
+        "discount": "ချက်ချင်း ฿100 လျှော့",
+        "minSpend": "฿600 အထက် မှာယူပါက",
+        "expiry": "ဖောက်သည်အားလုံးအတွက်"
+      },
+      "vCoin1": {
+        "discount": "Coins 20% ငွေပြန်အမ်း",
+        "minSpend": "Coins 200 အထိ ပြန်ရ",
+        "expiry": "နောက်မှာယူမှု လျှော့စျေးအဖြစ် သုံးနိုင်သည်"
+      },
+      "vStore1": {
+        "discount": "ဤဆိုင်တွင် ฿50 လျှော့",
+        "minSpend": "฿500 အထက် ဝယ်ပါက",
+        "expiry": "TechPro ဆိုင်တွင်သာ"
+      },
+      "vStore2": {
+        "discount": "ဤဆိုင်တွင် 10% လျှော့",
+        "minSpend": "฿800 အထက် ဝယ်ပါက",
+        "expiry": "Fashionista ဆိုင်တွင်သာ"
+      }
+    },
+    "api": {
+      "freeShipping": "အခမဲ့ ပို့ဆောင်ခ {{amount}}",
+      "percentOff": "{{percent, number}}% လျှော့",
+      "amountOff": "{{amount}} လျှော့",
+      "minSpend": "{{amount}} အထက် မှာယူပါက",
+      "noMinimum": "အနည်းဆုံးကန့်သတ်ချက် မရှိ",
+      "expiresOn": "{{date}} တွင် သက်တမ်းကုန်"
+    }
   }
 }
