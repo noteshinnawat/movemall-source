@@ -7,6 +7,7 @@ import { ShieldCheck, AlertCircle, ArrowLeft, RefreshCw } from 'lucide-react';
 import { fetchApi } from '../utils/api';
 import { getLineCallbackUrl } from '../utils/lineAuth';
 import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
+import { errorTranslationKey } from '../i18n/errorMessages';
 
 export function LineCallbackPage() {
   const { t } = useTranslation(['auth', 'common']);
@@ -90,7 +91,8 @@ export function LineCallbackPage() {
       } catch (err: any) {
         console.error('LINE OAuth exchange error:', err);
         setStatus('error');
-        setErrorMessage(err?.message || t('auth:oauth.callback.exchangeFailed'));
+        const key = errorTranslationKey(err?.code);
+        setErrorMessage(key === 'errors.generic' ? t('auth:oauth.callback.exchangeFailed') : t(`common:${key}`));
       }
     }
 

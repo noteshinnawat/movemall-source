@@ -54,7 +54,7 @@ router.get('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 
@@ -91,7 +91,7 @@ router.get('/unread-count', authenticateJWT, async (req: AuthRequest, res: Respo
   try {
     const userId = req.user?.userId;
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 
@@ -143,7 +143,7 @@ router.patch('/read-all', authenticateJWT, async (req: AuthRequest, res: Respons
   try {
     const userId = req.user?.userId;
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 

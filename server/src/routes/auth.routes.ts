@@ -98,7 +98,7 @@ router.post('/verify-otp', async (req: AuthRequest, res: Response) => {
 
     const verifyResult = await ThaiBulkSmsService.verifyOtp(target, otp);
     if (!verifyResult.success) {
-      res.status(400).json({ error: verifyResult.message });
+      res.status(400).json({ error: verifyResult.message, code: verifyResult.code || 'OTP_INVALID' });
       return;
     }
 
@@ -241,13 +241,13 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
     // = ใครก็ยึดสิทธิ์แอดมินได้ จึงถูกถอดออก ให้ตั้งแอดมินผ่าน seed script เท่านั้น
 
     if (!user) {
-      res.status(401).json({ error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
+      res.status(401).json({ error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', code: 'AUTH_INVALID_CREDENTIALS' });
       return;
     }
 
     const isValidPassword = await bcrypt.compare(password, user.passwordHash);
     if (!isValidPassword) {
-      res.status(401).json({ error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
+      res.status(401).json({ error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', code: 'AUTH_INVALID_CREDENTIALS' });
       return;
     }
 
@@ -291,7 +291,7 @@ router.post('/login-otp', async (req: AuthRequest, res: Response) => {
     if (!isEmail) {
       const verifyResult = await ThaiBulkSmsService.verifyOtp(target, otp);
       if (!verifyResult.success) {
-        res.status(400).json({ error: verifyResult.message });
+        res.status(400).json({ error: verifyResult.message, code: verifyResult.code || 'OTP_INVALID' });
         return;
       }
     }
@@ -737,7 +737,7 @@ router.post('/line', async (req: AuthRequest, res: Response) => {
 router.get('/me', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user?.userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 
@@ -756,7 +756,7 @@ router.get('/me', authenticateJWT, async (req: AuthRequest, res: Response) => {
     });
 
     if (!user) {
-      res.status(404).json({ error: 'User not found' });
+      res.status(404).json({ error: 'User not found', code: 'AUTH_REQUIRED' });
       return;
     }
 

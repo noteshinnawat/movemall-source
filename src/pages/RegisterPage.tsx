@@ -30,6 +30,7 @@ import { getTurnstileToken } from '../utils/turnstile';
 import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
 import { formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
+import { errorTranslationKey } from '../i18n/errorMessages';
 
 interface RegisterPageProps {
   onRegisterSuccess?: (name: string, role: 'buyer' | 'seller') => void;
@@ -208,8 +209,10 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
           body: JSON.stringify({ target: targetValue.trim(), otp: enteredOtp }),
         });
       } catch (verifyErr: any) {
+        console.warn('Register OTP verification failed:', verifyErr);
         if (enteredOtp !== '123456' && enteredOtp !== demoOtp) {
-          setErrorMsg(verifyErr?.message || t('auth:validation.otpInvalid'));
+          const key = errorTranslationKey(verifyErr?.code);
+          setErrorMsg(key === 'errors.generic' ? t('auth:validation.otpInvalid') : t(`common:${key}`));
           setLoading(false);
           return;
         }

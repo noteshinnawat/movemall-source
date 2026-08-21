@@ -37,7 +37,7 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 
@@ -201,7 +201,9 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
     });
   } catch (error) {
     console.error('Create Order Error:', error);
-    res.status(400).json({ error: (error as Error).message || 'Failed to create order' });
+    const message = (error as Error).message || 'Failed to create order';
+    const code = /out of stock/i.test(message) ? 'ORDER_OUT_OF_STOCK' : 'ORDER_FAILED';
+    res.status(400).json({ error: message, code });
   }
 });
 
@@ -210,7 +212,7 @@ router.get('/my-orders', authenticateJWT, async (req: AuthRequest, res: Response
   try {
     const userId = req.user?.userId;
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 

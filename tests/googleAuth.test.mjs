@@ -58,7 +58,7 @@ test('rejects when the Google popup closes before returning a token', async () =
   const result = await settlementOf(promptGoogleAuth(CLIENT_ID));
 
   assert.equal(result.status, 'rejected');
-  assert.match(result.error.message, /ถูกปิดหน้าต่าง/);
+  assert.equal(result.error.code, 'GOOGLE_POPUP_CLOSED');
 });
 
 test('rejects when Google returns an OAuth error without an access token', async () => {
@@ -72,5 +72,5 @@ test('rejects when Google returns an OAuth error without an access token', async
   const result = await settlementOf(promptGoogleAuth(CLIENT_ID));
 
   assert.equal(result.status, 'rejected');
-  assert.match(result.error.message, /Access Token/);
+  assert.equal(result.error.code, 'GOOGLE_AUTH_FAILED');
 });

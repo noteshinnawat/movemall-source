@@ -180,7 +180,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     });
 
     if (!product) {
-      res.status(404).json({ error: 'Product not found' });
+      res.status(404).json({ error: 'Product not found', code: 'PRODUCT_NOT_FOUND' });
       return;
     }
 

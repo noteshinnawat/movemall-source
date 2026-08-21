@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { User, Store, KeyRound, Phone, ArrowRight, Sparkles, AlertCircle } from 'lucide-react';
 import { fetchApi } from '../utils/api';
 import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
+import { errorTranslationKey } from '../i18n/errorMessages';
 import { formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import { promptGoogleAuth } from '../utils/googleAuth';
@@ -201,7 +202,9 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       onLoginSuccess?.(res.user?.name || t('auth:login.otpUserFallback', { digits: otpPhone.slice(-4) }), role);
       navigate(getRedirectTarget(res.user?.role));
     } catch (err: any) {
-      setErrorMsg(err?.message || t('auth:validation.otpInvalid'));
+      console.warn('OTP login verification failed:', err);
+      const key = errorTranslationKey(err?.code);
+      setErrorMsg(key === 'errors.generic' ? t('auth:validation.otpInvalid') : t(`common:${key}`));
     } finally {
       setLoading(false);
     }

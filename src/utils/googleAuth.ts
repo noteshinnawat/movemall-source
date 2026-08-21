@@ -1,5 +1,7 @@
 // Google Authentication Utility for Movemall
 
+import { ApiError } from './apiError.ts';
+
 declare global {
   interface Window {
     google?: {
@@ -139,12 +141,12 @@ export async function promptGoogleAuth(clientId?: string): Promise<GoogleAuthRes
                 resolve({ accessToken: tokenResponse.access_token });
               } else {
                 console.warn('Google OAuth Token response error:', tokenResponse);
-                reject(new Error('ไม่สามารถรับ Access Token จาก Google ได้'));
+                reject(new ApiError('GOOGLE_AUTH_FAILED', 'ไม่สามารถรับ Access Token จาก Google ได้'));
               }
             },
             error_callback: (err) => {
               console.warn('Google OAuth Prompt Error:', err);
-              reject(new Error('การเข้าสู่ระบบด้วย Google ขัดข้อง หรือถูกปิดหน้าต่าง'));
+              reject(new ApiError('GOOGLE_POPUP_CLOSED', 'การเข้าสู่ระบบด้วย Google ขัดข้อง หรือถูกปิดหน้าต่าง'));
             },
           });
 
