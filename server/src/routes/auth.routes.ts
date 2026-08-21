@@ -98,7 +98,7 @@ router.post('/verify-otp', async (req: AuthRequest, res: Response) => {
 
     const verifyResult = await ThaiBulkSmsService.verifyOtp(target, otp);
     if (!verifyResult.success) {
-      res.status(400).json({ error: verifyResult.message, code: verifyResult.code || 'OTP_INVALID' });
+      res.status(400).json({ error: verifyResult.message, code: verifyResult.code });
       return;
     }
 
@@ -291,7 +291,7 @@ router.post('/login-otp', async (req: AuthRequest, res: Response) => {
     if (!isEmail) {
       const verifyResult = await ThaiBulkSmsService.verifyOtp(target, otp);
       if (!verifyResult.success) {
-        res.status(400).json({ error: verifyResult.message, code: verifyResult.code || 'OTP_INVALID' });
+        res.status(400).json({ error: verifyResult.message, code: verifyResult.code });
         return;
       }
     }

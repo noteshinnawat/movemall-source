@@ -178,7 +178,10 @@ export class ThaiBulkSmsService {
         }
       } catch (err: any) {
         console.error('[ThaiBulkSMS Smart OTP] Verify API Error:', err);
-        return { success: false, message: 'เกิดข้อผิดพลาดในการตรวจสอบรหัส OTP', code: 'OTP_INVALID' };
+        // Transport/provider failure, not necessarily a wrong code — leave
+        // `code` unset so the buyer sees a generic retry message instead of
+        // a false "that OTP is incorrect" after a transient outage.
+        return { success: false, message: 'เกิดข้อผิดพลาดในการตรวจสอบรหัส OTP' };
       }
     }
 

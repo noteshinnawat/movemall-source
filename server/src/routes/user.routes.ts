@@ -244,7 +244,7 @@ router.post('/verify-phone/verify', authenticateJWT, async (req: AuthRequest, re
     const cleanPhone = ThaiBulkSmsService.sanitizePhone(phone);
     const verifyResult = await ThaiBulkSmsService.verifyOtp(cleanPhone, String(otp));
     if (!verifyResult.success) {
-      res.status(400).json({ error: verifyResult.message, code: verifyResult.code || 'OTP_INVALID' });
+      res.status(400).json({ error: verifyResult.message, code: verifyResult.code });
       return;
     }
 
