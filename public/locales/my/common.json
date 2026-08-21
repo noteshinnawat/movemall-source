@@ -87,7 +87,13 @@
     "wishlistAdded": "ကုန်ပစ္စည်း သိမ်းပြီး",
     "wishlistRemoved": "စိတ်ကြိုက်စာရင်းမှ ဖယ်ရှားပြီး",
     "cartAdded_one": "ခြင်းတောင်းထဲ ထည့်ပြီး · {{count, number}} ခု",
-    "cartAdded_other": "ခြင်းတောင်းထဲ ထည့်ပြီး · {{count, number}} ခု"
+    "cartAdded_other": "ခြင်းတောင်းထဲ ထည့်ပြီး · {{count, number}} ခု",
+    "welcomeBack": "ကြိုဆိုပါတယ် {{name}}",
+    "registerSuccess": "စာရင်းသွင်းအောင်မြင်ပြီး Coins ရရှိပါပြီ",
+    "videoPublished": "ဗီဒီယို ထုတ်ဝေပြီး",
+    "productListed": "ကုန်ပစ္စည်း ရောင်းချထားပြီး",
+    "productRemoved": "ဆိုင်မှ ကုန်ပစ္စည်း ဖယ်ရှားပြီး",
+    "productUpdated": "ကုန်ပစ္စည်း အပ်ဒိတ်လုပ်ပြီး"
   },
   "accessibility": {
     "backToTop": "စာမျက်နှာထိပ်သို့ ရွှေ့ရန်",

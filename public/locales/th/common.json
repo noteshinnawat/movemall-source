@@ -87,7 +87,13 @@
     "wishlistAdded": "บันทึกสินค้าแล้ว",
     "wishlistRemoved": "นำออกจากรายการโปรดแล้ว",
     "cartAdded_one": "เพิ่มลงตะกร้าแล้ว · {{count, number}} ชิ้น",
-    "cartAdded_other": "เพิ่มลงตะกร้าแล้ว · {{count, number}} ชิ้น"
+    "cartAdded_other": "เพิ่มลงตะกร้าแล้ว · {{count, number}} ชิ้น",
+    "welcomeBack": "ยินดีต้อนรับ {{name}}",
+    "registerSuccess": "สมัครสำเร็จ รับ Coins แล้ว",
+    "videoPublished": "เผยแพร่วิดีโอแล้ว",
+    "productListed": "ลงขายสินค้าแล้ว",
+    "productRemoved": "ลบสินค้าออกจากร้านค้าแล้ว",
+    "productUpdated": "อัปเดตสินค้าแล้ว"
   },
   "accessibility": {
     "backToTop": "เลื่อนขึ้นด้านบนสุด",

@@ -87,7 +87,13 @@
     "wishlistAdded": "Product saved",
     "wishlistRemoved": "Removed from your wishlist",
     "cartAdded_one": "Added to cart · {{count, number}} piece",
-    "cartAdded_other": "Added to cart · {{count, number}} pieces"
+    "cartAdded_other": "Added to cart · {{count, number}} pieces",
+    "welcomeBack": "Welcome, {{name}}",
+    "registerSuccess": "Registered successfully — Coins added",
+    "videoPublished": "Video published",
+    "productListed": "Product listed",
+    "productRemoved": "Product removed from your store",
+    "productUpdated": "Product updated"
   },
   "accessibility": {
     "backToTop": "Scroll to the top of the page",

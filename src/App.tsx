@@ -163,7 +163,7 @@ function AppLayout({
           <Suspense fallback={
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: 12 }}>
               <div style={{ width: 36, height: 36, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>กำลังโหลด...</span>
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{t('common:loading')}</span>
             </div>
           }>
         <Routes>
@@ -317,7 +317,7 @@ function AppLayout({
             element={
               <LoginPage
                 onLoginSuccess={name => {
-                  addToast(`ยินดีต้อนรับ ${name}`, 'success', '👋');
+                  addToast(t('common:toast.welcomeBack', { name }), 'success', '👋');
                 }}
               />
             }
@@ -329,7 +329,7 @@ function AppLayout({
             element={
               <RegisterPage
                 onRegisterSuccess={() => {
-                  addToast('สมัครสำเร็จ รับ Coins แล้ว', 'success', '🎁');
+                  addToast(t('common:toast.registerSuccess'), 'success', '🎁');
                 }}
               />
             }
@@ -536,7 +536,7 @@ function App() {
 
   function handlePublishClip(newClip: VideoClip) {
     setCustomClips(prev => [newClip, ...prev]);
-    addToast('เผยแพร่วิดีโอแล้ว', 'success', '🎬');
+    addToast(t('common:toast.videoPublished'), 'success', '🎬');
   }
 
   async function handleAddProduct(newProduct: Product) {
@@ -568,7 +568,7 @@ function App() {
     } catch (err) {
       console.warn('[Movemall API] Could not persist product to DB API, saved locally:', err);
     }
-    addToast('ลงขายสินค้าแล้ว', 'success', '📦');
+    addToast(t('common:toast.productListed'), 'success', '📦');
   }
 
   async function handleDeleteProduct(id: string) {
@@ -589,7 +589,7 @@ function App() {
     } catch (err) {
       console.warn('[Movemall API] Could not delete product from DB API:', err);
     }
-    addToast('ลบสินค้าออกจากร้านค้าแล้ว', 'info', '🗑️');
+    addToast(t('common:toast.productRemoved'), 'info', '🗑️');
   }
 
   async function handleUpdateProduct(updatedProduct: Product) {
@@ -619,7 +619,7 @@ function App() {
     } catch (err) {
       console.warn('[Movemall API] Could not update product on DB API:', err);
     }
-    addToast('อัปเดตสินค้าแล้ว', 'success', '✏️');
+    addToast(t('common:toast.productUpdated'), 'success', '✏️');
   }
 
   return (

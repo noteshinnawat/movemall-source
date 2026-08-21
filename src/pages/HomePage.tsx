@@ -850,7 +850,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
             id="live-grid-2"
             channelName="Fashionista Studio"
             streamerAvatar="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80"
-            title="👗 ไลฟ์ลองชุดคอลเลกชั่น 2026 • ซื้อ 1 แถม 1"
+            title="👗 ไลฟ์ลองชุดคอลเลกชั่น 2026 • ซื้อ 1 แถม 1" /* i18n-allow-user-content: simulated live-stream caption, not UI chrome */
             viewers={920}
             videoUrl="/videos/live-streamer-2.mp4"
             posterImage="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80"

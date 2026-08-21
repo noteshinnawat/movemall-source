@@ -236,7 +236,7 @@ export function ShopPage({ products: propProducts, onAddToCart, isWishlisted, on
                         id="live-shop-1"
                         channelName="BeautyGlow Live"
                         streamerAvatar="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80"
-                        title="✨ สกินแคร์เซรั่มวิตามิน C ซื้อ 1 แถม 1 เฉพาะในไลฟ์"
+                        title="✨ สกินแคร์เซรั่มวิตามิน C ซื้อ 1 แถม 1 เฉพาะในไลฟ์" /* i18n-allow-user-content: simulated live-stream caption, not UI chrome */
                         viewers={1_800}
                         videoUrl="/videos/live-streamer-3.mp4"
                         posterImage="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&q=80"
