@@ -163,13 +163,31 @@ function calleeText(expression) {
   return '';
 }
 
+// The literal text of a string or template literal, checking every static
+// segment of a template (not just a plain string), so `` `label: ${x}` ``
+// with Thai in its static parts is caught the same as a plain string.
+function literalThaiText(node) {
+  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
+  if (ts.isTemplateExpression(node)) {
+    return node.head.text + node.templateSpans.map(span => span.literal.text).join('');
+  }
+  return null;
+}
+
 function auditFile(relativePath, text) {
   const violations = [];
   const sourceFile = ts.createSourceFile(relativePath, text, ts.ScriptTarget.Latest, true, scriptKindFor(relativePath));
 
+  // The JSX-attribute and call-argument checks report specific literal nodes
+  // that the generic template-literal walk below would otherwise visit and
+  // report again; track reported positions so each literal surfaces once.
+  const reportedPositions = new Set();
+
   const report = (node, reason) => {
-    if (isAllowedByComment(sourceFile, node)) return;
     const pos = node.getStart(sourceFile);
+    if (reportedPositions.has(pos)) return;
+    if (isAllowedByComment(sourceFile, node)) return;
+    reportedPositions.add(pos);
     const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
     violations.push(`${relativePath}:${line + 1}:${character + 1}: ${reason}: ${node.getText(sourceFile).trim().slice(0, 80)}`);
   };
@@ -178,18 +196,29 @@ function auditFile(relativePath, text) {
     if (ts.isJsxText(node)) {
       if (THAI_RE.test(node.text)) report(node, 'hardcoded Thai text in JSX');
     } else if (ts.isJsxAttribute(node) && ts.isIdentifier(node.name) && VISIBLE_JSX_ATTRS.has(node.name.text)) {
-      const value = node.initializer && ts.isStringLiteral(node.initializer)
+      const value = node.initializer && (ts.isStringLiteral(node.initializer) || ts.isTemplateExpression(node.initializer))
         ? node.initializer
         : (node.initializer && ts.isJsxExpression(node.initializer) && node.initializer.expression
-          && ts.isStringLiteral(node.initializer.expression) ? node.initializer.expression : null);
-      if (value && THAI_RE.test(value.text)) report(value, `hardcoded Thai text in "${node.name.text}" attribute`);
+          ? node.initializer.expression : null);
+      const literalText = value && literalThaiText(value);
+      if (literalText !== null && literalText !== undefined && THAI_RE.test(literalText)) {
+        report(value, `hardcoded Thai text in "${node.name.text}" attribute`);
+      }
     } else if (ts.isCallExpression(node)) {
       const name = calleeName(node.expression);
       const isAlert = ALERT_CALLEES.has(name);
       const isToast = TOAST_CALL_RE.test(calleeText(node.expression));
-      if ((isAlert || isToast) && node.arguments[0] && ts.isStringLiteral(node.arguments[0]) && THAI_RE.test(node.arguments[0].text)) {
-        report(node.arguments[0], `hardcoded Thai text in ${isAlert ? 'alert/confirm' : 'toast'} call`);
+      if (isAlert || isToast) {
+        for (const arg of node.arguments) {
+          const literalText = literalThaiText(arg);
+          if (literalText !== null && THAI_RE.test(literalText)) {
+            report(arg, `hardcoded Thai text in ${isAlert ? 'alert/confirm' : 'toast'} call`);
+          }
+        }
       }
+    } else if (ts.isTemplateExpression(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
+      const literalText = literalThaiText(node);
+      if (literalText && THAI_RE.test(literalText)) report(node, 'hardcoded Thai text in template literal');
     }
     ts.forEachChild(node, visit);
   };

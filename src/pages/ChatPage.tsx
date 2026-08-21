@@ -110,10 +110,10 @@ export function ChatPage() {
       // These labels are read by the seller CRM, so they stay in the source
       // language rather than following the buyer's UI locale.
       const labelMap: Record<string, string> = {
-        product: `สินค้า: ${decodeURIComponent(refName || refId || '')}`,
-        store: `หน้าร้าน: ${decodeURIComponent(refName || '')}`,
-        live: `ไลฟ์สด: ${decodeURIComponent(refName || refId || '')}`,
-        video: `คลิปสั้น: ${decodeURIComponent(refName || refId || '')}`,
+        product: `สินค้า: ${decodeURIComponent(refName || refId || '')}` /* i18n-allow-user-content: seller CRM label, not buyer UI */,
+        store: `หน้าร้าน: ${decodeURIComponent(refName || '')}` /* i18n-allow-user-content: seller CRM label, not buyer UI */,
+        live: `ไลฟ์สด: ${decodeURIComponent(refName || refId || '')}` /* i18n-allow-user-content: seller CRM label, not buyer UI */,
+        video: `คลิปสั้น: ${decodeURIComponent(refName || refId || '')}` /* i18n-allow-user-content: seller CRM label, not buyer UI */,
       };
       const sourceEntry = {
         source: sourceType,
