@@ -48,6 +48,12 @@ export function ProductCard({
   const [isAdded, setIsAdded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const [imageLoadFailed, setImageLoadFailed] = useState(false);
+
+  // Reset the broken-image fallback whenever the product's image actually changes
+  useEffect(() => {
+    setImageLoadFailed(false);
+  }, [images[0]]);
 
   const cardRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -148,13 +154,14 @@ export function ProductCard({
                 </div>
               )}
             </div>
-          ) : images[0] ? (
+          ) : images[0] && !imageLoadFailed ? (
             <>
               <img
                 src={images[0]}
                 alt={name}
                 className={`product-card__image product-card__image--primary${images[1] ? ' has-second-image' : ''}`}
                 loading="lazy"
+                onError={() => setImageLoadFailed(true)}
               />
               {images[1] && (
                 <img
@@ -162,6 +169,7 @@ export function ProductCard({
                   alt={t('catalog:product.card.nextImageAlt', { name })}
                   className="product-card__image product-card__image--secondary"
                   loading="lazy"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
               )}
             </>
