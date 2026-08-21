@@ -137,13 +137,18 @@ function scriptKindFor(fileName) {
   return fileName.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
 }
 
-function isAllowedByComment(sourceFile, pos) {
-  const { line } = sourceFile.getLineAndCharacterOfPosition(pos);
-  const lines = sourceFile.text.split('\n');
-  for (let ln = Math.max(0, line - 1); ln <= line; ln += 1) {
-    if (lines[ln]?.includes(ALLOW_MARKER)) return true;
-  }
-  return false;
+// Exemption is attached to this specific node's own trivia only — a trailing
+// comment on the same line (the common `value /* i18n-allow-user-content */`
+// style) or a leading comment directly above it — never to a neighboring
+// sibling's comment, so annotating one JSX attribute can't accidentally
+// exempt the next one down.
+function isAllowedByComment(sourceFile, node) {
+  const text = sourceFile.text;
+  const ranges = [
+    ...(ts.getTrailingCommentRanges(text, node.getEnd()) ?? []),
+    ...(ts.getLeadingCommentRanges(text, node.getFullStart()) ?? []),
+  ];
+  return ranges.some(range => text.slice(range.pos, range.end).includes(ALLOW_MARKER));
 }
 
 function calleeName(expression) {
@@ -163,8 +168,8 @@ function auditFile(relativePath, text) {
   const sourceFile = ts.createSourceFile(relativePath, text, ts.ScriptTarget.Latest, true, scriptKindFor(relativePath));
 
   const report = (node, reason) => {
+    if (isAllowedByComment(sourceFile, node)) return;
     const pos = node.getStart(sourceFile);
-    if (isAllowedByComment(sourceFile, pos)) return;
     const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
     violations.push(`${relativePath}:${line + 1}:${character + 1}: ${reason}: ${node.getText(sourceFile).trim().slice(0, 80)}`);
   };
