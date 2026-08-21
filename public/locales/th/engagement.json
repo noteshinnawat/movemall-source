@@ -349,5 +349,37 @@
       "noMinimum": "ไม่มีขั้นต่ำ",
       "expiresOn": "หมดอายุ {{date}}"
     }
+  },
+  "seo": {
+    "pages": {
+      "live": {
+        "title": "ไลฟ์สด | Movemall",
+        "description": "ช้อปสดผ่านไลฟ์สตรีม พร้อมโค้ดลดพิเศษเฉพาะในไลฟ์"
+      },
+      "video": {
+        "title": "วิดีโอสั้น | Movemall",
+        "description": "ช้อปสินค้าผ่านคลิปวิดีโอสั้น พร้อมตะกร้าสีเหลืองสั่งซื้อทันที"
+      },
+      "games": {
+        "title": "เกมและของรางวัล | Movemall",
+        "description": "เล่นเกม เช็กอิน และรับ Movemall Coins ทุกวัน"
+      },
+      "flashSale": {
+        "title": "Flash Sale | Movemall",
+        "description": "ดีลลดราคาแรงช่วงเวลาจำกัด ลดสูงสุด 70%"
+      },
+      "vouchers": {
+        "title": "ศูนย์รวมคูปอง | Movemall",
+        "description": "เก็บโค้ดส่วนลดและคูปองส่งฟรีใช้ได้ทันทีตอนชำระเงิน"
+      },
+      "chat": {
+        "title": "แชทกับร้านค้า | Movemall",
+        "description": "พูดคุยกับร้านค้าเพื่อสอบถามสินค้าก่อนตัดสินใจซื้อ"
+      },
+      "notifications": {
+        "title": "การแจ้งเตือน | Movemall",
+        "description": "ติดตามสถานะออเดอร์ โปรโมชั่น และสิทธิพิเศษล่าสุด"
+      }
+    }
   }
 }

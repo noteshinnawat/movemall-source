@@ -515,5 +515,33 @@
       "coinsDesc": "A nudge to collect free coins every day for cash discounts",
       "save": "Save settings"
     }
+  },
+  "seo": {
+    "pages": {
+      "cart": {
+        "title": "Shopping cart | Movemall",
+        "description": "Review the items in your cart and check out securely"
+      },
+      "checkout": {
+        "title": "Checkout | Movemall",
+        "description": "Enter your shipping address and choose a payment method to confirm your order"
+      },
+      "orderSuccess": {
+        "title": "Order placed | Movemall",
+        "description": "Thank you for shopping with Movemall — track your parcel right away"
+      },
+      "wishlist": {
+        "title": "Saved products | Movemall",
+        "description": "See the products you saved to buy later"
+      },
+      "orders": {
+        "title": "Order history | Movemall",
+        "description": "Check parcel status and your full order history"
+      },
+      "tracking": {
+        "title": "Track your parcel | Movemall",
+        "description": "Follow your delivery status in real time"
+      }
+    }
   }
 }

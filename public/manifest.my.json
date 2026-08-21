@@ -1,0 +1,19 @@
+{
+  "name": "Movemall — ဈေးကွက် & တိုက်ရိုက်ဈေးဝယ်ခြင်း",
+  "short_name": "Movemall",
+  "description": "ထိပ်တန်း အမှတ်တံဆိပ်များ၊ တိုက်ရိုက်ရောင်းချမှုနှင့် Coins ရယူရန် မီနီဂိမ်းများ ပါဝင်သော အွန်လိုင်း ဈေးဝယ်ရာနေရာ",
+  "lang": "my",
+  "start_url": "/my",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFFFFF",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -9,7 +9,7 @@ import { products as staticProducts } from '../data/products';
 import { getStoreById, stores } from '../data/stores';
 import { mockLiveStreams } from '../data/liveStreams';
 import { parseRichText } from '../components/RichTextEditor';
-import { extractProductId, getProductUrl, updateProductSEO } from '../utils/seo';
+import { extractProductId, getProductUrl, buildProductSeo, applySeoTags } from '../utils/seo';
 import { LocalizedLink as Link, useLocalizedPath } from '../i18n/LocalizedLink';
 import { formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
@@ -121,14 +121,14 @@ export function ProductDetailPage({
     } catch {}
 
     // Update comprehensive SEO Meta, Social & JSON-LD
-    updateProductSEO(product, store?.name);
+    applySeoTags(buildProductSeo(product, locale, t, store?.name));
 
     // If accessed with legacy non-SEO URL, gracefully replace browser history URL without reloading
     const canonicalSeoUrl = localizePath(getProductUrl(product));
     if (window.location.pathname !== canonicalSeoUrl) {
       window.history.replaceState(null, '', canonicalSeoUrl + window.location.search);
     }
-  }, [localizePath, product, store]);
+  }, [localizePath, product, store, locale, t]);
 
   const productId = product?.id;
   const productStoreId = product?.storeId;

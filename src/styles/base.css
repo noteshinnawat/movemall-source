@@ -19,7 +19,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', 'Noto Sans Myanmar', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--background);
   color: var(--text-primary);
   line-height: 1.5;
@@ -31,6 +31,16 @@ body {
   overflow-x: hidden;
   position: relative;
   touch-action: manipulation;
+}
+
+/* Myanmar script stacks tall combining marks that need extra line-height to
+   avoid clipping/collision; Latin/Thai body copy is unaffected. */
+[lang="my"] body {
+  line-height: 1.65;
+}
+
+input, textarea, select, button {
+  font-family: inherit;
 }
 
 #root {

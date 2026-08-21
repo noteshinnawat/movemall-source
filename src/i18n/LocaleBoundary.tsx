@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import i18n from './config';
+import { BuyerSeo } from './BuyerSeo';
 import {
   LOCALE_STORAGE_KEY,
   localeFromPath,
@@ -56,7 +57,22 @@ export function LocaleBoundary() {
     void i18n.changeLanguage(resolvedLocale);
     document.documentElement.lang = resolvedLocale;
     if (locale) localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+
+    let manifestLink = document.querySelector('link[rel="manifest"]');
+    if (!manifestLink) {
+      manifestLink = document.createElement('link');
+      manifestLink.setAttribute('rel', 'manifest');
+      document.head.appendChild(manifestLink);
+    }
+    manifestLink.setAttribute('href', `/manifest.${resolvedLocale}.json`);
   }, [locale, resolvedLocale]);
 
-  return locale ? <Outlet /> : <LocalizedNotFound />;
+  if (!locale) return <LocalizedNotFound />;
+
+  return (
+    <>
+      <BuyerSeo />
+      <Outlet />
+    </>
+  );
 }

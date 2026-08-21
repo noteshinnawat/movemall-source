@@ -162,5 +162,37 @@
       "messagePlaceholder": "Tell us what you'd like help with... *",
       "send": "Send to our team"
     }
+  },
+  "seo": {
+    "pages": {
+      "help": {
+        "title": "Help centre | Movemall",
+        "description": "Frequently asked questions and how to use Movemall"
+      },
+      "howToOrder": {
+        "title": "How to order | Movemall",
+        "description": "A step-by-step guide to ordering on Movemall"
+      },
+      "shipping": {
+        "title": "Shipping | Movemall",
+        "description": "Movemall's free-shipping policy and delivery partners"
+      },
+      "returns": {
+        "title": "Return policy | Movemall",
+        "description": "Terms and steps for a 30-day return and refund"
+      },
+      "contact": {
+        "title": "Contact us | Movemall",
+        "description": "How to reach Movemall customer support"
+      },
+      "privacy": {
+        "title": "Privacy policy | Movemall",
+        "description": "Movemall's privacy policy and personal data protection (PDPA)"
+      },
+      "terms": {
+        "title": "Terms of service | Movemall",
+        "description": "The terms and conditions for using the Movemall platform"
+      }
+    }
   }
 }

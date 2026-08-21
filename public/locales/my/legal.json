@@ -162,5 +162,37 @@
       "messagePlaceholder": "ကူညီပေးစေလိုသည့် အကြောင်းအရာကို ရေးပါ... *",
       "send": "အဖွဲ့ထံ ပို့ရန်"
     }
+  },
+  "seo": {
+    "pages": {
+      "help": {
+        "title": "အကူအညီ စင်တာ | Movemall",
+        "description": "မေးလေ့ရှိသော မေးခွန်းများနှင့် Movemall အသုံးပြုနည်း"
+      },
+      "howToOrder": {
+        "title": "မှာယူနည်း | Movemall",
+        "description": "Movemall တွင် မှာယူနည်း အဆင့်ဆင့်"
+      },
+      "shipping": {
+        "title": "ပို့ဆောင်ရေး | Movemall",
+        "description": "Movemall ၏ အခမဲ့ပို့ဆောင်ခ မူဝါဒနှင့် ပို့ဆောင်ရေး မိတ်ဖက်များ"
+      },
+      "returns": {
+        "title": "ပြန်ပို့ရေး မူဝါဒ | Movemall",
+        "description": "ရက် 30 အတွင်း ပြန်ပို့ခြင်းနှင့် ငွေပြန်အမ်းခြင်း စည်းမျဉ်းနှင့် အဆင့်များ"
+      },
+      "contact": {
+        "title": "ဆက်သွယ်ရန် | Movemall",
+        "description": "Movemall ဝန်ဆောင်မှု အဖွဲ့ကို ဆက်သွယ်နည်း"
+      },
+      "privacy": {
+        "title": "ကိုယ်ရေးအချက်အလက် မူဝါဒ | Movemall",
+        "description": "Movemall ၏ ကိုယ်ရေးအချက်အလက် မူဝါဒနှင့် PDPA ကာကွယ်ရေး"
+      },
+      "terms": {
+        "title": "ဝန်ဆောင်မှု စည်းမျဉ်းများ | Movemall",
+        "description": "Movemall ပလက်ဖောင်း အသုံးပြုခြင်း စည်းမျဉ်းစည်းကမ်းများ"
+      }
+    }
   }
 }

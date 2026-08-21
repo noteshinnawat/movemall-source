@@ -349,5 +349,37 @@
       "noMinimum": "No minimum spend",
       "expiresOn": "Expires {{date}}"
     }
+  },
+  "seo": {
+    "pages": {
+      "live": {
+        "title": "Live shopping | Movemall",
+        "description": "Shop live streams with exclusive in-stream discount codes"
+      },
+      "video": {
+        "title": "Short videos | Movemall",
+        "description": "Shop through short video clips with an instant checkout basket"
+      },
+      "games": {
+        "title": "Games & rewards | Movemall",
+        "description": "Play games, check in and earn Movemall Coins every day"
+      },
+      "flashSale": {
+        "title": "Flash Sale | Movemall",
+        "description": "Limited-time deals with up to 70% off"
+      },
+      "vouchers": {
+        "title": "Voucher centre | Movemall",
+        "description": "Claim discount and free-shipping codes to use at checkout"
+      },
+      "chat": {
+        "title": "Chat with stores | Movemall",
+        "description": "Ask a store about a product before you buy"
+      },
+      "notifications": {
+        "title": "Notifications | Movemall",
+        "description": "Track your order status, promotions and member perks"
+      }
+    }
   }
 }

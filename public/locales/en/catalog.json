@@ -693,5 +693,34 @@
     "protectionDescription": "Get 100% back, or 200% for Mall products confirmed as counterfeit",
     "submitting": "Submitting...",
     "submit": "🚨 Submit report"
+  },
+  "seo": {
+    "productTitle": "{{name}} | Special price {{price}} — shop now at Movemall",
+    "productDescriptionFallback": "{{name}} — shop online at a special price, 100% authentic, free shipping nationwide, 0% instalments. Buy now at Movemall",
+    "home": "Home",
+    "allProducts": "All products",
+    "keywords": "{{name}}, {{category}}, online shopping, Movemall, buy {{name}}",
+    "pages": {
+      "home": {
+        "title": "Movemall — Modern Social Marketplace, Live Shopping & Short Video",
+        "description": "A modern online marketplace with 100% authentic brands, live streams, shoppable short videos, discount codes and free nationwide shipping"
+      },
+      "shop": {
+        "title": "Shop all products | Movemall",
+        "description": "Browse quality products at great prices with fast delivery from verified sellers nationwide"
+      },
+      "mall": {
+        "title": "Movemall Mall — 100% Authentic Brands | Movemall",
+        "description": "A hub of authentic official brands with a double-refund guarantee and Thai service-centre warranty"
+      },
+      "stores": {
+        "title": "All stores and brands | Movemall",
+        "description": "Browse verified stores and leading brands on Movemall"
+      },
+      "compare": {
+        "title": "Compare products | Movemall",
+        "description": "Compare prices, specs and reviews on one page before you decide"
+      }
+    }
   }
 }

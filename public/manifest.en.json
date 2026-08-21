@@ -1,0 +1,19 @@
+{
+  "name": "Movemall — Marketplace & Live Shopping",
+  "short_name": "Movemall",
+  "description": "A one-stop online shopping destination with top brands, live selling and mini-games for coins",
+  "lang": "en",
+  "start_url": "/en",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFFFFF",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

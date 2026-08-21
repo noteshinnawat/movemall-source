@@ -162,5 +162,37 @@
       "messagePlaceholder": "ระบุข้อความหรือปัญหาที่คุณต้องการสอบถาม... *",
       "send": "ส่งข้อความถึงทีมงาน"
     }
+  },
+  "seo": {
+    "pages": {
+      "help": {
+        "title": "ศูนย์ช่วยเหลือ | Movemall",
+        "description": "คำถามที่พบบ่อยและวิธีการใช้งาน Movemall"
+      },
+      "howToOrder": {
+        "title": "วิธีสั่งซื้อสินค้า | Movemall",
+        "description": "ขั้นตอนการสั่งซื้อสินค้าบน Movemall แบบละเอียด"
+      },
+      "shipping": {
+        "title": "การจัดส่งสินค้า | Movemall",
+        "description": "นโยบายจัดส่งฟรีและพันธมิตรผู้ให้บริการขนส่งของ Movemall"
+      },
+      "returns": {
+        "title": "นโยบายการคืนสินค้า | Movemall",
+        "description": "เงื่อนไขและขั้นตอนการคืนสินค้าและคืนเงินภายใน 30 วัน"
+      },
+      "contact": {
+        "title": "ติดต่อเรา | Movemall",
+        "description": "ช่องทางติดต่อฝ่ายบริการลูกค้า Movemall"
+      },
+      "privacy": {
+        "title": "นโยบายความเป็นส่วนตัว | Movemall",
+        "description": "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA)"
+      },
+      "terms": {
+        "title": "ข้อกำหนดการใช้บริการ | Movemall",
+        "description": "ข้อกำหนดและเงื่อนไขการใช้บริการแพลตฟอร์ม Movemall"
+      }
+    }
   }
 }
