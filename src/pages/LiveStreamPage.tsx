@@ -52,6 +52,13 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
   const [hearts, setHearts] = useState<HeartEffect[]>([]);
   const [inputComment, setInputComment] = useState('');
   const [floatingChats, setFloatingChats] = useState<FloatingChatMsg[]>([]);
+  // Kept in a ref so a language switch (which gives `t` a new identity) does
+  // not re-run the stream-loading effect and discard in-place edits such as
+  // comments the buyer has already sent.
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
 
   const activeCatalog = useMemo(
     () => products && products.length > 0 ? products : staticProducts,
@@ -76,7 +83,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
               soldCount: (foundPinned as any).salesCount || 120,
             } : (s.pinnedProduct || {
               id: 'el-1',
-              name: t('engagement:live.stream.demoProductName'),
+              name: tRef.current('engagement:live.stream.demoProductName'),
               price: 990,
               originalPrice: 1990,
               image: s.coverImage,
@@ -108,7 +115,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
               followers: `${Math.floor(20 + idx * 15)}K`,
               videoUrl: s.streamUrl,
               coverImage: s.coverImage,
-              viewers: t('engagement:live.stream.viewersSuffix', { count: s.viewersCount || 1500 }),
+              viewers: tRef.current('engagement:live.stream.viewersSuffix', { count: s.viewersCount || 1500 }),
               likesCount: s.likesCount || 10000,
               caption: s.title,
               tags: ['#MovemallLive', '#ลดราคา', '#ของแท้'],
@@ -125,7 +132,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
       }
     }
     loadLiveStreams();
-  }, [activeCatalog, t]);
+  }, [activeCatalog]);
 
   const touchStartY = useRef(0);
   const isScrolling = useRef(false);

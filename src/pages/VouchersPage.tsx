@@ -46,35 +46,38 @@ export function VouchersPage() {
 
   const [filter, setFilter] = useState<(typeof FILTER_IDS)[number]>('all');
   const [claimed, setClaimed] = useState<Record<string, boolean>>({});
-  const [apiVouchers, setApiVouchers] = useState<DisplayVoucher[] | null>(null);
+  // Raw API rows are fetched once; display strings are derived below so a
+  // language switch re-translates them without re-fetching from the server.
+  const [rawApiVouchers, setRawApiVouchers] = useState<any[] | null>(null);
 
   useEffect(() => {
     async function loadVouchersFromDb() {
       try {
         const res = await fetchApi<{ vouchers: any[] }>('/api/vouchers');
         if (res && Array.isArray(res.vouchers) && res.vouchers.length > 0) {
-          const mapped: DisplayVoucher[] = res.vouchers.map(v => ({
-            id: v.id || v.code,
-            type: v.discountType === 'free_shipping' ? 'shipping' : v.storeId ? 'store' : 'platform',
-            discount: v.discountType === 'free_shipping'
-              ? t('engagement:vouchers.api.freeShipping', { amount: formatCurrency(45, locale) })
-              : v.discountType === 'percentage'
-                ? t('engagement:vouchers.api.percentOff', { percent: v.value })
-                : t('engagement:vouchers.api.amountOff', { amount: formatCurrency(v.value, locale) }),
-            minSpend: Number(v.minSpend) > 0
-              ? t('engagement:vouchers.api.minSpend', { amount: formatCurrency(Number(v.minSpend), locale) })
-              : t('engagement:vouchers.api.noMinimum'),
-            expiry: t('engagement:vouchers.api.expiresOn', { date: formatDate(v.expiryDate, locale) }),
-            storeName: v.store?.name,
-          }));
-          setApiVouchers(mapped);
+          setRawApiVouchers(res.vouchers);
         }
       } catch {
         // Fallback to the mock catalog below
       }
     }
     loadVouchersFromDb();
-  }, [t, locale]);
+  }, []);
+
+  const apiVouchers: DisplayVoucher[] | null = rawApiVouchers && rawApiVouchers.map(v => ({
+    id: v.id || v.code,
+    type: v.discountType === 'free_shipping' ? 'shipping' : v.storeId ? 'store' : 'platform',
+    discount: v.discountType === 'free_shipping'
+      ? t('engagement:vouchers.api.freeShipping', { amount: formatCurrency(45, locale) })
+      : v.discountType === 'percentage'
+        ? t('engagement:vouchers.api.percentOff', { percent: v.value })
+        : t('engagement:vouchers.api.amountOff', { amount: formatCurrency(v.value, locale) }),
+    minSpend: Number(v.minSpend) > 0
+      ? t('engagement:vouchers.api.minSpend', { amount: formatCurrency(Number(v.minSpend), locale) })
+      : t('engagement:vouchers.api.noMinimum'),
+    expiry: t('engagement:vouchers.api.expiresOn', { date: formatDate(v.expiryDate, locale) }),
+    storeName: v.store?.name,
+  }));
 
   const mockDisplayVouchers: DisplayVoucher[] = MOCK_VOUCHERS.map(v => ({
     id: v.id,
