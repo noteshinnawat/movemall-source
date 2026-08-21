@@ -1,9 +1,13 @@
 // src/components/YellowBasketModal.tsx — Yellow Basket Product Drawer Modal for Video Clips
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ShoppingCart, Zap, Star, ShieldCheck, X, ChevronRight, Check } from 'lucide-react';
 import { getProductUrl } from '../utils/seo';
+import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
+import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import type { PinnedProductItem, Product } from '../types';
 import './YellowBasketModal.css';
 
@@ -20,6 +24,9 @@ export function YellowBasketModal({
   products,
   onAddToCart,
 }: YellowBasketModalProps) {
+  const { t, i18n } = useTranslation(['engagement']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const localizePath = useLocalizedPath();
   const navigate = useNavigate();
   const [selectedProduct, setSelectedProduct] = useState<PinnedProductItem>(products[0] || null);
   const [quantity, setQuantity] = useState(1);
@@ -41,7 +48,7 @@ export function YellowBasketModal({
     rating: current.rating || 4.9,
     reviewCount: current.salesCount || 120,
     stock: 99,
-    description: 'สินค้าของแท้สั่งซื้อโดยตรงจากคลิปวิดีโอ Movemall Short Video',
+    description: t('engagement:video.basket.demoDescription'),
     tags: ['VideoBasket', 'FlashSale'],
     badge: 'hot',
   };
@@ -55,7 +62,7 @@ export function YellowBasketModal({
   function handleBuyNow() {
     onAddToCart(cartProduct, quantity);
     onClose();
-    navigate('/checkout');
+    navigate(localizePath('/checkout'));
   }
 
   return (
@@ -64,10 +71,12 @@ export function YellowBasketModal({
         {/* Header */}
         <div className="yellow-basket-header">
           <div className="yellow-basket-title-group">
-            <span className="yellow-basket-icon-badge">🟡 ตะกร้าสีเหลือง</span>
-            <h3 className="yellow-basket-heading">สินค้าในคลิปวิดีโอนี้ ({products.length})</h3>
+            <span className="yellow-basket-icon-badge">{t('engagement:video.basket.pill')}</span>
+            <h3 className="yellow-basket-heading">
+              {t('engagement:video.basket.heading', { count: products.length })}
+            </h3>
           </div>
-          <button className="yellow-basket-close-btn" onClick={onClose} aria-label="Close">
+          <button className="yellow-basket-close-btn" onClick={onClose} aria-label={t('engagement:video.basket.close')}>
             <X size={20} />
           </button>
         </div>
@@ -81,7 +90,10 @@ export function YellowBasketModal({
                 className={`yellow-basket-tab ${current.id === item.id ? 'active' : ''}`}
                 onClick={() => setSelectedProduct(item)}
               >
-                #{idx + 1} {item.name.slice(0, 18)}...
+                {t('engagement:video.basket.tabLabel', {
+                  index: idx + 1,
+                  name: item.name.slice(0, 18),
+                })}
               </button>
             ))}
           </div>
@@ -106,17 +118,19 @@ export function YellowBasketModal({
                   <Star size={13} fill="#F59E0B" color="#F59E0B" />
                   <span>{current.rating || 4.9}</span>
                 </div>
-                <span className="yellow-basket-sales">ขายแล้ว {current.salesCount || 500}+ ชิ้น</span>
+                <span className="yellow-basket-sales">
+                  {t('engagement:video.basket.sold', { count: current.salesCount || 500 })}
+                </span>
               </div>
 
               <div className="yellow-basket-price-row">
                 <div className="yellow-basket-price-wrap">
-                  <span className="yellow-basket-price">฿{current.price.toLocaleString()}</span>
+                  <span className="yellow-basket-price">{formatCurrency(current.price, locale)}</span>
                   {current.originalPrice && (
-                    <span className="yellow-basket-original">฿{current.originalPrice.toLocaleString()}</span>
+                    <span className="yellow-basket-original">{formatCurrency(current.originalPrice, locale)}</span>
                   )}
                 </div>
-                <span className="yellow-basket-exclusive-pill">⚡ ดีลพิเศษในคลิป</span>
+                <span className="yellow-basket-exclusive-pill">{t('engagement:video.basket.exclusiveDeal')}</span>
               </div>
             </div>
           </div>
@@ -125,19 +139,19 @@ export function YellowBasketModal({
           <div className="yellow-basket-perks">
             <div className="yellow-basket-perk-item">
               <ShieldCheck size={14} color="#10B981" />
-              <span>การันตีของแท้ 100%</span>
+              <span>{t('engagement:video.basket.perkAuthentic')}</span>
             </div>
             <div className="yellow-basket-perk-item">
-              <span>🚚 ส่งฟรีไม่มีขั้นต่ำ</span>
+              <span>{t('engagement:video.basket.perkShipping')}</span>
             </div>
             <div className="yellow-basket-perk-item">
-              <span>💳 ผ่อน 0% PayLater</span>
+              <span>{t('engagement:video.basket.perkPayLater')}</span>
             </div>
           </div>
 
           {/* Quantity Selector */}
           <div className="yellow-basket-qty-row">
-            <span className="yellow-basket-qty-label">จำนวน</span>
+            <span className="yellow-basket-qty-label">{t('engagement:video.basket.qtyLabel')}</span>
             <div className="yellow-basket-qty-controls">
               <button
                 className="yellow-basket-qty-btn"
@@ -146,7 +160,7 @@ export function YellowBasketModal({
               >
                 -
               </button>
-              <span className="yellow-basket-qty-num">{quantity}</span>
+              <span className="yellow-basket-qty-num">{formatNumber(quantity, locale)}</span>
               <button
                 className="yellow-basket-qty-btn"
                 onClick={() => setQuantity(quantity + 1)}
@@ -159,13 +173,13 @@ export function YellowBasketModal({
 
         {/* Action Footer */}
         <div className="yellow-basket-footer">
-          <Link
+          <LocalizedLink
             to={getProductUrl(cartProduct)}
             className="yellow-basket-detail-link"
             onClick={onClose}
           >
-            ดูรายละเอียดเต็ม <ChevronRight size={14} />
-          </Link>
+            {t('engagement:video.basket.viewDetail')} <ChevronRight size={14} />
+          </LocalizedLink>
 
           <div className="yellow-basket-btn-group">
             <button
@@ -174,16 +188,16 @@ export function YellowBasketModal({
             >
               {addedSuccessId === current.id ? (
                 <>
-                  <Check size={16} /> ใส่ตะกร้าแล้ว
+                  <Check size={16} /> {t('engagement:video.basket.added')}
                 </>
               ) : (
                 <>
-                  <ShoppingCart size={16} /> ใส่ตะกร้า
+                  <ShoppingCart size={16} /> {t('engagement:video.basket.addToCart')}
                 </>
               )}
             </button>
             <button className="yellow-basket-buy-now-btn" onClick={handleBuyNow}>
-              <Zap size={16} /> สั่งซื้อทันที
+              <Zap size={16} /> {t('engagement:video.basket.buyNow')}
             </button>
           </div>
         </div>

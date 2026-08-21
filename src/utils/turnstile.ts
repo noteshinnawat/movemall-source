@@ -12,6 +12,10 @@
 // โดเมนที่ลงทะเบียนไว้เท่านั้น จึงใส่เป็นค่า default ในโค้ดได้อย่างปลอดภัย
 // ข้อดี: ไม่ต้องพึ่ง build env var ที่ถ้าลืมตั้งแล้วด่านกันบอทจะเงียบไปโดยไม่มีสัญญาณ
 // ตั้ง VITE_TURNSTILE_SITE_KEY เพื่อ override ได้ (เช่น ใช้ widget คนละตัวต่อ environment)
+import i18n from '../i18n/config';
+import { resolveRootLocale } from '../i18n/locales';
+import type { Locale } from '../i18n/locales';
+
 const DEFAULT_SITE_KEY = '0x4AAAAAAEV4IWYDw8lkwvt0';
 const SITE_KEY = (import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined)?.trim() || DEFAULT_SITE_KEY;
 const SCRIPT_ID = 'cf-turnstile-script';
@@ -34,6 +38,16 @@ export function isTurnstileEnabled(): boolean {
   return SITE_KEY.length > 0;
 }
 
+// Turnstile renders its challenge in the language it is given. Thai and English
+// are supported directly; Burmese is not, so `auto` lets Cloudflare pick from
+// the browser rather than pinning the challenge to Thai.
+const TURNSTILE_LANGUAGES: Record<Locale, string> = { th: 'th', en: 'en', my: 'auto' };
+
+export function turnstileLanguage(locale: Locale): string {
+  return TURNSTILE_LANGUAGES[locale];
+}
+
+let widgetLanguage: string | null = null;
 let scriptPromise: Promise<void> | null = null;
 
 function loadScript(): Promise<void> {
@@ -130,12 +144,22 @@ export async function getTurnstileToken(): Promise<string | undefined> {
     };
 
     try {
+      const language = turnstileLanguage(resolveRootLocale(i18n.resolvedLanguage ?? i18n.language));
+      // Rebuild the widget when the buyer switched language, so the challenge is
+      // not stuck in the language of their first attempt.
+      if (widgetId !== null && language !== widgetLanguage) {
+        try { turnstile.remove(widgetId); } catch { /* already gone */ }
+        widgetId = null;
+      }
+
       if (widgetId === null) {
+        widgetLanguage = language;
         widgetId = turnstile.render(getContainer(), {
           sitekey: SITE_KEY,
           action: 'turnstile-spin-v1',
           execution: 'execute',
           appearance: 'interaction-only',
+          language,
           callback: (token: string) => deliver(token),
           'error-callback': () => deliver(undefined),
           'expired-callback': () => deliver(undefined),

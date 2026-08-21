@@ -21,7 +21,7 @@ router.get('/profile', authenticateJWT, async (req: AuthRequest, res: Response) 
   try {
     const userId = req.user?.userId;
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 
@@ -62,7 +62,7 @@ router.put('/profile', authenticateJWT, async (req: AuthRequest, res: Response) 
   try {
     const userId = req.user?.userId;
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 
@@ -148,7 +148,7 @@ router.post('/verify-email/verify', authenticateJWT, async (req: AuthRequest, re
     // ตรวจรหัส OTP จริง — เดิมรับ otp มาแล้วไม่เคยนำไปเทียบกับอะไรเลย
     const result = verifyEmailOtp(userId, email, String(otp));
     if (!result.success) {
-      res.status(400).json({ error: result.message });
+      res.status(400).json({ error: result.message, code: result.code || 'OTP_INVALID' });
       return;
     }
 
@@ -244,7 +244,7 @@ router.post('/verify-phone/verify', authenticateJWT, async (req: AuthRequest, re
     const cleanPhone = ThaiBulkSmsService.sanitizePhone(phone);
     const verifyResult = await ThaiBulkSmsService.verifyOtp(cleanPhone, String(otp));
     if (!verifyResult.success) {
-      res.status(400).json({ error: verifyResult.message });
+      res.status(400).json({ error: verifyResult.message, code: verifyResult.code });
       return;
     }
 
@@ -305,7 +305,7 @@ router.put('/change-password', authenticateJWT, async (req: AuthRequest, res: Re
 
     const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!isValid) {
-      res.status(401).json({ error: 'Current password is incorrect' });
+      res.status(401).json({ error: 'Current password is incorrect', code: 'AUTH_INVALID_CREDENTIALS' });
       return;
     }
 
@@ -338,7 +338,7 @@ router.post('/line/connect', authenticateJWT, async (req: AuthRequest, res: Resp
     const { lineUserId, displayName, pictureUrl } = req.body;
 
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 
@@ -389,7 +389,7 @@ router.put('/line/preferences', authenticateJWT, async (req: AuthRequest, res: R
     const { preferences } = req.body;
 
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 
@@ -414,7 +414,7 @@ router.delete('/line/disconnect', authenticateJWT, async (req: AuthRequest, res:
   try {
     const userId = req.user?.userId;
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 
@@ -430,7 +430,7 @@ router.get('/wishlist', authenticateJWT, async (req: AuthRequest, res: Response)
   try {
     const userId = req.user?.userId;
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 
@@ -462,7 +462,7 @@ router.post('/wishlist/sync', authenticateJWT, async (req: AuthRequest, res: Res
     const { productIds } = req.body;
 
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 
@@ -523,7 +523,7 @@ router.post('/wishlist/toggle', authenticateJWT, async (req: AuthRequest, res: R
     const { productId } = req.body;
 
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 
@@ -583,7 +583,7 @@ router.delete('/wishlist/:productId', authenticateJWT, async (req: AuthRequest, 
     const productId = String(req.params.productId);
 
     if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 

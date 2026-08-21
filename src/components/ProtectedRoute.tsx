@@ -8,6 +8,7 @@
 
 import { Navigate, useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
+import { useLocalizedPath } from '../i18n/LocalizedLink';
 
 interface StoredUser {
   role?: string;
@@ -37,17 +38,18 @@ export interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, allowedRoles, fallbackPath = '/login' }: ProtectedRouteProps) {
   const location = useLocation();
+  const localizePath = useLocalizedPath();
   const user = readCurrentUser();
 
   if (!user || !hasToken()) {
     // ส่งเส้นทางเดิมไปด้วย เพื่อให้ล็อกอินเสร็จแล้วกลับมาที่เดิมได้
-    return <Navigate to={fallbackPath} state={{ from: location.pathname }} replace />;
+    return <Navigate to={localizePath(fallbackPath)} state={{ from: location.pathname }} replace />;
   }
 
   if (allowedRoles && allowedRoles.length > 0) {
     const role = (user.role || '').toUpperCase();
     if (!allowedRoles.includes(role)) {
-      return <Navigate to="/" replace />;
+      return <Navigate to={localizePath('/')} replace />;
     }
   }
 

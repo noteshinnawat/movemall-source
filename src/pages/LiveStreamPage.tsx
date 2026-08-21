@@ -1,10 +1,13 @@
 // src/pages/LiveStreamPage.tsx — TikTok & Shopee Video Vertical Swipe Feed with Yellow Basket
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Heart, ShoppingBag, Send, Eye, Volume2, VolumeX, X, Plus, Check, Share2, MessageCircle, ChevronUp, ChevronDown, Sparkles, Smile, Gift, ShoppingCart, Maximize2, Minimize2 } from 'lucide-react';
 import { mockLiveStreams } from '../data/liveStreams';
 import { products as staticProducts } from '../data/products';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { formatCurrency } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import type { Product } from '../types';
 import './LiveStreamPage.css';
 
@@ -31,6 +34,9 @@ interface FloatingChatMsg {
 import { fetchActiveLiveStreamsApi } from '../utils/api';
 
 export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStreamPageProps) {
+  const { t, i18n } = useTranslation(['engagement']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const money = (value: number) => formatCurrency(value, locale);
   const [streamsList, setStreamsList] = useState<any[]>(mockLiveStreams);
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'following' | 'foryou'>('foryou');
@@ -46,6 +52,13 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
   const [hearts, setHearts] = useState<HeartEffect[]>([]);
   const [inputComment, setInputComment] = useState('');
   const [floatingChats, setFloatingChats] = useState<FloatingChatMsg[]>([]);
+  // Kept in a ref so a language switch (which gives `t` a new identity) does
+  // not re-run the stream-loading effect and discard in-place edits such as
+  // comments the buyer has already sent.
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
 
   const activeCatalog = useMemo(
     () => products && products.length > 0 ? products : staticProducts,
@@ -70,7 +83,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
               soldCount: (foundPinned as any).salesCount || 120,
             } : (s.pinnedProduct || {
               id: 'el-1',
-              name: 'ดีลพิเศษในไลฟ์',
+              name: tRef.current('engagement:live.stream.demoProductName'),
               price: 990,
               originalPrice: 1990,
               image: s.coverImage,
@@ -102,7 +115,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
               followers: `${Math.floor(20 + idx * 15)}K`,
               videoUrl: s.streamUrl,
               coverImage: s.coverImage,
-              viewers: `${s.viewersCount || 1500} คนดู`,
+              viewers: tRef.current('engagement:live.stream.viewersSuffix', { count: s.viewersCount || 1500 }),
               likesCount: s.likesCount || 10000,
               caption: s.title,
               tags: ['#MovemallLive', '#ลดราคา', '#ของแท้'],
@@ -279,7 +292,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
       rating: 5,
       reviewCount: 48,
       stock: 20,
-      description: 'สินค้าลดราคาพิเศษเฉพาะในไลฟ์สด',
+      description: t('engagement:live.stream.demoProductDescription'),
       tags: ['Live', 'Sale'],
     };
     onAddToCart(matchedProduct, 1);
@@ -291,15 +304,15 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
     if (!inputComment.trim()) return;
     const text = inputComment.trim();
     currentStream.comments.push({
-      user: 'คุณ (ฉัน)',
+      user: t('engagement:live.stream.myCommentUser'),
       text,
-      time: 'เมื่อสักครู่',
-      badge: 'ผู้ใช้',
+      time: t('engagement:live.stream.myCommentTime'),
+      badge: t('engagement:live.stream.myCommentBadge'),
     });
     // Also show in floating chat overlay
     const myMsg: FloatingChatMsg = {
       id: Date.now() + Math.random(),
-      user: 'ฉัน',
+      user: t('engagement:live.stream.myFloatingChatUser'),
       text,
       color: '#FFFFFF',
       badge: '💬',
@@ -345,13 +358,13 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
               className={`tiktok-tab-item ${activeTab === 'following' ? 'tiktok-tab-item--active' : ''}`}
               onClick={() => setActiveTab('following')}
             >
-              กำลังติดตาม
+              {t('engagement:live.stream.tabFollowing')}
             </span>
             <span
               className={`tiktok-tab-item ${activeTab === 'foryou' ? 'tiktok-tab-item--active' : ''}`}
               onClick={() => setActiveTab('foryou')}
             >
-              สำหรับคุณ (LIVE)
+              {t('engagement:live.stream.tabForYou')}
             </span>
           </div>
 
@@ -360,28 +373,28 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
             <button
               onClick={toggleFullscreen}
               className="tiktok-control-btn"
-              title={isFullscreen ? 'ย่อหน้าจอ' : 'แสดงเต็มจอ (ซ่อนแถบ)'}
+              title={isFullscreen ? t('engagement:live.stream.exitFullscreen') : t('engagement:live.stream.enterFullscreen')}
             >
               {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
             </button>
 
             {/* Personal Cart Button with Badge */}
-            <Link to="/cart" className="tiktok-control-btn tiktok-user-cart-btn" title="ตะกร้าสินค้าของฉัน">
+            <LocalizedLink to="/cart" className="tiktok-control-btn tiktok-user-cart-btn" title={t('engagement:live.stream.myCart')}>
               <ShoppingCart size={16} />
               {cartCount > 0 && <span className="tiktok-user-cart-badge">{cartCount}</span>}
-            </Link>
+            </LocalizedLink>
 
             <button
               onClick={() => setIsMuted(!isMuted)}
               className="tiktok-control-btn"
-              title={isMuted ? 'เปิดเสียง' : 'ปิดเสียง'}
+              title={isMuted ? t('engagement:live.stream.unmute') : t('engagement:live.stream.mute')}
             >
               {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
             </button>
 
-            <Link to="/" className="tiktok-control-btn" title="กลับสู่หน้าหลัก">
+            <LocalizedLink to="/" className="tiktok-control-btn" title={t('engagement:live.stream.backHome')}>
               <X size={18} />
-            </Link>
+            </LocalizedLink>
           </div>
         </header>
 
@@ -481,23 +494,24 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
                       <div className="tiktok-basket-info">
                         <div className="tiktok-basket-badge-row">
                           <span className="tiktok-basket-icon-tag">
-                            <ShoppingBag size={10} /> ลด {stream.pinnedProduct.discountPct}%
+                            <ShoppingBag size={10} />{' '}
+                            {t('engagement:live.stream.discountPct', { percent: stream.pinnedProduct.discountPct })}
                           </span>
                           <span className="tiktok-urgency-ticker">
-                            <Sparkles size={10} /> ดีลไลฟ์สด
+                            <Sparkles size={10} /> {t('engagement:live.stream.liveDealTag')}
                           </span>
                         </div>
                         <span className="tiktok-basket-title">{stream.pinnedProduct.name}</span>
                         <div className="tiktok-basket-price-row">
-                          <span className="tiktok-basket-price-now">฿{stream.pinnedProduct.price.toLocaleString()}</span>
-                          <span className="tiktok-basket-price-old">฿{stream.pinnedProduct.originalPrice.toLocaleString()}</span>
+                          <span className="tiktok-basket-price-now">{money(stream.pinnedProduct.price)}</span>
+                          <span className="tiktok-basket-price-old">{money(stream.pinnedProduct.originalPrice)}</span>
                         </div>
                       </div>
                     </div>
 
                     <button className="tiktok-basket-buy-btn" onClick={() => handleBuy(stream.pinnedProduct)}>
-                      <span>⚡ สั่งซื้อ</span>
-                      <span style={{ fontSize: 9, opacity: 0.9, fontWeight: 700 }}>ส่งฟรี 0.-</span>
+                      <span>{t('engagement:live.stream.buyNow')}</span>
+                      <span style={{ fontSize: 9, opacity: 0.9, fontWeight: 700 }}>{t('engagement:live.stream.freeShipping')}</span>
                     </button>
                   </div>
                 </div>
@@ -505,29 +519,29 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
                 {/* ── Authentic TikTok Bottom Action Bar ── */}
                 <div className="tiktok-live-bottom-bar">
                   {/* Yellow Basket Quick Button (สินค้าในไลฟ์) */}
-                  <button className="tiktok-bottom-basket-btn" onClick={() => setIsBasketOpen(true)} title="ดูสินค้าทั้งหมดในไลฟ์สด">
+                  <button className="tiktok-bottom-basket-btn" onClick={() => setIsBasketOpen(true)} title={t('engagement:live.stream.viewAllProductsTitle')}>
                     <ShoppingBag size={18} color="#FFFFFF" />
                     <span className="tiktok-bottom-basket-badge">99+</span>
                   </button>
 
                   {/* Comment Input Pill Bar */}
                   <div className="tiktok-bottom-comment-pill" onClick={() => setIsCommentsOpen(true)}>
-                    <span className="tiktok-bottom-comment-placeholder">พิมพ์...</span>
+                    <span className="tiktok-bottom-comment-placeholder">{t('engagement:live.stream.commentPlaceholder')}</span>
                     <Smile size={18} className="tiktok-emoji-icon" />
                   </div>
 
                   {/* Rose Gift Button */}
-                  <button className="tiktok-bottom-action-icon-btn" onClick={() => handleToggleLike(stream.id)} title="ส่งหัวใจ / ดอกกุหลาบ">
+                  <button className="tiktok-bottom-action-icon-btn" onClick={() => handleToggleLike(stream.id)} title={t('engagement:live.stream.sendHeart')}>
                     <span style={{ fontSize: 16 }}>🌹</span>
                   </button>
 
                   {/* Gift Box Button */}
-                  <button className="tiktok-bottom-action-icon-btn" onClick={() => handleToggleLike(stream.id)} title="ส่งของขวัญ">
+                  <button className="tiktok-bottom-action-icon-btn" onClick={() => handleToggleLike(stream.id)} title={t('engagement:live.stream.sendGift')}>
                     <Gift size={18} color="#F43F5E" />
                   </button>
 
                   {/* Share Button */}
-                  <button className="tiktok-bottom-action-icon-btn" onClick={() => alert(`แชร์ไลฟ์สดของ ${stream.channelName} เรียบร้อยแล้ว!`)} title="แชร์ไลฟ์สด">
+                  <button className="tiktok-bottom-action-icon-btn" onClick={() => alert(t('engagement:live.stream.shareToast', { channel: stream.channelName }))} title={t('engagement:live.stream.shareTitle')}>
                     <Share2 size={16} color="#FFFFFF" />
                     <span className="tiktok-bottom-share-count">{stream.sharesCount}</span>
                   </button>
@@ -564,7 +578,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
           <div className="tiktok-comments-drawer-backdrop" onClick={() => setIsCommentsOpen(false)}>
             <div className="tiktok-comments-drawer" onClick={e => e.stopPropagation()}>
               <div className="tiktok-comments-header">
-                <span>ความคิดเห็น ({currentStream.comments.length})</span>
+                <span>{t('engagement:live.stream.commentsHeader', { count: currentStream.comments.length })}</span>
                 <button onClick={() => setIsCommentsOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
                   <X size={16} />
                 </button>
@@ -585,7 +599,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
               <form onSubmit={handleSendComment} style={{ display: 'flex', gap: 6, paddingTop: 8, borderTop: '1px solid #27272A' }}>
                 <input
                   type="text"
-                  placeholder="เพิ่มความคิดเห็นในคลิป..."
+                  placeholder={t('engagement:live.stream.commentInputPlaceholder')}
                   value={inputComment}
                   onChange={e => setInputComment(e.target.value)}
                   style={{ flex: 1, background: '#27272A', border: 'none', color: 'white', padding: '8px 12px', fontSize: 12, borderRadius: 0, outline: 'none' }}
@@ -605,7 +619,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
               <div className="tiktok-comments-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <ShoppingBag size={18} style={{ color: '#F59E0B' }} />
-                  <span>สินค้าในตะกร้าคลิปนี้ ({currentStream.channelName})</span>
+                  <span>{t('engagement:live.stream.basketHeader', { channel: currentStream.channelName })}</span>
                 </div>
                 <button onClick={() => setIsBasketOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
                   <X size={16} />
@@ -616,19 +630,19 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
                 <div style={{ background: '#27272A', padding: 12, borderRadius: 0, display: 'flex', gap: 10, alignItems: 'center' }}>
                   <img src={currentStream.pinnedProduct.image} alt={currentStream.pinnedProduct.name} style={{ width: 60, height: 60, borderRadius: 0, objectFit: 'cover' }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 10, color: '#F59E0B', fontWeight: 900, marginBottom: 2 }}>🔥 ปักหมุดในคลิป</div>
+                    <div style={{ fontSize: 10, color: '#F59E0B', fontWeight: 900, marginBottom: 2 }}>{t('engagement:live.stream.pinnedTag')}</div>
                     <div style={{ fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {currentStream.pinnedProduct.name}
                     </div>
                     <div style={{ fontSize: 15, fontWeight: 900, color: '#EF4444', marginTop: 4 }}>
-                      ฿{currentStream.pinnedProduct.price.toLocaleString()}
+                      {money(currentStream.pinnedProduct.price)}
                     </div>
                   </div>
                   <button
                     onClick={() => handleBuy(currentStream.pinnedProduct)}
                     style={{ background: '#EF4444', color: 'white', border: 'none', borderRadius: 0, padding: '8px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
                   >
-                    ใส่ตะกร้า
+                    {t('engagement:live.stream.addToCart')}
                   </button>
                 </div>
               </div>
@@ -638,12 +652,12 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
 
         {/* ── Desktop Swipe Navigation Arrows ── */}
         {activeIndex > 0 && (
-          <button className="tiktok-nav-arrow-up" onClick={handlePrev} title="คลิปก่อนหน้า (Arrow Up)">
+          <button className="tiktok-nav-arrow-up" onClick={handlePrev} title={t('engagement:live.stream.prevClip')}>
             <ChevronUp size={24} />
           </button>
         )}
         {activeIndex < mockLiveStreams.length - 1 && (
-          <button className="tiktok-nav-arrow-down" onClick={handleNext} title="คลิปถัดไป (Arrow Down)">
+          <button className="tiktok-nav-arrow-down" onClick={handleNext} title={t('engagement:live.stream.nextClip')}>
             <ChevronDown size={24} />
           </button>
         )}

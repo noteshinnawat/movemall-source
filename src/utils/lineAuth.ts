@@ -1,5 +1,8 @@
 // src/utils/lineAuth.ts — Official LINE Login v2.1 OAuth Integration
 
+import i18n from '../i18n/config';
+import { localeFromPath, resolveRootLocale, withLocale } from '../i18n/locales';
+
 export interface LineUserProfile {
   userId: string;
   displayName: string;
@@ -27,11 +30,19 @@ export function generateRandomState(length = 16): string {
 }
 
 /**
- * Get the current callback URL for LINE Login
+ * Get the current callback URL for LINE Login.
+ *
+ * The locale segment is part of the URL, so all three localized callbacks must
+ * be allow-listed in the LINE Console before release (see the deployment
+ * checklist). `/auth/line/callback` stays a legacy path that redirects to Thai.
  */
 export function getLineCallbackUrl(): string {
   if (typeof window === 'undefined') return '';
-  return `${window.location.origin}/auth/line/callback`;
+  // On the callback itself the path already carries the locale that was used at
+  // authorize time, so both requests send LINE an identical redirect_uri.
+  const locale = localeFromPath(window.location.pathname)
+    ?? resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  return `${window.location.origin}${withLocale('/auth/line/callback', locale)}`;
 }
 
 /**

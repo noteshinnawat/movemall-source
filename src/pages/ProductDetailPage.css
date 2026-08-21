@@ -1666,6 +1666,42 @@
   }
 }
 
+/* Below ~400px, longer Myanmar/English labels on the cart button no longer
+   fit alongside the buy-now button on one line — stack icon over label like
+   the chat button instead of letting the row overflow the viewport. */
+@media (max-width: 400px) {
+  .product-bottom-sticky-content {
+    gap: 4px;
+    padding: 0 8px;
+  }
+  .product-sticky-cart-btn {
+    flex-direction: column;
+    gap: 2px;
+    height: auto;
+    min-height: 44px;
+    padding: 4px 8px;
+    font-size: 10px;
+    white-space: normal;
+    text-align: center;
+  }
+  .product-sticky-buy-btn {
+    height: auto;
+    min-height: 44px;
+    padding: 4px 8px;
+  }
+  .product-sticky-buy-price-row {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0;
+  }
+  .product-sticky-buy-text {
+    font-size: 12.5px;
+  }
+  .product-sticky-buy-amount {
+    font-size: 13.5px;
+  }
+}
+
 /* ── Shopee-Style Slide-up Product Options Drawer (Color, Qty, Installment) ── */
 .product-drawer-overlay {
   position: fixed;

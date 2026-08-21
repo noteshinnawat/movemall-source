@@ -2,14 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ShoppingBag } from 'lucide-react';
 import { getProductUrl } from '../utils/seo';
+import { useLocalizedPath } from '../i18n/LocalizedLink';
+import { stripLocale } from '../i18n/locales';
 import type { Product } from '../types';
 import './LiveActivityTicker.css';
 
 interface Activity {
   product: Product;
-  timeAgo: string;
+  secondsAgo: number;
 }
 
 interface LiveActivityTickerProps {
@@ -17,8 +20,10 @@ interface LiveActivityTickerProps {
 }
 
 export function LiveActivityTicker({ products }: LiveActivityTickerProps) {
+  const { t } = useTranslation(['engagement']);
   const location = useLocation();
   const navigate = useNavigate();
+  const localizePath = useLocalizedPath();
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
 
   // Do not show on /live, /video, /creator, /checkout, /cart, /orders, /wishlist, /login, /notifications, /tracking, /seller
@@ -36,7 +41,8 @@ export function LiveActivityTicker({ products }: LiveActivityTickerProps) {
     '/tracking',
     '/seller',
   ];
-  const isHiddenRoute = hiddenRoutes.some(route => location.pathname.startsWith(route));
+  const routePathname = stripLocale(location.pathname);
+  const isHiddenRoute = hiddenRoutes.some(route => routePathname.startsWith(route));
 
   useEffect(() => {
     if (isHiddenRoute || products.length === 0) return;
@@ -47,7 +53,7 @@ export function LiveActivityTicker({ products }: LiveActivityTickerProps) {
 
       setCurrentActivity({
         product: randomProduct,
-        timeAgo: `เมื่อ ${secondsAgo} วินาทีที่แล้ว`,
+        secondsAgo,
       });
 
       // Hide after 4.5 seconds
@@ -72,15 +78,17 @@ export function LiveActivityTicker({ products }: LiveActivityTickerProps) {
     <div className="activity-ticker-container">
       <div
         className="activity-ticker"
-        onClick={() => navigate(getProductUrl(currentActivity.product))}
+        onClick={() => navigate(localizePath(getProductUrl(currentActivity.product)))}
       >
         <div className="activity-ticker__icon-badge">
           <ShoppingBag size={13} />
         </div>
         <div className="activity-ticker__body">
           <div className="activity-ticker__status-line">
-            <span className="activity-ticker__title">สินค้าขายออกแล้ว</span>
-            <span className="activity-ticker__time">• {currentActivity.timeAgo}</span>
+            <span className="activity-ticker__title">{t('engagement:live.ticker.soldTitle')}</span>
+            <span className="activity-ticker__time">
+              • {t('engagement:live.ticker.secondsAgo', { seconds: currentActivity.secondsAgo })}
+            </span>
           </div>
           <div className="activity-ticker__product">
             {currentActivity.product.name}

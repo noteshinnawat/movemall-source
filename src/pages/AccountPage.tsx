@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   User,
   ShieldCheck,
@@ -11,7 +12,6 @@ import {
   CheckCircle,
   Coins,
   Sparkles,
-  Key,
   X,
   Upload,
   Plus,
@@ -25,9 +25,17 @@ import {
 } from 'lucide-react';
 import { fetchApi, logoutApi } from '../utils/api';
 import { LineConnectModal } from '../components/LineConnectModal';
+import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
+import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import './AccountPage.css';
 
+const PAYLATER_CREDIT_LIMIT = 15000;
+
 export function AccountPage() {
+  const { t, i18n } = useTranslation(['auth', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const localizePath = useLocalizedPath();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'addresses' | 'paylater' | 'line'>('profile');
 
@@ -42,7 +50,7 @@ export function AccountPage() {
   })();
 
   // User Profile State
-  const [name, setName] = useState(savedUser?.name || 'สมาชิก Movemall');
+  const [name, setName] = useState(savedUser?.name || t('auth:account.memberFallback'));
   const [email, setEmail] = useState(savedUser?.email || '');
   const [phone, setPhone] = useState(savedUser?.phone || '');
   const [avatarUrl, setAvatarUrl] = useState(
@@ -118,7 +126,7 @@ export function AccountPage() {
     const updatedUser = {
       ...(savedUser || {}),
       id: savedUser?.id || 'usr-local',
-      name: name.trim() || 'สมาชิก Movemall',
+      name: name.trim() || t('auth:account.memberFallback'),
       email: email.trim(),
       phone: phone.trim(),
       avatarUrl: avatarUrl,
@@ -142,7 +150,7 @@ export function AccountPage() {
       }).catch(() => {});
     }
 
-    setSaveSuccessMsg('✅ บันทึกข้อมูลส่วนตัวและรูปโปรไฟล์เรียบร้อยแล้ว!');
+    setSaveSuccessMsg(t('auth:account.saveSuccess'));
     setTimeout(() => setSaveSuccessMsg(''), 4000);
   }
 
@@ -150,7 +158,7 @@ export function AccountPage() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert('กรุณาเลือกไฟล์รูปภาพขนาดไม่เกิน 5MB');
+        alert(t('auth:account.avatarTooLarge'));
         return;
       }
       const reader = new FileReader();
@@ -208,7 +216,7 @@ export function AccountPage() {
 
   function handleOpenAddAddress() {
     if (addresses.length >= 10) {
-      alert('คุณสามารถบันทึกที่อยู่จัดส่งได้สูงสุดไม่เกิน 10 ที่อยู่');
+      alert(t('auth:account.addressLimitReached'));
       return;
     }
     setEditingAddressId(null);
@@ -251,7 +259,7 @@ export function AccountPage() {
       );
     } else {
       if (addresses.length >= 10) {
-        alert('คุณสามารถบันทึกที่อยู่จัดส่งได้สูงสุดไม่เกิน 10 ที่อยู่');
+        alert(t('auth:account.addressLimitReached'));
         return;
       }
       const newAddr = {
@@ -269,7 +277,7 @@ export function AccountPage() {
   }
 
   function handleDeleteAddress(id: string) {
-    if (confirm('คุณต้องการลบที่อยู่จัดส่งนี้ใช่หรือไม่?')) {
+    if (confirm(t('auth:account.deleteAddressConfirm'))) {
       setAddresses(prev => {
         const remaining = prev.filter(a => a.id !== id);
         if (remaining.length > 0 && !remaining.some(a => a.isDefault)) {
@@ -328,7 +336,7 @@ export function AccountPage() {
       if (res.coinsBalance) setCoins(res.coinsBalance);
       else setCoins((prev: number) => prev + 50);
 
-      setOtpStatusMsg(res.message || 'ยืนยันตัวตนสำเร็จ! รับฟรี 50 Movemall Coins 🪙');
+      setOtpStatusMsg(res.message || t('auth:account.otpVerified'));
       setTimeout(() => {
         setOtpModalType(null);
       }, 1500);
@@ -336,7 +344,7 @@ export function AccountPage() {
       if (otpModalType === 'email') setIsEmailVerified(true);
       if (otpModalType === 'phone') setIsPhoneVerified(true);
       setCoins((prev: number) => prev + 50);
-      setOtpStatusMsg('ยืนยันตัวตนสำเร็จ! รับฟรี 50 Movemall Coins 🪙');
+      setOtpStatusMsg(t('auth:account.otpVerified'));
       setTimeout(() => {
         setOtpModalType(null);
       }, 1500);
@@ -346,7 +354,7 @@ export function AccountPage() {
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setPasswordMsg('❌ รหัสผ่านใหม่ทั้งสองช่องไม่ตรงกัน');
+      setPasswordMsg(t('auth:account.passwordMismatch'));
       return;
     }
 
@@ -355,12 +363,12 @@ export function AccountPage() {
         method: 'PUT',
         body: JSON.stringify({ currentPassword, newPassword }),
       });
-      setPasswordMsg('✅ เปลี่ยนรหัสผ่านความปลอดภัยเรียบร้อยแล้ว!');
+      setPasswordMsg(t('auth:account.passwordUpdated'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err) {
-      setPasswordMsg(`✅ อัปเดตรหัสผ่านความปลอดภัยเรียบร้อยแล้ว!`);
+      setPasswordMsg(t('auth:account.passwordUpdated'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -370,7 +378,7 @@ export function AccountPage() {
   function handleLogout() {
     logoutApi(); // เพิกถอน token ฝั่งเซิร์ฟเวอร์ด้วย ไม่ใช่แค่ลบทิ้งฝั่ง client
     window.dispatchEvent(new Event('movemall_auth_change'));
-    navigate('/login');
+    navigate(localizePath('/login'));
   }
 
   // ── Membership Tier Calculation (Classic -> Silver -> Gold -> Platinum VIP) ──
@@ -382,11 +390,11 @@ export function AccountPage() {
         name: 'Platinum VIP',
         icon: '👑',
         badgeTitle: '👑 MOVEMALL PLATINUM VIP',
-        roleLabel: 'สมาชิก Platinum VIP',
+        roleLabel: t('auth:account.tiers.vip.roleLabel'),
         progressPct: 100,
         nextTierName: null,
         neededAmount: 0,
-        perks: 'รับ Coins คืน 2x + Flash Sale VIP + สิทธิ์ส่งฟรีก่อนใคร',
+        perks: t('auth:account.tiers.vip.perks'),
       };
     }
     if (totalSpent >= 5000) {
@@ -395,11 +403,11 @@ export function AccountPage() {
         name: 'Gold Member',
         icon: '🥇',
         badgeTitle: '🥇 MOVEMALL GOLD MEMBER',
-        roleLabel: 'สมาชิก Gold Member',
+        roleLabel: t('auth:account.tiers.gold.roleLabel'),
         progressPct: Math.min(100, Math.round(((totalSpent - 5000) / 15000) * 100)),
         nextTierName: 'Platinum VIP',
         neededAmount: 20000 - totalSpent,
-        perks: 'รับ Coins คืน 1.5x + โค้ดส่งฟรี 4 ใบ/เดือน',
+        perks: t('auth:account.tiers.gold.perks'),
       };
     }
     if (totalSpent >= 1000) {
@@ -408,11 +416,11 @@ export function AccountPage() {
         name: 'Silver Member',
         icon: '🥈',
         badgeTitle: '🥈 MOVEMALL SILVER MEMBER',
-        roleLabel: 'สมาชิก Silver Member',
+        roleLabel: t('auth:account.tiers.silver.roleLabel'),
         progressPct: Math.min(100, Math.round(((totalSpent - 1000) / 4000) * 100)),
         nextTierName: 'Gold Member',
         neededAmount: 5000 - totalSpent,
-        perks: 'รับ Coins คืน 1.2x + โค้ดส่วนลดวันเกิด',
+        perks: t('auth:account.tiers.silver.perks'),
       };
     }
     return {
@@ -420,11 +428,11 @@ export function AccountPage() {
       name: 'Classic Member',
       icon: '🥉',
       badgeTitle: '🥉 MOVEMALL CLASSIC MEMBER',
-      roleLabel: 'สมาชิกทั่วไป (Classic)',
+      roleLabel: t('auth:account.tiers.classic.roleLabel'),
       progressPct: Math.min(100, Math.round((totalSpent / 1000) * 100)),
       nextTierName: 'Silver Member',
       neededAmount: 1000 - totalSpent,
-      perks: 'รับ 100 Coins ต้อนรับ + โค้ดส่งฟรีช้อปครั้งแรก',
+      perks: t('auth:account.tiers.classic.perks'),
     };
   })();
 
@@ -446,25 +454,25 @@ export function AccountPage() {
               className={`account-nav-btn ${activeTab === 'profile' ? 'account-nav-btn--active' : ''}`}
               onClick={() => setActiveTab('profile')}
             >
-              <User size={18} /> โปรไฟล์ส่วนตัว
+              <User size={18} /> {t('auth:account.nav.profile')}
             </button>
             <button
               className={`account-nav-btn ${activeTab === 'security' ? 'account-nav-btn--active' : ''}`}
               onClick={() => setActiveTab('security')}
             >
-              <ShieldCheck size={18} /> ยืนยันตัวตน & ความปลอดภัย
+              <ShieldCheck size={18} /> {t('auth:account.nav.security')}
             </button>
             <button
               className={`account-nav-btn ${activeTab === 'addresses' ? 'account-nav-btn--active' : ''}`}
               onClick={() => setActiveTab('addresses')}
             >
-              <MapPin size={18} /> สมุดที่อยู่จัดส่งพัสดุ
+              <MapPin size={18} /> {t('auth:account.nav.addresses')}
             </button>
             <button
               className={`account-nav-btn ${activeTab === 'paylater' ? 'account-nav-btn--active' : ''}`}
               onClick={() => setActiveTab('paylater')}
             >
-              <CreditCard size={18} /> Movemall PayLater
+              <CreditCard size={18} /> {t('auth:account.nav.payLater')}
             </button>
             <button
               className={`account-nav-btn ${activeTab === 'line' ? 'account-nav-btn--active' : ''}`}
@@ -482,7 +490,7 @@ export function AccountPage() {
                 display: 'inline-flex',
                 alignItems: 'center',
               }}>LINE</span>
-              การแจ้งเตือน LINE Official
+              {t('auth:account.nav.line')}
               {!isLineConnected && (
                 <span style={{
                   marginLeft: 'auto',
@@ -492,7 +500,7 @@ export function AccountPage() {
                   fontWeight: 700,
                   padding: '1px 6px',
                   borderRadius: '4px',
-                }}>+50 Coins</span>
+                }}>{t('auth:account.nav.lineBonus')}</span>
               )}
             </button>
             <div style={{ height: 1, background: '#E2E8F0', margin: '8px 0' }} />
@@ -509,7 +517,7 @@ export function AccountPage() {
                   marginBottom: 6,
                 }}
               >
-                <ShieldCheck size={18} /> 👑 จัดการระบบ Super Admin
+                <ShieldCheck size={18} /> {t('auth:account.nav.admin')}
               </Link>
             )}
             <Link
@@ -523,7 +531,7 @@ export function AccountPage() {
                 border: '1px solid #BFDBFE',
               }}
             >
-              <Store size={18} /> 🏪 ศูนย์ผู้ขาย (Seller Centre)
+              <Store size={18} /> {t('auth:account.nav.sellerCentre')}
             </Link>
             <button
               type="button"
@@ -538,7 +546,7 @@ export function AccountPage() {
                 cursor: 'pointer',
               }}
             >
-              <LogOut size={18} /> 🚪 ออกจากระบบ
+              <LogOut size={18} /> {t('auth:account.nav.logout')}
             </button>
           </nav>
         </aside>
@@ -547,8 +555,8 @@ export function AccountPage() {
         <section className="account-content">
           {activeTab === 'profile' && (
             <div>
-              <h1 className="account-section-title">โปรไฟล์ส่วนตัว (Personal Profile)</h1>
-              <p className="account-section-sub">ข้อมูลส่วนตัว สมาชิก และ Coins</p>
+              <h1 className="account-section-title">{t('auth:account.profile.title')}</h1>
+              <p className="account-section-sub">{t('auth:account.profile.subtitle')}</p>
 
               <div className="account-card account-vip-card">
                 <div className="account-vip-card__header">
@@ -557,18 +565,21 @@ export function AccountPage() {
                 </div>
                 <div className="account-vip-card__body">
                   <div>
-                    <span className="account-vip-label">ยอดเหรียญสะสม Movemall Coins</span>
-                    <h2 className="account-vip-val">🪙 {coins.toLocaleString()} <span className="account-vip-unit">Coins</span></h2>
-                    <span className="account-vip-sub">💡 ใช้เป็นส่วนลดเงินสด 1 Coin = 1 บาท ในขั้นตอนชำระเงิน</span>
+                    <span className="account-vip-label">{t('auth:account.profile.coinsLabel')}</span>
+                    <h2 className="account-vip-val">
+                      {t('auth:account.profile.coinsValue', { count: coins })}{' '}
+                      <span className="account-vip-unit">{t('auth:account.profile.coinsUnit')}</span>
+                    </h2>
+                    <span className="account-vip-sub">{t('auth:account.profile.coinsHint')}</span>
                     <div style={{ marginTop: 10, fontSize: '0.8rem', color: '#DBEAFE', display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span>🎁 สิทธิประโยชน์ระดับปัจจุบัน:</span>
+                      <span>{t('auth:account.profile.tierPerksLabel')}</span>
                       <strong>{currentTier.perks}</strong>
                     </div>
                   </div>
                   <div className="account-vip-actions">
-                    <Link to="/games" className="account-vip-btn">
-                      🪙 แลกรางวัล
-                    </Link>
+                    <LocalizedLink to="/games" className="account-vip-btn">
+                      {t('auth:account.profile.redeemRewards')}
+                    </LocalizedLink>
                   </div>
                 </div>
 
@@ -582,8 +593,15 @@ export function AccountPage() {
                     color: 'white',
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span>อีก <strong>฿{currentTier.neededAmount.toLocaleString()}</strong> ถึงระดับ <strong>{currentTier.nextTierName}</strong></span>
-                      <span>ยอดช้อปสะสม ฿{totalSpent.toLocaleString()}</span>
+                      <span>
+                        {t('auth:account.profile.tierProgress', {
+                          amount: formatCurrency(currentTier.neededAmount, locale),
+                          tier: currentTier.nextTierName,
+                        })}
+                      </span>
+                      <span>
+                        {t('auth:account.profile.totalSpent', { amount: formatCurrency(totalSpent, locale) })}
+                      </span>
                     </div>
                     <div style={{
                       width: '100%',
@@ -630,24 +648,24 @@ export function AccountPage() {
                   fontWeight: 900
                 }}>
                   <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>100</span>
-                  <span style={{ fontSize: '0.6rem', color: '#059669', fontWeight: 700 }}>แต้ม</span>
+                  <span style={{ fontSize: '0.6rem', color: '#059669', fontWeight: 700 }}>{t('auth:account.profile.trustUnit')}</span>
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <ShieldCheck size={18} color="#10b981" /> คะแนนความน่าเชื่อถือผู้ซื้อ (Buyer Trust Score)
+                      <ShieldCheck size={18} color="#10b981" /> {t('auth:account.profile.trustTitle')}
                     </h3>
                     <span style={{ fontSize: '0.75rem', background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: 4, fontWeight: 700 }}>
-                      ✓ ระดับ: ผู้ซื้อคุณภาพสูงสุด (Excellent)
+                      {t('auth:account.profile.trustBadge')}
                     </span>
                   </div>
                   <p style={{ margin: '4px 0 8px 0', fontSize: '0.8rem', color: '#64748b' }}>
-                    รับพัสดุ COD <strong>100%</strong> · ไม่มีประวัติปฏิเสธรับ
+                    {t('auth:account.profile.trustSummary')}
                   </p>
                   <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', color: '#475569', flexWrap: 'wrap' }}>
-                    <span>✅ สิทธิ์เก็บเงินปลายทาง (COD) ไม่จำกัดวงเงิน</span>
-                    <span>✅ ได้รับความสำคัญในการจัดส่งพัสดุด่วน</span>
-                    <span>✅ อนุมัติการคืนเงินด่วนพิเศษ (Fast Refund)</span>
+                    <span>{t('auth:account.profile.trustPerkCod')}</span>
+                    <span>{t('auth:account.profile.trustPerkPriority')}</span>
+                    <span>{t('auth:account.profile.trustPerkRefund')}</span>
                   </div>
                 </div>
               </div>
@@ -655,29 +673,29 @@ export function AccountPage() {
               <div className="account-card">
                 <div className="account-grid-2">
                   <div className="account-field">
-                    <label className="account-label">ชื่อ-นามสกุล</label>
-                    <input type="text" className="account-input" value={name} onChange={e => setName(e.target.value)} placeholder="ชื่อ นามสกุล" />
+                    <label className="account-label">{t('auth:account.profile.nameLabel')}</label>
+                    <input type="text" className="account-input" value={name} onChange={e => setName(e.target.value)} placeholder={t('auth:account.profile.namePlaceholder')} />
                   </div>
                   <div className="account-field">
-                    <label className="account-label">อีเมล (Email)</label>
+                    <label className="account-label">{t('auth:account.profile.emailLabel')}</label>
                     <input type="email" className="account-input" value={email} onChange={e => setEmail(e.target.value)} placeholder="user@example.com" />
                   </div>
                   <div className="account-field">
-                    <label className="account-label">เบอร์โทรศัพท์ (สำหรับติดต่อ & รับพัสดุ)</label>
+                    <label className="account-label">{t('auth:account.profile.phoneLabel')}</label>
                     <input type="tel" className="account-input" value={phone} onChange={e => setPhone(e.target.value)} placeholder="0812345678" />
                   </div>
                   <div className="account-field">
-                    <label className="account-label">ระดับสมาชิก (Tier)</label>
-                    <input type="text" className="account-input" value={`${currentTier.badgeTitle} (${currentTier.roleLabel})`} disabled style={{ background: '#f1f5f9', cursor: 'not-allowed' }} />
+                    <label className="account-label">{t('auth:account.profile.tierLabel')}</label>
+                    <input type="text" className="account-input" value={t('auth:account.profile.tierValue', { badge: currentTier.badgeTitle, role: currentTier.roleLabel })} disabled style={{ background: '#f1f5f9', cursor: 'not-allowed' }} />
                   </div>
                 </div>
 
                 <div className="account-field" style={{ marginTop: '1rem' }}>
-                  <label className="account-label">รูปโปรไฟล์ & อวตาร (Avatar Image)</label>
+                  <label className="account-label">{t('auth:account.profile.avatarLabel')}</label>
                   <div className="account-avatar-picker">
                     <div style={{ position: 'relative', display: 'inline-block' }}>
-                      <img src={avatarUrl} alt="Avatar Preview" className="account-avatar-preview" />
-                      <label className="account-avatar-upload-icon-btn" title="อัปโหลดรูปจากเครื่อง">
+                      <img src={avatarUrl} alt={t('auth:account.profile.avatarPreviewAlt')} className="account-avatar-preview" />
+                      <label className="account-avatar-upload-icon-btn" title={t('auth:account.profile.avatarUploadTitle')}>
                         <Upload size={13} />
                         <input
                           type="file"
@@ -692,7 +710,7 @@ export function AccountPage() {
                       <div className="account-avatar-action-row">
                         <label className="account-avatar-file-label">
                           <Upload size={14} />
-                          📷 เลือกรูปโปรไฟล์ใหม่จากเครื่อง (มือถือ / คอม)
+                          {t('auth:account.profile.avatarPickFile')}
                           <input
                             type="file"
                             accept="image/*"
@@ -703,27 +721,27 @@ export function AccountPage() {
                       </div>
 
                       <div className="account-avatar-presets">
-                        <span style={{ fontSize: '0.75rem', color: '#6B7280', fontWeight: 600 }}>หรือเลือกอวตารทางการ:</span>
+                        <span style={{ fontSize: '0.75rem', color: '#6B7280', fontWeight: 600 }}>{t('auth:account.profile.avatarPresetsLabel')}</span>
                         <button
                           type="button"
                           className="account-preset-btn"
                           onClick={() => setAvatarUrl('https://images.unsplash.com/photo-1535713875002-d1d0cf377fc6?auto=format&fit=crop&w=200&q=80')}
                         >
-                          👤 ชาย
+                          {t('auth:account.profile.avatarMale')}
                         </button>
                         <button
                           type="button"
                           className="account-preset-btn"
                           onClick={() => setAvatarUrl('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80')}
                         >
-                          👩 หญิง
+                          {t('auth:account.profile.avatarFemale')}
                         </button>
                         <button
                           type="button"
                           className="account-preset-btn"
                           onClick={() => setAvatarUrl('https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80')}
                         >
-                          🧑 ธุรกิจ
+                          {t('auth:account.profile.avatarBusiness')}
                         </button>
                       </div>
                     </div>
@@ -742,7 +760,7 @@ export function AccountPage() {
                   className="account-btn-primary"
                   style={{ marginTop: '1.25rem' }}
                 >
-                  💾 บันทึกข้อมูลส่วนตัว
+                  {t('auth:account.profile.save')}
                 </button>
               </div>
             </div>
@@ -750,8 +768,8 @@ export function AccountPage() {
 
           {activeTab === 'security' && (
             <div>
-              <h1 className="account-section-title">ยืนยันตัวตน & ความปลอดภัย (Security & OTP Hub)</h1>
-              <p className="account-section-sub">ยืนยันข้อมูลเพื่อรับส่งฟรีและ 100 Coins</p>
+              <h1 className="account-section-title">{t('auth:account.security.title')}</h1>
+              <p className="account-section-sub">{t('auth:account.security.subtitle')}</p>
 
               {/* Email Verification Card */}
               <div className="verify-card">
@@ -760,16 +778,16 @@ export function AccountPage() {
                     <Mail size={22} />
                   </div>
                   <div>
-                    <h3 className="verify-title">ยืนยันอีเมล (Email Verification)</h3>
+                    <h3 className="verify-title">{t('auth:account.security.emailTitle')}</h3>
                     <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: '2px 0' }}>{email}</p>
                     <span className={`verify-status-badge ${isEmailVerified ? 'verify-status-badge--verified' : 'verify-status-badge--unverified'}`}>
-                      {isEmailVerified ? '✓ ยืนยันเรียบร้อยแล้ว' : '⚠ ยังไม่ได้ยืนยัน'}
+                      {isEmailVerified ? t('auth:account.security.verified') : t('auth:account.security.unverified')}
                     </span>
                   </div>
                 </div>
                 {!isEmailVerified ? (
                   <button className="account-btn-primary" onClick={() => handleRequestOtp('email')}>
-                    ขอรับ OTP ยืนยัน
+                    {t('auth:account.security.requestEmailOtp')}
                   </button>
                 ) : (
                   <CheckCircle size={24} color="#10b981" />
@@ -783,16 +801,16 @@ export function AccountPage() {
                     <Phone size={22} />
                   </div>
                   <div>
-                    <h3 className="verify-title">ยืนยันเบอร์โทรศัพท์ (SMS Phone Verification)</h3>
+                    <h3 className="verify-title">{t('auth:account.security.phoneTitle')}</h3>
                     <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: '2px 0' }}>{phone}</p>
                     <span className={`verify-status-badge ${isPhoneVerified ? 'verify-status-badge--verified' : 'verify-status-badge--unverified'}`}>
-                      {isPhoneVerified ? '✓ ยืนยันเรียบร้อยแล้ว' : '⚠ ยังไม่ได้ยืนยัน (รับฟรี 50 Coins)'}
+                      {isPhoneVerified ? t('auth:account.security.verified') : t('auth:account.security.unverifiedPhone')}
                     </span>
                   </div>
                 </div>
                 {!isPhoneVerified ? (
                   <button className="account-btn-primary" onClick={() => handleRequestOtp('phone')}>
-                    ขอรับ SMS OTP
+                    {t('auth:account.security.requestSmsOtp')}
                   </button>
                 ) : (
                   <CheckCircle size={24} color="#10b981" />
@@ -802,25 +820,25 @@ export function AccountPage() {
               {/* Password Change Form */}
               <div className="account-card" style={{ marginTop: '2rem' }}>
                 <h3 className="verify-title" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Lock size={18} /> เปลี่ยนรหัสผ่านความปลอดภัย
+                  <Lock size={18} /> {t('auth:account.security.changePasswordTitle')}
                 </h3>
                 {passwordMsg && <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#2563eb', marginBottom: '1rem' }}>{passwordMsg}</p>}
                 <form onSubmit={handleChangePassword}>
                   <div className="account-field">
-                    <label className="account-label">รหัสผ่านปัจจุบัน</label>
+                    <label className="account-label">{t('auth:account.security.currentPassword')}</label>
                     <input type="password" required className="account-input" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} />
                   </div>
                   <div className="account-grid-2">
                     <div className="account-field">
-                      <label className="account-label">รหัสผ่านใหม่</label>
+                      <label className="account-label">{t('auth:account.security.newPassword')}</label>
                       <input type="password" required className="account-input" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
                     </div>
                     <div className="account-field">
-                      <label className="account-label">ยืนยันรหัสผ่านใหม่</label>
+                      <label className="account-label">{t('auth:account.security.confirmPassword')}</label>
                       <input type="password" required className="account-input" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
                     </div>
                   </div>
-                  <button type="submit" className="account-btn-primary">อัปเดตรหัสผ่านใหม่</button>
+                  <button type="submit" className="account-btn-primary">{t('auth:account.security.updatePassword')}</button>
                 </form>
               </div>
             </div>
@@ -830,14 +848,14 @@ export function AccountPage() {
             <div>
               <div className="account-address-header">
                 <div>
-                  <h1 className="account-section-title">สมุดที่อยู่จัดส่งพัสดุ (Shipping Address Book)</h1>
+                  <h1 className="account-section-title">{t('auth:account.addresses.title')}</h1>
                   <p className="account-section-sub" style={{ marginBottom: 0 }}>
-                    ที่อยู่จัดส่ง · สูงสุด 10 ที่อยู่
+                    {t('auth:account.addresses.subtitle')}
                   </p>
                 </div>
                 <div className="account-address-header-actions">
                   <span className="account-address-count-badge">
-                    📍 {addresses.length}/10 ที่อยู่
+                    {t('auth:account.addresses.countBadge', { count: addresses.length })}
                   </span>
                   <button
                     type="button"
@@ -845,7 +863,7 @@ export function AccountPage() {
                     onClick={handleOpenAddAddress}
                     disabled={addresses.length >= 10}
                   >
-                    <Plus size={16} /> เพิ่มที่อยู่ใหม่
+                    <Plus size={16} /> {t('auth:account.addresses.add')}
                   </button>
                 </div>
               </div>
@@ -853,10 +871,10 @@ export function AccountPage() {
               {addresses.length === 0 ? (
                 <div className="account-card" style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
                   <MapPin size={40} style={{ color: '#9CA3AF', margin: '0 auto 10px auto' }} />
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#111827', margin: '0 0 6px 0' }}>ยังไม่มีที่อยู่สำหรับจัดส่ง</h3>
-                  <p style={{ fontSize: '0.85rem', color: '#6B7280', margin: '0 0 16px 0' }}>เพิ่มที่อยู่เพื่อความสะดวกรวดเร็วในการสั่งซื้อสินค้า</p>
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#111827', margin: '0 0 6px 0' }}>{t('auth:account.addresses.emptyTitle')}</h3>
+                  <p style={{ fontSize: '0.85rem', color: '#6B7280', margin: '0 0 16px 0' }}>{t('auth:account.addresses.emptySubtitle')}</p>
                   <button type="button" className="account-btn-primary" onClick={handleOpenAddAddress}>
-                    <Plus size={16} /> เพิ่มที่อยู่แรก
+                    <Plus size={16} /> {t('auth:account.addresses.addFirst')}
                   </button>
                 </div>
               ) : (
@@ -870,10 +888,12 @@ export function AccountPage() {
                         <div className="account-address-card__info">
                           <div className="account-address-card__name-row">
                             <h3 className="account-address-card__recipient">{addr.recipientName}</h3>
-                            <span className="account-address-card__phone">({addr.phone})</span>
+                            <span className="account-address-card__phone">
+                              {t('auth:account.addresses.phoneWrapped', { phone: addr.phone })}
+                            </span>
                             {addr.isDefault && (
                               <span className="account-address-card__default-badge">
-                                ✓ ที่อยู่หลักสำหรับจัดส่ง
+                                {t('auth:account.addresses.defaultBadge')}
                               </span>
                             )}
                           </div>
@@ -888,7 +908,7 @@ export function AccountPage() {
                             className="account-address-action-btn account-address-action-btn--edit"
                             onClick={() => handleOpenEditAddress(addr)}
                           >
-                            <Pencil size={13} /> แก้ไขที่อยู่
+                            <Pencil size={13} /> {t('auth:account.addresses.edit')}
                           </button>
 
                           {!addr.isDefault && (
@@ -898,15 +918,15 @@ export function AccountPage() {
                                 className="account-address-action-btn account-address-action-btn--set-default"
                                 onClick={() => handleSetDefaultAddress(addr.id)}
                               >
-                                ตั้งเป็นที่อยู่หลัก
+                                {t('auth:account.addresses.setDefault')}
                               </button>
                               <button
                                 type="button"
                                 className="account-address-action-btn account-address-action-btn--delete"
                                 onClick={() => handleDeleteAddress(addr.id)}
-                                title="ลบที่อยู่นี้"
+                                title={t('auth:account.addresses.deleteTitle')}
                               >
-                                <Trash2 size={13} /> ลบ
+                                <Trash2 size={13} /> {t('auth:account.addresses.delete')}
                               </button>
                             </>
                           )}
@@ -921,15 +941,19 @@ export function AccountPage() {
 
           {activeTab === 'paylater' && (
             <div>
-              <h1 className="account-section-title">Movemall PayLater (ผ่อน 0% นานสูงสุด 3 เดือน)</h1>
-              <p className="account-section-sub">วงเงินสินเชื่อช้อปก่อนจ่ายทีหลัง อนุมัติไว ไม่ต้องใช้เอกสาร</p>
+              <h1 className="account-section-title">{t('auth:account.payLater.title')}</h1>
+              <p className="account-section-sub">{t('auth:account.payLater.subtitle')}</p>
 
               <div className="account-card" style={{ borderLeft: '4px solid #10b981' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>สถานะสิทธิ์ Movemall PayLater</span>
-                    <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#10b981', margin: '0.25rem 0' }}>✓ อนุมัติวงเงินแล้ว ฿15,000 บาท</h2>
-                    <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>วงเงิน ฿15,000 · ผ่อน 0% สูงสุด 3 เดือน</p>
+                    <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>{t('auth:account.payLater.statusLabel')}</span>
+                    <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#10b981', margin: '0.25rem 0' }}>
+                      {t('auth:account.payLater.approved', { limit: formatCurrency(PAYLATER_CREDIT_LIMIT, locale) })}
+                    </h2>
+                    <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>
+                      {t('auth:account.payLater.terms', { limit: formatCurrency(PAYLATER_CREDIT_LIMIT, locale) })}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -942,9 +966,9 @@ export function AccountPage() {
                 <div>
                   <h1 className="account-section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ background: '#06C755', color: '#fff', fontSize: '12px', fontWeight: 900, padding: '3px 7px', borderRadius: '4px' }}>LINE</span>
-                    การแจ้งเตือนและบริการ Movemall x LINE Official
+                    {t('auth:account.line.title')}
                   </h1>
-                  <p className="account-section-sub">รับใบเสร็จ สถานะพัสดุ และดีลผ่าน LINE</p>
+                  <p className="account-section-sub">{t('auth:account.line.subtitle')}</p>
                 </div>
                 <button
                   type="button"
@@ -953,7 +977,7 @@ export function AccountPage() {
                   onClick={() => setIsLineModalOpen(true)}
                 >
                   <Smartphone size={16} />
-                  {isLineConnected ? '📱 ตั้งค่า LINE' : '🟢 เชื่อมต่อ LINE · +50 Coins'}
+                  {isLineConnected ? t('auth:account.line.manageCta') : t('auth:account.line.connectCta')}
                 </button>
               </div>
 
@@ -961,14 +985,14 @@ export function AccountPage() {
               <div className="account-card" style={{ borderLeft: isLineConnected ? '4px solid #06C755' : '4px solid #F59E0B' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                   <div>
-                    <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>สถานะการเชื่อมต่อ LINE Official</span>
+                    <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>{t('auth:account.line.statusLabel')}</span>
                     <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: isLineConnected ? '#06C755' : '#D97706', margin: '0.25rem 0' }}>
-                      {isLineConnected ? '🟢 เชื่อมต่อแล้ว' : 'ยังไม่ได้เชื่อมต่อ LINE'}
+                      {isLineConnected ? t('auth:account.line.connected') : t('auth:account.line.disconnected')}
                     </h2>
                     <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>
                       {isLineConnected
-                        ? 'รับสถานะออเดอร์และพัสดุผ่าน LINE'
-                        : 'เชื่อมต่อเพื่อรับ 50 Coins และสถานะพัสดุ'}
+                        ? t('auth:account.line.connectedDesc')
+                        : t('auth:account.line.disconnectedDesc')}
                     </p>
                   </div>
                   <button
@@ -977,7 +1001,7 @@ export function AccountPage() {
                     style={{ background: isLineConnected ? '#2563EB' : '#06C755' }}
                     onClick={() => setIsLineModalOpen(true)}
                   >
-                    {isLineConnected ? 'จัดการการแจ้งเตือน' : 'เชื่อมต่อทันที'}
+                    {isLineConnected ? t('auth:account.line.manageShort') : t('auth:account.line.connectShort')}
                   </button>
                 </div>
               </div>
@@ -987,30 +1011,30 @@ export function AccountPage() {
                 <div className="account-card" style={{ padding: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', color: '#2563EB', fontWeight: 700, fontSize: '14px' }}>
                     <Truck size={18} />
-                    <span>แจ้งเตือนพัสดุเรียลไทม์</span>
+                    <span>{t('auth:account.line.featureTrackingTitle')}</span>
                   </div>
                   <p style={{ fontSize: '12px', color: '#6B7280', margin: 0, lineHeight: 1.4 }}>
-                    รับเลขพัสดุและลิงก์ติดตาม GPS
+                    {t('auth:account.line.featureTrackingDesc')}
                   </p>
                 </div>
 
                 <div className="account-card" style={{ padding: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', color: '#059669', fontWeight: 700, fontSize: '14px' }}>
                     <Check size={18} />
-                    <span>ใบเสร็จดิจิทัล (E-Receipt)</span>
+                    <span>{t('auth:account.line.featureReceiptTitle')}</span>
                   </div>
                   <p style={{ fontSize: '12px', color: '#6B7280', margin: 0, lineHeight: 1.4 }}>
-                    รับใบเสร็จและประวัติชำระเงิน
+                    {t('auth:account.line.featureReceiptDesc')}
                   </p>
                 </div>
 
                 <div className="account-card" style={{ padding: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', color: '#D97706', fontWeight: 700, fontSize: '14px' }}>
                     <Coins size={18} />
-                    <span>แจ้งเตือน Coins & Flash Sale</span>
+                    <span>{t('auth:account.line.featureDealsTitle')}</span>
                   </div>
                   <p style={{ fontSize: '12px', color: '#6B7280', margin: 0, lineHeight: 1.4 }}>
-                    เตือนเช็กอินและดีลสินค้าโปรด
+                    {t('auth:account.line.featureDealsDesc')}
                   </p>
                 </div>
               </div>
@@ -1026,11 +1050,14 @@ export function AccountPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #E5E7EB', paddingBottom: '0.75rem' }}>
               <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <MapPin size={20} color="#2563EB" />
-                {editingAddressId ? 'แก้ไขที่อยู่จัดส่งพัสดุ' : 'เพิ่มที่อยู่จัดส่งพัสดุใหม่'}
+                {editingAddressId
+                  ? t('auth:account.addresses.modalEditTitle')
+                  : t('auth:account.addresses.modalAddTitle')}
               </h2>
               <button
                 type="button"
                 onClick={() => setIsAddressModalOpen(false)}
+                aria-label={t('auth:account.addresses.modalClose')}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}
               >
                 <X size={20} />
@@ -1040,23 +1067,23 @@ export function AccountPage() {
             <form onSubmit={handleSaveAddress}>
               <div className="account-grid-2">
                 <div className="account-field">
-                  <label className="account-label">ชื่อ-นามสกุล ผู้รับ *</label>
+                  <label className="account-label">{t('auth:account.addresses.recipientLabel')}</label>
                   <input
                     type="text"
                     required
                     className="account-input"
-                    placeholder="เช่น สมชาย ใจดี"
+                    placeholder={t('auth:account.addresses.recipientPlaceholder')}
                     value={addressForm.recipientName}
                     onChange={e => setAddressForm({ ...addressForm, recipientName: e.target.value })}
                   />
                 </div>
                 <div className="account-field">
-                  <label className="account-label">เบอร์โทรศัพท์ติดต่อ *</label>
+                  <label className="account-label">{t('auth:account.addresses.phoneLabel')}</label>
                   <input
                     type="tel"
                     required
                     className="account-input"
-                    placeholder="เช่น 0812345678"
+                    placeholder={t('auth:account.addresses.phonePlaceholder')}
                     value={addressForm.phone}
                     onChange={e => setAddressForm({ ...addressForm, phone: e.target.value })}
                   />
@@ -1064,12 +1091,12 @@ export function AccountPage() {
               </div>
 
               <div className="account-field">
-                <label className="account-label">ที่อยู่ (บ้านเลขที่, ซอย, หมู่, ถนน, อาคาร) *</label>
+                <label className="account-label">{t('auth:account.addresses.lineLabel')}</label>
                 <input
                   type="text"
                   required
                   className="account-input"
-                  placeholder="เช่น 99/1 อาคารมูฟมอลล์ ชั้น 5 ถ.สุขุมวิท"
+                  placeholder={t('auth:account.addresses.linePlaceholder')}
                   value={addressForm.addressLine}
                   onChange={e => setAddressForm({ ...addressForm, addressLine: e.target.value })}
                 />
@@ -1077,23 +1104,23 @@ export function AccountPage() {
 
               <div className="account-grid-2">
                 <div className="account-field">
-                  <label className="account-label">แขวง / ตำบล, เขต / อำเภอ *</label>
+                  <label className="account-label">{t('auth:account.addresses.districtLabel')}</label>
                   <input
                     type="text"
                     required
                     className="account-input"
-                    placeholder="เช่น แขวงคลองเตย เขตคลองเตย"
+                    placeholder={t('auth:account.addresses.districtPlaceholder')}
                     value={addressForm.district}
                     onChange={e => setAddressForm({ ...addressForm, district: e.target.value })}
                   />
                 </div>
                 <div className="account-field">
-                  <label className="account-label">จังหวัด *</label>
+                  <label className="account-label">{t('auth:account.addresses.provinceLabel')}</label>
                   <input
                     type="text"
                     required
                     className="account-input"
-                    placeholder="เช่น กรุงเทพมหานคร"
+                    placeholder={t('auth:account.addresses.provincePlaceholder')}
                     value={addressForm.province}
                     onChange={e => setAddressForm({ ...addressForm, province: e.target.value })}
                   />
@@ -1101,14 +1128,14 @@ export function AccountPage() {
               </div>
 
               <div className="account-field">
-                <label className="account-label">รหัสไปรษณีย์ *</label>
+                <label className="account-label">{t('auth:account.addresses.postalLabel')}</label>
                 <input
                   type="text"
                   required
                   pattern="[0-9]{5}"
                   maxLength={5}
                   className="account-input"
-                  placeholder="เช่น 10110"
+                  placeholder={t('auth:account.addresses.postalPlaceholder')}
                   value={addressForm.postalCode}
                   onChange={e => setAddressForm({ ...addressForm, postalCode: e.target.value })}
                 />
@@ -1120,7 +1147,7 @@ export function AccountPage() {
                   checked={addressForm.isDefault}
                   onChange={e => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
                 />
-                <span>ตั้งที่อยู่นี้เป็นที่อยู่หลักสำหรับจัดส่ง</span>
+                <span>{t('auth:account.addresses.setDefaultCheckbox')}</span>
               </label>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '1.25rem', borderTop: '1px solid #E5E7EB', paddingTop: '1rem' }}>
@@ -1129,10 +1156,10 @@ export function AccountPage() {
                   className="account-btn-outline"
                   onClick={() => setIsAddressModalOpen(false)}
                 >
-                  ยกเลิก
+                  {t('auth:account.addresses.cancel')}
                 </button>
                 <button type="submit" className="account-btn-primary">
-                  💾 บันทึกที่อยู่
+                  {t('auth:account.addresses.save')}
                 </button>
               </div>
             </form>
@@ -1146,14 +1173,20 @@ export function AccountPage() {
           <div className="otp-modal">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>
-                {otpModalType === 'email' ? '📧 ยืนยันรหัส OTP ผ่านอีเมล' : '📱 ยืนยันรหัส SMS OTP'}
+                {otpModalType === 'email'
+                  ? t('auth:account.otpModal.emailTitle')
+                  : t('auth:account.otpModal.phoneTitle')}
               </h2>
-              <button onClick={() => setOtpModalType(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+              <button
+                onClick={() => setOtpModalType(null)}
+                aria-label={t('auth:account.otpModal.close')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+              >
                 <X size={20} />
               </button>
             </div>
             <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
-              ระบบได้ส่งรหัส OTP 6 หลักไปที่ {otpModalType === 'email' ? email : phone}
+              {t('auth:account.otpModal.sentTo', { target: otpModalType === 'email' ? email : phone })}
             </p>
 
             <div style={{ background: '#eff6ff', padding: '0.5rem', borderRadius: 6, margin: '1rem 0', fontSize: '0.85rem', color: '#1e40af' }}>
@@ -1167,6 +1200,7 @@ export function AccountPage() {
                   type="text"
                   maxLength={1}
                   className="otp-digit"
+                  aria-label={t('auth:account.otpModal.digitAria', { position: formatNumber(idx + 1, locale) })}
                   value={digit}
                   onChange={e => {
                     const val = e.target.value;
@@ -1181,7 +1215,7 @@ export function AccountPage() {
             {otpStatusMsg && <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#10b981' }}>{otpStatusMsg}</p>}
 
             <button className="account-btn-primary" style={{ width: '100%', padding: '0.75rem' }} onClick={handleVerifyOtp}>
-              ยืนยันรหัส OTP และรับฟรี 50 Coins
+              {t('auth:account.otpModal.confirm')}
             </button>
           </div>
         </div>

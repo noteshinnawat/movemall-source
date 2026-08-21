@@ -1,6 +1,7 @@
 // src/components/LineConnectModal.tsx — 1-Click LINE Official Account Connect & Flex Message Simulator
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   X,
   CheckCircle2,
@@ -16,8 +17,17 @@ import {
   Gift,
   RefreshCw,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { formatCurrency } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import './LineConnectModal.css';
+
+const SAMPLE_CARRIER = 'Flash Express (Next-Day)';
+const SAMPLE_SHIPPED_PRODUCT = 'Sony WH-1000XM5 Wireless Headphones';
+const SAMPLE_FLASH_PRODUCT = 'Nike Air Max 270 React Special Edition';
+const SAMPLE_FLASH_OLD_PRICE = 4200;
+const SAMPLE_FLASH_NEW_PRICE = 2940;
+type SimulatedSentTime = 'justNow' | 't1245' | 't1000' | 't1930';
 
 export interface LineConnectModalProps {
   isOpen: boolean;
@@ -40,6 +50,9 @@ export function LineConnectModal({
   initialOrderId,
   initialTotal,
 }: LineConnectModalProps) {
+  const { t, i18n } = useTranslation(['commerce', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const money = (value: number) => formatCurrency(value, locale);
   const [activeTab, setActiveTab] = useState<'connect' | 'simulator' | 'settings'>('connect');
   const [isConnected, setIsConnected] = useState<boolean>(() => {
     try {
@@ -70,9 +83,9 @@ export function LineConnectModal({
       // ignore
     }
     return {
-      displayName: 'สมชาย ใจดี',
+      displayName: t('commerce:lineConnect.demoProfile.displayName'),
       pictureUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-      statusMessage: 'ช้อปปิ้งเพลินๆ ที่ Movemall ✨',
+      statusMessage: t('commerce:lineConnect.demoProfile.statusMessage'),
       lineUserId: 'U' + Math.random().toString(36).substring(2, 12).toUpperCase(),
     };
   });
@@ -96,7 +109,7 @@ export function LineConnectModal({
   const [isConnecting, setIsConnecting] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [simulatorMessageType, setSimulatorMessageType] = useState<'shipped' | 'receipt' | 'live' | 'flash'>('shipped');
-  const [simulatedSentTime, setSimulatedSentTime] = useState('เมื่อสักครู่');
+  const [simulatedSentTime, setSimulatedSentTime] = useState<SimulatedSentTime>('justNow');
 
   useEffect(() => {
     if (isOpen) {
@@ -156,7 +169,7 @@ export function LineConnectModal({
   }
 
   function handleDisconnectLine() {
-    if (!confirm('คุณต้องการยกเลิกการเชื่อมต่อ LINE Official Account ใช่หรือไม่? คุณจะไม่ได้รับการแจ้งเตือนพัสดุผ่าน LINE อีกต่อไป')) {
+    if (!confirm(t('commerce:lineConnect.disconnectConfirm'))) {
       return;
     }
     setIsConnected(false);
@@ -189,10 +202,10 @@ export function LineConnectModal({
             </div>
             <div>
               <h2 className="line-modal-title">Movemall x LINE Official</h2>
-              <p className="line-modal-subtitle">ระบบแจ้งเตือนออเดอร์และบริการพิเศษผ่าน LINE แบบเรียลไทม์</p>
+              <p className="line-modal-subtitle">{t('commerce:lineConnect.subtitle')}</p>
             </div>
           </div>
-          <button className="line-modal-close" onClick={onClose} aria-label="ปิดหน้าต่าง">
+          <button className="line-modal-close" onClick={onClose} aria-label={t('commerce:lineConnect.close')}>
             <X size={20} />
           </button>
         </div>
@@ -204,21 +217,23 @@ export function LineConnectModal({
             onClick={() => setActiveTab('connect')}
           >
             <ShieldCheck size={16} />
-            {isConnected ? 'สถานะการเชื่อมต่อ' : 'เชื่อมต่อบัญชี (+50 Coins)'}
+            {isConnected
+              ? t('commerce:lineConnect.tabStatus')
+              : t('commerce:lineConnect.tabConnect')}
           </button>
           <button
             className={`line-modal-tab ${activeTab === 'simulator' ? 'line-modal-tab--active' : ''}`}
             onClick={() => setActiveTab('simulator')}
           >
             <Smartphone size={16} />
-            จำลองข้อความ LINE (Flex Message)
+            {t('commerce:lineConnect.tabSimulator')}
           </button>
           <button
             className={`line-modal-tab ${activeTab === 'settings' ? 'line-modal-tab--active' : ''}`}
             onClick={() => setActiveTab('settings')}
           >
             <Bell size={16} />
-            การตั้งค่าแจ้งเตือน
+            {t('commerce:lineConnect.tabSettings')}
           </button>
         </div>
 
@@ -229,9 +244,9 @@ export function LineConnectModal({
               <div className="line-celebration-banner">
                 <Sparkles size={24} className="line-celebration-sparkle" />
                 <div>
-                  <div className="line-celebration-title">🎉 เชื่อมต่อ LINE สำเร็จ!</div>
+                  <div className="line-celebration-title">{t('commerce:lineConnect.celebrationTitle')}</div>
                   <div className="line-celebration-desc">
-                    คุณได้รับ <strong>+50 Movemall Coins</strong> และคูปองส่งฟรี 1 ใบเรียบร้อยแล้ว
+                    {t('commerce:lineConnect.celebrationDesc')}
                   </div>
                 </div>
               </div>
@@ -242,7 +257,7 @@ export function LineConnectModal({
                 <div className="line-reward-card">
                   <div className="line-reward-badge">
                     <Gift size={16} />
-                    สิทธิพิเศษสำหรับผู้เชื่อมต่อ
+                    {t('commerce:lineConnect.rewardBadge')}
                   </div>
                   <div className="line-reward-grid">
                     <div className="line-reward-item">
@@ -250,8 +265,8 @@ export function LineConnectModal({
                         <Coins size={20} />
                       </div>
                       <div>
-                        <strong>ฟรี 50 Coins</strong>
-                        <span>ใช้เป็นส่วนลดเงินสดได้ทันที</span>
+                        <strong>{t('commerce:lineConnect.rewardCoinsTitle')}</strong>
+                        <span>{t('commerce:lineConnect.rewardCoinsDesc')}</span>
                       </div>
                     </div>
                     <div className="line-reward-item">
@@ -259,8 +274,8 @@ export function LineConnectModal({
                         <Truck size={20} />
                       </div>
                       <div>
-                        <strong>แจ้งเตือนพัสดุสด</strong>
-                        <span>รู้ทันทีเมื่อพัสดุออกจากร้าน/ถึงบ้าน</span>
+                        <strong>{t('commerce:lineConnect.rewardTrackingTitle')}</strong>
+                        <span>{t('commerce:lineConnect.rewardTrackingDesc')}</span>
                       </div>
                     </div>
                   </div>
@@ -269,15 +284,24 @@ export function LineConnectModal({
                 <div className="line-benefit-list">
                   <div className="line-benefit-item">
                     <CheckCircle2 size={18} className="line-check-icon" />
-                    <span><strong>ใบเสร็จดิจิทัล (E-Receipt):</strong> สรุปยอดเงินและหลักฐานคำสั่งซื้อชัดเจน</span>
+                    <span>
+                      <strong>{t('commerce:lineConnect.benefitReceiptLabel')}</strong>{' '}
+                      {t('commerce:lineConnect.benefitReceiptDesc')}
+                    </span>
                   </div>
                   <div className="line-benefit-item">
                     <CheckCircle2 size={18} className="line-check-icon" />
-                    <span><strong>Flash Sale Alerts:</strong> เตือนเมื่อของในตะกร้าหรือ Wishlist จัดโปรลดแรง</span>
+                    <span>
+                      <strong>{t('commerce:lineConnect.benefitFlashLabel')}</strong>{' '}
+                      {t('commerce:lineConnect.benefitFlashDesc')}
+                    </span>
                   </div>
                   <div className="line-benefit-item">
                     <CheckCircle2 size={18} className="line-check-icon" />
-                    <span><strong>Live Alerts:</strong> ไม่พลาดไลฟ์สดของร้านค้า Official Mall พร้อมแจกโค้ด 50%</span>
+                    <span>
+                      <strong>{t('commerce:lineConnect.benefitLiveLabel')}</strong>{' '}
+                      {t('commerce:lineConnect.benefitLiveDesc')}
+                    </span>
                   </div>
                 </div>
 
@@ -290,17 +314,17 @@ export function LineConnectModal({
                     {isConnecting ? (
                       <>
                         <RefreshCw size={18} className="line-spinner" />
-                        กำลังเชื่อมต่อ LINE...
+                        {t('commerce:lineConnect.connecting')}
                       </>
                     ) : (
                       <>
                         <span className="line-btn-icon">LINE</span>
-                        เชื่อมต่อ LINE ทันที (รับ 50 Coins)
+                        {t('commerce:lineConnect.connectCta')}
                       </>
                     )}
                   </button>
                   <p className="line-terms-note">
-                    🔒 Movemall ปลอดภัย 100% แจ้งเตือนเฉพาะเรื่องสำคัญ สามารถเปิด-ปิดการแจ้งเตือนได้ตลอดเวลา
+                    {t('commerce:lineConnect.termsNote')}
                   </p>
                 </div>
               </div>
@@ -312,21 +336,23 @@ export function LineConnectModal({
                     <span className="line-profile-online-badge">✓</span>
                   </div>
                   <div className="line-profile-details">
-                    <div className="line-profile-badge">🟢 เชื่อมต่อกับ Movemall เรียบร้อยแล้ว</div>
+                    <div className="line-profile-badge">{t('commerce:lineConnect.profileBadge')}</div>
                     <h3 className="line-profile-name">{lineProfile.displayName}</h3>
                     <p className="line-profile-status">{lineProfile.statusMessage}</p>
-                    <span className="line-profile-uid">LINE User ID: {lineProfile.lineUserId}</span>
+                    <span className="line-profile-uid">
+                      {t('commerce:lineConnect.profileUserId', { id: lineProfile.lineUserId })}
+                    </span>
                   </div>
                 </div>
 
                 <div className="line-connected-stats">
                   <div className="line-stat-box">
-                    <span className="line-stat-label">สถานะการแจ้งเตือน</span>
-                    <strong className="line-stat-val text-green">เปิดใช้งานปกติ (Active)</strong>
+                    <span className="line-stat-label">{t('commerce:lineConnect.statNotificationLabel')}</span>
+                    <strong className="line-stat-val text-green">{t('commerce:lineConnect.statNotificationValue')}</strong>
                   </div>
                   <div className="line-stat-box">
-                    <span className="line-stat-label">เหรียญที่ได้รับ</span>
-                    <strong className="line-stat-val text-gold">+50 Coins (รับแล้ว)</strong>
+                    <span className="line-stat-label">{t('commerce:lineConnect.statCoinsLabel')}</span>
+                    <strong className="line-stat-val text-gold">{t('commerce:lineConnect.statCoinsValue')}</strong>
                   </div>
                 </div>
 
@@ -336,13 +362,13 @@ export function LineConnectModal({
                     onClick={() => setActiveTab('simulator')}
                   >
                     <Smartphone size={16} />
-                    ดูตัวอย่างข้อความแจ้งเตือนใน LINE
+                    {t('commerce:lineConnect.previewCta')}
                   </button>
                   <button
                     className="line-btn-disconnect"
                     onClick={handleDisconnectLine}
                   >
-                    ยกเลิกการเชื่อมต่อ LINE
+                    {t('commerce:lineConnect.disconnectCta')}
                   </button>
                 </div>
               </div>
@@ -354,47 +380,47 @@ export function LineConnectModal({
         {activeTab === 'simulator' && (
           <div className="line-modal-body line-simulator-body">
             <div className="line-sim-controls">
-              <span className="line-sim-label">เลือกประเภทข้อความจำลอง:</span>
+              <span className="line-sim-label">{t('commerce:lineConnect.sim.label')}</span>
               <div className="line-sim-pills">
                 <button
                   className={`line-sim-pill ${simulatorMessageType === 'shipped' ? 'line-sim-pill--active' : ''}`}
                   onClick={() => {
                     setSimulatorMessageType('shipped');
-                    setSimulatedSentTime('เมื่อสักครู่');
+                    setSimulatedSentTime('justNow');
                   }}
                 >
                   <Truck size={14} />
-                  แจ้งเตือนจัดส่งพัสดุ
+                  {t('commerce:lineConnect.sim.pillShipped')}
                 </button>
                 <button
                   className={`line-sim-pill ${simulatorMessageType === 'receipt' ? 'line-sim-pill--active' : ''}`}
                   onClick={() => {
                     setSimulatorMessageType('receipt');
-                    setSimulatedSentTime('12:45 น.');
+                    setSimulatedSentTime('t1245');
                   }}
                 >
                   <CheckCircle2 size={14} />
-                  ใบเสร็จสั่งซื้อสำเร็จ
+                  {t('commerce:lineConnect.sim.pillReceipt')}
                 </button>
                 <button
                   className={`line-sim-pill ${simulatorMessageType === 'flash' ? 'line-sim-pill--active' : ''}`}
                   onClick={() => {
                     setSimulatorMessageType('flash');
-                    setSimulatedSentTime('10:00 น.');
+                    setSimulatedSentTime('t1000');
                   }}
                 >
                   <Flame size={14} />
-                  สินค้าในตะกร้าลดราคา
+                  {t('commerce:lineConnect.sim.pillFlash')}
                 </button>
                 <button
                   className={`line-sim-pill ${simulatorMessageType === 'live' ? 'line-sim-pill--active' : ''}`}
                   onClick={() => {
                     setSimulatorMessageType('live');
-                    setSimulatedSentTime('19:30 น.');
+                    setSimulatedSentTime('t1930');
                   }}
                 >
                   <Radio size={14} />
-                  แจ้งเตือนไลฟ์สด
+                  {t('commerce:lineConnect.sim.pillLive')}
                 </button>
               </div>
             </div>
@@ -407,7 +433,7 @@ export function LineConnectModal({
                   <span className="line-phone-back">‹</span>
                   <div className="line-phone-oa-info">
                     <span className="line-phone-oa-name">Movemall Official</span>
-                    <span className="line-phone-oa-badge">✓ ทางการ</span>
+                    <span className="line-phone-oa-badge">{t('commerce:lineConnect.sim.officialBadge')}</span>
                   </div>
                 </div>
                 <div className="line-phone-header-right">
@@ -417,7 +443,11 @@ export function LineConnectModal({
 
               {/* Chat Message Stream */}
               <div className="line-phone-messages">
-                <div className="line-chat-timestamp">วันนี้ {simulatedSentTime}</div>
+                <div className="line-chat-timestamp">
+                  {t('commerce:lineConnect.sim.chatTimestamp', {
+                    time: t(`commerce:lineConnect.sim.times.${simulatedSentTime}`),
+                  })}
+                </div>
 
                 {/* Shipped Flex Message */}
                 {simulatorMessageType === 'shipped' && (
@@ -427,56 +457,58 @@ export function LineConnectModal({
                         <Truck size={18} />
                         <span>MOVEMALL LOGISTICS</span>
                       </div>
-                      <h4 className="line-flex-title">🚚 พัสดุของคุณอยู่ระหว่างจัดส่ง!</h4>
+                      <h4 className="line-flex-title">{t('commerce:lineConnect.sim.shippedTitle')}</h4>
                     </div>
 
                     <div className="line-flex-body">
                       <div className="line-flex-row">
-                        <span className="line-flex-lbl">หมายเลขคำสั่งซื้อ:</span>
+                        <span className="line-flex-lbl">{t('commerce:lineConnect.sim.orderIdLabel')}</span>
                         <strong className="line-flex-val">{sampleOrderId}</strong>
                       </div>
                       <div className="line-flex-row">
-                        <span className="line-flex-lbl">ผู้ให้บริการขนส่ง:</span>
-                        <strong className="line-flex-val">Flash Express (Next-Day)</strong>
+                        <span className="line-flex-lbl">{t('commerce:lineConnect.sim.carrierLabel')}</span>
+                        <strong className="line-flex-val">{SAMPLE_CARRIER}</strong>
                       </div>
                       <div className="line-flex-row">
-                        <span className="line-flex-lbl">เลขพัสดุ (Tracking No.):</span>
+                        <span className="line-flex-lbl">{t('commerce:lineConnect.sim.trackingLabel')}</span>
                         <strong className="line-flex-val text-blue">{sampleTrackingNo}</strong>
                       </div>
                       <div className="line-flex-row">
-                        <span className="line-flex-lbl">สถานะล่าสุด:</span>
-                        <span className="line-flex-badge-status">📍 กำลังนำส่งโดยพนักงาน</span>
+                        <span className="line-flex-lbl">{t('commerce:lineConnect.sim.statusLabel')}</span>
+                        <span className="line-flex-badge-status">{t('commerce:lineConnect.sim.statusValue')}</span>
                       </div>
 
                       <div className="line-flex-product-preview">
                         <img
                           src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&auto=format&fit=crop&q=80"
-                          alt="Product"
+                          alt={t('commerce:lineConnect.sim.sampleProductAlt')}
                           className="line-flex-thumb"
                         />
                         <div className="line-flex-prod-info">
-                          <div className="line-flex-prod-name">หูฟัง Sony WH-1000XM5 Wireless Headphones</div>
-                          <div className="line-flex-prod-qty">จำนวน 1 ชิ้น • รวม ฿{sampleTotal.toLocaleString()}</div>
+                          <div className="line-flex-prod-name">{SAMPLE_SHIPPED_PRODUCT}</div>
+                          <div className="line-flex-prod-qty">
+                            {t('commerce:lineConnect.sim.sampleProductQty', { amount: money(sampleTotal) })}
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     <div className="line-flex-footer">
-                      <Link
+                      <LocalizedLink
                         to={`/tracking?id=${sampleOrderId}`}
                         className="line-flex-btn line-flex-btn--primary"
                         onClick={onClose}
                       >
                         <Truck size={14} />
-                        📍 ติดตามพัสดุสดแบบ GPS
-                      </Link>
-                      <Link
-                        to={`/orders`}
+                        {t('commerce:lineConnect.sim.trackCta')}
+                      </LocalizedLink>
+                      <LocalizedLink
+                        to="/orders"
                         className="line-flex-btn line-flex-btn--secondary"
                         onClick={onClose}
                       >
-                        ดูรายละเอียดคำสั่งซื้อ
-                      </Link>
+                        {t('commerce:lineConnect.sim.orderDetailCta')}
+                      </LocalizedLink>
                     </div>
                   </div>
                 )}
@@ -489,36 +521,36 @@ export function LineConnectModal({
                         <CheckCircle2 size={18} />
                         <span>MOVEMALL E-RECEIPT</span>
                       </div>
-                      <h4 className="line-flex-title">✅ ชำระเงินสำเร็จ เรียบร้อยแล้ว</h4>
+                      <h4 className="line-flex-title">{t('commerce:lineConnect.sim.receiptTitle')}</h4>
                     </div>
 
                     <div className="line-flex-body">
                       <div className="line-flex-row">
-                        <span className="line-flex-lbl">คำสั่งซื้อ:</span>
+                        <span className="line-flex-lbl">{t('commerce:lineConnect.sim.receiptOrderLabel')}</span>
                         <strong className="line-flex-val">{sampleOrderId}</strong>
                       </div>
                       <div className="line-flex-row">
-                        <span className="line-flex-lbl">ยอดชำระสุทธิ:</span>
-                        <strong className="line-flex-val text-green">฿{sampleTotal.toLocaleString()}</strong>
+                        <span className="line-flex-lbl">{t('commerce:lineConnect.sim.receiptTotalLabel')}</span>
+                        <strong className="line-flex-val text-green">{money(sampleTotal)}</strong>
                       </div>
                       <div className="line-flex-row">
-                        <span className="line-flex-lbl">Coins ที่ได้รับเพิ่ม:</span>
-                        <strong className="line-flex-val text-gold">+12 Coins ✨</strong>
+                        <span className="line-flex-lbl">{t('commerce:lineConnect.sim.receiptCoinsLabel')}</span>
+                        <strong className="line-flex-val text-gold">{t('commerce:lineConnect.sim.receiptCoinsValue')}</strong>
                       </div>
                       <div className="line-flex-row">
-                        <span className="line-flex-lbl">การจัดส่ง:</span>
-                        <span className="line-flex-val">Flash Express (เตรียมแพ็กพัสดุ)</span>
+                        <span className="line-flex-lbl">{t('commerce:lineConnect.sim.receiptShippingLabel')}</span>
+                        <span className="line-flex-val">{t('commerce:lineConnect.sim.receiptShippingValue')}</span>
                       </div>
                     </div>
 
                     <div className="line-flex-footer">
-                      <Link
+                      <LocalizedLink
                         to="/orders"
                         className="line-flex-btn line-flex-btn--primary"
                         onClick={onClose}
                       >
-                        ดูประวัติคำสั่งซื้อ
-                      </Link>
+                        {t('commerce:lineConnect.sim.orderHistoryCta')}
+                      </LocalizedLink>
                     </div>
                   </div>
                 )}
@@ -531,38 +563,38 @@ export function LineConnectModal({
                         <Flame size={18} />
                         <span>PRICE DROP ALERT ⚡</span>
                       </div>
-                      <h4 className="line-flex-title">🔥 สินค้าที่คุณดูไว้ ลดราคาพิเศษ!</h4>
+                      <h4 className="line-flex-title">{t('commerce:lineConnect.sim.flashTitle')}</h4>
                     </div>
 
                     <div className="line-flex-body">
                       <p className="line-flex-desc">
-                        สินค้าในตะกร้าของคุณจัดโปรโมชั่นลดแรง 30% เฉพาะ 2 ชั่วโมงนี้เท่านั้น!
+                        {t('commerce:lineConnect.sim.flashDesc')}
                       </p>
                       <div className="line-flex-product-preview">
                         <img
                           src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&auto=format&fit=crop&q=80"
-                          alt="Nike Shoes"
+                          alt={t('commerce:lineConnect.sim.flashProductAlt')}
                           className="line-flex-thumb"
                         />
                         <div className="line-flex-prod-info">
-                          <div className="line-flex-prod-name">Nike Air Max 270 React Special Edition</div>
+                          <div className="line-flex-prod-name">{SAMPLE_FLASH_PRODUCT}</div>
                           <div className="line-flex-price-row">
-                            <span className="line-flex-old-price">฿4,200</span>
-                            <span className="line-flex-new-price">฿2,940</span>
-                            <span className="line-flex-discount-tag">-30%</span>
+                            <span className="line-flex-old-price">{money(SAMPLE_FLASH_OLD_PRICE)}</span>
+                            <span className="line-flex-new-price">{money(SAMPLE_FLASH_NEW_PRICE)}</span>
+                            <span className="line-flex-discount-tag">{t('commerce:lineConnect.sim.flashDiscountTag')}</span>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     <div className="line-flex-footer">
-                      <Link
+                      <LocalizedLink
                         to="/cart"
                         className="line-flex-btn line-flex-btn--red"
                         onClick={onClose}
                       >
-                        🛒 สั่งซื้อทันทีพร้อมรับส่วนลด
-                      </Link>
+                        {t('commerce:lineConnect.sim.flashCta')}
+                      </LocalizedLink>
                     </div>
                   </div>
                 )}
@@ -575,23 +607,23 @@ export function LineConnectModal({
                         <Radio size={18} />
                         <span>MOVEMALL LIVE 🔴</span>
                       </div>
-                      <h4 className="line-flex-title">แบรนด์โปรดกำลังถ่ายทอดสด!</h4>
+                      <h4 className="line-flex-title">{t('commerce:lineConnect.sim.liveTitle')}</h4>
                     </div>
 
                     <div className="line-flex-body">
                       <p className="line-flex-desc">
-                        <strong>Apple Flagship Store</strong> เริ่มต้นสตรีมสดแล้ว พร้อมแจกโค้ดลดทันที 500 บาท และปักหมุด iPhone 16 Pro Max ลดพิเศษ
+                        {t('commerce:lineConnect.sim.liveDesc')}
                       </p>
                     </div>
 
                     <div className="line-flex-footer">
-                      <Link
+                      <LocalizedLink
                         to="/live"
                         className="line-flex-btn line-flex-btn--purple"
                         onClick={onClose}
                       >
-                        🔴 กดเข้าชมไลฟ์สดรับโค้ด
-                      </Link>
+                        {t('commerce:lineConnect.sim.liveCta')}
+                      </LocalizedLink>
                     </div>
                   </div>
                 )}
@@ -604,8 +636,8 @@ export function LineConnectModal({
         {activeTab === 'settings' && (
           <div className="line-modal-body">
             <div className="line-settings-header">
-              <h3 className="line-settings-title">เลือกการแจ้งเตือนที่คุณต้องการรับผ่าน LINE</h3>
-              <p className="line-settings-sub">คุณสามารถปรับเปลี่ยนหรือปิดการแจ้งเตือนได้ตลอดเวลา</p>
+              <h3 className="line-settings-title">{t('commerce:lineConnect.settings.title')}</h3>
+              <p className="line-settings-sub">{t('commerce:lineConnect.settings.subtitle')}</p>
             </div>
 
             <div className="line-toggles-list">
@@ -613,9 +645,9 @@ export function LineConnectModal({
                 <div className="line-toggle-info">
                   <div className="line-toggle-label">
                     <CheckCircle2 size={16} className="text-green" />
-                    <strong>ใบเสร็จดิจิทัล & ยืนยันออเดอร์ (Order Updates)</strong>
+                    <strong>{t('commerce:lineConnect.settings.orderTitle')}</strong>
                   </div>
-                  <span className="line-toggle-sub">รับสรุปคำสั่งซื้อและหลักฐานชำระเงินทันทีหลังสั่งซื้อ</span>
+                  <span className="line-toggle-sub">{t('commerce:lineConnect.settings.orderDesc')}</span>
                 </div>
                 <input
                   type="checkbox"
@@ -629,9 +661,9 @@ export function LineConnectModal({
                 <div className="line-toggle-info">
                   <div className="line-toggle-label">
                     <Truck size={16} className="text-blue" />
-                    <strong>สถานะจัดส่งและเลขพัสดุ</strong>
+                    <strong>{t('commerce:lineConnect.settings.shippingTitle')}</strong>
                   </div>
-                  <span className="line-toggle-sub">แจ้งเตือนเมื่อพัสดุถูกส่งออก และเมื่อพนักงานกำลังนำส่งถึงบ้าน</span>
+                  <span className="line-toggle-sub">{t('commerce:lineConnect.settings.shippingDesc')}</span>
                 </div>
                 <input
                   type="checkbox"
@@ -645,9 +677,9 @@ export function LineConnectModal({
                 <div className="line-toggle-info">
                   <div className="line-toggle-label">
                     <Flame size={16} className="text-red" />
-                    <strong>Flash Sale & สินค้าลดราคา (Price Drop Alerts)</strong>
+                    <strong>{t('commerce:lineConnect.settings.flashTitle')}</strong>
                   </div>
-                  <span className="line-toggle-sub">เตือนเมื่อสินค้าใน Wishlist หรือในตะกร้าจัด Flash Sale</span>
+                  <span className="line-toggle-sub">{t('commerce:lineConnect.settings.flashDesc')}</span>
                 </div>
                 <input
                   type="checkbox"
@@ -661,9 +693,9 @@ export function LineConnectModal({
                 <div className="line-toggle-info">
                   <div className="line-toggle-label">
                     <Radio size={16} className="text-purple" />
-                    <strong>แจ้งเตือนไลฟ์สด (Live Stream Shopping)</strong>
+                    <strong>{t('commerce:lineConnect.settings.liveTitle')}</strong>
                   </div>
-                  <span className="line-toggle-sub">เตือนเมื่อร้านค้าโปรดเริ่ม Live พร้อมแจกโค้ดส่วนลดพิเศษในไลฟ์</span>
+                  <span className="line-toggle-sub">{t('commerce:lineConnect.settings.liveDesc')}</span>
                 </div>
                 <input
                   type="checkbox"
@@ -677,9 +709,9 @@ export function LineConnectModal({
                 <div className="line-toggle-info">
                   <div className="line-toggle-label">
                     <Coins size={16} className="text-gold" />
-                    <strong>เตือนเช็กอินรับ Coins</strong>
+                    <strong>{t('commerce:lineConnect.settings.coinsTitle')}</strong>
                   </div>
-                  <span className="line-toggle-sub">สะกิดรับเหรียญฟรีทุกวัน เพื่อนำไปใช้แลกส่วนลดเงินสด</span>
+                  <span className="line-toggle-sub">{t('commerce:lineConnect.settings.coinsDesc')}</span>
                 </div>
                 <input
                   type="checkbox"
@@ -692,7 +724,7 @@ export function LineConnectModal({
 
             <div className="line-settings-footer">
               <button className="line-btn-save-settings" onClick={onClose}>
-                บันทึกการตั้งค่า
+                {t('commerce:lineConnect.settings.save')}
               </button>
             </div>
           </div>

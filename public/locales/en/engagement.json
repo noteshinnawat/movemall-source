@@ -1,0 +1,385 @@
+{
+  "chat": {
+    "storeFallback": "Store",
+    "online": "Online",
+    "offline": "Offline",
+    "startConversation": "Start the conversation",
+    "back": "Go back",
+    "inboxTitle": "💬 Chat inbox",
+    "liveBadge": "Live",
+    "liveBadgeTitle": "Connected live over WebSocket",
+    "searchPlaceholder": "Search stores or messages...",
+    "tabAll": "All ({{count, number}})",
+    "tabUnread": "Unread",
+    "tabUnreadCount": "Unread ({{count, number}})",
+    "tabOfficial": "Mall stores 👑",
+    "loading": "Loading your chats...",
+    "emptyAll": "No conversations with stores yet",
+    "emptyFiltered": "No chats match this filter",
+    "browseStores": "Browse stores",
+    "onlineDotTitle": "Online",
+    "noSelection": "Choose a conversation on the left to start chatting",
+    "backToListTitle": "Back to all chats",
+    "backToListAria": "Back to the chat list",
+    "backToListText": "All chats",
+    "officialMall": "Official Mall",
+    "connectedLive": "Connected live",
+    "visitStore": "Visit store",
+    "secureBanner": "This conversation is protected by Movemall Buyer Protection — never transfer money outside the platform",
+    "emptyThreadTitle": "No messages with this store yet",
+    "emptyThreadHint": "Say hello — the store sees your message right away",
+    "typing": "Typing...",
+    "quickLabel": "Quick questions:",
+    "quickQuestions": {
+      "stock": "📦 Do you have this in stock?",
+      "photos": "📸 Could I see more photos of the actual item?",
+      "invoice": "🧾 Can you issue a tax invoice?",
+      "voucher": "🎟️ Do you have a special discount code?"
+    },
+    "attachImageTitle": "Attach a photo",
+    "attachImageMessage": "📸 [Sample product photo sent]",
+    "emojiTitle": "Emoji",
+    "inputPlaceholder": "Message {{store}}...",
+    "send": "Send"
+  },
+  "notifications": {
+    "relative": {
+      "justNow": "Just now",
+      "recently": "Recently",
+      "minutes_one": "{{count, number}} minute ago",
+      "minutes_other": "{{count, number}} minutes ago",
+      "hours_one": "{{count, number}} hour ago",
+      "hours_other": "{{count, number}} hours ago",
+      "days_one": "{{count, number}} day ago",
+      "days_other": "{{count, number}} days ago"
+    },
+    "title": "My notifications",
+    "unreadCount": "({{count, number}} new)",
+    "liveSync": "Connected to live database notifications (Live Sync)",
+    "markAllRead": "Mark all as read",
+    "tabs": {
+      "all": "All",
+      "orders": "📦 Orders",
+      "promos": "⚡ Promotions",
+      "live": "🔴 Live"
+    },
+    "signedOutTitle": "Sign in to see your notifications",
+    "signedOutSubtitle": "Orders, parcels and member perks",
+    "signIn": "Sign in",
+    "signUp": "Create an account",
+    "loading": "Loading notifications...",
+    "emptyTitle": "No notifications yet",
+    "emptySubtitle": "New items will appear here"
+  },
+  "live": {
+    "floatingWidget": {
+      "clickToWatch": "Tap to watch the live stream",
+      "close": "Close the live window",
+      "watchNow": "Watch →"
+    },
+    "ticker": {
+      "soldTitle": "Just sold",
+      "secondsAgo": "{{seconds, number}} seconds ago"
+    },
+    "stream": {
+      "tabFollowing": "Following",
+      "tabForYou": "For You (LIVE)",
+      "exitFullscreen": "Exit fullscreen",
+      "enterFullscreen": "Fullscreen (hide bars)",
+      "myCart": "My cart",
+      "unmute": "Unmute",
+      "mute": "Mute",
+      "backHome": "Back to home",
+      "discountPct": "{{percent, number}}% off",
+      "liveDealTag": "Live deal",
+      "buyNow": "⚡ Buy now",
+      "freeShipping": "Free shipping",
+      "viewAllProductsTitle": "View all products in this live stream",
+      "commentPlaceholder": "Type...",
+      "sendHeart": "Send a heart / rose",
+      "sendGift": "Send a gift",
+      "shareTitle": "Share this live stream",
+      "shareToast": "Shared {{channel}}'s live stream!",
+      "commentsHeader": "Comments ({{count, number}})",
+      "commentInputPlaceholder": "Add a comment...",
+      "basketHeader": "Products in this clip ({{channel}})",
+      "pinnedTag": "🔥 Pinned in this clip",
+      "addToCart": "Add to cart",
+      "prevClip": "Previous clip (Arrow Up)",
+      "nextClip": "Next clip (Arrow Down)",
+      "demoProductName": "Live special deal",
+      "demoProductDescription": "Special discount only available during this live stream",
+      "viewersSuffix": "{{count}} watching",
+      "myCommentUser": "You (me)",
+      "myCommentTime": "Just now",
+      "myCommentBadge": "User",
+      "myFloatingChatUser": "Me"
+    }
+  },
+  "video": {
+    "grid": {
+      "shortVideoTag": "Short video",
+      "basketPill": "🟡 Yellow basket",
+      "watchFull": "Watch the full clip & shop the yellow basket"
+    },
+    "basket": {
+      "pill": "🟡 Yellow basket",
+      "heading": "Products in this clip ({{count, number}})",
+      "close": "Close",
+      "tabLabel": "#{{index, number}} {{name}}...",
+      "sold": "{{count, number}}+ sold",
+      "exclusiveDeal": "⚡ Exclusive clip deal",
+      "perkAuthentic": "100% authenticity guarantee",
+      "perkShipping": "🚚 Free shipping, no minimum",
+      "perkPayLater": "💳 0% PayLater instalments",
+      "qtyLabel": "Quantity",
+      "viewDetail": "View full details",
+      "added": "Added to cart",
+      "addToCart": "Add to cart",
+      "buyNow": "Buy now",
+      "demoDescription": "Genuine product ordered directly from a Movemall Short Video clip"
+    },
+    "feed": {
+      "toastTimeAgo": "{{seconds, number}} sec ago",
+      "myCommentUser": "You (Movemall user)",
+      "myCommentTime": "Just now",
+      "myCommentBadge": "Live viewer",
+      "linkCopied": "Video link copied!",
+      "tabForYou": "For You",
+      "tabTrending": "Trending",
+      "tabMall": "Verified Mall",
+      "exitFullscreen": "Exit fullscreen",
+      "enterFullscreen": "Fullscreen (hide bars)",
+      "searchProducts": "Search products",
+      "createClip": "Create a video clip",
+      "createClipShort": "Create",
+      "categories": {
+        "all": "🔥 All",
+        "electronics": "🎧 Electronics & gadgets",
+        "fashion": "👗 Fashion",
+        "beauty": "💄 Beauty & skincare",
+        "home": "🏠 Home essentials",
+        "sports": "🏃 Sports & fitness",
+        "food": "🍔 Food & snacks",
+        "toys": "🧱 Toys & models",
+        "baby": "👶 Baby & mom"
+      },
+      "prevClip": "Previous clip (scroll up)",
+      "nextClip": "Next clip (scroll down)",
+      "unmute": "Unmute",
+      "mute": "Mute",
+      "following": "Following",
+      "follow": "Follow",
+      "justPurchased": "Someone just bought this ({{timeAgo}})",
+      "basketPill": "🟡 Yellow basket #{{id}}",
+      "viewProduct": "⚡ View product",
+      "buyNow": "Buy now",
+      "commentsHeader": "Comments ({{count, number}})",
+      "commentPlaceholder": "Write a comment..."
+    }
+  },
+  "games": {
+    "heroTitle": "🎮 Movemall Games & Rewards Hub",
+    "heroSubtitle": "Play games, check in and earn Coins every day",
+    "myCoins": "My Coins: <b>{{coins}}</b> · {{amount}}",
+    "checkin": {
+      "title": "7-day check-in for Coins",
+      "goal": "Complete all 7 days for 100 bonus Coins",
+      "dayLabel": "Day {{day, number}}",
+      "claimed": "✓ Claimed",
+      "today": "Today",
+      "pending": "Pending",
+      "buttonClaimed": "✓ Checked in — come back tomorrow",
+      "buttonClaim": "🎁 Check in for 30 Coins",
+      "toast": "You received 30 Coins for checking in"
+    },
+    "wheel": {
+      "title": "Lucky Spin Wheel",
+      "subtitle": "One free spin a day — win up to 100 Coins",
+      "won": "🎉 You won: {{prize}}!",
+      "spinning": "Spinning...",
+      "spin": "Spin now!",
+      "toast": "🎉 Congratulations! You won \"{{prize}}\"",
+      "prizes": {
+        "discountCode": "{{amount}} off code",
+        "coins": "{{amount, number}} Coins",
+        "freeShipping": "Free shipping code",
+        "percentOff": "{{amount, number}}% off"
+      }
+    },
+    "cards": {
+      "title": "Mystery Cards",
+      "subtitle": "Tap 1 of the 3 cards to reveal a mystery reward",
+      "cardLabel": "Card {{index, number}}",
+      "tapToOpen": "Tap to open",
+      "toast": "🎴 Card opened! You received {{reward}}",
+      "rewards": [
+        "🎟️ ฿80 off",
+        "💰 80 Coins",
+        "🚚 Free shipping code"
+      ],
+      "footnote": "1 Coin = {{amount}} off at checkout"
+    }
+  },
+  "flashSale": {
+    "badge": "MOVEMALL FLASH DEALS",
+    "title": "⚡ Flash Sale Stock Clearance — up to 70% off",
+    "subtitle": "Special prices for a limited time",
+    "timerLabel": "This round ends in",
+    "unitHours": "hr",
+    "unitMinutes": "min",
+    "unitSeconds": "sec",
+    "liveTraffic": "{{count, number}} shoppers are waiting to grab this deal",
+    "slots": {
+      "s0": {
+        "label": "On sale now 🔴",
+        "desc": "Ends in 02:45:18"
+      },
+      "s1": {
+        "label": "Next round ⏰",
+        "desc": "Starts at 18:00"
+      },
+      "s2": {
+        "label": "Evening hot deals 🌙",
+        "desc": "Starts at 21:00"
+      },
+      "s3": {
+        "label": "Midnight Sale ⚡",
+        "desc": "Tonight at midnight"
+      }
+    },
+    "vouchersTitle": "🎟️ Secret vouchers for this Flash Sale round",
+    "vouchers": {
+      "fv1": {
+        "discount": "฿50 off",
+        "minSpend": "Min. spend ฿300",
+        "tag": "⚡ Quick code"
+      },
+      "fv2": {
+        "discount": "15% off",
+        "minSpend": "Min. spend ฿800",
+        "tag": "🔥 Most popular"
+      },
+      "fv3": {
+        "discount": "Free shipping",
+        "minSpend": "No minimum",
+        "tag": "🚚 Free shipping"
+      }
+    },
+    "claimed": "Claimed",
+    "claim": "Claim code",
+    "categories": {
+      "all": "🔥 All",
+      "electronics": "🎧 Electronics & gadgets",
+      "fashion": "👗 Fashion",
+      "beauty": "💄 Beauty & skincare",
+      "home": "🏠 Home essentials"
+    },
+    "bestPriceTag": "👑 Lowest price in 30 days",
+    "soldPct": "🔥 {{percent, number}}% sold",
+    "stockLeft": "({{count, number}} left)",
+    "opensAt": "Opens at {{time}}",
+    "buyNow": "Buy now",
+    "reminded": "✓ Reminder set",
+    "remindMe": "🔔 Remind me",
+    "reminderCancelled": "Reminder for \"{{product}}\" cancelled",
+    "reminderSet": "🔔 Reminder set! We'll notify you before this Flash Sale round starts",
+    "voucherClaimedToast": "Claimed code {{code}}"
+  },
+  "vouchers": {
+    "heroTitle": "🎟️ Movemall Voucher Centre",
+    "heroSubtitle": "Claim a code and use it at checkout",
+    "claimAll": "Claim every code in one click",
+    "filters": {
+      "all": "All",
+      "shipping": "Free-shipping codes",
+      "platform": "Movemall discount codes",
+      "cashback": "Coins cashback",
+      "store": "Store codes"
+    },
+    "typeLabels": {
+      "shipping": "🚚 Free-shipping code",
+      "cashback": "💰 Coins cashback",
+      "platform": "🎟️ Discount voucher"
+    },
+    "claimed": "Claimed",
+    "claim": "Claim code",
+    "mock": {
+      "vShip1": {
+        "discount": "Free shipping ฿0",
+        "minSpend": "No minimum, nationwide",
+        "expiry": "Expires in 3 days"
+      },
+      "vShip2": {
+        "discount": "฿40 off shipping",
+        "minSpend": "Min. spend ฿150",
+        "expiry": "Expires end of this month"
+      },
+      "vPlat1": {
+        "discount": "15% off, up to ฿300",
+        "minSpend": "On orders over ฿1,000",
+        "expiry": "Valid on every category"
+      },
+      "vPlat2": {
+        "discount": "฿100 off instantly",
+        "minSpend": "On orders over ฿600",
+        "expiry": "For all customers"
+      },
+      "vCoin1": {
+        "discount": "20% cashback in Coins",
+        "minSpend": "Up to 200 Coins back",
+        "expiry": "Use as a discount on your next order"
+      },
+      "vStore1": {
+        "discount": "฿50 off at this store",
+        "minSpend": "On orders over ฿500",
+        "expiry": "TechPro store only"
+      },
+      "vStore2": {
+        "discount": "10% off at this store",
+        "minSpend": "On orders over ฿800",
+        "expiry": "Fashionista store only"
+      }
+    },
+    "api": {
+      "freeShipping": "Free shipping {{amount}}",
+      "percentOff": "{{percent, number}}% off",
+      "amountOff": "{{amount}} off",
+      "minSpend": "On orders over {{amount}}",
+      "noMinimum": "No minimum spend",
+      "expiresOn": "Expires {{date}}"
+    }
+  },
+  "seo": {
+    "pages": {
+      "live": {
+        "title": "Live shopping | Movemall",
+        "description": "Shop live streams with exclusive in-stream discount codes"
+      },
+      "video": {
+        "title": "Short videos | Movemall",
+        "description": "Shop through short video clips with an instant checkout basket"
+      },
+      "games": {
+        "title": "Games & rewards | Movemall",
+        "description": "Play games, check in and earn Movemall Coins every day"
+      },
+      "flashSale": {
+        "title": "Flash Sale | Movemall",
+        "description": "Limited-time deals with up to 70% off"
+      },
+      "vouchers": {
+        "title": "Voucher centre | Movemall",
+        "description": "Claim discount and free-shipping codes to use at checkout"
+      },
+      "chat": {
+        "title": "Chat with stores | Movemall",
+        "description": "Ask a store about a product before you buy"
+      },
+      "notifications": {
+        "title": "Notifications | Movemall",
+        "description": "Track your order status, promotions and member perks"
+      }
+    }
+  }
+}

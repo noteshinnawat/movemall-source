@@ -1,11 +1,13 @@
 // src/components/CookieConsentBanner.tsx — PDPA Cookie Consent Notification
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Cookie } from 'lucide-react';
+import { LocalizedLink } from '../i18n/LocalizedLink';
 import './CookieConsentBanner.css';
 
 export function CookieConsentBanner() {
+  const { t } = useTranslation('common');
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -30,25 +32,25 @@ export function CookieConsentBanner() {
   if (!isVisible) return null;
 
   return (
-    <aside className="cookie-consent-bar" aria-label="การแจ้งเตือนคุกกี้และความเป็นส่วนตัว (PDPA)">
+    <aside className="cookie-consent-bar" aria-label={t('cookie.ariaLabel')}>
       <div className="cookie-consent-inner">
         <div className="cookie-consent-text">
           <div className="cookie-consent-title">
             <Cookie size={16} style={{ color: '#F59E0B' }} />
-            การใช้คุกกี้
+            {t('cookie.title')}
           </div>
           <p className="cookie-consent-desc">
-            เราใช้คุกกี้เพื่อให้เว็บไซต์ทำงานและปรับปรุงการใช้งาน
-            <Link to="/privacy" className="cookie-consent-link">ดูรายละเอียด</Link>
+            {t('cookie.description')}{' '}
+            <LocalizedLink to="/privacy" className="cookie-consent-link">{t('cookie.details')}</LocalizedLink>
           </p>
         </div>
 
         <div className="cookie-consent-actions">
           <button className="cookie-btn-reject" onClick={handleRejectNonEssential}>
-            เฉพาะที่จำเป็น
+            {t('cookie.essentialOnly')}
           </button>
           <button className="cookie-btn-accept" onClick={handleAcceptAll}>
-            ✓ ยอมรับทั้งหมด
+            ✓ {t('cookie.acceptAll')}
           </button>
         </div>
       </div>

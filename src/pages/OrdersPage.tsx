@@ -1,14 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Package, Calendar, MapPin, Truck, ShoppingBag, ArrowRight, Flag, ShieldAlert } from 'lucide-react';
-import { getStoredOrders, STATUS_LABEL, STATUS_COLOR } from '../data/orders';
+import { useTranslation } from 'react-i18next';
+import { Package, Calendar, MapPin, Truck, ShoppingBag, ArrowRight, Flag } from 'lucide-react';
+import { getStoredOrders, STATUS_COLOR } from '../data/orders';
 import type { Order } from '../data/orders';
 import { ReportStoreModal } from '../components/ReportStoreModal';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { formatCurrency, formatDate } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
+import { NEUTRAL_STORE_NAME } from '../components/VisualSearch.behavior';
 import './OrdersPage.css';
 
 import { fetchMyOrdersApi } from '../utils/api';
 
 export function OrdersPage() {
+  const { t, i18n } = useTranslation(['commerce', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const [activeTab, setActiveTab] = useState<string>('all');
   const [reportingOrder, setReportingOrder] = useState<any | null>(null);
   const [orders, setOrders] = useState<Order[]>(() => getStoredOrders());
@@ -26,7 +32,7 @@ export function OrdersPage() {
               status: (o.status?.toLowerCase() === 'paid' || o.status?.toLowerCase() === 'preparing') ? 'processing' : (o.status?.toLowerCase() || 'processing'),
               items: (o.items || []).map((item: any) => ({
                 productId: item.productId,
-                name: item.product?.name || 'สินค้า Movemall',
+                name: item.product?.name || t('commerce:orders.fallbackProductName'),
                 image: item.product?.images?.[0] || '',
                 price: Number(item.price || 0),
                 quantity: item.quantity || 1,
@@ -34,7 +40,7 @@ export function OrdersPage() {
               subtotal: Number(o.totalAmount || 0) - Number(o.shippingCost || 0),
               shipping: Number(o.shippingCost || 0),
               total: Number(o.totalAmount || 0),
-              address: typeof o.shippingAddress === 'string' ? o.shippingAddress : (o.shippingAddress?.address || 'ที่อยู่จัดส่ง'),
+              address: typeof o.shippingAddress === 'string' ? o.shippingAddress : (o.shippingAddress?.address || t('commerce:orders.fallbackAddress')),
             }));
 
 
@@ -61,7 +67,7 @@ export function OrdersPage() {
       window.removeEventListener('movemall_orders_change', handleOrdersUpdate);
       window.removeEventListener('storage', handleOrdersUpdate);
     };
-  }, []);
+  }, [t]);
 
 
   const filteredOrders = activeTab === 'all'
@@ -74,10 +80,10 @@ export function OrdersPage() {
         <div className="container">
           <h1 className="orders__header-title">
             <Package size={28} style={{ color: 'var(--primary)' }} />
-            ประวัติคำสั่งซื้อของฉัน
+            {t('commerce:orders.title')}
           </h1>
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
-            ตรวจสอบสถานะพัสดุ ติดตามตำแหน่งรถส่งของ และดูประวัติการสั่งซื้อย้อนหลัง
+            {t('commerce:orders.subtitle')}
           </p>
         </div>
       </div>
@@ -93,19 +99,14 @@ export function OrdersPage() {
             paddingBottom: 'var(--space-2)',
             overflowX: 'auto',
           }}>
-            {[
-              { id: 'all', label: 'ทั้งหมด' },
-              { id: 'shipped', label: '🚚 กำลังนำส่ง' },
-              { id: 'delivered', label: '✓ สำเร็จแล้ว' },
-              { id: 'processing', label: '⏳ กำลังเตรียมพัสดุ' },
-            ].map(tab => (
+            {(['all', 'shipped', 'delivered', 'processing'] as const).map(tabId => (
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                key={tabId}
+                onClick={() => setActiveTab(tabId)}
                 style={{
                   padding: '8px 16px',
-                  background: activeTab === tab.id ? 'var(--primary)' : 'var(--surface)',
-                  color: activeTab === tab.id ? '#FFFFFF' : 'var(--text-secondary)',
+                  background: activeTab === tabId ? 'var(--primary)' : 'var(--surface)',
+                  color: activeTab === tabId ? '#FFFFFF' : 'var(--text-secondary)',
                   border: '1px solid var(--border)',
                   borderRadius: 0,
                   fontSize: 13,
@@ -115,7 +116,7 @@ export function OrdersPage() {
                   transition: 'var(--transition)',
                 }}
               >
-                {tab.label}
+                {t(`commerce:orders.tabs.${tabId}`)}
               </button>
             ))}
           </div>
@@ -130,18 +131,14 @@ export function OrdersPage() {
                       <span className="order-card__id">{order.id}</span>
                       <span className="order-card__date">
                         <Calendar size={13} style={{ display: 'inline', marginRight: 4 }} />
-                        {new Date(order.createdAt).toLocaleDateString('th-TH', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
+                        {formatDate(order.createdAt, locale)}
                       </span>
                     </div>
                     <span
                       className="order-card__status"
                       style={{ color: STATUS_COLOR[order.status] }}
                     >
-                      {STATUS_LABEL[order.status]}
+                      {t(`commerce:orderStatus.${order.status}`)}
                     </span>
                   </div>
 
@@ -156,10 +153,14 @@ export function OrdersPage() {
                           />
                           <div className="order-card__item-info">
                             <p className="order-card__item-name">{item.name}</p>
-                            <p className="order-card__item-qty">จำนวน: {item.quantity} ชิ้น</p>
+                            <p className="order-card__item-qty">
+                              {t('commerce:orders.itemQuantity', {
+                                count: item.quantity,
+                              })}
+                            </p>
                           </div>
                           <span className="order-card__item-price">
-                            ฿{(item.price * item.quantity).toLocaleString()}
+                            {formatCurrency(item.price * item.quantity, locale)}
                           </span>
                         </div>
                       ))}
@@ -172,7 +173,9 @@ export function OrdersPage() {
                       </span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                         <span className="order-card__total" style={{ fontWeight: 800, fontSize: 14 }}>
-                          ยอดสุทธิ: ฿{order.total.toLocaleString()}
+                          {t('commerce:orders.netTotal', {
+                            amount: formatCurrency(order.total, locale),
+                          })}
                         </span>
                         
                         <button
@@ -191,13 +194,13 @@ export function OrdersPage() {
                             gap: 4,
                             borderRadius: 6,
                           }}
-                          title="ร้องเรียนสินค้าปลอม ไม่ตรงปก หรือมิจฉาชีพ เพื่อขอเงินคืน"
+                          title={t('commerce:orders.reportTitle')}
                         >
                           <Flag size={13} />
-                          <span>ร้องเรียน / แจ้งของปลอม</span>
+                          <span>{t('commerce:orders.reportCta')}</span>
                         </button>
 
-                        <Link
+                        <LocalizedLink
                           to={`/tracking/${order.id}`}
                           style={{
                             padding: '7px 14px',
@@ -212,8 +215,8 @@ export function OrdersPage() {
                             gap: 6,
                           }}
                         >
-                          <Truck size={14} /> ติดตามพัสดุสด
-                        </Link>
+                          <Truck size={14} /> {t('commerce:orders.trackCta')}
+                        </LocalizedLink>
                       </div>
                     </div>
                   </div>
@@ -229,12 +232,12 @@ export function OrdersPage() {
             }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>📦</div>
               <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>
-                ไม่พบรายการคำสั่งซื้อในหมวดนี้
+                {t('commerce:orders.emptyTitle')}
               </h2>
               <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16 }}>
-                เลือกซื้อสินค้าแบรนด์ดังราคาพิเศษพร้อมส่งฟรีได้เลย
+                {t('commerce:orders.emptySubtitle')}
               </p>
-              <Link
+              <LocalizedLink
                 to="/shop"
                 style={{
                   padding: '9px 20px',
@@ -248,8 +251,8 @@ export function OrdersPage() {
                   gap: 6,
                 }}
               >
-                <ShoppingBag size={15} /> ไปช้อปปิ้งกันเลย <ArrowRight size={14} />
-              </Link>
+                <ShoppingBag size={15} /> {t('commerce:orders.emptyCta')} <ArrowRight size={14} />
+              </LocalizedLink>
             </div>
           )}
         </div>
@@ -262,8 +265,10 @@ export function OrdersPage() {
           onClose={() => setReportingOrder(null)}
           targetType="ORDER"
           targetId={reportingOrder.id}
-          targetName={`คำสั่งซื้อ #${reportingOrder.id} (${reportingOrder.items?.map((i: any) => i.name).join(', ')})`}
-          storeName={reportingOrder.storeName || 'ร้านค้าบน Movemall'}
+          // The report payload reaches back-office tooling, so these names stay
+          // locale-independent: order id, source product names, neutral fallback.
+          targetName={`#${reportingOrder.id} (${(reportingOrder.items ?? []).map((i: any) => i.name).join(', ')})`}
+          storeName={reportingOrder.storeName || NEUTRAL_STORE_NAME}
           orderId={reportingOrder.id}
         />
       )}

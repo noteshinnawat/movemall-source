@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import type { ComponentType } from 'react';
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ToastContainer } from './components/Toast';
@@ -15,7 +16,10 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { resetChatSocket, clearAllStoredChatHistory } from './utils/chatSocket';
 import { API_BASE_URL, createProductApi, updateProductApi, deleteProductApi } from './utils/api';
-import { UI_COPY } from './uiCopy';
+import { uiCopy } from './uiCopy';
+import { LocaleBoundary, LocalizedNotFound } from './i18n/LocaleBoundary';
+import { LegacyBuyerRedirect } from './i18n/LegacyBuyerRedirect';
+import { BUYER_ROUTE_PATHS, stripLocale } from './i18n/locales';
 
 // Helper to safely retry module imports without causing browser reload loops
 function lazyRetry<T extends ComponentType<any>>(
@@ -91,7 +95,9 @@ function AppLayout({
   handleUpdateProduct,
   addToast,
 }: any) {
+  const { t } = useTranslation(['common']);
   const location = useLocation();
+  const routePathname = stripLocale(location.pathname);
 
   // Global Route Change: Always scroll window to top (0, 0) instantly
   useEffect(() => {
@@ -109,13 +115,13 @@ function AppLayout({
     return () => window.removeEventListener('movemall_auth_change', handleAuthChange);
   }, []);
 
-  const isProductDetailPage = location.pathname.startsWith('/product/');
-  const isChatPage = location.pathname.startsWith('/chat');
-  const isLivePage = location.pathname.startsWith('/live');
-  const isVideoFeedPage = location.pathname.startsWith('/video') || location.pathname.startsWith('/creator');
-  const isCheckoutPage = location.pathname.startsWith('/checkout');
-  const isSellerPage = location.pathname.startsWith('/seller');
-  const isAdminPage = location.pathname.startsWith('/admin') || isSellerPage;
+  const isProductDetailPage = routePathname.startsWith('/product/');
+  const isChatPage = routePathname.startsWith('/chat');
+  const isLivePage = routePathname.startsWith('/live');
+  const isVideoFeedPage = routePathname.startsWith('/video') || routePathname.startsWith('/creator');
+  const isCheckoutPage = routePathname.startsWith('/checkout');
+  const isSellerPage = routePathname.startsWith('/seller');
+  const isAdminPage = routePathname.startsWith('/admin') || isSellerPage;
   
   // Clean full-screen pages where floating popups and footer should be suppressed
   const isDistractionFreePage = isChatPage || isLivePage || isVideoFeedPage || isCheckoutPage || isAdminPage;
@@ -131,7 +137,7 @@ function AppLayout({
   return (
     <>
       {!isAdminPage && <PWAInstallPrompt />}
-      {!isChatPage && location.pathname !== '/video' && !isAdminPage && (
+      {!isChatPage && routePathname !== '/video' && !isAdminPage && (
         <Navbar
           cartCount={cart.totalItems}
           wishlistCount={wishlist.count}
@@ -157,117 +163,19 @@ function AppLayout({
           <Suspense fallback={
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: 12 }}>
               <div style={{ width: 36, height: 36, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>กำลังโหลด...</span>
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{t('common:loading')}</span>
             </div>
           }>
         <Routes>
-          {/* Home */}
-          <Route
-            path="/"
-            element={
-              <HomePage
-                products={productList}
-                onAddToCart={p => handleAddToCart(p)}
-                isWishlisted={id => wishlist.isWished(id)}
-                onToggleWishlist={p => handleToggleWishlist(p)}
-              />
-            }
-          />
-
-          {/* Shop */}
-          <Route
-            path="/shop"
-            element={
-              <ShopPage
-                products={productList}
-                onAddToCart={p => handleAddToCart(p)}
-                isWishlisted={id => wishlist.isWished(id)}
-                onToggleWishlist={p => handleToggleWishlist(p)}
-              />
-            }
-          />
-
-          {/* Official Brand Mall */}
-          <Route
-            path="/mall"
-            element={
-              <BrandMallPage
-                products={productList}
-                onAddToCart={p => handleAddToCart(p)}
-                isWishlisted={id => wishlist.isWished(id)}
-                onToggleWishlist={p => handleToggleWishlist(p)}
-              />
-            }
-          />
-
-          {/* Live Streaming Shopping */}
-          <Route
-            path="/live"
-            element={<LiveStreamPage products={productList} onAddToCart={p => handleAddToCart(p)} cartCount={cart.totalItems} />}
-          />
-
-          {/* Movemall Short Video Clips Social Feed (TikTok Style) */}
-          <Route
-            path="/video"
-            element={
-              <VideoFeedPage
-                onAddToCart={p => handleAddToCart(p)}
-                customClips={customClips}
-              />
-            }
-          />
-
-          {/* Short Video Creator Studio with Yellow Basket & Compression */}
+          {/* Operational routes stay unprefixed. */}
           <Route
             path="/video/create"
-            element={
-              <VideoStudioPage
-                onPublishClip={c => handlePublishClip(c)}
-              />
-            }
+            element={<VideoStudioPage onPublishClip={c => handlePublishClip(c)} />}
           />
           <Route
             path="/creator/studio"
-            element={
-              <VideoStudioPage
-                onPublishClip={c => handlePublishClip(c)}
-              />
-            }
+            element={<VideoStudioPage onPublishClip={c => handlePublishClip(c)} />}
           />
-
-          {/* Gamification Hub */}
-          <Route
-            path="/games"
-            element={
-              <GamesPage
-                onRewardWon={msg => addToast(msg, 'success', '🎁')}
-              />
-            }
-          />
-
-          {/* Flash Sale Hub */}
-          <Route
-            path="/flash-sale"
-            element={<FlashSalePage products={productList} onAddToCart={p => handleAddToCart(p)} />}
-          />
-
-          {/* Vouchers & Promotions */}
-          <Route path="/vouchers" element={<VouchersPage />} />
-
-          {/* Notifications Hub */}
-          <Route path="/notifications" element={<NotificationsPage />} />
-
-          {/* Live Parcel Tracking */}
-          <Route path="/tracking" element={<TrackingPage />} />
-          <Route path="/tracking/:orderId" element={<TrackingPage />} />
-
-          {/* Product Comparison Tool */}
-          <Route
-            path="/compare"
-            element={<ComparePage onAddToCart={p => handleAddToCart(p)} />}
-          />
-
-          {/* Creator & Affiliate Program */}
           <Route
             path="/affiliate"
             element={
@@ -277,51 +185,6 @@ function AppLayout({
               />
             }
           />
-
-          {/* Stores Directory */}
-          <Route path="/stores" element={<StoresDirectoryPage />} />
-
-          {/* Chat Inbox — ต้องล็อกอิน เพราะห้องแชทผูกกับตัวตนที่เซิร์ฟเวอร์ยืนยันได้ */}
-          <Route
-            path="/chat"
-            element={
-              <ProtectedRoute>
-                <ChatPage />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Login / Authentication */}
-          <Route
-            path="/login"
-            element={
-              <LoginPage
-                onLoginSuccess={name => {
-                  addToast(`ยินดีต้อนรับ ${name}`, 'success', '👋');
-                }}
-              />
-            }
-          />
-
-          {/* Customer Registration */}
-          <Route
-            path="/register"
-            element={
-              <RegisterPage
-                onRegisterSuccess={() => {
-                  addToast('สมัครสำเร็จ รับ Coins แล้ว', 'success', '🎁');
-                }}
-              />
-            }
-          />
-
-          {/* LINE OAuth Callback */}
-          <Route path="/auth/line/callback" element={<LineCallbackPage />} />
-
-          {/* Customer Account & Verification Portal */}
-          <Route path="/account" element={<AccountPage />} />
-
-          {/* Super Admin Portal (7 Departments) */}
           <Route
             path="/admin"
             element={
@@ -330,36 +193,6 @@ function AppLayout({
               </ProtectedRoute>
             }
           />
-
-          {/* Product Detail */}
-          <Route
-            path="/product/:id"
-            element={
-              <ProductDetailPage
-                products={productList}
-                onAddToCart={(p, qty) => handleAddToCart(p, qty)}
-                isWishlisted={id => wishlist.isWished(id)}
-                onToggleWishlist={p => handleToggleWishlist(p)}
-                cartCount={cart.totalItems}
-                onOpenVisualSearchWithImage={img => handleOpenVisualSearch(img)}
-              />
-            }
-          />
-
-          {/* Marketplace Store Page */}
-          <Route
-            path="/store/:id"
-            element={
-              <StorePage
-                allProducts={productList}
-                onAddToCart={p => handleAddToCart(p)}
-                isWishlisted={id => wishlist.isWished(id)}
-                onToggleWishlist={p => handleToggleWishlist(p)}
-              />
-            }
-          />
-
-          {/* Marketplace Seller Center & Registration */}
           <Route path="/seller/register" element={<SellerRegisterPage />} />
           <Route
             path="/seller"
@@ -375,9 +208,170 @@ function AppLayout({
             }
           />
 
+          {/* Buyer routes always carry a supported locale prefix. */}
+          <Route path="/:locale" element={<LocaleBoundary />}>
+          {/* Home */}
+          <Route
+            index
+            element={
+              <HomePage
+                products={productList}
+                onAddToCart={p => handleAddToCart(p)}
+                isWishlisted={id => wishlist.isWished(id)}
+                onToggleWishlist={p => handleToggleWishlist(p)}
+              />
+            }
+          />
+
+          {/* Shop */}
+          <Route
+            path="shop"
+            element={
+              <ShopPage
+                products={productList}
+                onAddToCart={p => handleAddToCart(p)}
+                isWishlisted={id => wishlist.isWished(id)}
+                onToggleWishlist={p => handleToggleWishlist(p)}
+              />
+            }
+          />
+
+          {/* Official Brand Mall */}
+          <Route
+            path="mall"
+            element={
+              <BrandMallPage
+                products={productList}
+                onAddToCart={p => handleAddToCart(p)}
+                isWishlisted={id => wishlist.isWished(id)}
+                onToggleWishlist={p => handleToggleWishlist(p)}
+              />
+            }
+          />
+
+          {/* Live Streaming Shopping */}
+          <Route
+            path="live"
+            element={<LiveStreamPage products={productList} onAddToCart={p => handleAddToCart(p)} cartCount={cart.totalItems} />}
+          />
+
+          {/* Movemall Short Video Clips Social Feed (TikTok Style) */}
+          <Route
+            path="video"
+            element={
+              <VideoFeedPage
+                onAddToCart={p => handleAddToCart(p)}
+                customClips={customClips}
+              />
+            }
+          />
+
+          {/* Gamification Hub */}
+          <Route
+            path="games"
+            element={
+              <GamesPage
+                onRewardWon={msg => addToast(msg, 'success', '🎁')}
+              />
+            }
+          />
+
+          {/* Flash Sale Hub */}
+          <Route
+            path="flash-sale"
+            element={<FlashSalePage products={productList} onAddToCart={p => handleAddToCart(p)} />}
+          />
+
+          {/* Vouchers & Promotions */}
+          <Route path="vouchers" element={<VouchersPage />} />
+
+          {/* Notifications Hub */}
+          <Route path="notifications" element={<NotificationsPage />} />
+
+          {/* Live Parcel Tracking */}
+          <Route path="tracking" element={<TrackingPage />} />
+          <Route path="tracking/:orderId" element={<TrackingPage />} />
+
+          {/* Product Comparison Tool */}
+          <Route
+            path="compare"
+            element={<ComparePage onAddToCart={p => handleAddToCart(p)} />}
+          />
+
+          {/* Stores Directory */}
+          <Route path="stores" element={<StoresDirectoryPage />} />
+
+          {/* Chat Inbox — ต้องล็อกอิน เพราะห้องแชทผูกกับตัวตนที่เซิร์ฟเวอร์ยืนยันได้ */}
+          <Route
+            path="chat"
+            element={
+              <ProtectedRoute>
+                <ChatPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Login / Authentication */}
+          <Route
+            path="login"
+            element={
+              <LoginPage
+                onLoginSuccess={name => {
+                  addToast(t('common:toast.welcomeBack', { name }), 'success', '👋');
+                }}
+              />
+            }
+          />
+
+          {/* Customer Registration */}
+          <Route
+            path="register"
+            element={
+              <RegisterPage
+                onRegisterSuccess={() => {
+                  addToast(t('common:toast.registerSuccess'), 'success', '🎁');
+                }}
+              />
+            }
+          />
+
+          {/* LINE OAuth Callback */}
+          <Route path="auth/line/callback" element={<LineCallbackPage />} />
+
+          {/* Customer Account & Verification Portal */}
+          <Route path="account" element={<AccountPage />} />
+
+          {/* Product Detail */}
+          <Route
+            path="product/:id"
+            element={
+              <ProductDetailPage
+                products={productList}
+                onAddToCart={(p, qty) => handleAddToCart(p, qty)}
+                isWishlisted={id => wishlist.isWished(id)}
+                onToggleWishlist={p => handleToggleWishlist(p)}
+                cartCount={cart.totalItems}
+                onOpenVisualSearchWithImage={img => handleOpenVisualSearch(img)}
+              />
+            }
+          />
+
+          {/* Marketplace Store Page */}
+          <Route
+            path="store/:id"
+            element={
+              <StorePage
+                allProducts={productList}
+                onAddToCart={p => handleAddToCart(p)}
+                isWishlisted={id => wishlist.isWished(id)}
+                onToggleWishlist={p => handleToggleWishlist(p)}
+              />
+            }
+          />
+
           {/* Cart */}
           <Route
-            path="/cart"
+            path="cart"
             element={
               <CartPage
                 items={cart.items}
@@ -387,11 +381,11 @@ function AppLayout({
                 onUpdateQty={cart.updateQty}
                 onRemove={productId => {
                   cart.removeItem(productId);
-                  addToast(UI_COPY.cart.removed, 'info', '🗑️');
+                  addToast(uiCopy.cart.removed(t), 'info', '🗑️');
                 }}
                 onClear={() => {
                   cart.clearCart();
-                  addToast(UI_COPY.cart.cleared, 'info', '🗑️');
+                  addToast(uiCopy.cart.cleared(t), 'info', '🗑️');
                 }}
                 onAddToCart={(p, qty) => handleAddToCart(p, qty)}
                 isWishlisted={id => wishlist.isWished(id)}
@@ -402,7 +396,7 @@ function AppLayout({
 
           {/* Checkout */}
           <Route
-            path="/checkout"
+            path="checkout"
             element={
               <CheckoutPage
                 items={cart.items}
@@ -414,11 +408,11 @@ function AppLayout({
           />
 
           {/* Order Success */}
-          <Route path="/order/success" element={<OrderSuccessPage />} />
+          <Route path="order/success" element={<OrderSuccessPage />} />
 
           {/* Wishlist */}
           <Route
-            path="/wishlist"
+            path="wishlist"
             element={
               <WishlistPage
                 items={wishlist.items}
@@ -428,57 +422,27 @@ function AppLayout({
           />
 
           {/* Orders */}
-          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="orders" element={<OrdersPage />} />
 
           {/* Help & Information Pages */}
-          <Route path="/help" element={<HelpCenterPage initialTab="help" />} />
-          <Route path="/how-to-order" element={<HelpCenterPage initialTab="how-to-order" />} />
-          <Route path="/shipping" element={<HelpCenterPage initialTab="shipping" />} />
-          <Route path="/returns" element={<HelpCenterPage initialTab="returns" />} />
-          <Route path="/contact" element={<HelpCenterPage initialTab="contact" />} />
+          <Route path="help" element={<HelpCenterPage initialTab="help" />} />
+          <Route path="how-to-order" element={<HelpCenterPage initialTab="how-to-order" />} />
+          <Route path="shipping" element={<HelpCenterPage initialTab="shipping" />} />
+          <Route path="returns" element={<HelpCenterPage initialTab="returns" />} />
+          <Route path="contact" element={<HelpCenterPage initialTab="contact" />} />
 
 
           {/* PDPA & Legal Routes */}
-          <Route path="/privacy" element={<PrivacyPolicyPage />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-          <Route path="/terms" element={<TermsPage />} />
+          <Route path="privacy" element={<PrivacyPolicyPage />} />
+          <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="terms" element={<TermsPage />} />
 
-          {/* 404 Not Found */}
-          <Route
-            path="*"
-            element={
-              <div style={{
-                paddingTop: 'calc(var(--navbar-height) + var(--space-12))',
-                minHeight: '70vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'column',
-                gap: 16,
-                textAlign: 'center',
-              }}>
-                <div style={{ fontSize: 48 }}>🔍</div>
-                <h1 style={{ fontSize: 24, fontWeight: 800 }}>404 — ไม่พบหน้าที่ต้องการ</h1>
-                <p style={{ color: 'var(--text-secondary)', maxWidth: 400, fontSize: 14 }}>
-                  หน้าที่คุณกำลังค้นหาอาจถูกย้าย ลบ หรือ URL ไม่ถูกต้อง
-                </p>
-                <Link
-                  to="/"
-                  style={{
-                    marginTop: 8,
-                    padding: '10px 20px',
-                    background: 'var(--primary)',
-                    color: 'white',
-                    borderRadius: 0,
-                    fontWeight: 600,
-                    fontSize: 13,
-                  }}
-                >
-                  กลับสู่หน้าหลัก
-                </Link>
-              </div>
-            }
-          />
+          <Route path="*" element={<LocalizedNotFound />} />
+          </Route>
+
+          {BUYER_ROUTE_PATHS.map(path => (
+            <Route key={path} path={path} element={<LegacyBuyerRedirect />} />
+          ))}
         </Routes>
         </Suspense>
         </ErrorBoundary>
@@ -496,6 +460,7 @@ function AppLayout({
 }
 
 function App() {
+  const { t } = useTranslation(['common']);
   const [productList, setProductList] = useState<Product[]>(() => {
     try {
       const savedCustom = localStorage.getItem('movemall_user_custom_products');
@@ -556,22 +521,22 @@ function App() {
 
   function handleAddToCart(product: Product, qty = 1) {
     cart.addItem(product, qty);
-    addToast(UI_COPY.cart.added(qty), 'success', '🛒');
+    addToast(uiCopy.cart.added(t, qty), 'success', '🛒');
   }
 
   function handleToggleWishlist(product: Product) {
     const isWishedNow = wishlist.isWished(product.id);
     wishlist.toggle(product);
     if (!isWishedNow) {
-      addToast(UI_COPY.wishlist.added, 'info', '❤️');
+      addToast(uiCopy.wishlist.added(t), 'info', '❤️');
     } else {
-      addToast(UI_COPY.wishlist.removed, 'info', '🤍');
+      addToast(uiCopy.wishlist.removed(t), 'info', '🤍');
     }
   }
 
   function handlePublishClip(newClip: VideoClip) {
     setCustomClips(prev => [newClip, ...prev]);
-    addToast('เผยแพร่วิดีโอแล้ว', 'success', '🎬');
+    addToast(t('common:toast.videoPublished'), 'success', '🎬');
   }
 
   async function handleAddProduct(newProduct: Product) {
@@ -603,7 +568,7 @@ function App() {
     } catch (err) {
       console.warn('[Movemall API] Could not persist product to DB API, saved locally:', err);
     }
-    addToast('ลงขายสินค้าแล้ว', 'success', '📦');
+    addToast(t('common:toast.productListed'), 'success', '📦');
   }
 
   async function handleDeleteProduct(id: string) {
@@ -624,7 +589,7 @@ function App() {
     } catch (err) {
       console.warn('[Movemall API] Could not delete product from DB API:', err);
     }
-    addToast('ลบสินค้าออกจากร้านค้าแล้ว', 'info', '🗑️');
+    addToast(t('common:toast.productRemoved'), 'info', '🗑️');
   }
 
   async function handleUpdateProduct(updatedProduct: Product) {
@@ -654,7 +619,7 @@ function App() {
     } catch (err) {
       console.warn('[Movemall API] Could not update product on DB API:', err);
     }
-    addToast('อัปเดตสินค้าแล้ว', 'success', '✏️');
+    addToast(t('common:toast.productUpdated'), 'success', '✏️');
   }
 
   return (

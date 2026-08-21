@@ -1,8 +1,11 @@
 // src/components/FilterSidebar.tsx
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { categories } from '../data/products';
+import { formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import './FilterSidebar.css';
 
 export interface FilterState {
@@ -20,13 +23,11 @@ interface FilterSidebarProps {
 }
 
 const RATINGS = [5, 4, 3];
-const BADGES = [
-  { id: 'sale', label: '🔥 Sale' },
-  { id: 'new', label: '✨ ใหม่' },
-  { id: 'hot', label: '⚡ Hot' },
-];
+const BADGES = ['sale', 'new', 'hot'];
 
 export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
+  const { t, i18n } = useTranslation(['catalog', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const [priceMin, setPriceMin] = useState(filters.minPrice);
   const [priceMax, setPriceMax] = useState(filters.maxPrice);
 
@@ -62,15 +63,15 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
     filters.badges.length > 0;
 
   return (
-    <aside className="filter-sidebar" aria-label="ตัวกรองสินค้า">
+    <aside className="filter-sidebar" aria-label={t('catalog:filters.ariaLabel')}>
       <div className="filter-sidebar__header">
         <h2 className="filter-sidebar__title">
           <SlidersHorizontal size={16} style={{ display: 'inline', marginRight: 8 }} />
-          ตัวกรอง
+          {t('catalog:filters.title')}
         </h2>
         {hasFilters && (
           <button className="filter-sidebar__clear" onClick={clearAll}>
-            ล้างทั้งหมด
+            {t('catalog:filters.clearAll')}
           </button>
         )}
       </div>
@@ -78,7 +79,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
       {/* Categories */}
       <div className="filter-group">
         <div className="filter-group__label">
-          หมวดหมู่ <ChevronDown size={14} />
+          {t('catalog:filters.categories')} <ChevronDown size={14} />
         </div>
         {categories.map(cat => {
           const active = filters.categories.includes(cat.id);
@@ -89,15 +90,15 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
                   {active && <span style={{ color: 'white', fontSize: 11, fontWeight: 700 }}>✓</span>}
                 </div>
                 <span className="filter-option__icon">{cat.icon}</span>
-                <span className="filter-option__name">{cat.name}</span>
+                <span className="filter-option__name">{t(`catalog:categories.${cat.id}.name`)}</span>
               </div>
-              <span className="filter-option__count">{cat.productCount}</span>
+              <span className="filter-option__count">{formatNumber(cat.productCount, locale)}</span>
               <input
                 type="checkbox"
                 className="sr-only"
                 checked={active}
                 onChange={() => toggleCategory(cat.id)}
-                aria-label={cat.name}
+                aria-label={t(`catalog:categories.${cat.id}.name`)}
               />
             </label>
           );
@@ -107,40 +108,40 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
       {/* Price Range */}
       <div className="filter-group">
         <div className="filter-group__label">
-          ราคา <ChevronDown size={14} />
+          {t('catalog:filters.price')} <ChevronDown size={14} />
         </div>
         <div className="filter-price-inputs">
           <input
             id="filter-price-min"
             type="number"
             className="filter-price-input"
-            placeholder="ต่ำสุด"
+            placeholder={t('catalog:filters.minimum')}
             value={priceMin}
             onChange={e => setPriceMin(e.target.value)}
             min={0}
-            aria-label="ราคาต่ำสุด"
+            aria-label={t('catalog:filters.minimumPrice')}
           />
           <span className="filter-price-sep">—</span>
           <input
             id="filter-price-max"
             type="number"
             className="filter-price-input"
-            placeholder="สูงสุด"
+            placeholder={t('catalog:filters.maximum')}
             value={priceMax}
             onChange={e => setPriceMax(e.target.value)}
             min={0}
-            aria-label="ราคาสูงสุด"
+            aria-label={t('catalog:filters.maximumPrice')}
           />
         </div>
         <button className="filter-apply-btn" onClick={applyPrice} id="filter-price-apply">
-          ใช้ตัวกรองราคา
+          {t('catalog:filters.applyPrice')}
         </button>
       </div>
 
       {/* Rating */}
       <div className="filter-group">
         <div className="filter-group__label">
-          คะแนน <ChevronDown size={14} />
+          {t('catalog:filters.rating')} <ChevronDown size={14} />
         </div>
         {RATINGS.map(r => (
           <label key={r} className="filter-rating-option">
@@ -148,14 +149,14 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
               {filters.rating === r && <span style={{ color: 'white', fontSize: 11, fontWeight: 700 }}>✓</span>}
             </div>
             <span className="filter-stars">{'★'.repeat(r)}{'☆'.repeat(5 - r)}</span>
-            <span className="filter-option__name">ขึ้นไป</span>
+            <span className="filter-option__name">{t('catalog:filters.andUp')}</span>
             <input
               type="radio"
               className="sr-only"
               name="rating-filter"
               checked={filters.rating === r}
               onChange={() => onChange({ ...filters, rating: filters.rating === r ? null : r })}
-              aria-label={`${r} ดาวขึ้นไป`}
+              aria-label={t('catalog:filters.ratingAndUp', { rating: r })}
             />
           </label>
         ))}
@@ -164,18 +165,18 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
       {/* Badge */}
       <div className="filter-group">
         <div className="filter-group__label">
-          โปรโมชั่น <ChevronDown size={14} />
+          {t('catalog:filters.promotions')} <ChevronDown size={14} />
         </div>
         <div className="filter-badge-list">
-          {BADGES.map(b => (
+          {BADGES.map(badge => (
             <button
-              key={b.id}
-              id={`filter-badge-${b.id}`}
-              className={`filter-badge-chip${filters.badges.includes(b.id) ? ' filter-badge-chip--active' : ''}`}
-              onClick={() => toggleBadge(b.id)}
-              aria-pressed={filters.badges.includes(b.id)}
+              key={badge}
+              id={`filter-badge-${badge}`}
+              className={`filter-badge-chip${filters.badges.includes(badge) ? ' filter-badge-chip--active' : ''}`}
+              onClick={() => toggleBadge(badge)}
+              aria-pressed={filters.badges.includes(badge)}
             >
-              {b.label}
+              {t(`catalog:filters.badges.${badge}`)}
             </button>
           ))}
         </div>
@@ -184,7 +185,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
       {/* Tax & Invoice Filter */}
       <div className="filter-group" style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #E5E7EB' }}>
         <div className="filter-group__label">
-          ใบกำกับภาษี / e-Tax <ChevronDown size={14} />
+          {t('catalog:filters.taxInvoice')} <ChevronDown size={14} />
         </div>
         <label className="filter-option" style={{ cursor: 'pointer' }}>
           <div className="filter-option__left">
@@ -192,14 +193,14 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
               {filters.onlyTaxReady && <span style={{ color: 'white', fontSize: 11, fontWeight: 700 }}>✓</span>}
             </div>
             <span className="filter-option__icon">🧾</span>
-            <span className="filter-option__name" style={{ fontWeight: 600, color: '#1E40AF' }}>ออกใบกำกับภาษีได้</span>
+            <span className="filter-option__name" style={{ fontWeight: 600, color: '#1E40AF' }}>{t('catalog:filters.taxReady')}</span>
           </div>
           <input
             type="checkbox"
             className="sr-only"
             checked={!!filters.onlyTaxReady}
             onChange={() => onChange({ ...filters, onlyTaxReady: !filters.onlyTaxReady })}
-            aria-label="ร้านค้าที่ออกใบกำกับภาษีได้"
+            aria-label={t('catalog:filters.taxReadyAria')}
           />
         </label>
       </div>

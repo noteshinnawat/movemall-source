@@ -1,6 +1,7 @@
 // src/components/VisualSearchModal.tsx — Movemall AI Visual Search / Lens Modal
 
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   Camera,
@@ -11,13 +12,17 @@ import {
   SlidersHorizontal,
   Check,
   Search,
-  Maximize2,
   ChevronRight,
   ShoppingBag,
-  ExternalLink,
   Tag,
   Palette,
 } from 'lucide-react';
+import { useLocalizedPath } from '../i18n/LocalizedLink';
+import {
+  createSyntheticSearchSubject,
+  rankVisualSearchProducts,
+  resolveVisualSearchStoreName,
+} from './VisualSearch.behavior';
 import { VISUAL_SEARCH_SAMPLES, type VisualSample } from '../data/visualSearchSamples';
 import { getStoreById } from '../data/stores';
 import { getProductUrl } from '../utils/seo';
@@ -50,7 +55,9 @@ export function VisualSearchModal({
   initialImage,
   onAddToCart,
 }: VisualSearchModalProps) {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
+  const localizePath = useLocalizedPath();
   const [activeTab, setActiveTab] = useState<InputTab>('samples');
   const [selectedImage, setSelectedImage] = useState<string | null>(initialImage || null);
   const [isScanning, setIsScanning] = useState(false);
@@ -106,7 +113,7 @@ export function VisualSearchModal({
       setCameraActive(true);
     } catch (err: any) {
       console.error('Camera access error:', err);
-      setCameraError('เปิดกล้องไม่ได้ โปรดอนุญาตสิทธิ์หรืออัปโหลดรูปแทน');
+      setCameraError(t('visualSearch.cameraError'));
       setCameraActive(false);
     }
   }
@@ -186,14 +193,17 @@ export function VisualSearchModal({
         setCategoryFilter(foundSample.category);
       } else {
         // Synthesize dynamic AI bounding boxes & colors for uploaded/captured image
+        const syntheticSubject = createSyntheticSearchSubject(
+          t('visualSearch.detectedPrimary'),
+        );
         const syntheticObjects: DetectedObject[] = [
           {
             id: 'obj-gen-1',
-            label: 'วัตถุหลักที่ตรวจพบ (Primary Subject)',
+            label: syntheticSubject.label,
             category: 'all',
             confidence: 0.96,
             box: { top: 15, left: 15, width: 70, height: 70 },
-            suggestedKeywords: ['ยอดนิยม', 'คุณภาพสูง', 'ของแท้', 'พร้อมส่ง'],
+            suggestedKeywords: syntheticSubject.suggestedKeywords,
           },
         ];
         setDetectedObjects(syntheticObjects);
@@ -238,39 +248,20 @@ export function VisualSearchModal({
       });
     }
 
-    // Calculate score based on keyword relevance & category
-    const scoredList = list.map((p, idx) => {
-      let score = 75; // base score
-
-      if (categoryFilter === p.category) {
-        score += 15;
-      }
-
-      if (activeObject?.suggestedKeywords) {
-        activeObject.suggestedKeywords.forEach(kw => {
-          if (
-            p.name.toLowerCase().includes(kw.toLowerCase()) ||
-            p.tags.some(t => t.toLowerCase().includes(kw.toLowerCase()))
-          ) {
-            score += 4;
-          }
-        });
-      }
-
-      // Add deterministic natural variance
-      score = Math.min(99, Math.max(68, score + ((p.name.length * 7 + idx * 3) % 9)));
+    // Calculate score from canonical matching tokens, never translated UI copy.
+    const scoredList = rankVisualSearchProducts(
+      list,
+      categoryFilter,
+      activeObject?.suggestedKeywords ?? [],
+    ).map(p => {
       const store = p.storeId ? getStoreById(p.storeId) : undefined;
 
       return {
         ...p,
-        visualMatchScore: score,
         isMall: store?.badge === 'official',
-        storeName: store?.name || 'ร้านค้าทางการ Movemall',
+        storeName: resolveVisualSearchStoreName(store?.name),
       };
     });
-
-    // Sort by Visual Match Score descending
-    scoredList.sort((a, b) => b.visualMatchScore - a.visualMatchScore);
 
     return scoredList;
   }, [selectedImage, categoryFilter, onlyMall, activeObject, products]);
@@ -283,7 +274,7 @@ export function VisualSearchModal({
         className="vsearch-modal"
         onClick={e => e.stopPropagation()}
         role="dialog"
-        aria-label="ค้นหาด้วยรูปภาพ Movemall AI Lens"
+        aria-label={t('visualSearch.dialogLabel')}
       >
         {/* ── Header ── */}
         <div className="vsearch-header">
@@ -292,13 +283,13 @@ export function VisualSearchModal({
               <Sparkles size={18} />
             </div>
             <div>
-              <h2 className="vsearch-title">Movemall AI Lens — ค้นหาด้วยรูปภาพ</h2>
+              <h2 className="vsearch-title">{t('visualSearch.title')}</h2>
               <p className="vsearch-subtitle">
-                ถ่ายหรืออัปโหลดรูปเพื่อค้นหาสินค้า
+                {t('visualSearch.subtitle')}
               </p>
             </div>
           </div>
-          <button className="vsearch-close-btn" onClick={onClose} aria-label="ปิดหน้าต่าง">
+          <button className="vsearch-close-btn" onClick={onClose} aria-label={t('visualSearch.close')}>
             <X size={20} />
           </button>
         </div>
@@ -318,7 +309,7 @@ export function VisualSearchModal({
                       stopCamera();
                     }}
                   >
-                    <Sparkles size={16} /> ภาพตัวอย่างยอดนิยม
+                    <Sparkles size={16} /> {t('visualSearch.tabs.samples')}
                   </button>
                   <button
                     className={`vsearch-tab ${activeTab === 'upload' ? 'active' : ''}`}
@@ -327,7 +318,7 @@ export function VisualSearchModal({
                       stopCamera();
                     }}
                   >
-                    <Upload size={16} /> อัปโหลดรูปภาพ
+                    <Upload size={16} /> {t('visualSearch.tabs.upload')}
                   </button>
                   <button
                     className={`vsearch-tab ${activeTab === 'camera' ? 'active' : ''}`}
@@ -336,7 +327,7 @@ export function VisualSearchModal({
                       startCamera();
                     }}
                   >
-                    <Camera size={16} /> ถ่ายจากกล้องสด
+                    <Camera size={16} /> {t('visualSearch.tabs.camera')}
                   </button>
                 </div>
 
@@ -344,7 +335,7 @@ export function VisualSearchModal({
                 {activeTab === 'samples' && (
                   <div className="vsearch-samples-grid">
                     <p className="vsearch-samples-hint">
-                      หรือเลือกรูปตัวอย่าง
+                      {t('visualSearch.sampleHint')}
                     </p>
                     <div className="vsearch-samples-list">
                       {VISUAL_SEARCH_SAMPLES.map(sample => (
@@ -385,12 +376,12 @@ export function VisualSearchModal({
                     <div className="vsearch-drop-icon">
                       <Upload size={36} />
                     </div>
-                    <h3 className="vsearch-drop-title">ลากไฟล์รูปภาพมาวางที่นี่ หรือคลิกเพื่ออัปโหลด</h3>
+                    <h3 className="vsearch-drop-title">{t('visualSearch.uploadTitle')}</h3>
                     <p className="vsearch-drop-desc">
-                      รองรับไฟล์ JPG, PNG, WEBP (ความละเอียดสูงสุด 10MB)
+                      {t('visualSearch.uploadFormats')}
                     </p>
                     <button type="button" className="vsearch-browse-btn">
-                      เลือกรูปภาพจากเครื่อง
+                      {t('visualSearch.browse')}
                     </button>
                   </div>
                 )}
@@ -402,7 +393,7 @@ export function VisualSearchModal({
                       <div className="vsearch-camera-error">
                         <p>{cameraError}</p>
                         <button className="vsearch-retry-btn" onClick={startCamera}>
-                          <RefreshCw size={14} /> ลองเปิดกล้องใหม่อีกครั้ง
+                          <RefreshCw size={14} /> {t('visualSearch.retryCamera')}
                         </button>
                       </div>
                     ) : (
@@ -420,7 +411,7 @@ export function VisualSearchModal({
                             type="button"
                             className="vsearch-shutter-btn"
                             onClick={capturePhoto}
-                            aria-label="ถ่ายรูป"
+                            aria-label={t('visualSearch.capture')}
                           >
                             <div className="vsearch-shutter-inner" />
                           </button>
@@ -436,7 +427,7 @@ export function VisualSearchModal({
                 <div className="vsearch-preview-frame">
                   <img
                     src={selectedImage}
-                    alt="Visual Search Query"
+                    alt={t('visualSearch.queryAlt')}
                     className="vsearch-preview-img"
                   />
 
@@ -445,7 +436,7 @@ export function VisualSearchModal({
                     <div className="vsearch-laser-container">
                       <div className="vsearch-laser-line" />
                       <div className="vsearch-scan-status">
-                        <Sparkles size={16} className="spin-icon" /> AI กำลังวิเคราะห์ลักษณะสินค้าและตรวจจับวัตถุ...
+                        <Sparkles size={16} className="spin-icon" /> {t('visualSearch.analyzing')}
                       </div>
                     </div>
                   )}
@@ -485,10 +476,10 @@ export function VisualSearchModal({
                     <div className="vsearch-features-header">
                       <div className="vsearch-features-left">
                         <Tag size={14} />
-                        <span className="vsearch-features-title">วัตถุที่ตรวจพบ:</span>
+                        <span className="vsearch-features-title">{t('visualSearch.detectedObjects')}</span>
                       </div>
                       <button className="vsearch-change-btn" onClick={handleReset}>
-                        <RefreshCw size={12} /> สแกนรูปอื่น
+                        <RefreshCw size={12} /> {t('visualSearch.scanAnother')}
                       </button>
                     </div>
 
@@ -518,7 +509,7 @@ export function VisualSearchModal({
                     {dominantColors.length > 0 && (
                       <div className="vsearch-colors-row">
                         <Palette size={14} className="vsearch-color-icon" />
-                        <span className="vsearch-color-label">โทนสีหลัก:</span>
+                        <span className="vsearch-color-label">{t('visualSearch.dominantColors')}</span>
                         <div className="vsearch-swatches">
                           {dominantColors.map((color, cIdx) => (
                             <button
@@ -528,7 +519,7 @@ export function VisualSearchModal({
                               onClick={() =>
                                 setSelectedColor(selectedColor === color ? null : color)
                               }
-                              title={`โทนสี ${color}`}
+                              title={t('visualSearch.colorTitle', { color })}
                             />
                           ))}
                         </div>
@@ -547,7 +538,9 @@ export function VisualSearchModal({
               <div className="vsearch-filter-title">
                 <SlidersHorizontal size={14} />
                 <span>
-                  ผลการค้นหา {matchedProducts.length > 0 ? `(${matchedProducts.length} รายการ)` : ''}
+                  {matchedProducts.length > 0
+                    ? t('visualSearch.resultsWithCount', { count: matchedProducts.length })
+                    : t('visualSearch.results')}
                 </span>
               </div>
               <div className="vsearch-filter-actions">
@@ -557,7 +550,7 @@ export function VisualSearchModal({
                     checked={onlyMall}
                     onChange={e => setOnlyMall(e.target.checked)}
                   />
-                  <span>👑 เฉพาะ Mall แท้</span>
+                  <span>👑 {t('visualSearch.onlyMall')}</span>
                 </label>
               </div>
             </div>
@@ -566,21 +559,21 @@ export function VisualSearchModal({
             {isScanning ? (
               <div className="vsearch-loading-state">
                 <div className="vsearch-spinner" />
-                <p>กำลังค้นหาสินค้าที่ใกล้เคียง...</p>
+                <p>{t('visualSearch.searching')}</p>
               </div>
             ) : !selectedImage ? (
               <div className="vsearch-empty-prompt">
                 <div className="vsearch-empty-icon">📷</div>
-                <h3>เลือกรูปภาพเพื่อเริ่มการค้นหา</h3>
+                <h3>{t('visualSearch.emptyTitle')}</h3>
                 <p>
-                  เปรียบเทียบรูปทรง สไตล์ และโทนสี
+                  {t('visualSearch.emptyDescription')}
                 </p>
               </div>
             ) : matchedProducts.length === 0 ? (
               <div className="vsearch-no-results">
                 <Search size={32} />
-                <h3>ไม่พบสินค้าที่ใกล้เคียงกับเงื่อนไขนี้</h3>
-                <p>ลองปิดตัวกรอง หรือเลือกสแกนรูปภาพอื่น</p>
+                <h3>{t('visualSearch.noResultsTitle')}</h3>
+                <p>{t('visualSearch.noResultsDescription')}</p>
                 <button
                   className="vsearch-clear-filter-btn"
                   onClick={() => {
@@ -588,7 +581,7 @@ export function VisualSearchModal({
                     setOnlyMall(false);
                   }}
                 >
-                  ล้างตัวกรองทั้งหมด
+                  {t('visualSearch.clearFilters')}
                 </button>
               </div>
             ) : (
@@ -601,7 +594,7 @@ export function VisualSearchModal({
                       {/* Visual Match Badge */}
                       <div className="vsearch-match-badge">
                         <Sparkles size={11} />
-                        <span>{prod.visualMatchScore}% ตรงกัน</span>
+                        <span>{t('visualSearch.match', { score: prod.visualMatchScore })}</span>
                       </div>
 
                       {isMall && <div className="vsearch-mall-badge">MALL</div>}
@@ -610,7 +603,7 @@ export function VisualSearchModal({
                         className="vsearch-prod-thumb-wrap"
                         onClick={() => {
                           onClose();
-                          navigate(getProductUrl(prod));
+                          navigate(localizePath(getProductUrl(prod)));
                         }}
                       >
                         <img
@@ -621,13 +614,13 @@ export function VisualSearchModal({
                       </div>
 
                       <div className="vsearch-prod-details">
-                        <div className="vsearch-prod-store">{store?.name || 'Movemall Store'}</div>
+                        <div className="vsearch-prod-store">{resolveVisualSearchStoreName(store?.name)}</div>
                       <h4
                         className="vsearch-prod-title"
                         title={prod.name}
                         onClick={() => {
                           onClose();
-                          navigate(getProductUrl(prod));
+                          navigate(localizePath(getProductUrl(prod)));
                         }}
                       >
                         {prod.name}
@@ -655,17 +648,17 @@ export function VisualSearchModal({
                             }
                           }}
                         >
-                          <ShoppingBag size={13} /> ใส่ตะกร้า
+                          <ShoppingBag size={13} /> {t('visualSearch.addToCart')}
                         </button>
                         <button
                           type="button"
                           className="vsearch-view-btn"
                           onClick={() => {
                             onClose();
-                            navigate(getProductUrl(prod));
+                            navigate(localizePath(getProductUrl(prod)));
                           }}
                         >
-                          ดูสินค้า <ChevronRight size={13} />
+                          {t('visualSearch.viewProduct')} <ChevronRight size={13} />
                         </button>
                       </div>
                     </div>

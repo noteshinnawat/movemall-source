@@ -1,7 +1,8 @@
 // src/pages/OrderSuccessPage.tsx
 
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   CheckCircle2,
   ShoppingBag,
@@ -13,9 +14,14 @@ import {
   Smartphone,
 } from 'lucide-react';
 import { LineConnectModal } from '../components/LineConnectModal';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { formatCurrency } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import './OrderSuccessPage.css';
 
 export function OrderSuccessPage() {
+  const { t, i18n } = useTranslation(['commerce', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get('id') || `ORD-${Date.now()}`;
   const total = searchParams.get('total') ? Number(searchParams.get('total')) : null;
@@ -58,10 +64,10 @@ export function OrderSuccessPage() {
             <CheckCircle2 size={64} className="order-success__icon" />
           </div>
 
-          <span className="order-success__badge">สั่งซื้อสำเร็จ 🎉</span>
-          <h1 className="order-success__title">ขอบคุณที่สั่งซื้อ</h1>
+          <span className="order-success__badge">{t('commerce:orderSuccess.badge')}</span>
+          <h1 className="order-success__title">{t('commerce:orderSuccess.title')}</h1>
           <p className="order-success__subtitle">
-            ร้านค้ากำลังเตรียมสินค้า
+            {t('commerce:orderSuccess.subtitle')}
           </p>
 
           {isCOD && total !== null && (
@@ -76,8 +82,8 @@ export function OrderSuccessPage() {
               lineHeight: 1.5,
               borderRadius: '6px',
             }}>
-              <strong>💵 เก็บเงินปลายทาง</strong>
-              <div>เตรียมเงิน <strong>฿{total.toLocaleString()}</strong> และรอรับสายจากพนักงานจัดส่ง</div>
+              <strong>{t('commerce:orderSuccess.codTitle')}</strong>
+              <div>{t('commerce:orderSuccess.codNote', { amount: formatCurrency(total, locale) })}</div>
             </div>
           )}
 
@@ -88,13 +94,13 @@ export function OrderSuccessPage() {
               <div className="order-success__line-texts">
                 <h3 className="order-success__line-title">
                   {isLineConnected
-                    ? '✓ เชื่อมต่อ LINE แล้ว'
-                    : '📲 ติดตามพัสดุผ่าน LINE'}
+                    ? t('commerce:orderSuccess.lineConnectedTitle')
+                    : t('commerce:orderSuccess.lineConnectTitle')}
                 </h3>
                 <p className="order-success__line-desc">
                   {isLineConnected
-                    ? 'เราจะแจ้งเลขพัสดุและสถานะจัดส่ง'
-                    : 'เชื่อมต่อแล้วรับ 50 Coins พร้อมใบเสร็จและสถานะพัสดุ'}
+                    ? t('commerce:orderSuccess.lineConnectedDesc')
+                    : t('commerce:orderSuccess.lineConnectDesc')}
                 </p>
               </div>
             </div>
@@ -107,7 +113,7 @@ export function OrderSuccessPage() {
                   onClick={() => setIsLineModalOpen(true)}
                 >
                   <Sparkles size={16} />
-                  เชื่อมต่อ LINE · รับ 50 Coins
+                  {t('commerce:orderSuccess.lineConnectCta')}
                 </button>
               ) : (
                 <button
@@ -116,7 +122,7 @@ export function OrderSuccessPage() {
                   onClick={() => setIsLineModalOpen(true)}
                 >
                   <Smartphone size={16} />
-                  ดูตัวอย่างข้อความและจัดการการแจ้งเตือน
+                  {t('commerce:orderSuccess.lineManageCta')}
                 </button>
               )}
             </div>
@@ -124,43 +130,49 @@ export function OrderSuccessPage() {
 
           <div className="order-success__info">
             <div className="order-success__info-row">
-              <span className="order-success__info-label">หมายเลขคำสั่งซื้อ</span>
+              <span className="order-success__info-label">{t('commerce:orderSuccess.orderIdLabel')}</span>
               <span className="order-success__info-val order-success__order-id">{orderId}</span>
             </div>
             {total !== null && (
               <div className="order-success__info-row">
-                <span className="order-success__info-label">ยอดชำระทั้งหมด</span>
-                <span className="order-success__info-val">฿{total.toLocaleString()}</span>
+                <span className="order-success__info-label">{t('commerce:orderSuccess.totalLabel')}</span>
+                <span className="order-success__info-val">{formatCurrency(total, locale)}</span>
               </div>
             )}
             <div className="order-success__info-row">
-              <span className="order-success__info-label">รูปแบบการชำระเงิน</span>
+              <span className="order-success__info-label">{t('commerce:orderSuccess.methodLabel')}</span>
               <span className="order-success__info-val">
-                {isCOD ? '💵 เก็บเงินปลายทาง (COD)' : method === 'credit' ? '💳 บัตรเครดิต/เดบิต' : '📱 พร้อมเพย์ (PromptPay QR)'}
+                {isCOD
+                  ? t('commerce:orderSuccess.methodCod')
+                  : method === 'credit'
+                    ? t('commerce:orderSuccess.methodCredit')
+                    : t('commerce:orderSuccess.methodPromptPay')}
               </span>
             </div>
             <div className="order-success__info-row">
-              <span className="order-success__info-label">สถานะการชำระเงิน</span>
+              <span className="order-success__info-label">{t('commerce:orderSuccess.paymentStatusLabel')}</span>
               <span className={`order-success__info-val ${isCOD ? 'order-success__status-pending' : 'order-success__status-paid'}`} style={isCOD ? { color: '#D97706', fontWeight: 800 } : {}}>
-                {isCOD ? 'รอชำระเงินเมื่อได้รับสินค้า' : 'ชำระเงินสำเร็จ'}
+                {isCOD
+                  ? t('commerce:orderSuccess.paymentStatusPending')
+                  : t('commerce:orderSuccess.paymentStatusPaid')}
               </span>
             </div>
             <div className="order-success__info-row">
-              <span className="order-success__info-label">กำหนดการส่งโดยประมาณ</span>
-              <span className="order-success__info-val">1-3 วันทำการ (Flash Express)</span>
+              <span className="order-success__info-label">{t('commerce:orderSuccess.etaLabel')}</span>
+              <span className="order-success__info-val">{t('commerce:orderSuccess.etaValue')}</span>
             </div>
           </div>
 
           <div className="order-success__actions">
-            <Link to={`/tracking?id=${orderId}`} className="order-success__btn order-success__btn--primary">
+            <LocalizedLink to={`/tracking?id=${orderId}`} className="order-success__btn order-success__btn--primary">
               <Truck size={18} />
-              ติดตามสถานะพัสดุ (Live GPS)
-            </Link>
-            <Link to="/shop" className="order-success__btn order-success__btn--secondary">
+              {t('commerce:orderSuccess.trackCta')}
+            </LocalizedLink>
+            <LocalizedLink to="/shop" className="order-success__btn order-success__btn--secondary">
               <ShoppingBag size={18} />
-              ช้อปสินค้าต่อ
+              {t('commerce:orderSuccess.continueShopping')}
               <ArrowRight size={16} />
-            </Link>
+            </LocalizedLink>
           </div>
         </div>
       </div>

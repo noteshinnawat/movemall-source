@@ -1,8 +1,11 @@
 // src/components/LiveStreamCard.tsx — In-Grid Interactive Live Stream Card
 
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Play, Eye, ShoppingBag, ArrowRight, Heart } from 'lucide-react';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { formatCompactNumber, formatCurrency, formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import './LiveStreamCard.css';
 
 export interface LiveStreamCardProps {
@@ -10,7 +13,7 @@ export interface LiveStreamCardProps {
   channelName?: string;
   streamerAvatar?: string;
   title?: string;
-  viewers?: string;
+  viewers?: number;
   videoUrl?: string;
   posterImage?: string;
   pinnedProduct?: {
@@ -27,7 +30,7 @@ export function LiveStreamCard({
   channelName = 'TechPro Official Live',
   streamerAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80',
   title = '🔥 แจกโค้ดลับ 50% ทุก 15 นาที + รีวิวแกะกล่องสินค้าใหม่',
-  viewers = '1.4k',
+  viewers = 1_400,
   videoUrl = '/videos/live-streamer-1.mp4',
   posterImage = 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=600&q=80',
   pinnedProduct = {
@@ -38,6 +41,8 @@ export function LiveStreamCard({
     discountPct: 50,
   },
 }: LiveStreamCardProps) {
+  const { t, i18n } = useTranslation(['catalog', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const [heartsCount, setHeartsCount] = useState(384);
   const [isLiked, setIsLiked] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -64,7 +69,7 @@ export function LiveStreamCard({
   }
 
   return (
-    <Link to="/live" className="live-stream-card" aria-label={`ชมไลฟ์สด ${channelName}`}>
+    <LocalizedLink to="/live" className="live-stream-card" aria-label={t('catalog:home.live.watchChannel', { channel: channelName })}>
       {/* Background Autoplay Video */}
       <video
         ref={videoRef}
@@ -88,7 +93,7 @@ export function LiveStreamCard({
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div className="live-stream-viewer-count">
             <Eye size={12} style={{ display: 'inline', marginRight: 3 }} />
-            {viewers}
+            {formatCompactNumber(viewers, locale)}
           </div>
 
           <button
@@ -105,10 +110,10 @@ export function LiveStreamCard({
               alignItems: 'center',
               gap: 3,
             }}
-            title="ส่งหัวใจให้ไลฟ์นี้"
+            title={t('catalog:home.live.sendHeart')}
           >
             <Heart size={12} fill={isLiked ? '#EF4444' : 'none'} />
-            {heartsCount}
+            {formatNumber(heartsCount, locale)}
           </button>
         </div>
       </div>
@@ -127,22 +132,22 @@ export function LiveStreamCard({
         <div className="live-pinned-deal">
           <img src={pinnedProduct.image} alt={pinnedProduct.name} className="live-pinned-deal-img" />
           <div className="live-pinned-deal-info">
-            <div className="live-pinned-tag">📌 ปักหมุด -{pinnedProduct.discountPct}%</div>
+            <div className="live-pinned-tag">{t('catalog:home.live.pinnedDiscount', { discount: pinnedProduct.discountPct })}</div>
             <div className="live-pinned-name">{pinnedProduct.name}</div>
             <div className="live-pinned-price-row">
-              <span className="live-pinned-price">฿{pinnedProduct.price.toLocaleString()}</span>
-              <span className="live-pinned-orig">฿{pinnedProduct.originalPrice.toLocaleString()}</span>
+              <span className="live-pinned-price">{formatCurrency(pinnedProduct.price, locale)}</span>
+              <span className="live-pinned-orig">{formatCurrency(pinnedProduct.originalPrice, locale)}</span>
             </div>
           </div>
         </div>
 
         <div className="live-watch-now-btn">
           <Play size={12} fill="white" />
-          <span>ช้อปในไลฟ์</span>
+          <span>{t('catalog:home.live.shopLive')}</span>
           <ArrowRight size={12} />
         </div>
       </div>
-    </Link>
+    </LocalizedLink>
   );
 }
 

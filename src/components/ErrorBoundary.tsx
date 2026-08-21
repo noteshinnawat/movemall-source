@@ -1,6 +1,9 @@
 import React, { Component, type ErrorInfo, type ReactNode } from 'react';
+import { withTranslation, type WithTranslation } from 'react-i18next';
+import i18n from '../i18n/config';
+import { localeFromPath, replaceLocale, resolveRootLocale } from '../i18n/locales';
 
-interface Props {
+interface Props extends WithTranslation<'common'> {
   children: ReactNode;
   fallback?: ReactNode;
 }
@@ -10,7 +13,7 @@ interface State {
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundaryComponent extends Component<Props, State> {
   public state: State = {
     hasError: false,
     error: null,
@@ -31,7 +34,9 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleGoHome = () => {
     this.setState({ hasError: false, error: null });
-    window.location.href = window.location.origin + '/';
+    const locale = localeFromPath(window.location.pathname)
+      ?? resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+    window.location.href = window.location.origin + replaceLocale('/', locale);
   };
 
   public render() {
@@ -56,7 +61,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <div style={{
             width: 56,
             height: 56,
-            borderRadius: '50%',
+            borderRadius: 'var(--radius-md, 6px)',
             background: '#FEE2E2',
             color: '#DC2626',
             display: 'flex',
@@ -68,10 +73,10 @@ export class ErrorBoundary extends Component<Props, State> {
             ⚠️
           </div>
           <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 8px 0' }}>
-            มีการอัปเดตเวอร์ชันใหม่ หรือพบข้อผิดพลาดชั่วคราว
+            {this.props.t('errors.updateTitle')}
           </h2>
           <p style={{ fontSize: 14, color: 'var(--text-muted, #6B7280)', maxWidth: 460, margin: '0 0 24px 0', lineHeight: 1.6 }}>
-            มีเวอร์ชันใหม่ กรุณาโหลดหน้าเว็บอีกครั้ง
+            {this.props.t('errors.updateDescription')}
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
             <button
@@ -88,7 +93,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)',
               }}
             >
-              🔄 โหลดหน้าเว็บใหม่ (Refresh)
+              🔄 {this.props.t('actions.reload')}
             </button>
             <button
               onClick={this.handleGoHome}
@@ -103,7 +108,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 cursor: 'pointer',
               }}
             >
-              🏠 กลับหน้าแรก
+              🏠 {this.props.t('actions.goHome')}
             </button>
           </div>
         </div>
@@ -113,3 +118,5 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+export const ErrorBoundary = withTranslation('common')(ErrorBoundaryComponent);

@@ -1,25 +1,45 @@
 // src/pages/GamesPage.tsx — Movemall Gamification & Rewards Hub
 
-import { useState, useRef } from 'react';
-import { Sparkles, Coins, Gift, CheckCircle, RotateCw, Trophy, Ticket } from 'lucide-react';
+import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import { Sparkles, Coins, Gift, RotateCw, Trophy } from 'lucide-react';
+import { formatCurrency, formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import './GamesPage.css';
 
 interface GamesPageProps {
   onRewardWon?: (rewardText: string) => void;
 }
 
-const WHEEL_PRIZES = [
-  { label: 'โค้ดลด ฿100', color: '#EF4444' },
-  { label: '50 Coins', color: '#F59E0B' },
-  { label: 'โค้ดส่งฟรี', color: '#10B981' },
-  { label: 'ลด 20%', color: '#3B82F6' },
-  { label: '100 Coins', color: '#8B5CF6' },
-  { label: 'โค้ดลด ฿50', color: '#EC4899' },
-  { label: '10 Coins', color: '#6366F1' },
-  { label: 'ลด 15%', color: '#14B8A6' },
+type WheelPrize =
+  | { kind: 'discountCode'; amount: number; color: string }
+  | { kind: 'coins'; amount: number; color: string }
+  | { kind: 'freeShipping'; color: string }
+  | { kind: 'percentOff'; amount: number; color: string };
+
+const WHEEL_PRIZES: WheelPrize[] = [
+  { kind: 'discountCode', amount: 100, color: '#EF4444' },
+  { kind: 'coins', amount: 50, color: '#F59E0B' },
+  { kind: 'freeShipping', color: '#10B981' },
+  { kind: 'percentOff', amount: 20, color: '#3B82F6' },
+  { kind: 'coins', amount: 100, color: '#8B5CF6' },
+  { kind: 'discountCode', amount: 50, color: '#EC4899' },
+  { kind: 'coins', amount: 10, color: '#6366F1' },
+  { kind: 'percentOff', amount: 15, color: '#14B8A6' },
 ];
 
 export function GamesPage({ onRewardWon }: GamesPageProps) {
+  const { t, i18n } = useTranslation(['engagement']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const money = (value: number) => formatCurrency(value, locale);
+
+  function prizeLabel(prize: WheelPrize) {
+    if (prize.kind === 'freeShipping') return t('engagement:games.wheel.prizes.freeShipping');
+    if (prize.kind === 'discountCode') return t('engagement:games.wheel.prizes.discountCode', { amount: money(prize.amount) });
+    if (prize.kind === 'coins') return t('engagement:games.wheel.prizes.coins', { amount: prize.amount });
+    return t('engagement:games.wheel.prizes.percentOff', { amount: prize.amount });
+  }
+
   const [coins, setCoins] = useState<number>(350);
   const [checkedDays, setCheckedDays] = useState<number[]>([1, 2]);
   const [todayClaimed, setTodayClaimed] = useState<boolean>(false);
@@ -27,24 +47,24 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
   // Wheel State
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const [wonPrize, setWonPrize] = useState<string | null>(null);
+  const [wonPrizeLabel, setWonPrizeLabel] = useState<string | null>(null);
 
   // Cards Game
   const [flippedCards, setFlippedCards] = useState<Record<number, boolean>>({});
-  const [cardRewards] = useState(['🎟️ ลด ฿80', '💰 80 Coins', '🚚 โค้ดส่งฟรี']);
+  const cardRewards = t('engagement:games.cards.rewards', { returnObjects: true }) as string[];
 
   function handleCheckin() {
     if (todayClaimed) return;
     setTodayClaimed(true);
     setCheckedDays(prev => [...prev, 3]);
     setCoins(c => c + 30);
-    onRewardWon?.('รับ 30 Coins จากการเช็กอินแล้ว');
+    onRewardWon?.(t('engagement:games.checkin.toast'));
   }
 
   function handleSpinWheel() {
     if (isSpinning) return;
     setIsSpinning(true);
-    setWonPrize(null);
+    setWonPrizeLabel(null);
 
     // Random prize index 0-7
     const prizeIndex = Math.floor(Math.random() * WHEEL_PRIZES.length);
@@ -58,13 +78,13 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
 
     setTimeout(() => {
       setIsSpinning(false);
-      const prize = WHEEL_PRIZES[prizeIndex].label;
-      setWonPrize(prize);
-      if (prize.includes('Coins')) {
-        const amt = parseInt(prize, 10) || 50;
-        setCoins(c => c + amt);
+      const prize = WHEEL_PRIZES[prizeIndex];
+      const label = prizeLabel(prize);
+      setWonPrizeLabel(label);
+      if (prize.kind === 'coins') {
+        setCoins(c => c + prize.amount);
       }
-      onRewardWon?.(`🎉 ยินดีด้วย! คุณได้รับรางวัล "${prize}"`);
+      onRewardWon?.(t('engagement:games.wheel.toast', { prize: label }));
     }, 4200);
   }
 
@@ -72,7 +92,7 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
     if (flippedCards[index]) return;
     setFlippedCards(prev => ({ ...prev, [index]: true }));
     const reward = cardRewards[index];
-    onRewardWon?.(`🎴 เปิดการ์ดสำเร็จ! คุณได้รับ ${reward}`);
+    onRewardWon?.(t('engagement:games.cards.toast', { reward }));
   }
 
   return (
@@ -80,14 +100,21 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
       {/* Hero */}
       <section className="games-hero">
         <div className="container">
-          <h1 className="games-hero__title">🎮 Movemall Games & ศูนย์รวมของรางวัล</h1>
+          <h1 className="games-hero__title">{t('engagement:games.heroTitle')}</h1>
           <p style={{ fontSize: 14, opacity: 0.9 }}>
-            เล่นเกม เช็กอิน และรับ Coins ทุกวัน
+            {t('engagement:games.heroSubtitle')}
           </p>
 
           <div className="games-hero__coins-badge">
             <Coins size={18} style={{ color: '#FCD34D' }} />
-            <span>Coins ของฉัน: <strong>{coins.toLocaleString()}</strong> · ฿{coins}</span>
+            <span>
+              <Trans
+                i18nKey="games.myCoins"
+                ns="engagement"
+                values={{ coins: formatNumber(coins, locale), amount: money(coins) }}
+                components={{ b: <strong /> }}
+              />
+            </span>
           </div>
         </div>
       </section>
@@ -98,9 +125,9 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
           <div className="daily-checkin__header">
             <h2 className="daily-checkin__title">
               <Gift size={18} style={{ color: 'var(--primary)' }} />
-              เช็กอิน 7 วัน รับ Coins
+              {t('engagement:games.checkin.title')}
             </h2>
-            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>ครบ 7 วัน รับเพิ่ม 100 Coins</span>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{t('engagement:games.checkin.goal')}</span>
           </div>
 
           <div className="daily-grid">
@@ -114,11 +141,15 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
                   key={day}
                   className={`daily-box${isClaimed ? ' daily-box--claimed' : ''}${isToday && !todayClaimed ? ' daily-box--today' : ''}`}
                 >
-                  <span className="daily-box-day">วันที่ {day}</span>
+                  <span className="daily-box-day">{t('engagement:games.checkin.dayLabel', { day })}</span>
                   <Coins size={20} style={{ color: isClaimed ? 'var(--success)' : 'var(--warning)' }} />
-                  <span className="daily-box-coin">+{coinReward}</span>
+                  <span className="daily-box-coin">+{formatNumber(coinReward, locale)}</span>
                   <span style={{ fontSize: 10, color: isClaimed ? 'var(--success)' : 'var(--text-muted)' }}>
-                    {isClaimed ? '✓ รับแล้ว' : isToday ? 'วันนี้' : 'รอรับ'}
+                    {isClaimed
+                      ? t('engagement:games.checkin.claimed')
+                      : isToday
+                        ? t('engagement:games.checkin.today')
+                        : t('engagement:games.checkin.pending')}
                   </span>
                 </div>
               );
@@ -130,7 +161,7 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
             onClick={handleCheckin}
             disabled={todayClaimed}
           >
-            {todayClaimed ? '✓ เช็กอินแล้ว กลับมาใหม่พรุ่งนี้' : '🎁 เช็กอินรับ 30 Coins'}
+            {todayClaimed ? t('engagement:games.checkin.buttonClaimed') : t('engagement:games.checkin.buttonClaim')}
           </button>
         </section>
 
@@ -140,10 +171,10 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
           <section className="wheel-card">
             <h3 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
               <Trophy size={18} style={{ color: 'var(--warning)' }} />
-              วงล้อหมุนลุ้นโชค (Lucky Spin Wheel)
+              {t('engagement:games.wheel.title')}
             </h3>
             <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
-              หมุนฟรีวันละครั้ง ลุ้นรับสูงสุด 100 Coins
+              {t('engagement:games.wheel.subtitle')}
             </p>
 
             <div className="wheel-wrapper">
@@ -183,7 +214,7 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
                         dominantBaseline="middle"
                         transform={`rotate(${textAngle}, ${tx}, ${ty})`}
                       >
-                        {prize.label}
+                        {prizeLabel(prize)}
                       </text>
                     </g>
                   );
@@ -191,9 +222,11 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
               </svg>
             </div>
 
-            {wonPrize && (
+            {wonPrizeLabel && (
               <div style={{ background: 'var(--success-subtle)', border: '1px solid var(--success)', padding: '8px 16px', marginBottom: 12 }}>
-                <strong style={{ color: 'var(--success)', fontSize: 14 }}>🎉 คุณได้รับ: {wonPrize}!</strong>
+                <strong style={{ color: 'var(--success)', fontSize: 14 }}>
+                  {t('engagement:games.wheel.won', { prize: wonPrizeLabel })}
+                </strong>
               </div>
             )}
 
@@ -203,7 +236,7 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
               disabled={isSpinning}
             >
               <RotateCw size={16} style={{ display: 'inline', marginRight: 6 }} />
-              {isSpinning ? 'กำลังหมุนลุ้นรางวัล...' : 'หมุนวงล้อทันที!'}
+              {isSpinning ? t('engagement:games.wheel.spinning') : t('engagement:games.wheel.spin')}
             </button>
           </section>
 
@@ -211,10 +244,10 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
           <section className="cards-game-card">
             <h3 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
               <Sparkles size={18} style={{ color: 'var(--primary)' }} />
-              เปิดการ์ดลุ้นคูปองลับ (Mystery Cards)
+              {t('engagement:games.cards.title')}
             </h3>
             <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
-              แตะเลือกการ์ด 1 ใน 3 ใบเพื่อเปิดรับของรางวัลปริศนา
+              {t('engagement:games.cards.subtitle')}
             </p>
 
             <div className="cards-grid">
@@ -230,10 +263,10 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
                       {isFlipped ? '🎁' : '🎴'}
                     </div>
                     <div className="mystery-card-reward">
-                      {isFlipped ? cardRewards[idx] : `การ์ดใบที่ ${idx + 1}`}
+                      {isFlipped ? cardRewards[idx] : t('engagement:games.cards.cardLabel', { index: idx + 1 })}
                     </div>
                     {!isFlipped && (
-                      <span style={{ fontSize: 10, opacity: 0.8, marginTop: 4 }}>แตะเพื่อเปิด</span>
+                      <span style={{ fontSize: 10, opacity: 0.8, marginTop: 4 }}>{t('engagement:games.cards.tapToOpen')}</span>
                     )}
                   </div>
                 );
@@ -241,7 +274,7 @@ export function GamesPage({ onRewardWon }: GamesPageProps) {
             </div>
 
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'auto' }}>
-              1 Coin = ส่วนลด ฿1 ตอนชำระเงิน
+              {t('engagement:games.cards.footnote', { amount: money(1) })}
             </div>
           </section>
         </div>

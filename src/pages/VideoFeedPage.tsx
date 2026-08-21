@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Heart,
   MessageCircle,
@@ -26,6 +27,9 @@ import {
 } from 'lucide-react';
 import { initialVideoClips } from '../data/videoClips';
 import { YellowBasketModal } from '../components/YellowBasketModal';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { formatCurrency } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import type { VideoClip, VideoComment, Product } from '../types';
 import './VideoFeedPage.css';
 
@@ -35,6 +39,10 @@ interface VideoFeedPageProps {
 }
 
 export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPageProps) {
+  const { t, i18n } = useTranslation(['engagement']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const money = (value: number) => formatCurrency(value, locale);
+
   // All video clips combined
   const [allClips, setAllClips] = useState<VideoClip[]>(() => {
     const saved = localStorage.getItem('movemall_custom_clips');
@@ -73,7 +81,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
       const sec = Math.floor(Math.random() * 20) + 3;
       setLiveBasketToast({
         user: randomUser,
-        timeAgo: `เมื่อ ${sec} วิที่แล้ว`,
+        timeAgo: t('engagement:video.feed.toastTimeAgo', { seconds: sec }),
       });
 
       setTimeout(() => {
@@ -88,7 +96,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
       clearTimeout(initial);
       clearInterval(interval);
     };
-  }, [activeIndex]);
+  }, [activeIndex, t]);
 
   // User category interest tracking for AI Algorithm
   const [userInterests, setUserInterests] = useState<Record<string, number>>({
@@ -295,11 +303,11 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
     const newComment: VideoComment = {
       id: `comment-${Date.now()}`,
       userId: 'my-user-id',
-      userName: 'คุณ (ผู้ใช้ Movemall)',
+      userName: t('engagement:video.feed.myCommentUser'),
       text: newCommentText.trim(),
-      time: 'เมื่อสักครู่',
+      time: t('engagement:video.feed.myCommentTime'),
       likesCount: 0,
-      badge: 'ผู้ชมสด',
+      badge: t('engagement:video.feed.myCommentBadge'),
     };
 
     setAllClips((prev) =>
@@ -319,7 +327,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
 
   function handleShare() {
     navigator.clipboard?.writeText(window.location.href);
-    setShareToast('คัดลอกลิงก์คลิปวิดีโอเรียบร้อยแล้ว!');
+    setShareToast(t('engagement:video.feed.linkCopied'));
     setTimeout(() => setShareToast(null), 2500);
   }
 
@@ -363,7 +371,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
                   setActiveIndex(0);
                 }}
               >
-                <Sparkles size={13} /> สำหรับคุณ
+                <Sparkles size={13} /> {t('engagement:video.feed.tabForYou')}
               </button>
               <button
                 className={`video-algo-tab ${feedMode === 'trending' ? 'active' : ''}`}
@@ -372,7 +380,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
                   setActiveIndex(0);
                 }}
               >
-                <Flame size={13} /> กำลังฮิต
+                <Flame size={13} /> {t('engagement:video.feed.tabTrending')}
               </button>
               <button
                 className={`video-algo-tab ${feedMode === 'mall' ? 'active' : ''}`}
@@ -381,7 +389,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
                   setActiveIndex(0);
                 }}
               >
-                <Crown size={13} /> Mall แท้
+                <Crown size={13} /> {t('engagement:video.feed.tabMall')}
               </button>
             </div>
 
@@ -390,15 +398,15 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
               <button
                 onClick={toggleFullscreen}
                 className="video-search-header-btn"
-                title={isFullscreen ? 'ย่อหน้าจอ' : 'แสดงเต็มจอ (ซ่อนแถบ)'}
+                title={isFullscreen ? t('engagement:video.feed.exitFullscreen') : t('engagement:video.feed.enterFullscreen')}
               >
                 {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
               </button>
-              <Link to="/shop" className="video-search-header-btn" title="ค้นหาสินค้า">
+              <LocalizedLink to="/shop" className="video-search-header-btn" title={t('engagement:video.feed.searchProducts')}>
                 <Search size={14} />
-              </Link>
-              <Link to="/video/create" className="video-create-header-btn" title="สร้างคลิปวิดีโอ">
-                <Plus size={13} /> <span className="video-create-text">สร้าง</span>
+              </LocalizedLink>
+              <Link to="/video/create" className="video-create-header-btn" title={t('engagement:video.feed.createClip')}>
+                <Plus size={13} /> <span className="video-create-text">{t('engagement:video.feed.createClipShort')}</span>
               </Link>
             </div>
           </div>
@@ -406,16 +414,8 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
           {/* ── Sub Category Filter Pills Bar ── */}
           <div className="video-sub-cat-bar">
             {[
-              { id: 'all', label: '🔥 ทั้งหมด' },
-              { id: 'electronics', label: '🎧 ไอที & แกดเจ็ต' },
-              { id: 'fashion', label: '👗 แฟชั่น' },
-              { id: 'beauty', label: '💄 บิวตี้ & สกินแคร์' },
-              { id: 'home', label: '🏠 ของใช้ในบ้าน' },
-              { id: 'sports', label: '🏃 กีฬา & ฟิตเนส' },
-              { id: 'food', label: '🍔 อาหาร & ขนม' },
-              { id: 'toys', label: '🧱 ของเล่น & โมเดล' },
-              { id: 'baby', label: '👶 แม่และเด็ก' },
-            ].map((cat) => (
+              'all', 'electronics', 'fashion', 'beauty', 'home', 'sports', 'food', 'toys', 'baby',
+            ].map((catId) => ({ id: catId, label: t(`engagement:video.feed.categories.${catId}`) })).map((cat) => (
               <button
                 key={cat.id}
                 className={`video-sub-cat-pill ${selectedCategory === cat.id ? 'active' : ''}`}
@@ -434,7 +434,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
           <button
             className="video-nav-arrow-btn"
             onClick={handlePrev}
-            title="คลิปก่อนหน้า (เลื่อนขึ้น)"
+            title={t('engagement:video.feed.prevClip')}
             aria-label="Previous"
           >
             <ChevronUp size={22} />
@@ -442,7 +442,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
           <button
             className="video-nav-arrow-btn"
             onClick={handleNext}
-            title="คลิปถัดไป (เลื่อนลง)"
+            title={t('engagement:video.feed.nextClip')}
             aria-label="Next"
           >
             <ChevronDown size={22} />
@@ -503,7 +503,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
                     e.stopPropagation();
                     setIsMuted(!isMuted);
                   }}
-                  title={isMuted ? 'เปิดเสียง' : 'ปิดเสียง'}
+                  title={isMuted ? t('engagement:video.feed.unmute') : t('engagement:video.feed.mute')}
                 >
                   {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
                 </button>
@@ -521,7 +521,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
                       className="video-action-follow-badge"
                       onClick={(e) => handleToggleFollow(clip.creatorId, e)}
                       style={{ background: isFollowed ? '#10B981' : '#EF4444' }}
-                      title={isFollowed ? 'กำลังติดตาม' : 'กดติดตาม'}
+                      title={isFollowed ? t('engagement:video.feed.following') : t('engagement:video.feed.follow')}
                     >
                       {isFollowed ? <Check size={10} /> : <Plus size={10} />}
                     </button>
@@ -585,7 +585,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
                     <div className="video-basket-live-toast">
                       <span className="video-basket-toast-fire">🔥</span>
                       <span className="video-basket-toast-text">
-                        มีคนเพิ่งสั่งซื้อสินค้านี้ ({liveBasketToast.timeAgo})
+                        {t('engagement:video.feed.justPurchased', { timeAgo: liveBasketToast.timeAgo })}
                       </span>
                     </div>
                   )}
@@ -599,7 +599,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
                       <div className="video-yellow-basket-left">
                         <div className="video-yellow-basket-pill">
                           <span className="video-basket-dot" />
-                          <span>🟡 ตะกร้าสีเหลือง #{pinned.id}</span>
+                          <span>{t('engagement:video.feed.basketPill', { id: pinned.id })}</span>
                         </div>
                         <div className="video-yellow-basket-info">
                           <img
@@ -611,20 +611,20 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
                             <span className="video-yellow-basket-name">{pinned.name}</span>
                             <div className="video-yellow-basket-prices">
                               <strong className="video-yellow-basket-price">
-                                ฿{pinned.price.toLocaleString()}
+                                {money(pinned.price)}
                               </strong>
                               {pinned.originalPrice && (
                                 <span className="video-yellow-basket-orig">
-                                  ฿{pinned.originalPrice.toLocaleString()}
+                                  {money(pinned.originalPrice)}
                                 </span>
                               )}
-                              <span className="video-yellow-basket-sale-tag">⚡ กดดูสินค้า</span>
+                              <span className="video-yellow-basket-sale-tag">{t('engagement:video.feed.viewProduct')}</span>
                             </div>
                           </div>
                         </div>
                       </div>
                       <button className="video-yellow-basket-buy-btn">
-                        <Zap size={14} fill="#FFFFFF" /> ซื้อทันที
+                        <Zap size={14} fill="#FFFFFF" /> {t('engagement:video.feed.buyNow')}
                       </button>
                     </div>
                   )}
@@ -675,7 +675,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
           <div className="video-comments-drawer" onClick={(e) => e.stopPropagation()}>
             <div className="video-comments-header">
               <h3 className="video-comments-title">
-                ความคิดเห็น ({currentClip?.commentsCount || 0})
+                {t('engagement:video.feed.commentsHeader', { count: currentClip?.commentsCount || 0 })}
               </h3>
               <button
                 className="video-comments-close"
@@ -714,7 +714,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
                 type="text"
                 value={newCommentText}
                 onChange={(e) => setNewCommentText(e.target.value)}
-                placeholder="เขียนความคิดเห็นที่นี่..."
+                placeholder={t('engagement:video.feed.commentPlaceholder')}
                 className="video-comment-input"
               />
               <button

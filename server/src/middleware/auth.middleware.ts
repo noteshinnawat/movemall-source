@@ -26,7 +26,7 @@ export async function authenticateJWT(req: AuthRequest, res: Response, next: Nex
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'Unauthorized: Missing or invalid token format' });
+    res.status(401).json({ error: 'Unauthorized: Missing or invalid token format', code: 'AUTH_REQUIRED' });
     return;
   }
 
@@ -36,13 +36,13 @@ export async function authenticateJWT(req: AuthRequest, res: Response, next: Nex
   try {
     decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
   } catch {
-    res.status(403).json({ error: 'Forbidden: Invalid or expired token' });
+    res.status(403).json({ error: 'Forbidden: Invalid or expired token', code: 'AUTH_REQUIRED' });
     return;
   }
 
   // ตรวจบัญชีดำ: token ที่ถูกเพิกถอน (logout / เปลี่ยนรหัสผ่าน / ถูกแบน) ต้องใช้ไม่ได้
   if (await isTokenRevoked(decoded.jti, decoded.userId, decoded.iat)) {
-    res.status(401).json({ error: 'Session ถูกยกเลิกแล้ว กรุณาเข้าสู่ระบบใหม่' });
+    res.status(401).json({ error: 'Session ถูกยกเลิกแล้ว กรุณาเข้าสู่ระบบใหม่', code: 'AUTH_REQUIRED' });
     return;
   }
 
@@ -54,7 +54,7 @@ export async function authenticateJWT(req: AuthRequest, res: Response, next: Nex
 export function requireRole(...allowedRoles: string[]) {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
       return;
     }
 

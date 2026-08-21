@@ -1,5 +1,6 @@
 // src/components/Toast.tsx
 
+import { useTranslation } from 'react-i18next';
 import type { Toast as ToastType } from '../hooks/useToast';
 import './Toast.css';
 
@@ -9,10 +10,12 @@ interface ToastContainerProps {
 }
 
 export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
+  const { t } = useTranslation('common');
+
   if (toasts.length === 0) return null;
 
   return (
-    <div className="toast-container" role="region" aria-label="การแจ้งเตือน" aria-live="polite">
+    <div className="toast-container" role="region" aria-label={t('toast.region')} aria-live="polite">
       {toasts.map(toast => (
         <div
           key={toast.id}
@@ -25,7 +28,7 @@ export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
           <button
             className="toast__close"
             onClick={e => { e.stopPropagation(); onRemove(toast.id); }}
-            aria-label="ปิดการแจ้งเตือน"
+            aria-label={t('toast.close')}
           >
             ×
           </button>

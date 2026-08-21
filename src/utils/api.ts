@@ -1,5 +1,8 @@
 // ── Centralized API Service Client for Movemall Frontend ──
 
+import { ApiError } from './apiError.ts';
+export { ApiError } from './apiError.ts';
+
 export const API_BASE_URL = (() => {
   let url = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
   if (!url) {
@@ -26,15 +29,23 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
+  } catch (err) {
+    throw new ApiError('NETWORK_ERROR', err instanceof Error ? err.message : 'Network request failed');
+  }
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data.error || 'An error occurred during API request');
+    if (response.status === 429) {
+      throw new ApiError('RATE_LIMITED', data.error);
+    }
+    throw new ApiError(data.code || 'UNKNOWN', data.error || 'An error occurred during API request');
   }
 
   return data as T;

@@ -1,8 +1,20 @@
 User-agent: *
 Allow: /
 Disallow: /seller
+Disallow: /*/checkout
+Disallow: /*/order/success
+Disallow: /*/account
+Disallow: /*/cart
+Disallow: /*/orders
+Disallow: /*/wishlist
+Disallow: /*/notifications
+Disallow: /*/chat
+Disallow: /*/tracking
+Disallow: /*/login
+Disallow: /*/register
+Disallow: /*/auth/line/callback
 Disallow: /checkout
 Disallow: /order/success
 Disallow: /account
 
-Sitemap: https://movemall.com/sitemap.xml
+Sitemap: https://movemall.app/sitemap.xml

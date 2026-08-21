@@ -48,7 +48,7 @@ router.post('/promptpay/create', authenticateJWT, async (req: AuthRequest, res: 
     });
   } catch (error) {
     console.error('PromptPay Create Error:', error);
-    res.status(500).json({ error: 'Failed to generate PromptPay QR' });
+    res.status(500).json({ error: 'Failed to generate PromptPay QR', code: 'PAYMENT_FAILED' });
   }
 });
 
@@ -194,7 +194,7 @@ router.post('/verify-slip', authenticateJWT, async (req: AuthRequest, res: Respo
     res.status(503).json({ error: 'Slip verification provider is not implemented yet' });
   } catch (error) {
     console.error('Slip Verification Error:', error);
-    res.status(500).json({ error: 'Failed to verify transfer slip' });
+    res.status(500).json({ error: 'Failed to verify transfer slip', code: 'PAYMENT_FAILED' });
   }
 });
 
@@ -291,7 +291,7 @@ router.post('/refund', authenticateJWT, async (req: AuthRequest, res: Response) 
       return;
     }
     console.error('Refund Error:', error);
-    res.status(500).json({ error: 'Failed to process refund' });
+    res.status(500).json({ error: 'Failed to process refund', code: 'PAYMENT_FAILED' });
   }
 });
 

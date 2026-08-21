@@ -244,6 +244,10 @@
   gap: 12px;
 }
 
+.navbar__language-switcher--mobile {
+  display: none;
+}
+
 .navbar__action-btn {
   display: flex;
   align-items: center;
@@ -401,6 +405,19 @@
   /* 3. Right Icons: Cart & Chat Only */
   .navbar__actions {
     gap: 2px;
+  }
+
+  .navbar__language-switcher--desktop {
+    display: none;
+  }
+
+  .navbar__language-switcher--mobile {
+    display: block;
+  }
+
+  .navbar__language-switcher--mobile .language-switcher__trigger {
+    min-height: 34px;
+    padding: 5px 7px;
   }
 
   .navbar__wishlist-btn,

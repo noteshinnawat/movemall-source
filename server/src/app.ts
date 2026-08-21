@@ -59,7 +59,9 @@ function isAllowedOrigin(origin: string): boolean {
   // โดเมนพรีวิวของ Cloudflare Pages (เช่น abc123.movemall.pages.dev)
   if (hostname === 'movemall.pages.dev' || hostname.endsWith('.movemall.pages.dev')) return true;
 
-  // โดเมนจริงของแบรนด์และ subdomain ทั้งหมด
+  // โดเมนจริงของแบรนด์และ subdomain ทั้งหมด — .app คือโดเมนหลักปัจจุบัน (ดู sitemap/canonical),
+  // คง .com ไว้เผื่อยังมีการเข้าถึงจากโดเมนเดิมระหว่างการย้าย
+  if (hostname === 'movemall.app' || hostname.endsWith('.movemall.app')) return true;
   if (hostname === 'movemall.com' || hostname.endsWith('.movemall.com')) return true;
 
   return false;

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, Zap, ChevronLeft, ChevronRight, X, ShoppingCart } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { LiveStreamCard } from '../components/LiveStreamCard';
@@ -9,6 +9,9 @@ import { mockLiveStreams } from '../data/liveStreams';
 import { famousBrands } from '../data/brands';
 import { initialAdCampaigns } from '../data/mockAdsData';
 import { getProductUrl } from '../utils/seo';
+import { LocalizedLink as Link } from '../i18n/LocalizedLink';
+import { formatCompactNumber, formatCurrency, formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import type { Product } from '../types';
 import './HomePage.css';
 
@@ -34,50 +37,50 @@ function useCountdown(targetSeconds: number) {
 
 
 const QUICK_SHORTCUTS = [
-  { icon: '🔴', label: 'ไลฟ์', link: '/live', badge: 'LIVE' },
-  { icon: '👑', label: 'Mall', link: '/mall', badge: 'MALL' },
-  { icon: '⚡', label: 'Flash Sale', link: '/flash-sale', badge: 'HOT' },
-  { icon: '🎟️', label: 'คูปอง', link: '/vouchers', badge: 'โค้ดฟรี' },
-  { icon: '🎮', label: 'เกม & Coins', link: '/games', badge: 'แจกเหรียญ' },
-  { icon: '🚚', label: 'ติดตามพัสดุ', link: '/tracking', badge: 'GPS' },
-  { icon: '⚖️', label: 'เปรียบเทียบ', link: '/compare', badge: 'ใหม่' },
-  { icon: '💰', label: 'Affiliate', link: '/affiliate', badge: 'ค่าคอม 10%' },
+  { id: 'live', icon: '🔴', link: '/live' },
+  { id: 'mall', icon: '👑', link: '/mall' },
+  { id: 'flashSale', icon: '⚡', link: '/flash-sale' },
+  { id: 'vouchers', icon: '🎟️', link: '/vouchers' },
+  { id: 'games', icon: '🎮', link: '/games' },
+  { id: 'tracking', icon: '🚚', link: '/tracking' },
+  { id: 'compare', icon: '⚖️', link: '/compare' },
+  { id: 'affiliate', icon: '💰', link: '/affiliate' },
 ];
 
 const FEED_TABS = [
   {
     id: 'foryou' as const,
-    title: 'สำหรับคุณ',
-    subtitle: 'คัดสรรพิเศษเพื่อคุณ',
+    titleKey: 'home.feed.tabs.forYou.title',
+    subtitleKey: 'home.feed.tabs.forYou.subtitle',
     icon: '✨',
-    badge: 'แนะนำ',
+    badgeKey: 'home.feed.tabs.forYou.badge',
     badgeClass: 'feed-badge-blue',
     accentColor: '#2563EB',
   },
   {
     id: 'bestseller' as const,
-    title: 'สินค้าขายดี',
-    subtitle: 'ยอดฮิตประจำสัปดาห์',
+    titleKey: 'home.feed.tabs.bestSeller.title',
+    subtitleKey: 'home.feed.tabs.bestSeller.subtitle',
     icon: '🔥',
-    badge: 'TOP HIT',
+    badgeKey: 'home.feed.tabs.bestSeller.badge',
     badgeClass: 'feed-badge-orange',
     accentColor: '#EA580C',
   },
   {
     id: 'deals' as const,
-    title: 'ดีลลดแรง',
-    subtitle: 'ลดสูงสุด 70%',
+    titleKey: 'home.feed.tabs.deals.title',
+    subtitleKey: 'home.feed.tabs.deals.subtitle',
     icon: '⚡',
-    badge: '-70%',
+    badgeKey: 'home.feed.tabs.deals.badge',
     badgeClass: 'feed-badge-red',
     accentColor: '#DC2626',
   },
   {
     id: 'mall' as const,
-    title: 'Mall ของแท้',
-    subtitle: 'การันตีแท้ 100%',
+    titleKey: 'home.feed.tabs.mall.title',
+    subtitleKey: 'home.feed.tabs.mall.subtitle',
     icon: '👑',
-    badge: 'OFFICIAL',
+    badgeKey: 'home.feed.tabs.mall.badge',
     badgeClass: 'feed-badge-purple',
     accentColor: '#7C3AED',
   },
@@ -86,6 +89,8 @@ const FEED_TABS = [
 import { fetchActiveLiveStreamsApi } from '../utils/api';
 
 export function HomePage({ products: propProducts, onAddToCart, isWishlisted, onToggleWishlist }: HomePageProps) {
+  const { t, i18n } = useTranslation(['catalog', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const { h, m, s } = useCountdown(4 * 3600 + 32 * 60 + 15);
   const sourceProducts = propProducts || staticProducts;
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -114,7 +119,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
             hashtags: ['#MovemallLive', '#ลดราคา', '#ของแท้'],
             soundTitle: 'เสียงต้นฉบับ - Movemall Live 🎵',
             category: 'electronics',
-            viewers: `${s.viewersCount || 1200} คนดู`,
+            viewers: Number(s.viewersCount || 1200),
             likesCount: s.likesCount || 10000,
             commentsCount: 250,
             sharesCount: 95,
@@ -138,7 +143,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
       }
     }
     loadLiveChannels();
-  }, []);
+  }, [locale, t]);
 
   // AI Personalized Scoring Engine based on user affinity in localStorage
   const userInterest = typeof window !== 'undefined' ? localStorage.getItem('mm_user_interest') || 'electronics' : 'electronics';
@@ -264,7 +269,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
   return (
     <main className="home">
       {/* ── Hero Campaign Zone ── */}
-      <section className="hero" aria-label="Promotions">
+      <section className="hero" aria-label={t('catalog:home.hero.promotions')}>
         <div className="hero__grid">
           {/* Main Auto Carousel */}
           <div
@@ -288,12 +293,12 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                 <div className="hero__slide-overlay" />
                 <div className="hero__slide-content">
                   <span className="hero__slide-badge">
-                    {i === 0 ? '🔥 แคมเปญลดใหญ่ประจำวัน' : i === 1 ? '👑 SUPER BRAND DAY' : '⚡ PAYDAY BIG SALE'}
+                    {t(`catalog:home.hero.banners.${banner.id}.badge`)}
                   </span>
-                  <h2 className="hero__slide-title">{banner.title}</h2>
-                  <p className="hero__slide-desc">{banner.subtitle}</p>
+                  <h2 className="hero__slide-title">{t(`catalog:home.hero.banners.${banner.id}.title`)}</h2>
+                  <p className="hero__slide-desc">{t(`catalog:home.hero.banners.${banner.id}.subtitle`)}</p>
                   <Link to={banner.ctaLink} className="hero__slide-cta">
-                    {banner.cta}
+                    {t(`catalog:home.hero.banners.${banner.id}.cta`)}
                     <ArrowRight size={15} />
                   </Link>
                 </div>
@@ -304,14 +309,14 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
             <button
               className="hero__nav-btn hero__nav-btn--prev"
               onClick={() => setCurrentSlide(prev => (prev - 1 + banners.length) % banners.length)}
-              aria-label="Previous Slide"
+              aria-label={t('catalog:home.hero.previousSlide')}
             >
               <ChevronLeft size={20} />
             </button>
             <button
               className="hero__nav-btn hero__nav-btn--next"
               onClick={() => setCurrentSlide(prev => (prev + 1) % banners.length)}
-              aria-label="Next Slide"
+              aria-label={t('catalog:home.hero.nextSlide')}
             >
               <ChevronRight size={20} />
             </button>
@@ -323,7 +328,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                   key={i}
                   className={`hero__dot${currentSlide === i ? ' hero__dot--active' : ''}`}
                   onClick={() => setCurrentSlide(i)}
-                  aria-label={`Go to slide ${i + 1}`}
+                  aria-label={t('catalog:home.hero.goToSlide', { number: i + 1 })}
                 />
               ))}
             </div>
@@ -338,12 +343,12 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                 className="hero__sub-banner"
                 style={{ background: sub.bg }}
               >
-                <img src={sub.img} alt={sub.title} className="hero__sub-bg" />
+                <img src={sub.img} alt={t(`catalog:home.hero.subBanners.${sub.id}.title`)} className="hero__sub-bg" />
                 <div className="hero__sub-overlay" />
                 <div className="hero__sub-content">
-                  <span className="hero__sub-tag">{sub.tag}</span>
-                  <div className="hero__sub-title">{sub.title}</div>
-                  <div className="hero__sub-desc">{sub.subtitle}</div>
+                  <span className="hero__sub-tag">{t(`catalog:home.hero.subBanners.${sub.id}.tag`)}</span>
+                  <div className="hero__sub-title">{t(`catalog:home.hero.subBanners.${sub.id}.title`)}</div>
+                  <div className="hero__sub-desc">{t(`catalog:home.hero.subBanners.${sub.id}.subtitle`)}</div>
                 </div>
               </Link>
             ))}
@@ -352,13 +357,13 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
 
         {/* ── 8 Quick Access Shortcuts Bar ── */}
         <div className="container">
-          <div className="quick-access-bar" aria-label="เมนูลัดยอดฮิต">
+          <div className="quick-access-bar" aria-label={t('catalog:home.shortcuts.ariaLabel')}>
             {QUICK_SHORTCUTS.map(sc => (
-              <Link key={sc.label} to={sc.link} className="quick-access-item">
+              <Link key={sc.id} to={sc.link} className="quick-access-item">
                 <div className="quick-access-icon-box">
                   {sc.icon}
                 </div>
-                <span className="quick-access-label">{sc.label}</span>
+                <span className="quick-access-label">{t(`catalog:home.shortcuts.items.${sc.id}`)}</span>
               </Link>
             ))}
           </div>
@@ -377,11 +382,11 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
               MOVEMALL LIVE
             </h2>
             <span className="home-live-subtitle">
-              • ช้อปสด ปักหมุดดีลลดแรง & โค้ดสดในไลฟ์
+              {t('catalog:home.live.subtitle')}
             </span>
           </div>
           <Link to="/live" className="home-live-viewall-btn">
-            <span>ดูไลฟ์ทั้งหมด ({mockLiveStreams.length} ช่อง)</span>
+            <span>{t('catalog:home.live.viewAll', { count: mockLiveStreams.length })}</span>
             <ArrowRight size={13} />
           </Link>
         </div>
@@ -392,7 +397,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
               key={ch.id}
               to="/live"
               className="home-live-card"
-              title={`เข้าชมไลฟ์ ${ch.channelName}`}
+              title={t('catalog:home.live.watchChannel', { channel: ch.channelName })}
             >
               <video
                 src={ch.videoUrl}
@@ -409,7 +414,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
               <div className="home-live-card-top">
                 <span className="home-live-tag">
                   <span className="home-live-tag-dot" />
-                  {ch.viewers}
+                  {formatCompactNumber(ch.viewers, locale)}
                 </span>
                 <span className="home-live-channel">{ch.channelName}</span>
               </div>
@@ -425,7 +430,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                     {ch.pinnedProduct.name}
                   </span>
                   <span className="home-live-prod-price">
-                    ฿{(ch.pinnedProduct?.price ?? 0).toLocaleString()}
+                    {formatCurrency(ch.pinnedProduct?.price ?? 0, locale)}
                   </span>
                 </div>
               </div>
@@ -445,11 +450,11 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                 <span>FLASH SALE</span>
               </div>
               <h2 id="flash-sale-heading" className="home-flash-heading">
-                ดีลเดือดจำกัดเวลา ลดสูงสุด 70%
+                {t('catalog:home.flash.heading')}
               </h2>
               {/* Countdown Timer */}
               <div className="home-flash-timer-wrap">
-                <span className="home-flash-timer-label">⏰ ดีลจบใน:</span>
+                <span className="home-flash-timer-label">{t('catalog:home.flash.endsIn')}</span>
                 <div className="home-flash-timer-digits">
                   <span className="home-flash-digit">{String(h).padStart(2, '0')}</span>
                   <span className="home-flash-colon">:</span>
@@ -461,7 +466,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
 
               <div className="home-flash-live-pulse">
                 <span className="home-flash-pulse-dot" />
-                <span>กำลังสั่งซื้อสด 18 คน</span>
+                <span>{t('catalog:home.flash.liveBuyers', { count: 18 })}</span>
               </div>
             </div>
 
@@ -471,7 +476,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                   type="button"
                   className="home-flash-arrow-btn"
                   onClick={() => scrollFlashGrid('left')}
-                  aria-label="Scroll left"
+                  aria-label={t('catalog:home.flash.scrollLeft')}
                 >
                   <ChevronLeft size={16} />
                 </button>
@@ -479,14 +484,14 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                   type="button"
                   className="home-flash-arrow-btn"
                   onClick={() => scrollFlashGrid('right')}
-                  aria-label="Scroll right"
+                  aria-label={t('catalog:home.flash.scrollRight')}
                 >
                   <ChevronRight size={16} />
                 </button>
               </div>
 
               <Link to="/flash-sale" className="home-flash-view-all">
-                ดูดีลทั้งหมด <ArrowRight size={14} />
+                {t('catalog:home.flash.viewAll')} <ArrowRight size={14} />
               </Link>
             </div>
           </div>
@@ -503,8 +508,8 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                   {/* Image & Discount Badge */}
                   <Link to={getProductUrl(product)} className="home-flash-img-wrap">
                     <img src={product.images[0]} alt={product.name} className="home-flash-img" />
-                    <span className="home-flash-tag">-{discountPct}%</span>
-                    <span className="home-flash-guarantee">👑 ถูกสุด 30 วัน</span>
+                    <span className="home-flash-tag">{t('catalog:home.flash.discount', { discount: discountPct })}</span>
+                    <span className="home-flash-guarantee">{t('catalog:home.flash.lowestPrice')}</span>
                   </Link>
 
                   {/* Info */}
@@ -514,8 +519,8 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                     </Link>
 
                     <div className="home-flash-price-row">
-                      <span className="home-flash-price">฿{(flashPrice ?? 0).toLocaleString()}</span>
-                      <span className="home-flash-orig">฿{(product.price ?? 0).toLocaleString()}</span>
+                      <span className="home-flash-price">{formatCurrency(flashPrice ?? 0, locale)}</span>
+                      <span className="home-flash-orig">{formatCurrency(product.price ?? 0, locale)}</span>
                     </div>
 
                     {/* Fire Progress Bar */}
@@ -527,7 +532,9 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                         />
                       </div>
                       <span className="home-flash-progress-text">
-                        🔥 ขายแล้ว {soldPct}% {soldPct > 90 && '• ด่วน!'}
+                        {soldPct > 90
+                          ? t('catalog:home.flash.soldUrgent', { percent: soldPct })
+                          : t('catalog:home.flash.sold', { percent: soldPct })}
                       </span>
                     </div>
 
@@ -536,7 +543,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                       className="home-flash-buy-btn"
                       onClick={() => onAddToCart({ ...product, price: flashPrice })}
                     >
-                      <Zap size={13} fill="#FFFFFF" /> สั่งซื้อด่วน
+                      <Zap size={13} fill="#FFFFFF" /> {t('catalog:home.flash.buyNow')}
                     </button>
                   </div>
                 </div>
@@ -552,30 +559,30 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
         <div className="home-category-banner-header">
           <div className="home-category-title-block">
             <div className="home-category-badge-row">
-              <span className="home-category-tag-badge">EXPLORE CATEGORIES</span>
+              <span className="home-category-tag-badge">{t('catalog:home.categories.eyebrow')}</span>
               <span className="home-category-count-badge">
-              8 หมวดหมู่
+              {t('catalog:home.categories.count', { count: categories.length })}
               </span>
             </div>
             <h2 id="categories-heading" className="home-category-main-title">
-              🛍️ หมวดหมู่ยอดนิยม
+              {t('catalog:home.categories.title')}
             </h2>
             <p className="home-category-subtitle">
-              ช้อปง่าย พร้อมดีลลดสูงสุด 70%
+              {t('catalog:home.categories.subtitle')}
             </p>
           </div>
 
           <div className="home-category-actions">
             <div className="home-category-perks">
               <div className="home-category-perk-chip">
-                <span>✨ 160+ ดีลเด็ด</span>
+                <span>{t('catalog:home.categories.deals', { count: 160 })}</span>
               </div>
               <div className="home-category-perk-chip">
-                <span>⚡ อัปเดตทุกวัน</span>
+                <span>{t('catalog:home.categories.updatedDaily')}</span>
               </div>
             </div>
             <Link to="/shop" className="home-category-viewall-btn">
-              <span>ดูทั้งหมด ({categories.length})</span>
+              <span>{t('catalog:home.categories.viewAll', { count: categories.length })}</span>
               <ArrowRight size={14} />
             </Link>
           </div>
@@ -588,18 +595,21 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
               to={`/shop?category=${cat.id}`}
               id={`category-${cat.id}`}
               className="category-card"
-              aria-label={`${cat.name} ${cat.productCount} สินค้า`}
+              aria-label={t('catalog:home.categories.categoryAria', {
+                category: t(`catalog:categories.${cat.id}.name`),
+                count: cat.productCount,
+              })}
             >
               <div className="category-card__img-wrap">
                 <img
                   src={cat.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=240&q=80'}
-                  alt={cat.name}
+                  alt={t(`catalog:categories.${cat.id}.name`)}
                   className="category-card__img"
                   loading="lazy"
                 />
                 {cat.tag && (
                   <span className="category-card__tag-pill">
-                    {cat.tag}
+                    {t(`catalog:categories.${cat.id}.tag`)}
                   </span>
                 )}
                 <span className="category-card__icon-badge">
@@ -607,8 +617,8 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                 </span>
               </div>
               <div className="category-card__info">
-                <span className="category-card__name">{cat.name}</span>
-                <span className="category-card__count">{cat.productCount}+ ดีลเด็ด</span>
+                <span className="category-card__name">{t(`catalog:categories.${cat.id}.name`)}</span>
+                <span className="category-card__count">{t('catalog:home.categories.categoryDeals', { count: cat.productCount })}</span>
               </div>
             </Link>
           ))}
@@ -620,20 +630,20 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
         {/* ── Movemall Official Brand Mall Header Banner ── */}
         <div className="home-mall-banner">
           <div className="home-mall-banner-left">
-            <span className="home-mall-badge">MALL</span>
+            <span className="home-mall-badge">{t('catalog:home.mall.badge')}</span>
             <h2 id="mall-heading" className="home-mall-title">
-              แบรนด์ทางการแท้ 100%
+              {t('catalog:home.mall.title')}
             </h2>
             <div className="home-mall-guarantees">
-              <span>🛡️ แท้ 100%</span>
+              <span>{t('catalog:home.mall.authentic')}</span>
               <span>•</span>
-              <span>🔄 คืนฟรี 30 วัน</span>
+              <span>{t('catalog:home.mall.returns')}</span>
               <span>•</span>
-              <span>🚚 ส่งฟรี</span>
+              <span>{t('catalog:home.mall.shipping')}</span>
             </div>
           </div>
           <Link to="/mall" className="home-mall-viewall-btn">
-            ดูแบรนด์ทั้งหมด <ArrowRight size={13} />
+            {t('catalog:home.mall.viewAll')} <ArrowRight size={13} />
           </Link>
         </div>
 
@@ -677,10 +687,10 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
         <div className="section__header">
           <h2 id="stores-heading" className="section__title">
             <span className="section__title-accent" />
-            🏪 ร้านค้ายอดนิยม & แบรนด์ชั้นนำ
+            {t('catalog:home.stores.title')}
           </h2>
           <Link to="/stores" className="section__view-all">
-            ดูทั้งหมด ({stores.length}) <ChevronRight size={14} />
+            {t('catalog:home.stores.viewAll', { count: stores.length })} <ChevronRight size={14} />
           </Link>
         </div>
 
@@ -694,10 +704,10 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                   style={{ background: st.banner || 'linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%)' }}
                 >
                   <span className="home-store-badge-small">
-                    {st.badge === 'official' ? 'MALL ทางการ' : '⭐ ร้านแนะนำ'}
+                    {st.badge === 'official' ? t('catalog:home.stores.official') : t('catalog:home.stores.preferred')}
                   </span>
                   <span className="home-store-followers-small">
-                    {(st.followerCount / 1000).toFixed(1)}k ผู้ติดตาม
+                    {t('catalog:home.stores.followers', { count: st.followerCount })}
                   </span>
                 </div>
                 <div className="home-store-card-content">
@@ -711,7 +721,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                       </Link>
                       <div className="home-store-card-sub-info">
                         <span className="home-store-card-rating">⭐ {st.rating}</span>
-                        <span className="home-store-card-voucher">🎟️ ลด ฿50</span>
+                        <span className="home-store-card-voucher">{t('catalog:home.stores.voucher', { amount: formatCurrency(50, locale) })}</span>
                       </div>
                     </div>
                   </div>
@@ -719,7 +729,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                     {storeProducts.map(prod => (
                       <Link key={prod.id} to={getProductUrl(prod)} className="home-store-card-thumb-item" title={prod.name}>
                         <img src={prod.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80'} alt={prod.name} loading="lazy" />
-                        <span className="home-store-card-thumb-price">฿{(prod.price ?? 0).toLocaleString()}</span>
+                        <span className="home-store-card-thumb-price">{formatCurrency(prod.price ?? 0, locale)}</span>
                       </Link>
                     ))}
                   </div>
@@ -733,7 +743,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
 
 
       {/* ── Gamification Promo Banner (Lucky Spin & Coins) ── */}
-      <section className="section container" aria-label="Games and Coins">
+      <section className="section container" aria-label={t('catalog:home.rewards.ariaLabel')}>
         <Link
           to="/games"
           className="home-games-promo-strip"
@@ -741,17 +751,17 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
           <div className="home-games-promo-left">
             <div className="home-games-promo-icons">🎡 🎮 🎁</div>
             <div>
-              <div className="home-games-promo-badge">MOVEMALL REWARDS</div>
+              <div className="home-games-promo-badge">{t('catalog:home.rewards.eyebrow')}</div>
               <h3 className="home-games-promo-title">
-                เกมและรางวัล
+                {t('catalog:home.rewards.title')}
               </h3>
               <p className="home-games-promo-desc">
-                หมุนวงล้อ เช็กอิน และรับ Coins
+                {t('catalog:home.rewards.description')}
               </p>
             </div>
           </div>
           <div className="home-games-promo-cta">
-            <span>เล่นเลย</span>
+            <span>{t('catalog:home.rewards.play')}</span>
             <ArrowRight size={15} />
           </div>
         </Link>
@@ -764,35 +774,32 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
           <div className="home-feed-banner-header">
             <div className="home-feed-title-block">
               <div className="home-feed-badge-row">
-                <span className="home-feed-tag-badge">DAILY DISCOVER</span>
+                <span className="home-feed-tag-badge">{t('catalog:home.feed.eyebrow')}</span>
                 <span className="home-feed-live-badge">
                   <span className="home-feed-live-dot" />
-                  อัปเดตเรียลไทม์
+                  {t('catalog:home.feed.realtime')}
                 </span>
               </div>
               <h2 id="all-heading" className="home-feed-main-title">
-                ✨ สินค้าแนะนำสำหรับคุณ
+                {t('catalog:home.feed.title')}
               </h2>
               <p className="home-feed-subtitle">
-                {feedTab === 'foryou' && '🎯 ดีลเด็ดและสินค้าคัดสรรพิเศษเพื่อคุณโดยเฉพาะ'}
-                {feedTab === 'bestseller' && '🔥 สินค้ายอดนิยมประจำสัปดาห์ที่มียอดสั่งซื้อสูงสุด'}
-                {feedTab === 'deals' && '⚡ รวมสินค้าลดราคาพิเศษ 30% - 70% คุ้มค่าที่สุด'}
-                {feedTab === 'mall' && '👑 สินค้าของแท้ 100% จากแบรนด์และร้านค้าทางการ'}
+                {t(`catalog:home.feed.descriptions.${feedTab}`)}
               </p>
             </div>
 
             <div className="home-feed-header-perks">
               <div className="home-feed-perk-item">
-                <span>📦 160+ ดีลเด็ด</span>
+                <span>{t('catalog:home.feed.deals', { count: 160 })}</span>
               </div>
               <div className="home-feed-perk-item">
-                <span>🚚 ส่งฟรีทั่วไทย</span>
+                <span>{t('catalog:home.feed.freeShipping')}</span>
               </div>
             </div>
           </div>
 
           {/* Modern Interactive Tab Cards Grid */}
-          <div className="home-feed-tabs-grid" role="tablist" aria-label="หมวดหมู่สินค้าแนะนำ">
+          <div className="home-feed-tabs-grid" role="tablist" aria-label={t('catalog:home.feed.tabsAria')}>
             {FEED_TABS.map((tab) => {
               const isActive = feedTab === tab.id;
               return (
@@ -808,13 +815,13 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                 >
                   <div className="home-feed-tab-top">
                     <span className="home-feed-tab-icon">{tab.icon}</span>
-                    <span className="home-feed-tab-title">{tab.title}</span>
+                    <span className="home-feed-tab-title">{t(`catalog:${tab.titleKey}`)}</span>
                     <span className={`home-feed-tab-badge ${tab.badgeClass}`}>
-                      {tab.badge}
+                      {t(`catalog:${tab.badgeKey}`)}
                     </span>
                   </div>
                   <div className="home-feed-tab-sub">
-                    {tab.subtitle}
+                    {t(`catalog:${tab.subtitleKey}`)}
                   </div>
                 </button>
               );
@@ -843,8 +850,8 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
             id="live-grid-2"
             channelName="Fashionista Studio"
             streamerAvatar="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80"
-            title="👗 ไลฟ์ลองชุดคอลเลกชั่น 2026 • ซื้อ 1 แถม 1"
-            viewers="920"
+            title="👗 ไลฟ์ลองชุดคอลเลกชั่น 2026 • ซื้อ 1 แถม 1" /* i18n-allow-user-content: simulated live-stream caption, not UI chrome */
+            viewers={920}
             videoUrl="/videos/live-streamer-2.mp4"
             posterImage="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80"
             pinnedProduct={{
@@ -883,8 +890,14 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
               <div className="home-feed-spinner" />
               <span>
                 {isLoadingMore
-                  ? `กำลังโหลด... (${visibleCount}/${personalizedProducts.length})`
-                  : `ดูเพิ่มเติม (${visibleCount}/${personalizedProducts.length})`}
+                  ? t('catalog:home.feed.loadingProgress', {
+                    visible: formatNumber(visibleCount, locale),
+                    total: formatNumber(personalizedProducts.length, locale),
+                  })
+                  : t('catalog:home.feed.viewMoreProgress', {
+                    visible: formatNumber(visibleCount, locale),
+                    total: formatNumber(personalizedProducts.length, locale),
+                  })}
               </span>
             </div>
           </div>
@@ -892,7 +905,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
           <div className="home-feed-end-state" role="status">
             <div className="home-feed-end-line" />
             <span className="home-feed-end-text">
-              ครบแล้ว {personalizedProducts.length} รายการ
+              {t('catalog:home.feed.end', { count: personalizedProducts.length })}
             </span>
             <div className="home-feed-end-line" />
           </div>
@@ -906,7 +919,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
             <button
               className="home-video-modal-close"
               onClick={() => setSelectedVideoProduct(null)}
-              title="ปิด"
+              title={t('common:actions.close')}
             >
               <X size={18} />
             </button>
@@ -935,10 +948,12 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                 )}
                 <div>
                   <h4 className="home-video-modal-creator-title">
-                    {selectedVideoProduct.videoReview?.creatorName ? `รีวิวโดย @${selectedVideoProduct.videoReview.creatorName}` : 'คลิปรีวิวจริงจากผู้ใช้งาน'}
+                    {selectedVideoProduct.videoReview?.creatorName
+                      ? t('catalog:product.card.reviewBy', { creator: selectedVideoProduct.videoReview.creatorName })
+                      : t('catalog:home.video.realUserReview')}
                   </h4>
                   <p className="home-video-modal-creator-sub">
-                    🎥 ทดลองใช้งานจริง • การันตีรีวิวแท้ 100%
+                    {t('catalog:home.video.verifiedReview')}
                   </p>
                 </div>
               </div>
@@ -952,7 +967,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                 <div className="home-video-modal-product-details">
                   <h5 className="home-video-modal-product-name">{selectedVideoProduct.name}</h5>
                   <div className="home-video-modal-product-price">
-                    ฿{(selectedVideoProduct.price ?? 0).toLocaleString()}
+                    {formatCurrency(selectedVideoProduct.price ?? 0, locale)}
                   </div>
                 </div>
                 <button
@@ -962,7 +977,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                     setSelectedVideoProduct(null);
                   }}
                 >
-                  <ShoppingCart size={14} /> ใส่ตะกร้า
+                  <ShoppingCart size={14} /> {t('catalog:product.card.addToCart')}
                 </button>
               </div>
             </div>

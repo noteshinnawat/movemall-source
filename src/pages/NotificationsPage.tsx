@@ -1,7 +1,9 @@
 // src/pages/NotificationsPage.tsx — Movemall Notification Center Hub
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { Bell, CheckCheck, Sparkles, LogIn, Inbox } from 'lucide-react';
 import {
   fetchUserNotifications,
@@ -9,6 +11,7 @@ import {
   markAllNotificationsAsRead,
   type ApiNotification,
 } from '../utils/api';
+import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
 import './NotificationsPage.css';
 
 interface NotificationDisplayItem {
@@ -38,23 +41,25 @@ function getCategoryIcon(category: string): { icon: string; iconBg: string } {
   }
 }
 
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, t: TFunction): string {
   try {
     const diffMs = Date.now() - new Date(dateStr).getTime();
     const diffSec = Math.floor(diffMs / 1000);
-    if (diffSec < 60) return 'เมื่อสักครู่';
+    if (diffSec < 60) return t('engagement:notifications.relative.justNow');
     const diffMin = Math.floor(diffSec / 60);
-    if (diffMin < 60) return `${diffMin} นาทีที่แล้ว`;
+    if (diffMin < 60) return t('engagement:notifications.relative.minutes', { count: diffMin });
     const diffHr = Math.floor(diffMin / 60);
-    if (diffHr < 24) return `${diffHr} ชั่วโมงที่แล้ว`;
+    if (diffHr < 24) return t('engagement:notifications.relative.hours', { count: diffHr });
     const diffDay = Math.floor(diffHr / 24);
-    return `${diffDay} วันที่แล้ว`;
+    return t('engagement:notifications.relative.days', { count: diffDay });
   } catch {
-    return 'เมื่อเร็วๆ นี้';
+    return t('engagement:notifications.relative.recently');
   }
 }
 
 export function NotificationsPage() {
+  const { t } = useTranslation(['engagement', 'common']);
+  const localizePath = useLocalizedPath();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'all' | 'orders' | 'promos' | 'live' | 'vouchers'>('all');
   const [notifications, setNotifications] = useState<NotificationDisplayItem[]>([]);
@@ -84,7 +89,7 @@ export function NotificationsPage() {
               iconBg: iconData.iconBg,
               title: n.title,
               body: n.body,
-              time: formatRelativeTime(n.createdAt),
+              time: formatRelativeTime(n.createdAt, t),
               link: n.link || '/notifications',
               unread: !n.isRead,
             };
@@ -102,7 +107,7 @@ export function NotificationsPage() {
     }
 
     loadNotifications();
-  }, [activeTab]);
+  }, [activeTab, t]);
 
   const filtered = activeTab === 'all'
     ? notifications
@@ -138,11 +143,16 @@ export function NotificationsPage() {
             <div>
               <h1 className="notifications-title">
                 <Bell size={20} style={{ color: 'var(--primary)' }} />
-                การแจ้งเตือนของฉัน {isLoggedIn && unreadCount > 0 && <span style={{ color: 'var(--primary)', fontSize: 14 }}>({unreadCount} ข้อความใหม่)</span>}
+                {t('engagement:notifications.title')}{' '}
+                {isLoggedIn && unreadCount > 0 && (
+                  <span style={{ color: 'var(--primary)', fontSize: 14 }}>
+                    {t('engagement:notifications.unreadCount', { count: unreadCount })}
+                  </span>
+                )}
               </h1>
               {isLoggedIn && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 12, color: 'var(--success, #10B981)', fontWeight: 600 }}>
-                  <Sparkles size={12} /> เชื่อมต่อกับระบบแจ้งเตือนฐานข้อมูลจริง (Live Sync)
+                  <Sparkles size={12} /> {t('engagement:notifications.liveSync')}
                 </div>
               )}
             </div>
@@ -150,7 +160,7 @@ export function NotificationsPage() {
             {isLoggedIn && unreadCount > 0 && (
               <button className="notifications-mark-read" onClick={handleMarkAllRead}>
                 <CheckCheck size={14} style={{ display: 'inline', marginRight: 4 }} />
-                อ่านทั้งหมด
+                {t('engagement:notifications.markAllRead')}
               </button>
             )}
           </div>
@@ -162,25 +172,25 @@ export function NotificationsPage() {
                 className={`notifications-tab-btn${activeTab === 'all' ? ' notifications-tab-btn--active' : ''}`}
                 onClick={() => setActiveTab('all')}
               >
-                ทั้งหมด
+                {t('engagement:notifications.tabs.all')}
               </button>
               <button
                 className={`notifications-tab-btn${activeTab === 'orders' ? ' notifications-tab-btn--active' : ''}`}
                 onClick={() => setActiveTab('orders')}
               >
-                📦 ออเดอร์
+                {t('engagement:notifications.tabs.orders')}
               </button>
               <button
                 className={`notifications-tab-btn${activeTab === 'promos' ? ' notifications-tab-btn--active' : ''}`}
                 onClick={() => setActiveTab('promos')}
               >
-                ⚡ โปรโมชั่น
+                {t('engagement:notifications.tabs.promos')}
               </button>
               <button
                 className={`notifications-tab-btn${activeTab === 'live' ? ' notifications-tab-btn--active' : ''}`}
                 onClick={() => setActiveTab('live')}
               >
-                🔴 ไลฟ์สด
+                {t('engagement:notifications.tabs.live')}
               </button>
             </div>
           )}
@@ -205,14 +215,14 @@ export function NotificationsPage() {
                   <Bell size={28} />
                 </div>
                 <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: '#111827' }}>
-                  เข้าสู่ระบบเพื่อดูการแจ้งเตือน
+                  {t('engagement:notifications.signedOutTitle')}
                 </h3>
                 <p style={{ color: '#6B7280', fontSize: 14, marginBottom: 24, maxWidth: 360, margin: '0 auto 24px' }}>
-                  ดูออเดอร์ พัสดุ และสิทธิพิเศษ
+                  {t('engagement:notifications.signedOutSubtitle')}
                 </p>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
                   <button
-                    onClick={() => navigate('/login')}
+                    onClick={() => navigate(localizePath('/login'))}
                     style={{
                       background: 'var(--primary, #2563EB)',
                       color: 'white',
@@ -226,10 +236,10 @@ export function NotificationsPage() {
                       gap: 6,
                     }}
                   >
-                    <LogIn size={16} /> เข้าสู่ระบบ
+                    <LogIn size={16} /> {t('engagement:notifications.signIn')}
                   </button>
                   <button
-                    onClick={() => navigate('/register')}
+                    onClick={() => navigate(localizePath('/register'))}
                     style={{
                       background: '#F3F4F6',
                       color: '#374151',
@@ -240,17 +250,17 @@ export function NotificationsPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    สมัครสมาชิก
+                    {t('engagement:notifications.signUp')}
                   </button>
                 </div>
               </div>
             ) : loading ? (
               <div style={{ padding: 'var(--space-12)', textAlign: 'center', color: 'var(--text-muted)' }}>
-                กำลังโหลดการแจ้งเตือน...
+                {t('engagement:notifications.loading')}
               </div>
             ) : filtered.length > 0 ? (
               filtered.map(item => (
-                <Link
+                <LocalizedLink
                   key={item.id}
                   to={item.link}
                   className={`notification-item${item.unread ? ' notification-item--unread' : ''}`}
@@ -267,16 +277,16 @@ export function NotificationsPage() {
                     <p className="notification-text">{item.body}</p>
                     <span className="notification-time">{item.time}</span>
                   </div>
-                </Link>
+                </LocalizedLink>
               ))
             ) : (
               <div style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--text-muted)' }}>
                 <Inbox size={40} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
                 <p style={{ fontWeight: 600, fontSize: 15, color: '#374151', margin: '0 0 4px' }}>
-                  ยังไม่มีการแจ้งเตือน
+                  {t('engagement:notifications.emptyTitle')}
                 </p>
                 <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>
-                  รายการใหม่จะแสดงที่นี่
+                  {t('engagement:notifications.emptySubtitle')}
                 </p>
               </div>
             )}

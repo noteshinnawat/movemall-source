@@ -1,7 +1,10 @@
 // src/components/MobileBottomNav.tsx — Mobile App Bottom Navigation Bar
 
-import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { Home, Radio, PlaySquare, ShoppingCart, User } from 'lucide-react';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { stripLocale } from '../i18n/locales';
 import './MobileBottomNav.css';
 
 interface MobileBottomNavProps {
@@ -9,8 +12,9 @@ interface MobileBottomNavProps {
 }
 
 export function MobileBottomNav({ cartCount }: MobileBottomNavProps) {
+  const { t } = useTranslation('navigation');
   const location = useLocation();
-  const path = location.pathname;
+  const path = stripLocale(location.pathname);
 
   // Hide bottom nav on studio creation pages and product detail pages (where product action bar is active)
   if (path === '/video/create' || path.startsWith('/creator') || path.startsWith('/product/')) {
@@ -22,9 +26,9 @@ export function MobileBottomNav({ cartCount }: MobileBottomNavProps) {
   const isLivePage = path.startsWith('/live');
 
   return (
-    <nav className={`mobile-bottom-nav ${isDarkPage ? 'mobile-bottom-nav--dark' : ''}`} aria-label="Mobile Navigation">
+    <nav className={`mobile-bottom-nav ${isDarkPage ? 'mobile-bottom-nav--dark' : ''}`} aria-label={t('primary.mobileNavigation')}>
       {/* 1. Home */}
-      <Link
+      <LocalizedLink
         to="/"
         className={`mobile-nav-item${path === '/' ? ' mobile-nav-item--active' : ''}`}
       >
@@ -32,11 +36,11 @@ export function MobileBottomNav({ cartCount }: MobileBottomNavProps) {
         <div className="mobile-nav-icon-wrap">
           <Home size={20} />
         </div>
-        <span>หน้าแรก</span>
-      </Link>
+        <span>{t('primary.home')}</span>
+      </LocalizedLink>
 
       {/* 2. Short Video */}
-      <Link
+      <LocalizedLink
         to="/video"
         className={`mobile-nav-item mobile-nav-item--video${isVideoPage ? ' mobile-nav-item--active' : ''}`}
       >
@@ -48,11 +52,11 @@ export function MobileBottomNav({ cartCount }: MobileBottomNavProps) {
             HOT
           </span>
         </div>
-        <span>วิดีโอ</span>
-      </Link>
+        <span>{t('primary.video')}</span>
+      </LocalizedLink>
 
       {/* 3. Live Stream */}
-      <Link
+      <LocalizedLink
         to="/live"
         className={`mobile-nav-item mobile-nav-item--live${isLivePage ? ' mobile-nav-item--active' : ''}`}
       >
@@ -64,11 +68,11 @@ export function MobileBottomNav({ cartCount }: MobileBottomNavProps) {
             <span className="mobile-nav-live-core" />
           </span>
         </div>
-        <span>ไลฟ์สด</span>
-      </Link>
+        <span>{t('primary.liveStream')}</span>
+      </LocalizedLink>
 
       {/* 4. Cart */}
-      <Link
+      <LocalizedLink
         to="/cart"
         className={`mobile-nav-item${path === '/cart' ? ' mobile-nav-item--active' : ''}`}
       >
@@ -81,11 +85,11 @@ export function MobileBottomNav({ cartCount }: MobileBottomNavProps) {
             </span>
           )}
         </div>
-        <span>ตะกร้า</span>
-      </Link>
+        <span>{t('primary.cart')}</span>
+      </LocalizedLink>
 
       {/* 5. Account / Me */}
-      <Link
+      <LocalizedLink
         to="/login"
         className={`mobile-nav-item${path === '/login' || path === '/account' ? ' mobile-nav-item--active' : ''}`}
       >
@@ -93,8 +97,8 @@ export function MobileBottomNav({ cartCount }: MobileBottomNavProps) {
         <div className="mobile-nav-icon-wrap">
           <User size={20} />
         </div>
-        <span>ฉัน</span>
-      </Link>
+        <span>{t('primary.me')}</span>
+      </LocalizedLink>
     </nav>
   );
 }

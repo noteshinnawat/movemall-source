@@ -127,7 +127,7 @@ export class ThaiBulkSmsService {
   /**
    * Verify entered OTP code with ThaiBulkSMS Smart OTP Verify API
    */
-  public static async verifyOtp(phone: string, enteredOtp: string): Promise<{ success: boolean; message: string }> {
+  public static async verifyOtp(phone: string, enteredOtp: string): Promise<{ success: boolean; message: string; code?: 'OTP_INVALID' | 'OTP_EXPIRED' }> {
     const targetPhone = this.sanitizePhone(phone);
     const pin = enteredOtp.trim();
 
@@ -140,12 +140,12 @@ export class ThaiBulkSmsService {
 
     const stored = otpStore.get(targetPhone);
     if (!stored) {
-      return { success: false, message: 'รหัส OTP หมดอายุ หรือยังไม่ได้กดขอรหัส' };
+      return { success: false, message: 'รหัส OTP หมดอายุ หรือยังไม่ได้กดขอรหัส', code: 'OTP_EXPIRED' };
     }
 
     if (stored.expiresAt < Date.now()) {
       otpStore.delete(targetPhone);
-      return { success: false, message: 'รหัส OTP หมดอายุแล้ว กรุณากดขอรหัสใหม่อีกครั้ง' };
+      return { success: false, message: 'รหัส OTP หมดอายุแล้ว กรุณากดขอรหัสใหม่อีกครั้ง', code: 'OTP_EXPIRED' };
     }
 
     // If real ThaiBulkSMS token exists, verify with ThaiBulkSMS server
@@ -174,10 +174,13 @@ export class ThaiBulkSmsService {
           return { success: true, message: 'ยืนยันรหัส OTP ถูกต้องเรียบร้อยแล้ว' };
         } else {
           console.warn(`[ThaiBulkSMS Smart OTP] Verify failed for ${targetPhone}:`, resJson);
-          return { success: false, message: resJson?.message || 'รหัส OTP ไม่ถูกต้องหรือหมดอายุ' };
+          return { success: false, message: resJson?.message || 'รหัส OTP ไม่ถูกต้องหรือหมดอายุ', code: 'OTP_INVALID' };
         }
       } catch (err: any) {
         console.error('[ThaiBulkSMS Smart OTP] Verify API Error:', err);
+        // Transport/provider failure, not necessarily a wrong code — leave
+        // `code` unset so the buyer sees a generic retry message instead of
+        // a false "that OTP is incorrect" after a transient outage.
         return { success: false, message: 'เกิดข้อผิดพลาดในการตรวจสอบรหัส OTP' };
       }
     }
@@ -188,6 +191,6 @@ export class ThaiBulkSmsService {
       return { success: true, message: 'ยืนยันรหัส OTP ถูกต้องเรียบร้อยแล้ว' };
     }
 
-    return { success: false, message: 'รหัส OTP ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง' };
+    return { success: false, message: 'รหัส OTP ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง', code: 'OTP_INVALID' };
   }
 }

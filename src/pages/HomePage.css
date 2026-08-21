@@ -171,6 +171,10 @@
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.5;
   margin-bottom: var(--space-5);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .hero__slide-cta {
@@ -371,7 +375,7 @@
 
 @media (max-width: 900px) {
   .hero__grid { grid-template-columns: 1fr; }
-  .hero__carousel { height: 260px; }
+  .hero__carousel { height: 300px; }
   .hero__sub-banners { height: auto; flex-direction: row; }
   .hero__sub-banner { height: 130px; }
 }
@@ -410,7 +414,11 @@
 
 @media (max-width: 600px) {
   .hero__slide-title { font-size: 22px; }
+  .hero__slide-content { padding: var(--space-4); max-width: 100%; }
   .hero__sub-banners { flex-direction: column; }
+  /* Slide text can run the full width at this size; the autoplay timer and
+     dot indicator already cover navigation without the overlapping arrows. */
+  .hero__nav-btn { display: none; }
 }
 
 /* ── Section & Section Header ── */

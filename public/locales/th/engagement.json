@@ -1,0 +1,385 @@
+{
+  "chat": {
+    "storeFallback": "ร้านค้า",
+    "online": "ออนไลน์",
+    "offline": "ออฟไลน์",
+    "startConversation": "เริ่มการสนทนา",
+    "back": "ย้อนกลับ",
+    "inboxTitle": "💬 กล่องข้อความแชท",
+    "liveBadge": "สด",
+    "liveBadgeTitle": "เชื่อมต่อสดผ่าน WebSocket",
+    "searchPlaceholder": "ค้นหาร้านค้า หรือข้อความ...",
+    "tabAll": "ทั้งหมด ({{count, number}})",
+    "tabUnread": "ยังไม่อ่าน",
+    "tabUnreadCount": "ยังไม่อ่าน ({{count, number}})",
+    "tabOfficial": "ร้าน Mall 👑",
+    "loading": "กำลังโหลดรายการแชท...",
+    "emptyAll": "ยังไม่มีการสนทนากับร้านค้า",
+    "emptyFiltered": "ไม่พบรายการแชทที่ตรงกับเงื่อนไข",
+    "browseStores": "เลือกดูร้านค้า",
+    "onlineDotTitle": "ออนไลน์",
+    "noSelection": "เลือกห้องสนทนาทางซ้ายเพื่อเริ่มแชท",
+    "backToListTitle": "กลับหน้ารวมแชท",
+    "backToListAria": "ย้อนกลับไปหน้ารวมแชท",
+    "backToListText": "แชททั้งหมด",
+    "officialMall": "Official Mall",
+    "connectedLive": "เชื่อมต่อสด",
+    "visitStore": "หน้าร้าน",
+    "secureBanner": "การสนทนาได้รับการปกป้องโดย Movemall Buyer Protection ห้ามโอนเงินนอกระบบ",
+    "emptyThreadTitle": "ยังไม่มีข้อความกับร้านนี้",
+    "emptyThreadHint": "ทักไปได้เลย ร้านค้าจะเห็นข้อความของคุณทันที",
+    "typing": "กำลังพิมพ์...",
+    "quickLabel": "ถามด่วน:",
+    "quickQuestions": {
+      "stock": "📦 มีสินค้าพร้อมส่งไหมครับ?",
+      "photos": "📸 ขอดูรูปสินค้าจริงเพิ่มเติม",
+      "invoice": "🧾 ขอใบกำกับภาษีได้ไหม?",
+      "voucher": "🎟️ มีโค้ดส่วนลดพิเศษไหมครับ?"
+    },
+    "attachImageTitle": "แนบรูปภาพ",
+    "attachImageMessage": "📸 [ส่งรูปภาพสินค้าตัวอย่าง]",
+    "emojiTitle": "อีโมจิ",
+    "inputPlaceholder": "พิมพ์ข้อความถึง {{store}}...",
+    "send": "ส่ง"
+  },
+  "notifications": {
+    "relative": {
+      "justNow": "เมื่อสักครู่",
+      "recently": "เมื่อเร็วๆ นี้",
+      "minutes_one": "{{count, number}} นาทีที่แล้ว",
+      "minutes_other": "{{count, number}} นาทีที่แล้ว",
+      "hours_one": "{{count, number}} ชั่วโมงที่แล้ว",
+      "hours_other": "{{count, number}} ชั่วโมงที่แล้ว",
+      "days_one": "{{count, number}} วันที่แล้ว",
+      "days_other": "{{count, number}} วันที่แล้ว"
+    },
+    "title": "การแจ้งเตือนของฉัน",
+    "unreadCount": "({{count, number}} ข้อความใหม่)",
+    "liveSync": "เชื่อมต่อกับระบบแจ้งเตือนฐานข้อมูลจริง (Live Sync)",
+    "markAllRead": "อ่านทั้งหมด",
+    "tabs": {
+      "all": "ทั้งหมด",
+      "orders": "📦 ออเดอร์",
+      "promos": "⚡ โปรโมชั่น",
+      "live": "🔴 ไลฟ์สด"
+    },
+    "signedOutTitle": "เข้าสู่ระบบเพื่อดูการแจ้งเตือน",
+    "signedOutSubtitle": "ดูออเดอร์ พัสดุ และสิทธิพิเศษ",
+    "signIn": "เข้าสู่ระบบ",
+    "signUp": "สมัครสมาชิก",
+    "loading": "กำลังโหลดการแจ้งเตือน...",
+    "emptyTitle": "ยังไม่มีการแจ้งเตือน",
+    "emptySubtitle": "รายการใหม่จะแสดงที่นี่"
+  },
+  "live": {
+    "floatingWidget": {
+      "clickToWatch": "คลิกเพื่อเข้าชมไลฟ์สด",
+      "close": "ปิดหน้าต่างไลฟ์",
+      "watchNow": "ดูสด →"
+    },
+    "ticker": {
+      "soldTitle": "สินค้าขายออกแล้ว",
+      "secondsAgo": "เมื่อ {{seconds, number}} วินาทีที่แล้ว"
+    },
+    "stream": {
+      "tabFollowing": "กำลังติดตาม",
+      "tabForYou": "สำหรับคุณ (LIVE)",
+      "exitFullscreen": "ย่อหน้าจอ",
+      "enterFullscreen": "แสดงเต็มจอ (ซ่อนแถบ)",
+      "myCart": "ตะกร้าสินค้าของฉัน",
+      "unmute": "เปิดเสียง",
+      "mute": "ปิดเสียง",
+      "backHome": "กลับสู่หน้าหลัก",
+      "discountPct": "ลด {{percent, number}}%",
+      "liveDealTag": "ดีลไลฟ์สด",
+      "buyNow": "⚡ สั่งซื้อ",
+      "freeShipping": "ส่งฟรี 0.-",
+      "viewAllProductsTitle": "ดูสินค้าทั้งหมดในไลฟ์สด",
+      "commentPlaceholder": "พิมพ์...",
+      "sendHeart": "ส่งหัวใจ / ดอกกุหลาบ",
+      "sendGift": "ส่งของขวัญ",
+      "shareTitle": "แชร์ไลฟ์สด",
+      "shareToast": "แชร์ไลฟ์สดของ {{channel}} เรียบร้อยแล้ว!",
+      "commentsHeader": "ความคิดเห็น ({{count, number}})",
+      "commentInputPlaceholder": "เพิ่มความคิดเห็นในคลิป...",
+      "basketHeader": "สินค้าในตะกร้าคลิปนี้ ({{channel}})",
+      "pinnedTag": "🔥 ปักหมุดในคลิป",
+      "addToCart": "ใส่ตะกร้า",
+      "prevClip": "คลิปก่อนหน้า (Arrow Up)",
+      "nextClip": "คลิปถัดไป (Arrow Down)",
+      "demoProductName": "ดีลพิเศษในไลฟ์",
+      "demoProductDescription": "สินค้าลดราคาพิเศษเฉพาะในไลฟ์สด",
+      "viewersSuffix": "{{count}} คนดู",
+      "myCommentUser": "คุณ (ฉัน)",
+      "myCommentTime": "เมื่อสักครู่",
+      "myCommentBadge": "ผู้ใช้",
+      "myFloatingChatUser": "ฉัน"
+    }
+  },
+  "video": {
+    "grid": {
+      "shortVideoTag": "วิดีโอสั้น",
+      "basketPill": "🟡 ตะกร้าสีเหลือง",
+      "watchFull": "ดูคลิปเต็ม & ช้อปตะกร้าเหลือง"
+    },
+    "basket": {
+      "pill": "🟡 ตะกร้าสีเหลือง",
+      "heading": "สินค้าในคลิปวิดีโอนี้ ({{count, number}})",
+      "close": "ปิด",
+      "tabLabel": "#{{index, number}} {{name}}...",
+      "sold": "ขายแล้ว {{count, number}}+ ชิ้น",
+      "exclusiveDeal": "⚡ ดีลพิเศษในคลิป",
+      "perkAuthentic": "การันตีของแท้ 100%",
+      "perkShipping": "🚚 ส่งฟรีไม่มีขั้นต่ำ",
+      "perkPayLater": "💳 ผ่อน 0% PayLater",
+      "qtyLabel": "จำนวน",
+      "viewDetail": "ดูรายละเอียดเต็ม",
+      "added": "ใส่ตะกร้าแล้ว",
+      "addToCart": "ใส่ตะกร้า",
+      "buyNow": "สั่งซื้อทันที",
+      "demoDescription": "สินค้าของแท้สั่งซื้อโดยตรงจากคลิปวิดีโอ Movemall Short Video"
+    },
+    "feed": {
+      "toastTimeAgo": "เมื่อ {{seconds, number}} วิที่แล้ว",
+      "myCommentUser": "คุณ (ผู้ใช้ Movemall)",
+      "myCommentTime": "เมื่อสักครู่",
+      "myCommentBadge": "ผู้ชมสด",
+      "linkCopied": "คัดลอกลิงก์คลิปวิดีโอเรียบร้อยแล้ว!",
+      "tabForYou": "สำหรับคุณ",
+      "tabTrending": "กำลังฮิต",
+      "tabMall": "Mall แท้",
+      "exitFullscreen": "ย่อหน้าจอ",
+      "enterFullscreen": "แสดงเต็มจอ (ซ่อนแถบ)",
+      "searchProducts": "ค้นหาสินค้า",
+      "createClip": "สร้างคลิปวิดีโอ",
+      "createClipShort": "สร้าง",
+      "categories": {
+        "all": "🔥 ทั้งหมด",
+        "electronics": "🎧 ไอที & แกดเจ็ต",
+        "fashion": "👗 แฟชั่น",
+        "beauty": "💄 บิวตี้ & สกินแคร์",
+        "home": "🏠 ของใช้ในบ้าน",
+        "sports": "🏃 กีฬา & ฟิตเนส",
+        "food": "🍔 อาหาร & ขนม",
+        "toys": "🧱 ของเล่น & โมเดล",
+        "baby": "👶 แม่และเด็ก"
+      },
+      "prevClip": "คลิปก่อนหน้า (เลื่อนขึ้น)",
+      "nextClip": "คลิปถัดไป (เลื่อนลง)",
+      "unmute": "เปิดเสียง",
+      "mute": "ปิดเสียง",
+      "following": "กำลังติดตาม",
+      "follow": "กดติดตาม",
+      "justPurchased": "มีคนเพิ่งสั่งซื้อสินค้านี้ ({{timeAgo}})",
+      "basketPill": "🟡 ตะกร้าสีเหลือง #{{id}}",
+      "viewProduct": "⚡ กดดูสินค้า",
+      "buyNow": "ซื้อทันที",
+      "commentsHeader": "ความคิดเห็น ({{count, number}})",
+      "commentPlaceholder": "เขียนความคิดเห็นที่นี่..."
+    }
+  },
+  "games": {
+    "heroTitle": "🎮 Movemall Games & ศูนย์รวมของรางวัล",
+    "heroSubtitle": "เล่นเกม เช็กอิน และรับ Coins ทุกวัน",
+    "myCoins": "Coins ของฉัน: <b>{{coins}}</b> · {{amount}}",
+    "checkin": {
+      "title": "เช็กอิน 7 วัน รับ Coins",
+      "goal": "ครบ 7 วัน รับเพิ่ม 100 Coins",
+      "dayLabel": "วันที่ {{day, number}}",
+      "claimed": "✓ รับแล้ว",
+      "today": "วันนี้",
+      "pending": "รอรับ",
+      "buttonClaimed": "✓ เช็กอินแล้ว กลับมาใหม่พรุ่งนี้",
+      "buttonClaim": "🎁 เช็กอินรับ 30 Coins",
+      "toast": "รับ 30 Coins จากการเช็กอินแล้ว"
+    },
+    "wheel": {
+      "title": "วงล้อหมุนลุ้นโชค (Lucky Spin Wheel)",
+      "subtitle": "หมุนฟรีวันละครั้ง ลุ้นรับสูงสุด 100 Coins",
+      "won": "🎉 คุณได้รับ: {{prize}}!",
+      "spinning": "กำลังหมุนลุ้นรางวัล...",
+      "spin": "หมุนวงล้อทันที!",
+      "toast": "🎉 ยินดีด้วย! คุณได้รับรางวัล \"{{prize}}\"",
+      "prizes": {
+        "discountCode": "โค้ดลด {{amount}}",
+        "coins": "{{amount, number}} Coins",
+        "freeShipping": "โค้ดส่งฟรี",
+        "percentOff": "ลด {{amount, number}}%"
+      }
+    },
+    "cards": {
+      "title": "เปิดการ์ดลุ้นคูปองลับ (Mystery Cards)",
+      "subtitle": "แตะเลือกการ์ด 1 ใน 3 ใบเพื่อเปิดรับของรางวัลปริศนา",
+      "cardLabel": "การ์ดใบที่ {{index, number}}",
+      "tapToOpen": "แตะเพื่อเปิด",
+      "toast": "🎴 เปิดการ์ดสำเร็จ! คุณได้รับ {{reward}}",
+      "rewards": [
+        "🎟️ ลด ฿80",
+        "💰 80 Coins",
+        "🚚 โค้ดส่งฟรี"
+      ],
+      "footnote": "1 Coin = ส่วนลด {{amount}} ตอนชำระเงิน"
+    }
+  },
+  "flashSale": {
+    "badge": "MOVEMALL FLASH DEALS",
+    "title": "⚡ มหกรรมลดล้างสต็อก Flash Sale ลดสูงสุด 70%",
+    "subtitle": "ราคาพิเศษช่วงเวลาจำกัด",
+    "timerLabel": "สิ้นสุดรอบปัจจุบันใน",
+    "unitHours": "ชม.",
+    "unitMinutes": "นาที",
+    "unitSeconds": "วินาที",
+    "liveTraffic": "มีผู้กำลังรอแย่งช้อป {{count, number}} คน",
+    "slots": {
+      "s0": {
+        "label": "กำลังลดราคา 🔴",
+        "desc": "สิ้นสุดใน 02:45:18"
+      },
+      "s1": {
+        "label": "รอบถัดไป ⏰",
+        "desc": "เริ่ม 18:00 น."
+      },
+      "s2": {
+        "label": "รอบค่ำดีลเดือด 🌙",
+        "desc": "เริ่ม 21:00 น."
+      },
+      "s3": {
+        "label": "Midnight Sale ⚡",
+        "desc": "คืนนี้เที่ยงคืน"
+      }
+    },
+    "vouchersTitle": "🎟️ คูปองลับลดเพิ่มในรอบ Flash Sale นี้",
+    "vouchers": {
+      "fv1": {
+        "discount": "ลด ฿50",
+        "minSpend": "ขั้นต่ำ ฿300",
+        "tag": "⚡ โค้ดด่วน"
+      },
+      "fv2": {
+        "discount": "ลด 15%",
+        "minSpend": "ขั้นต่ำ ฿800",
+        "tag": "🔥 ฮิตสุด"
+      },
+      "fv3": {
+        "discount": "ส่งฟรี 0.-",
+        "minSpend": "ไม่มีขั้นต่ำ",
+        "tag": "🚚 ส่งฟรี"
+      }
+    },
+    "claimed": "เก็บแล้ว",
+    "claim": "เก็บโค้ด",
+    "categories": {
+      "all": "🔥 ทั้งหมด",
+      "electronics": "🎧 ไอที & แกดเจ็ต",
+      "fashion": "👗 แฟชั่น",
+      "beauty": "💄 บิวตี้ & สกินแคร์",
+      "home": "🏠 ของใช้ในบ้าน"
+    },
+    "bestPriceTag": "👑 ถูกสุดใน 30 วัน",
+    "soldPct": "🔥 ขายแล้ว {{percent, number}}%",
+    "stockLeft": "(เหลือ {{count, number}} ชิ้น)",
+    "opensAt": "เปิดขายรอบ {{time}} น.",
+    "buyNow": "สั่งซื้อด่วน",
+    "reminded": "✓ ตั้งเตือนแล้ว",
+    "remindMe": "🔔 เตือนฉัน",
+    "reminderCancelled": "ยกเลิกการแจ้งเตือน \"{{product}}\" แล้ว",
+    "reminderSet": "🔔 ตั้งเตือนสำเร็จ! ระบบจะแจ้งเตือนคุณก่อนเริ่มรอบ Flash Sale",
+    "voucherClaimedToast": "เก็บโค้ด {{code}} แล้ว"
+  },
+  "vouchers": {
+    "heroTitle": "🎟️ ศูนย์รวมโค้ดส่วนลด Movemall",
+    "heroSubtitle": "เก็บโค้ดแล้วใช้ได้ตอนชำระเงิน",
+    "claimAll": "เก็บโค้ดทั้งหมดในคลิกเดียว",
+    "filters": {
+      "all": "ทั้งหมด",
+      "shipping": "โค้ดส่งฟรี",
+      "platform": "โค้ดส่วนลด Movemall",
+      "cashback": "รับเงินคืน Coins",
+      "store": "โค้ดจากร้านค้า"
+    },
+    "typeLabels": {
+      "shipping": "🚚 โค้ดส่งฟรี",
+      "cashback": "💰 เงินคืน Coins",
+      "platform": "🎟️ คูปองส่วนลด"
+    },
+    "claimed": "เก็บแล้ว",
+    "claim": "เก็บโค้ด",
+    "mock": {
+      "vShip1": {
+        "discount": "ส่งฟรี ฿0",
+        "minSpend": "ขั้นต่ำ ฿0 ทั่วไทย",
+        "expiry": "หมดอายุใน 3 วัน"
+      },
+      "vShip2": {
+        "discount": "ส่วนลดค่าส่ง ฿40",
+        "minSpend": "ขั้นต่ำ ฿150",
+        "expiry": "หมดอายุสิ้นเดือนนี้"
+      },
+      "vPlat1": {
+        "discount": "ลด 15% สูงสุด ฿300",
+        "minSpend": "เมื่อช้อปครบ ฿1,000",
+        "expiry": "ใช้ได้กับสินค้าทุกหมวดหมู่"
+      },
+      "vPlat2": {
+        "discount": "ลดทันที ฿100",
+        "minSpend": "เมื่อช้อปครบ ฿600",
+        "expiry": "สำหรับลูกค้าทั่วไป"
+      },
+      "vCoin1": {
+        "discount": "รับเงินคืน 20% Coins",
+        "minSpend": "คืนสูงสุด 200 Coins",
+        "expiry": "ใช้เป็นส่วนลดออเดอร์ถัดไป"
+      },
+      "vStore1": {
+        "discount": "ลด ฿50 ประจำร้าน",
+        "minSpend": "เมื่อซื้อครบ ฿500",
+        "expiry": "เฉพาะร้าน TechPro"
+      },
+      "vStore2": {
+        "discount": "ลด 10% ประจำร้าน",
+        "minSpend": "เมื่อซื้อครบ ฿800",
+        "expiry": "เฉพาะร้าน Fashionista"
+      }
+    },
+    "api": {
+      "freeShipping": "ส่งฟรี {{amount}}",
+      "percentOff": "ลด {{percent, number}}%",
+      "amountOff": "ลด {{amount}}",
+      "minSpend": "เมื่อช้อปครบ {{amount}}",
+      "noMinimum": "ไม่มีขั้นต่ำ",
+      "expiresOn": "หมดอายุ {{date}}"
+    }
+  },
+  "seo": {
+    "pages": {
+      "live": {
+        "title": "ไลฟ์สด | Movemall",
+        "description": "ช้อปสดผ่านไลฟ์สตรีม พร้อมโค้ดลดพิเศษเฉพาะในไลฟ์"
+      },
+      "video": {
+        "title": "วิดีโอสั้น | Movemall",
+        "description": "ช้อปสินค้าผ่านคลิปวิดีโอสั้น พร้อมตะกร้าสีเหลืองสั่งซื้อทันที"
+      },
+      "games": {
+        "title": "เกมและของรางวัล | Movemall",
+        "description": "เล่นเกม เช็กอิน และรับ Movemall Coins ทุกวัน"
+      },
+      "flashSale": {
+        "title": "Flash Sale | Movemall",
+        "description": "ดีลลดราคาแรงช่วงเวลาจำกัด ลดสูงสุด 70%"
+      },
+      "vouchers": {
+        "title": "ศูนย์รวมคูปอง | Movemall",
+        "description": "เก็บโค้ดส่วนลดและคูปองส่งฟรีใช้ได้ทันทีตอนชำระเงิน"
+      },
+      "chat": {
+        "title": "แชทกับร้านค้า | Movemall",
+        "description": "พูดคุยกับร้านค้าเพื่อสอบถามสินค้าก่อนตัดสินใจซื้อ"
+      },
+      "notifications": {
+        "title": "การแจ้งเตือน | Movemall",
+        "description": "ติดตามสถานะออเดอร์ โปรโมชั่น และสิทธิพิเศษล่าสุด"
+      }
+    }
+  }
+}

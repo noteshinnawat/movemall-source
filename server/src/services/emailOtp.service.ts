@@ -42,23 +42,23 @@ export function verifyEmailOtp(
   userId: string,
   email: string,
   entered: string
-): { success: boolean; message: string } {
+): { success: boolean; message: string; code?: 'OTP_INVALID' | 'OTP_EXPIRED' } {
   const k = key(userId, email);
   const rec = store.get(k);
 
   if (!rec) {
-    return { success: false, message: 'ยังไม่ได้ขอรหัส OTP หรือรหัสหมดอายุแล้ว' };
+    return { success: false, message: 'ยังไม่ได้ขอรหัส OTP หรือรหัสหมดอายุแล้ว', code: 'OTP_EXPIRED' };
   }
 
   if (rec.expiresAt < Date.now()) {
     store.delete(k);
-    return { success: false, message: 'รหัส OTP หมดอายุ กรุณาขอรหัสใหม่' };
+    return { success: false, message: 'รหัส OTP หมดอายุ กรุณาขอรหัสใหม่', code: 'OTP_EXPIRED' };
   }
 
   rec.attempts += 1;
   if (rec.attempts > MAX_ATTEMPTS) {
     store.delete(k);
-    return { success: false, message: 'ใส่รหัสผิดเกินจำนวนที่กำหนด กรุณาขอรหัสใหม่' };
+    return { success: false, message: 'ใส่รหัสผิดเกินจำนวนที่กำหนด กรุณาขอรหัสใหม่', code: 'OTP_INVALID' };
   }
 
   const entry = Buffer.from(entered.trim(), 'utf8');
@@ -66,7 +66,7 @@ export function verifyEmailOtp(
   const matches = entry.length === expected.length && crypto.timingSafeEqual(entry, expected);
 
   if (!matches) {
-    return { success: false, message: 'รหัส OTP ไม่ถูกต้อง' };
+    return { success: false, message: 'รหัส OTP ไม่ถูกต้อง', code: 'OTP_INVALID' };
   }
 
   store.delete(k); // ใช้ได้ครั้งเดียว

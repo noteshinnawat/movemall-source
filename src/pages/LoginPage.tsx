@@ -1,9 +1,14 @@
 // src/pages/LoginPage.tsx — Authentication Page (Password Login / Fast SMS OTP Login / Social Login)
 
 import { useState } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { User, Store, KeyRound, Phone, ArrowRight, Sparkles, AlertCircle } from 'lucide-react';
 import { fetchApi } from '../utils/api';
+import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
+import { errorTranslationKey } from '../i18n/errorMessages';
+import { formatNumber } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import { promptGoogleAuth } from '../utils/googleAuth';
 import { initiateLineLogin } from '../utils/lineAuth';
 import './LoginPage.css';
@@ -14,6 +19,9 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onLoginSuccess }: LoginPageProps) {
+  const { t, i18n } = useTranslation(['auth', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
+  const localizePath = useLocalizedPath();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const paramRole = searchParams.get('role');
@@ -45,7 +53,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       return '/admin';
     }
     if (role === 'seller' || upper === 'SELLER') return '/seller';
-    return '/account';
+    return localizePath('/account');
   }
 
   // Countdown timer helper
@@ -121,7 +129,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       const isEmail = identifier.includes('@');
       const fallbackUser = {
         id: isSuper ? 'super-admin-note' : (isAdmin ? 'admin-001' : 'user-001'),
-        name: isSuper ? 'Note Shinnawat (Super Admin)' : (isAdmin ? 'Movemall Administrator' : (identifier || 'ผู้ใช้งาน Movemall')),
+        name: isSuper ? 'Note Shinnawat (Super Admin)' : (isAdmin ? 'Movemall Administrator' : (identifier || t('common:memberFallback'))),
         email: isEmail ? identifier : (isSuper ? 'note.shinnawat@gmail.com' : 'user@movemall.com'),
         role: isSuper ? 'SUPER_ADMIN' : (isAdmin ? 'ADMIN' : (role === 'seller' ? 'SELLER' : 'BUYER')),
         coinsBalance: isSuper ? 99999 : (isAdmin ? 5000 : 100),
@@ -140,7 +148,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   async function handleRequestOtp(e: React.FormEvent) {
     e.preventDefault();
     if (!otpPhone.trim()) {
-      setErrorMsg('กรุณาระบุเบอร์โทรศัพท์');
+      setErrorMsg(t('auth:validation.phoneRequired'));
       return;
     }
     setErrorMsg('');
@@ -172,7 +180,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   async function handleVerifyOtpLogin() {
     const enteredOtp = otpDigits.join('');
     if (enteredOtp.length < 6) {
-      setErrorMsg('กรุณากรอกรหัส OTP 6 หลัก');
+      setErrorMsg(t('auth:validation.otpLength'));
       return;
     }
     setErrorMsg('');
@@ -191,10 +199,12 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         window.dispatchEvent(new Event('movemall_auth_change'));
       }
 
-      onLoginSuccess?.(res.user?.name || `ผู้ใช้ ${otpPhone.slice(-4)}`, role);
+      onLoginSuccess?.(res.user?.name || t('auth:login.otpUserFallback', { digits: otpPhone.slice(-4) }), role);
       navigate(getRedirectTarget(res.user?.role));
     } catch (err: any) {
-      setErrorMsg(err?.message || 'รหัส OTP ไม่ถูกต้องหรือหมดอายุ');
+      console.warn('OTP login verification failed:', err);
+      const key = errorTranslationKey(err?.code);
+      setErrorMsg(key === 'errors.generic' ? t('auth:validation.otpInvalid') : t(`common:${key}`));
     } finally {
       setLoading(false);
     }
@@ -232,7 +242,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
         const finalUser = {
           id: res.user?.id,
-          name: res.user?.name || authRes.googleUser?.name || 'สมาชิก Google',
+          name: res.user?.name || authRes.googleUser?.name || t('auth:oauth.googleMemberFallback'),
           email: res.user?.email || authRes.googleUser?.email,
           avatarUrl: res.user?.avatarUrl || authRes.googleUser?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(res.user?.name || 'Google')}`,
           role: res.user?.role || (isSuperAdmin ? 'SUPER_ADMIN' : (role === 'seller' ? 'SELLER' : 'BUYER')),
@@ -257,12 +267,12 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       // Facebook & ผู้ให้บริการอื่น ๆ — ยังไม่เปิดให้บริการ
       // เดิมเส้นทางนี้ล็อกอินเข้าบัญชีกลางบัญชีเดียวที่ผู้ใช้ทุกคนใช้ร่วมกัน
       // โดยไม่มีการยืนยันตัวตนกับ Facebook จริง จึงถูกปิดไปจนกว่าจะต่อ OAuth ของจริง
-      setErrorMsg('ขณะนี้ยังไม่เปิดให้เข้าสู่ระบบด้วย Facebook กรุณาใช้ Google, LINE, อีเมล หรือเบอร์โทรศัพท์แทน');
+      setErrorMsg(t('auth:oauth.facebookLoginUnavailable'));
       return;
     } catch (err: any) {
       console.warn('Social login error:', err);
       const providerLabel = provider === 'google' ? 'Google' : (provider === 'line' ? 'LINE' : 'Facebook');
-      setErrorMsg(`การเข้าสู่ระบบด้วย ${providerLabel} ไม่สำเร็จ หรือถูกปิดหน้าต่าง กรุณาลองใหม่อีกครั้ง`);
+      setErrorMsg(t('auth:oauth.loginFailed', { provider: providerLabel }));
     } finally {
       setLoading(false);
     }
@@ -282,7 +292,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
             }}
           >
             <User size={14} style={{ display: 'inline', marginRight: 4 }} />
-            ผู้ซื้อ
+            {t('auth:login.roleBuyer')}
           </button>
           <button
             type="button"
@@ -294,17 +304,17 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
             }}
           >
             <Store size={14} style={{ display: 'inline', marginRight: 4 }} />
-            ผู้ขาย
+            {t('auth:login.roleSeller')}
           </button>
         </div>
 
         <h1 className="auth-title">
-          {role === 'seller' ? 'เข้าสู่ศูนย์ผู้ขาย' : 'เข้าสู่ระบบ Movemall'}
+          {role === 'seller' ? t('auth:login.titleSeller') : t('auth:login.titleBuyer')}
         </h1>
         <p className="auth-sub">
           {role === 'seller'
-            ? 'จัดการสินค้า ออเดอร์ และร้านค้า'
-            : 'ติดตามออเดอร์และรับสิทธิพิเศษ'}
+            ? t('auth:login.subtitleSeller')
+            : t('auth:login.subtitleBuyer')}
         </p>
 
         {/* Login Type Tabs (For Buyers) */}
@@ -318,7 +328,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 setErrorMsg('');
               }}
             >
-              <KeyRound size={14} /> รหัสผ่าน
+              <KeyRound size={14} /> {t('auth:login.methodPassword')}
             </button>
             <button
               type="button"
@@ -328,7 +338,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 setErrorMsg('');
               }}
             >
-              <Phone size={14} /> SMS OTP ด่วน ⚡
+              <Phone size={14} /> {t('auth:login.methodOtp')}
             </button>
           </div>
         )}
@@ -344,12 +354,12 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         {loginType === 'password' ? (
           <form className="auth-form" onSubmit={handlePasswordLogin}>
             <div className="auth-field">
-              <label className="auth-label">อีเมล หรือ เบอร์โทรศัพท์ *</label>
+              <label className="auth-label">{t('auth:login.identifierLabel')}</label>
               <input
                 type="text"
                 className="auth-input"
                 required
-                placeholder="user@movemall.local หรือ 0812345678"
+                placeholder={t('auth:login.identifierPlaceholder')}
                 value={identifier}
                 onChange={e => setIdentifier(e.target.value)}
               />
@@ -357,8 +367,8 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
             <div className="auth-field">
               <div className="auth-label-row">
-                <label className="auth-label">รหัสผ่าน *</label>
-                <Link to="/help" className="auth-forgot-link">ลืมรหัสผ่าน?</Link>
+                <label className="auth-label">{t('auth:login.passwordLabel')}</label>
+                <LocalizedLink to="/help" className="auth-forgot-link">{t('auth:login.forgotPassword')}</LocalizedLink>
               </div>
               <input
                 type="password"
@@ -371,7 +381,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
             </div>
 
             <button type="submit" className="auth-btn" disabled={loading}>
-              {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
+              {loading ? t('auth:login.submitting') : t('auth:login.submit')}
             </button>
           </form>
         ) : (
@@ -380,33 +390,33 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
             {!otpSent ? (
               <form className="auth-form" onSubmit={handleRequestOtp}>
                 <div className="auth-field">
-                  <label className="auth-label">เบอร์โทรศัพท์มือถือ *</label>
+                  <label className="auth-label">{t('auth:login.phoneLabel')}</label>
                   <input
                     type="tel"
                     className="auth-input"
                     required
-                    placeholder="เช่น 0812345678"
+                    placeholder={t('auth:login.phonePlaceholder')}
                     value={otpPhone}
                     onChange={e => setOtpPhone(e.target.value)}
                   />
                 </div>
                 <button type="submit" className="auth-btn" disabled={loading}>
-                  {loading ? 'กำลังส่ง OTP...' : '📲 ขอรับรหัส OTP เพื่อเข้าสู่ระบบ'}
+                  {loading ? t('auth:login.sendingOtp') : t('auth:login.requestOtp')}
                 </button>
               </form>
             ) : (
               <div className="auth-otp-confirm">
                 {isRealSms ? (
                   <div className="auth-otp-demo-tag" style={{ background: '#ECFDF5', color: '#065F46', borderColor: '#10B981' }}>
-                    📱 ส่งรหัส SMS OTP จริงไปยังเบอร์ {otpPhone} แล้ว กรุณาตรวจเช็ก SMS
+                    {t('auth:login.realSmsSent', { phone: otpPhone })}
                   </div>
                 ) : (
                   <div className="auth-otp-demo-tag">
-                    💡 รหัสทดสอบ OTP Demo: <strong>{demoOtp}</strong>
+                    {t('auth:login.demoOtpLabel')} <strong>{demoOtp}</strong>
                   </div>
                 )}
 
-                <p className="auth-otp-hint">กรอกรหัส OTP 6 หลักที่ส่งไปยัง {otpPhone}</p>
+                <p className="auth-otp-hint">{t('auth:login.otpHint', { phone: otpPhone })}</p>
 
                 <div className="auth-otp-row">
                   {otpDigits.map((d, i) => (
@@ -417,6 +427,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                       inputMode="numeric"
                       maxLength={1}
                       className="auth-otp-box"
+                      aria-label={t('auth:login.otpDigitAria', { position: formatNumber(i + 1, locale) })}
                       value={d}
                       onChange={e => {
                         const val = e.target.value;
@@ -458,14 +469,16 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                       startOtpCountdown();
                     }}
                   >
-                    {isCounting ? `ขอรหัสใหม่ (${countdown}s)` : '🔄 ขอรหัส OTP อีกครั้ง'}
+                    {isCounting
+                      ? t('auth:login.resendCountdown', { seconds: formatNumber(countdown, locale) })
+                      : t('auth:login.resend')}
                   </button>
                   <button
                     type="button"
                     className="auth-back-link"
                     onClick={() => setOtpSent(false)}
                   >
-                    เปลี่ยนเบอร์โทร
+                    {t('auth:login.changePhone')}
                   </button>
                 </div>
 
@@ -475,7 +488,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                   disabled={loading || otpDigits.join('').length < 6}
                   onClick={handleVerifyOtpLogin}
                 >
-                  {loading ? 'กำลังยืนยัน...' : '✨ ยืนยันและเข้าสู่ระบบ'}
+                  {loading ? t('auth:login.verifying') : t('auth:login.verifyAndLogin')}
                 </button>
               </div>
             )}
@@ -483,7 +496,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         )}
 
         {/* Social Login Options */}
-        <div className="auth-divider">หรือเข้าสู่ระบบด้วย</div>
+        <div className="auth-divider">{t('auth:login.socialDivider')}</div>
 
         <div className="auth-social-grid">
           <button
@@ -532,15 +545,15 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
         {/* Switch to Register */}
         <div className="auth-toggle-mode">
-          <span>ยังไม่มีบัญชีใช่ไหม?</span>
-          <Link
+          <span>{t('auth:login.noAccount')}</span>
+          <LocalizedLink
             to={role === 'seller' ? '/seller/register' : '/register'}
             className="auth-register-banner-link"
           >
             <Sparkles size={14} />
-            <span>{role === 'seller' ? 'เปิดร้านค้าบน Movemall' : 'สมัครสมาชิกใหม่ (รับฟรี 100.-)'}</span>
+            <span>{role === 'seller' ? t('auth:login.openStore') : t('auth:login.createAccount')}</span>
             <ArrowRight size={14} />
-          </Link>
+          </LocalizedLink>
         </div>
       </div>
     </main>

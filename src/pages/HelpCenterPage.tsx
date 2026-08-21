@@ -1,7 +1,8 @@
 // src/pages/HelpCenterPage.tsx — Help Center, How to Order, Shipping, Returns & Contact Us
 
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   HelpCircle,
   ShoppingBag,
@@ -12,17 +13,32 @@ import {
   MessageCircle,
   ChevronDown,
   ChevronUp,
-  Clock,
   ShieldCheck,
   CheckCircle2,
 } from 'lucide-react';
+import { LocalizedLink } from '../i18n/LocalizedLink';
+import { formatCurrency } from '../i18n/formatters';
+import { resolveRootLocale } from '../i18n/locales';
 import './HelpCenterPage.css';
 
 interface HelpCenterPageProps {
   initialTab?: 'help' | 'how-to-order' | 'shipping' | 'returns' | 'contact';
 }
 
+interface FaqItem {
+  q: string;
+  a: string;
+}
+
+const FREE_SHIPPING_THRESHOLD = 299;
+
+// Canonical (locale-independent) contact-subject identifiers; only the
+// displayed label is translated.
+const CONTACT_SUBJECTS = ['order', 'tracking', 'return', 'seller', 'other'] as const;
+
 export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
+  const { t, i18n } = useTranslation(['legal', 'common']);
+  const locale = resolveRootLocale(i18n.resolvedLanguage ?? i18n.language);
   const location = useLocation();
 
   // Determine active tab from URL path
@@ -40,7 +56,7 @@ export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
   // Contact Form
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
-  const [contactSubject, setContactSubject] = useState('สอบถามการสั่งซื้อ');
+  const [contactSubject, setContactSubject] = useState<(typeof CONTACT_SUBJECTS)[number]>('order');
   const [contactMessage, setContactMessage] = useState('');
   const [isSent, setIsSent] = useState(false);
 
@@ -50,80 +66,59 @@ export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
     setIsSent(true);
   }
 
-  const faqs = [
-    {
-      q: 'Movemall มีระบบเก็บเงินปลายทาง (COD) หรือไม่?',
-      a: 'มีครับ! Movemall รองรับการชำระเงินปลายทาง (COD) รวมถึงการโอนผ่านพร้อมเพย์/QR Code, บัตรเครดิต/เดบิต และ Mobile Banking ทุกธนาคาร',
-    },
-    {
-      q: 'สินค้าจัดส่งใช้เวลากี่วันถึงมือผู้รับ?',
-      a: 'สำหรับการจัดส่งในเขตกรุงเทพฯ และปริมณฑล ใช้เวลา 1-2 วันทำการ สำหรับต่างจังหวัดใช้เวลา 2-3 วันทำการ โดยมีบริการจัดส่งด่วน Express Delivery ในวันถัดไป',
-    },
-    {
-      q: 'สามารถเปลี่ยนหรือขอคืนสินค้าได้อย่างไร?',
-      a: 'คุณสามารถกดขอคืนสินค้าได้ภายใน 30 วันนับจากวันที่ได้รับพัสดุ ผ่านเมนู "ประวัติการสั่งซื้อ" หรือติดต่อฝ่ายบริการลูกค้า สินค้าต้องอยู่ในสภาพสมบูรณ์และมีบรรจุภัณฑ์เดิม',
-    },
-    {
-      q: 'ต้องการสมัครเป็นผู้ขายบน Movemall ต้องทำอย่างไร?',
-      a: 'คุณสามารถคลิกที่ปุ่ม "🏪 ศูนย์ผู้ขาย (Seller Centre)" บนแถบเมนูด้านบน เพื่อเปิดร้านค้าและลงขายสินค้าได้ฟรีโดยไม่มีค่าธรรมเนียมแรกเข้า',
-    },
-    {
-      q: 'โค้ดส่งฟรีและคูปองส่วนลดใช้งานอย่างไร?',
-      a: 'คุณสามารถกดเก็บโค้ดส่วนลดได้จากหน้าศูนย์รวมคูปองหรือหน้าร้านค้า เมื่ออยู่ในหน้าชำระเงิน (Checkout) ระบบจะคำนวณและหักส่วนลดให้อัตโนมัติ',
-    },
-  ];
+  const faqs = t('legal:help.faq.items', { returnObjects: true }) as FaqItem[];
 
   return (
     <main className="help-page">
       {/* Hero */}
       <section className="help-hero">
         <div className="container">
-          <h1 className="help-hero__title">ศูนย์บริการและช่วยเหลือผู้ใช้งาน</h1>
+          <h1 className="help-hero__title">{t('legal:help.heroTitle')}</h1>
           <p className="help-hero__subtitle">
-            ค้นหาคำตอบ วิธีการสั่งซื้อ นโยบายการจัดส่ง คืนสินค้า หรือติดต่อฝ่ายบริการลูกค้า Movemall
+            {t('legal:help.heroSubtitle')}
           </p>
 
-          <nav className="help-nav" aria-label="Help topics">
-            <Link
+          <nav className="help-nav" aria-label={t('legal:help.navAria')}>
+            <LocalizedLink
               to="/help"
               className={`help-nav__item${activeTab === 'help' ? ' help-nav__item--active' : ''}`}
               onClick={() => setActiveTab('help')}
             >
               <HelpCircle size={15} />
-              คำถามที่พบบ่อย (FAQ)
-            </Link>
-            <Link
+              {t('legal:help.navFaq')}
+            </LocalizedLink>
+            <LocalizedLink
               to="/how-to-order"
               className={`help-nav__item${activeTab === 'how-to-order' ? ' help-nav__item--active' : ''}`}
               onClick={() => setActiveTab('how-to-order')}
             >
               <ShoppingBag size={15} />
-              วิธีสั่งซื้อสินค้า
-            </Link>
-            <Link
+              {t('legal:help.navHowToOrder')}
+            </LocalizedLink>
+            <LocalizedLink
               to="/shipping"
               className={`help-nav__item${activeTab === 'shipping' ? ' help-nav__item--active' : ''}`}
               onClick={() => setActiveTab('shipping')}
             >
               <Truck size={15} />
-              การจัดส่งสินค้า
-            </Link>
-            <Link
+              {t('legal:help.navShipping')}
+            </LocalizedLink>
+            <LocalizedLink
               to="/returns"
               className={`help-nav__item${activeTab === 'returns' ? ' help-nav__item--active' : ''}`}
               onClick={() => setActiveTab('returns')}
             >
               <RotateCcw size={15} />
-              นโยบายการคืนสินค้า
-            </Link>
-            <Link
+              {t('legal:help.navReturns')}
+            </LocalizedLink>
+            <LocalizedLink
               to="/contact"
               className={`help-nav__item${activeTab === 'contact' ? ' help-nav__item--active' : ''}`}
               onClick={() => setActiveTab('contact')}
             >
               <Mail size={15} />
-              ติดต่อเรา
-            </Link>
+              {t('legal:help.navContact')}
+            </LocalizedLink>
           </nav>
         </div>
       </section>
@@ -134,11 +129,11 @@ export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
           <div className="help-card">
             <h2 className="help-card__title">
               <HelpCircle size={18} />
-              คำถามที่พบบ่อย (Frequently Asked Questions)
+              {t('legal:help.faq.title')}
             </h2>
             <div className="faq-list">
               {faqs.map((faq, idx) => (
-                <div key={idx} className="faq-item">
+                <div key={faq.q} className="faq-item">
                   <button
                     className="faq-question"
                     onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
@@ -158,48 +153,48 @@ export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
           <div className="help-card">
             <h2 className="help-card__title">
               <ShoppingBag size={18} />
-              ขั้นตอนการสั่งซื้อสินค้าบน Movemall
+              {t('legal:help.order.title')}
             </h2>
             <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-              ช้อปสินค้าคุณภาพได้อย่างง่ายดายและปลอดภัยใน 4 ขั้นตอน:
+              {t('legal:help.order.subtitle')}
             </p>
 
             <div className="help-steps">
               <div className="help-step-box">
                 <div className="help-step-num">1</div>
-                <h3 className="help-step-title">เลือกชมสินค้า</h3>
+                <h3 className="help-step-title">{t('legal:help.order.step1Title')}</h3>
                 <p className="help-step-desc">
-                  ค้นหาสินค้าจากช่องค้นหา หรือเลือกหมวดหมู่ที่สนใจ พร้อมตรวจสอบคะแนนรีวิวจากผู้ซื้อจริง
+                  {t('legal:help.order.step1Desc')}
                 </p>
               </div>
 
               <div className="help-step-box">
                 <div className="help-step-num">2</div>
-                <h3 className="help-step-title">เพิ่มลงตะกร้า</h3>
+                <h3 className="help-step-title">{t('legal:help.order.step2Title')}</h3>
                 <p className="help-step-desc">
-                  เลือกจำนวนสินค้าที่ต้องการ แล้วกดปุ่ม "เพิ่มลงตะกร้า" หรือ "ซื้อเลย"
+                  {t('legal:help.order.step2Desc')}
                 </p>
               </div>
 
               <div className="help-step-box">
                 <div className="help-step-num">3</div>
-                <h3 className="help-step-title">กรอกที่อยู่จัดส่ง</h3>
+                <h3 className="help-step-title">{t('legal:help.order.step3Title')}</h3>
                 <p className="help-step-desc">
-                  ระบุชื่อ ที่อยู่ เบอร์โทรศัพท์ และเลือกช่องทางการจัดส่งที่ต้องการ
+                  {t('legal:help.order.step3Desc')}
                 </p>
               </div>
 
               <div className="help-step-box">
                 <div className="help-step-num">4</div>
-                <h3 className="help-step-title">ชำระเงิน</h3>
+                <h3 className="help-step-title">{t('legal:help.order.step4Title')}</h3>
                 <p className="help-step-desc">
-                  เลือกวิธีชำระเงิน (พร้อมเพย์, บัตรเครดิต หรือเก็บเงินปลายทาง) แล้วกดยืนยันคำสั่งซื้อ
+                  {t('legal:help.order.step4Desc')}
                 </p>
               </div>
             </div>
 
             <div style={{ textAlign: 'center', marginTop: 'var(--space-6)' }}>
-              <Link
+              <LocalizedLink
                 to="/shop"
                 style={{
                   display: 'inline-block',
@@ -210,8 +205,8 @@ export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
                   fontSize: 13,
                 }}
               >
-                เริ่มช้อปปิ้งเลยตอนนี้ →
-              </Link>
+                {t('legal:help.order.startShopping')}
+              </LocalizedLink>
             </div>
           </div>
         )}
@@ -221,38 +216,40 @@ export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
           <div className="help-card">
             <h2 className="help-card__title">
               <Truck size={18} />
-              ข้อมูลและการจัดส่งสินค้า (Shipping & Delivery)
+              {t('legal:help.shipping.title')}
             </h2>
 
             <div style={{ marginBottom: 'var(--space-6)' }}>
               <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 'var(--space-2)' }}>
-                🚚 นโยบายจัดส่งฟรี
+                {t('legal:help.shipping.freeTitle')}
               </h3>
               <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                เมื่อคุณมียอดสั่งซื้อสินค้าครบ <strong>฿299 ขึ้นไป</strong> Movemall มอบสิทธิ์จัดส่งฟรีมาตรฐานทั่วประเทศไทยทันทีโดยไม่ต้องใช้โค้ดส่วนลด!
+                {t('legal:help.shipping.freeBody', {
+                  amount: formatCurrency(FREE_SHIPPING_THRESHOLD, locale),
+                })}
               </p>
             </div>
 
             <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 'var(--space-2)' }}>
-              📦 พันธมิตรผู้ให้บริการขนส่ง
+              {t('legal:help.shipping.carriersTitle')}
             </h3>
             <div className="shipping-carriers">
               <div className="carrier-card">
                 <div style={{ fontSize: 24, marginBottom: 4 }}>⚡</div>
                 <div className="carrier-card__name">Flash Express</div>
-                <div className="carrier-card__time">1-2 วันทำการ</div>
+                <div className="carrier-card__time">{t('legal:help.shipping.flashTime')}</div>
               </div>
 
               <div className="carrier-card">
                 <div style={{ fontSize: 24, marginBottom: 4 }}>🟧</div>
                 <div className="carrier-card__name">Kerry Express</div>
-                <div className="carrier-card__time">1-2 วันทำการ</div>
+                <div className="carrier-card__time">{t('legal:help.shipping.kerryTime')}</div>
               </div>
 
               <div className="carrier-card">
                 <div style={{ fontSize: 24, marginBottom: 4 }}>📮</div>
-                <div className="carrier-card__name">ไปรษณีย์ไทย (EMS)</div>
-                <div className="carrier-card__time">2-3 วันทำการ</div>
+                <div className="carrier-card__name">{t('legal:help.shipping.thaiPostName')}</div>
+                <div className="carrier-card__time">{t('legal:help.shipping.thaiPostTime')}</div>
               </div>
             </div>
           </div>
@@ -263,37 +260,37 @@ export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
           <div className="help-card">
             <h2 className="help-card__title">
               <RotateCcw size={18} />
-              นโยบายการคืนสินค้าและคืนเงิน (30 Days Money Back)
+              {t('legal:help.returns.title')}
             </h2>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', background: 'var(--success-subtle)', border: '1px solid hsla(142, 71%, 45%, 0.3)', padding: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
               <ShieldCheck size={28} style={{ color: 'var(--success)', flexShrink: 0 }} />
               <div>
-                <strong style={{ fontSize: 14, color: 'var(--success)' }}>รับประกันความพึงพอใจ 30 วัน</strong>
+                <strong style={{ fontSize: 14, color: 'var(--success)' }}>{t('legal:help.returns.guaranteeTitle')}</strong>
                 <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
-                  หากได้รับสินค้าชำรุด เสียหาย หรือไม่ตรงตามคำสั่งซื้อ สามารถส่งคืนเพื่อเปลี่ยนสินค้าใหม่หรือขอรับเงินคืนเต็มจำนวนได้ฟรี
+                  {t('legal:help.returns.guaranteeBody')}
                 </p>
               </div>
             </div>
 
             <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 'var(--space-2)' }}>
-              ขั้นตอนการขอคืนสินค้า:
+              {t('legal:help.returns.stepsTitle')}
             </h3>
             <div className="help-steps">
               <div className="help-step-box">
                 <div className="help-step-num">1</div>
-                <h4 className="help-step-title">แจ้งขอคืนสินค้า</h4>
-                <p className="help-step-desc">เข้าไปที่เมนูประวัติการสั่งซื้อ แล้วกดปุ่ม "ขอคืนสินค้า" พร้อมแนบรูปถ่าย</p>
+                <h4 className="help-step-title">{t('legal:help.returns.step1Title')}</h4>
+                <p className="help-step-desc">{t('legal:help.returns.step1Desc')}</p>
               </div>
               <div className="help-step-box">
                 <div className="help-step-num">2</div>
-                <h4 className="help-step-title">พนักงานเข้ารับพัสดุ</h4>
-                <p className="help-step-desc">บริการเข้ารับพัสดุคืนถึงหน้าบ้านฟรี ไม่มีค่าใช้จ่าย</p>
+                <h4 className="help-step-title">{t('legal:help.returns.step2Title')}</h4>
+                <p className="help-step-desc">{t('legal:help.returns.step2Desc')}</p>
               </div>
               <div className="help-step-box">
                 <div className="help-step-num">3</div>
-                <h4 className="help-step-title">รับเงินคืน</h4>
-                <p className="help-step-desc">เงินคืนจะโอนเข้าบัญชีเดิมของคุณภายใน 1-3 วันทำการหลังร้านค้าตรวจรับ</p>
+                <h4 className="help-step-title">{t('legal:help.returns.step3Title')}</h4>
+                <p className="help-step-desc">{t('legal:help.returns.step3Desc')}</p>
               </div>
             </div>
           </div>
@@ -304,39 +301,39 @@ export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
           <div className="help-card">
             <h2 className="help-card__title">
               <Mail size={18} />
-              ติดต่อฝ่ายบริการลูกค้า Movemall
+              {t('legal:help.contact.title')}
             </h2>
 
             <div className="contact-grid">
               <div className="contact-info-list">
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  ทีมงาน Movemall พร้อมดูแลและช่วยเหลือทุกปัญหาของคุณทุกวัน จันทร์ - อาทิตย์
+                  {t('legal:help.contact.intro')}
                 </p>
 
                 <div className="contact-info-item">
                   <div className="contact-info-icon"><Phone size={18} /></div>
                   <div>
-                    <h3 style={{ fontSize: 13, fontWeight: 700 }}>ศูนย์บริการลูกค้า (Call Center)</h3>
+                    <h3 style={{ fontSize: 13, fontWeight: 700 }}>{t('legal:help.contact.callCenterTitle')}</h3>
                     <p style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 600 }}>02-123-4567</p>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>ทุกวัน 08:30 - 20:00 น.</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('legal:help.contact.callCenterHours')}</span>
                   </div>
                 </div>
 
                 <div className="contact-info-item">
                   <div className="contact-info-icon"><Mail size={18} /></div>
                   <div>
-                    <h3 style={{ fontSize: 13, fontWeight: 700 }}>อีเมลติดต่อฝ่ายสนับสนุน</h3>
+                    <h3 style={{ fontSize: 13, fontWeight: 700 }}>{t('legal:help.contact.emailTitle')}</h3>
                     <p style={{ fontSize: 13, color: 'var(--text-primary)' }}>support@movemall.local</p>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>ตอบกลับภายใน 24 ชั่วโมง</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('legal:help.contact.emailHours')}</span>
                   </div>
                 </div>
 
                 <div className="contact-info-item">
                   <div className="contact-info-icon"><MessageCircle size={18} /></div>
                   <div>
-                    <h3 style={{ fontSize: 13, fontWeight: 700 }}>LINE Official Account</h3>
+                    <h3 style={{ fontSize: 13, fontWeight: 700 }}>{t('legal:help.contact.lineTitle')}</h3>
                     <p style={{ fontSize: 13, color: 'var(--success)', fontWeight: 600 }}>@MovemallOfficial</p>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>แชทสอบถามแอดมินแบบเรียลไทม์</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('legal:help.contact.lineHours')}</span>
                   </div>
                 </div>
               </div>
@@ -347,10 +344,10 @@ export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
                   <div style={{ background: 'var(--surface-hover)', border: '1px solid var(--success)', padding: 'var(--space-6)', textAlign: 'center' }}>
                     <CheckCircle2 size={40} style={{ color: 'var(--success)', margin: '0 auto 12px' }} />
                     <h3 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>
-                      ส่งข้อความของคุณเรียบร้อยแล้ว!
+                      {t('legal:help.contact.sentTitle')}
                     </h3>
                     <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>
-                      เจ้าหน้าที่ฝ่ายบริการลูกค้าจะติดต่อกลับไปยังอีเมล <strong>{contactEmail}</strong> โดยเร็วที่สุดครับ
+                      {t('legal:help.contact.sentBody', { email: contactEmail })}
                     </p>
                     <button
                       className="contact-form__btn"
@@ -361,7 +358,7 @@ export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
                         setContactMessage('');
                       }}
                     >
-                      ส่งข้อความใหม่
+                      {t('legal:help.contact.sendAnother')}
                     </button>
                   </div>
                 ) : (
@@ -369,7 +366,7 @@ export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
                     <input
                       type="text"
                       className="contact-form__input"
-                      placeholder="ชื่อ-นามสกุลของคุณ *"
+                      placeholder={t('legal:help.contact.namePlaceholder')}
                       required
                       value={contactName}
                       onChange={e => setContactName(e.target.value)}
@@ -377,7 +374,7 @@ export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
                     <input
                       type="email"
                       className="contact-form__input"
-                      placeholder="อีเมลของคุณ *"
+                      placeholder={t('legal:help.contact.emailPlaceholder')}
                       required
                       value={contactEmail}
                       onChange={e => setContactEmail(e.target.value)}
@@ -385,23 +382,23 @@ export function HelpCenterPage({ initialTab = 'help' }: HelpCenterPageProps) {
                     <select
                       className="contact-form__input"
                       value={contactSubject}
-                      onChange={e => setContactSubject(e.target.value)}
+                      onChange={e => setContactSubject(e.target.value as typeof contactSubject)}
                     >
-                      <option value="สอบถามการสั่งซื้อ">สอบถามการสั่งซื้อสินค้า</option>
-                      <option value="ติดตามสถานะพัสดุ">ติดตามสถานะพัสดุ / ขนส่ง</option>
-                      <option value="แจ้งเคลมคืนสินค้า">แจ้งเปลี่ยน / คืนสินค้า</option>
-                      <option value="สมัครร้านค้าผู้ขาย">ติดต่อเปิดร้านค้าผู้ขาย (Merchant)</option>
-                      <option value="อื่นๆ">อื่นๆ</option>
+                      {CONTACT_SUBJECTS.map(subject => (
+                        <option key={subject} value={subject}>
+                          {t(`legal:help.contact.subjects.${subject}`)}
+                        </option>
+                      ))}
                     </select>
                     <textarea
                       className="contact-form__textarea"
-                      placeholder="ระบุข้อความหรือปัญหาที่คุณต้องการสอบถาม... *"
+                      placeholder={t('legal:help.contact.messagePlaceholder')}
                       required
                       value={contactMessage}
                       onChange={e => setContactMessage(e.target.value)}
                     />
                     <button type="submit" className="contact-form__btn">
-                      ส่งข้อความถึงทีมงาน
+                      {t('legal:help.contact.send')}
                     </button>
                   </form>
                 )}
