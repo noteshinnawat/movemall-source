@@ -10,6 +10,7 @@ import { formatCurrency } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { Product } from '../types';
 import './FlashSalePage.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface FlashSalePageProps {
   products?: Product[];
@@ -229,7 +230,7 @@ export function FlashSalePage({ products, onAddToCart }: FlashSalePageProps) {
               <div key={p.id} className="flash-item-card">
                 {/* Image & Discount */}
                 <LocalizedLink to={getProductUrl(p)} className="flash-item-img-box">
-                  <img src={p.images[0]} alt={p.name} className="flash-item-img" />
+                  <img src={p.images[0]} alt={p.name} className="flash-item-img" onError={onImageError} />
                   <span className="flash-item-disc-badge">-{p.discountPct}%</span>
                   <span className="flash-item-guarantee-tag">{t('engagement:flashSale.bestPriceTag')}</span>
                 </LocalizedLink>

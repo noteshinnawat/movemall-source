@@ -8,6 +8,7 @@ import { formatCurrency } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { CartItem as CartItemType } from '../types';
 import './CartItem.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface CartItemProps {
   item: CartItemType;
@@ -30,7 +31,7 @@ export function CartItem({ item, onUpdateQty, onRemove }: CartItemProps) {
           alt={product.name}
           className="cart-item__image"
           loading="lazy"
-        />
+        onError={onImageError} />
       ) : (
         <div className="cart-item__image-placeholder">🛍️</div>
       )}

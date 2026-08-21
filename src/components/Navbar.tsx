@@ -22,6 +22,7 @@ import { fetchUnreadNotificationCount, logoutApi } from '../utils/api';
 import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import './Navbar.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface NavbarProps {
   cartCount?: number;
@@ -236,7 +237,7 @@ export function Navbar({
                     src={currentUser.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(currentUser.name || 'User')}`}
                     alt=""
                     style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover' }}
-                  />
+                  onError={onImageError} />
                   <span>{currentUser.name}</span>
                   <span style={{ fontSize: 11, background: '#FEF3C7', color: '#D97706', padding: '1px 6px', borderRadius: 4, fontWeight: 800 }}>
                     🪙 {currentUser.coinsBalance ?? 100}

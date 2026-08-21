@@ -10,6 +10,7 @@ import { formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { Product } from '../types';
 import './ProductCard.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface ProductCardProps {
   product: Product;
@@ -187,7 +188,7 @@ export function ProductCard({
             title={t('catalog:product.card.openVideoReview')}
           >
             {videoReview?.creatorAvatar ? (
-              <img src={videoReview.creatorAvatar} alt="" className="product-card__creator-avatar" />
+              <img src={videoReview.creatorAvatar} alt="" className="product-card__creator-avatar" onError={onImageError} />
             ) : (
               <span className="product-card__creator-icon">🎬</span>
             )}

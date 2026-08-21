@@ -16,6 +16,7 @@ import { resolveRootLocale } from '../i18n/locales';
 import { getDemoProductOptionKeys, getProductPerkInterpolation } from './ProductDetailPage.behavior';
 import type { Product } from '../types';
 import './ProductDetailPage.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface ProductDetailPageProps {
   products?: Product[];
@@ -452,7 +453,7 @@ export function ProductDetailPage({
                   src={currentMedia?.url || product.images?.[0] || ''}
                   alt={product.name}
                   className="product-detail__main-image"
-                />
+                onError={onImageError} />
               )}
 
               {currentMedia?.type !== 'video' && onOpenVisualSearchWithImage && (
@@ -532,7 +533,7 @@ export function ProductDetailPage({
                       onClick={() => setSelectedImg(i)}
                       title={t('catalog:product.watchVideo')}
                     >
-                      <img src={item.poster} alt={t('catalog:product.videoPreviewAlt')} />
+                      <img src={item.poster} alt={t('catalog:product.videoPreviewAlt')} onError={onImageError} />
                       <div className="product-detail__thumb-play-badge">
                         <Play size={12} fill="#FFFFFF" color="#FFFFFF" />
                         <span>VDO</span>
@@ -895,7 +896,7 @@ export function ProductDetailPage({
                       src={store.logo}
                       alt={store.name}
                       className={`product-store-logo ${activeLive ? 'product-store-logo--live' : ''}`}
-                    />
+                    onError={onImageError} />
                     {activeLive && (
                       <span className="product-store-live-badge">LIVE</span>
                     )}
@@ -1020,7 +1021,7 @@ export function ProductDetailPage({
                           onClick={() => navigate(localizePath(getProductUrl(p)))}
                         >
                           <div className="store-mini-img-wrap">
-                            <img src={p.images?.[0] || ''} alt={p.name} className="store-mini-img" />
+                            <img src={p.images?.[0] || ''} alt={p.name} className="store-mini-img" onError={onImageError} />
                             {disc && <span className="store-mini-badge">{t('catalog:product.card.discount', { discount: disc })}</span>}
                           </div>
                           <div className="store-mini-info">
@@ -1238,7 +1239,7 @@ export function ProductDetailPage({
                   src={product.images?.[0] || ''}
                   alt={product.name}
                   className="product-drawer-thumb"
-                />
+                onError={onImageError} />
                 <div className="product-drawer-meta">
                   <div className="product-drawer-price-row">
                     <span className="product-drawer-price">{formatCurrency(totalPrice ?? 0, locale)}</span>

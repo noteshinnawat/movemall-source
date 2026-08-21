@@ -16,6 +16,7 @@ import { formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { Product, Store } from '../types';
 import './StorePage.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface StorePageProps {
   onAddToCart: (product: Product) => void;
@@ -230,7 +231,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
                   src={store.logo}
                   alt={store.name}
                   className={`store-avatar ${activeLive ? 'store-avatar--live' : ''}`}
-                />
+                onError={onImageError} />
                 {activeLive && (
                   <span className="store-avatar-live-badge">🔴 LIVE</span>
                 )}
@@ -297,7 +298,7 @@ export function StorePage({ onAddToCart, isWishlisted, onToggleWishlist, allProd
                     src={activeLive.coverImage}
                     alt={activeLive.caption}
                     className="store-live-cover-img"
-                  />
+                  onError={onImageError} />
                   <div className="store-live-play-icon">
                     <Play size={18} fill="#FFFFFF" color="#FFFFFF" />
                   </div>

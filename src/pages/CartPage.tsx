@@ -31,6 +31,7 @@ import { formatCurrency } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { CartItem as CartItemType, Product } from '../types';
 import './CartPage.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface CartPageProps {
   items: CartItemType[];
@@ -414,7 +415,7 @@ export function CartPage({
                               alt={item.product.name}
                               className="cart-product-img"
                               loading="lazy"
-                            />
+                            onError={onImageError} />
                             {item.product.badge && (
                               <span className={`cart-img-badge cart-img-badge--${item.product.badge}`}>
                                 {item.product.badge === 'sale'

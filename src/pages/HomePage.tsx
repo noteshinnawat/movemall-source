@@ -87,6 +87,7 @@ const FEED_TABS = [
 ];
 
 import { fetchActiveLiveStreamsApi } from '../utils/api';
+import { onImageError } from '../utils/imageFallback';
 
 export function HomePage({ products: propProducts, onAddToCart, isWishlisted, onToggleWishlist }: HomePageProps) {
   const { t, i18n } = useTranslation(['catalog', 'common']);
@@ -288,7 +289,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                     src={banner.image}
                     alt={banner.title}
                     className="hero__slide-bg"
-                  />
+                  onError={onImageError} />
                 )}
                 <div className="hero__slide-overlay" />
                 <div className="hero__slide-content">
@@ -343,7 +344,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                 className="hero__sub-banner"
                 style={{ background: sub.bg }}
               >
-                <img src={sub.img} alt={t(`catalog:home.hero.subBanners.${sub.id}.title`)} className="hero__sub-bg" />
+                <img src={sub.img} alt={t(`catalog:home.hero.subBanners.${sub.id}.title`)} className="hero__sub-bg" onError={onImageError} />
                 <div className="hero__sub-overlay" />
                 <div className="hero__sub-content">
                   <span className="hero__sub-tag">{t(`catalog:home.hero.subBanners.${sub.id}.tag`)}</span>
@@ -507,7 +508,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                 <div key={product.id} className="home-flash-card">
                   {/* Image & Discount Badge */}
                   <Link to={getProductUrl(product)} className="home-flash-img-wrap">
-                    <img src={product.images[0]} alt={product.name} className="home-flash-img" />
+                    <img src={product.images[0]} alt={product.name} className="home-flash-img" onError={onImageError} />
                     <span className="home-flash-tag">{t('catalog:home.flash.discount', { discount: discountPct })}</span>
                     <span className="home-flash-guarantee">{t('catalog:home.flash.lowestPrice')}</span>
                   </Link>
@@ -606,7 +607,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                   alt={t(`catalog:categories.${cat.id}.name`)}
                   className="category-card__img"
                   loading="lazy"
-                />
+                onError={onImageError} />
                 {cat.tag && (
                   <span className="category-card__tag-pill">
                     {t(`catalog:categories.${cat.id}.tag`)}
@@ -670,7 +671,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                 src={brand.logo}
                 alt={brand.name}
                 style={{ width: 48, height: 48, objectFit: 'cover', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginBottom: 6 }}
-              />
+              onError={onImageError} />
               <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
                 {brand.name.split(' ')[0]}
               </span>
@@ -713,7 +714,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                 <div className="home-store-card-content">
                   <div className="home-store-card-profile-row">
                     <Link to={`/store/${st.id}`}>
-                      <img src={st.logo} alt={st.name} className="home-store-card-logo" />
+                      <img src={st.logo} alt={st.name} className="home-store-card-logo" onError={onImageError} />
                     </Link>
                     <div className="home-store-card-title-box">
                       <Link to={`/store/${st.id}`} className="home-store-card-name-link">
@@ -728,7 +729,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                   <div className="home-store-card-thumbs">
                     {storeProducts.map(prod => (
                       <Link key={prod.id} to={getProductUrl(prod)} className="home-store-card-thumb-item" title={prod.name}>
-                        <img src={prod.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80'} alt={prod.name} loading="lazy" />
+                        <img src={prod.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80'} alt={prod.name} loading="lazy" onError={onImageError} />
                         <span className="home-store-card-thumb-price">{formatCurrency(prod.price ?? 0, locale)}</span>
                       </Link>
                     ))}
@@ -942,7 +943,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                     src={selectedVideoProduct.videoReview.creatorAvatar}
                     alt=""
                     className="home-video-modal-creator-img"
-                  />
+                  onError={onImageError} />
                 ) : (
                   <div className="home-video-modal-creator-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2563EB', color: '#FFF' }}>🎬</div>
                 )}
@@ -963,7 +964,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
                   src={selectedVideoProduct.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80'}
                   alt=""
                   className="home-video-modal-product-img"
-                />
+                onError={onImageError} />
                 <div className="home-video-modal-product-details">
                   <h5 className="home-video-modal-product-name">{selectedVideoProduct.name}</h5>
                   <div className="home-video-modal-product-price">

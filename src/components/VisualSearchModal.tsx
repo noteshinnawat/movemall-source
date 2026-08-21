@@ -28,6 +28,7 @@ import { getStoreById } from '../data/stores';
 import { getProductUrl } from '../utils/seo';
 import type { Product } from '../types';
 import './VisualSearchModal.css';
+import { onImageError } from '../utils/imageFallback';
 
 export interface VisualSearchModalProps {
   products: Product[];
@@ -348,7 +349,7 @@ export function VisualSearchModal({
                             src={sample.thumbnail}
                             alt={sample.title}
                             className="vsearch-sample-img"
-                          />
+                          onError={onImageError} />
                           <div className="vsearch-sample-overlay">
                             <span className="vsearch-sample-tag">{sample.title}</span>
                           </div>
@@ -429,7 +430,7 @@ export function VisualSearchModal({
                     src={selectedImage}
                     alt={t('visualSearch.queryAlt')}
                     className="vsearch-preview-img"
-                  />
+                  onError={onImageError} />
 
                   {/* AI Laser Sweep Effect */}
                   {isScanning && (
@@ -610,7 +611,7 @@ export function VisualSearchModal({
                           src={prod.images[0]}
                           alt={prod.name}
                           className="vsearch-prod-thumb"
-                        />
+                        onError={onImageError} />
                       </div>
 
                       <div className="vsearch-prod-details">

@@ -32,6 +32,7 @@ import { formatCurrency } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { VideoClip, VideoComment, Product } from '../types';
 import './VideoFeedPage.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface VideoFeedPageProps {
   onAddToCart: (product: Product, qty?: number) => void;
@@ -516,7 +517,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
                       src={clip.creatorAvatar}
                       alt={clip.creatorName}
                       className="video-action-avatar-img"
-                    />
+                    onError={onImageError} />
                     <button
                       className="video-action-follow-badge"
                       onClick={(e) => handleToggleFollow(clip.creatorId, e)}
@@ -606,7 +607,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
                             src={pinned.image}
                             alt={pinned.name}
                             className="video-yellow-basket-thumb"
-                          />
+                          onError={onImageError} />
                           <div className="video-yellow-basket-text">
                             <span className="video-yellow-basket-name">{pinned.name}</span>
                             <div className="video-yellow-basket-prices">
@@ -690,7 +691,7 @@ export function VideoFeedPage({ onAddToCart, customClips = [] }: VideoFeedPagePr
                 <div key={cm.id} className="video-comment-row">
                   <div className="video-comment-avatar-wrap">
                     {cm.userAvatar ? (
-                      <img src={cm.userAvatar} alt={cm.userName} className="video-comment-avatar" />
+                      <img src={cm.userAvatar} alt={cm.userName} className="video-comment-avatar" onError={onImageError} />
                     ) : (
                       <div className="video-comment-avatar-ph">
                         {cm.userName.charAt(0)}

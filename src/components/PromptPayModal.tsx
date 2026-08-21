@@ -6,6 +6,7 @@ import { X, CheckCircle2, Clock } from 'lucide-react';
 import { formatCurrency } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import './PromptPayModal.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface PromptPayModalProps {
   amount: number;
@@ -52,7 +53,7 @@ export function PromptPayModal({ amount, onSuccess, onClose }: PromptPayModalPro
               src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=MOVEMALL_PROMPTPAY_${amount}_TH`}
               alt={t('commerce:promptPay.qrAlt')}
               className="promptpay-qr-img"
-            />
+            onError={onImageError} />
           </div>
 
           <div className="promptpay-timer-badge">

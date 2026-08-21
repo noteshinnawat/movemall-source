@@ -30,6 +30,7 @@ import { AffiliateRegisterModal } from '../components/AffiliateRegisterModal';
 import type { CreatorProfileData } from '../utils/api';
 import { fetchAffiliateProfile, requestAffiliatePayout } from '../utils/api';
 import './AffiliatePage.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface AffiliatePageProps {
   onCopySuccess?: (msg: string) => void;
@@ -590,7 +591,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
                         src={p.images[0]}
                         alt={p.name}
                         style={{ width: 44, height: 44, objectFit: 'cover', border: '1px solid var(--border)', borderRadius: 4 }}
-                      />
+                      onError={onImageError} />
                       <div>
                         <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>{p.name}</strong>
                         <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>หมวด: {p.category}</div>
@@ -638,7 +639,7 @@ export function AffiliatePage({ onCopySuccess, onPublishClip }: AffiliatePagePro
             return (
               <div key={p.id} className="affiliate-mobile-card">
                 <div className="affiliate-mobile-card-top">
-                  <img src={p.images[0]} alt={p.name} className="affiliate-mobile-card-thumb" />
+                  <img src={p.images[0]} alt={p.name} className="affiliate-mobile-card-thumb" onError={onImageError} />
                   <div className="affiliate-mobile-card-info">
                     <strong className="affiliate-mobile-card-name">{p.name}</strong>
                     <div className="affiliate-mobile-card-prices">

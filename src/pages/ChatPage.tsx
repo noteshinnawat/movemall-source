@@ -27,6 +27,7 @@ import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
 import { formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import './ChatPage.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface Message {
   id: string;
@@ -645,7 +646,7 @@ export function ChatPage() {
                     onClick={() => handleSelectConversation(conv.id)}
                   >
                     <div className="chat-avatar-wrapper">
-                      <img src={conv.logo} alt={conv.name} className="chat-conv-avatar" />
+                      <img src={conv.logo} alt={conv.name} className="chat-conv-avatar" onError={onImageError} />
                       {conv.isOnline && (
                         <span className="chat-online-dot" title={t('engagement:chat.onlineDotTitle')} />
                       )}
@@ -698,7 +699,7 @@ export function ChatPage() {
                 </button>
 
                 <div className="chat-avatar-wrapper">
-                  <img src={activeDisplay.logo} alt={activeDisplay.name} className="chat-conv-avatar" />
+                  <img src={activeDisplay.logo} alt={activeDisplay.name} className="chat-conv-avatar" onError={onImageError} />
                 {activeDisplay.isOnline && <span className="chat-online-dot" />}
                 </div>
 

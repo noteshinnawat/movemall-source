@@ -17,6 +17,7 @@ import {
 import { products } from '../data/products';
 import type { Product, PinnedProductItem } from '../types';
 import './ProductPickerModal.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface ProductPickerModalProps {
   isOpen: boolean;
@@ -195,7 +196,7 @@ export function ProductPickerModal({
 
               return (
                 <div key={p.id} className={`picker-item ${isPinned ? 'picker-item--pinned' : ''}`}>
-                  <img src={p.images[0]} alt={p.name} className="picker-item-img" />
+                  <img src={p.images[0]} alt={p.name} className="picker-item-img" onError={onImageError} />
 
                   <div className="picker-item-info">
                     <div className="picker-item-top">
