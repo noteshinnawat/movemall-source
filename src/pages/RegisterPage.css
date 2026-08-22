@@ -782,7 +782,7 @@
   }
 
   .reg-hero-side {
-    padding: 1.75rem 1.25rem;
+    display: none;
   }
 
   .reg-card {
