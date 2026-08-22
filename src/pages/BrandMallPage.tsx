@@ -25,6 +25,7 @@ import { getMallVoucherInterpolation } from './BrandMallPage.behavior';
 import type { MallVoucherNumericValues } from './BrandMallPage.behavior';
 import type { Product } from '../types';
 import './BrandMallPage.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface BrandMallPageProps {
   products?: Product[];
@@ -317,7 +318,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
                 src={activeHighlight.image}
                 alt={activeHighlight.campaignTitle}
                 className="super-brand-media-img"
-              />
+              onError={onImageError} />
               <div className="super-brand-media-badge">
                 <Award size={14} /> {t('catalog:store.official')}
               </div>
@@ -417,7 +418,7 @@ export function BrandMallPage({ products, onAddToCart, isWishlisted, onToggleWis
                   {/* Brand Profile Details */}
                   <div className="brand-directory-body">
                     <div className="brand-directory-logo-container">
-                      <img src={brand.logo} alt={brand.name} className="brand-directory-logo" />
+                      <img src={brand.logo} alt={brand.name} className="brand-directory-logo" onError={onImageError} />
                     </div>
                     <h3 className="brand-directory-name">{brand.name}</h3>
                     <p className="brand-directory-tagline">{brand.tagline}</p>

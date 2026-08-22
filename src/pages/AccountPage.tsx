@@ -29,6 +29,7 @@ import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
 import { formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import './AccountPage.css';
+import { onImageError } from '../utils/imageFallback';
 
 const PAYLATER_CREDIT_LIMIT = 15000;
 
@@ -442,7 +443,7 @@ export function AccountPage() {
         {/* Left Navigation Sidebar */}
         <aside className="account-sidebar">
           <div className="account-user-card">
-            <img src={avatarUrl} alt={name} className="account-avatar" />
+            <img src={avatarUrl} alt={name} className="account-avatar" onError={onImageError} />
             <div>
               <h2 className="account-name">{name}</h2>
               <span className="account-badge-role">{currentTier.icon} {currentTier.roleLabel}</span>
@@ -694,7 +695,7 @@ export function AccountPage() {
                   <label className="account-label">{t('auth:account.profile.avatarLabel')}</label>
                   <div className="account-avatar-picker">
                     <div style={{ position: 'relative', display: 'inline-block' }}>
-                      <img src={avatarUrl} alt={t('auth:account.profile.avatarPreviewAlt')} className="account-avatar-preview" />
+                      <img src={avatarUrl} alt={t('auth:account.profile.avatarPreviewAlt')} className="account-avatar-preview" onError={onImageError} />
                       <label className="account-avatar-upload-icon-btn" title={t('auth:account.profile.avatarUploadTitle')}>
                         <Upload size={13} />
                         <input

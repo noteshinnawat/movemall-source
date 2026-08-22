@@ -7,6 +7,7 @@ import { LocalizedLink } from '../i18n/LocalizedLink';
 import { formatCompactNumber, formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import './LiveStreamCard.css';
+import { onImageError } from '../utils/imageFallback';
 
 export interface LiveStreamCardProps {
   id?: string;
@@ -121,7 +122,7 @@ export function LiveStreamCard({
       {/* Streamer Info */}
       <div className="live-stream-card-center">
         <div className="live-streamer-row">
-          <img src={streamerAvatar} alt={channelName} className="live-streamer-avatar" />
+          <img src={streamerAvatar} alt={channelName} className="live-streamer-avatar" onError={onImageError} />
           <span className="live-stream-channel-name">{channelName}</span>
         </div>
         <h4 className="live-stream-title">{title}</h4>
@@ -130,7 +131,7 @@ export function LiveStreamCard({
       {/* Bottom Pinned Deal & Action */}
       <div className="live-stream-card-bottom">
         <div className="live-pinned-deal">
-          <img src={pinnedProduct.image} alt={pinnedProduct.name} className="live-pinned-deal-img" />
+          <img src={pinnedProduct.image} alt={pinnedProduct.name} className="live-pinned-deal-img" onError={onImageError} />
           <div className="live-pinned-deal-info">
             <div className="live-pinned-tag">{t('catalog:home.live.pinnedDiscount', { discount: pinnedProduct.discountPct })}</div>
             <div className="live-pinned-name">{pinnedProduct.name}</div>

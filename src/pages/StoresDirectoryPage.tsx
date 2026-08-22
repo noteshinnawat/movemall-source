@@ -11,6 +11,7 @@ import './StoresDirectoryPage.css';
 import { useState, useEffect } from 'react';
 import { fetchStoresApi } from '../utils/api';
 import type { Store } from '../types';
+import { onImageError } from '../utils/imageFallback';
 
 export function StoresDirectoryPage() {
   const { t, i18n } = useTranslation(['catalog', 'common']);
@@ -63,7 +64,7 @@ export function StoresDirectoryPage() {
           {storeList.map(store => (
             <div key={store.id} className="store-card">
               <div className="store-card__top">
-                <img src={store.logo} alt={store.name} className="store-card__logo" />
+                <img src={store.logo} alt={store.name} className="store-card__logo" onError={onImageError} />
                 <div>
                   <h2 className="store-card__name">
                     {store.name}

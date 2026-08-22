@@ -8,6 +8,7 @@ import { formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { VideoClip } from '../types';
 import './VideoClipInGridCard.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface VideoClipInGridCardProps {
   clip: VideoClip;
@@ -78,7 +79,7 @@ export function VideoClipInGridCard({ clip, onOpenBasket }: VideoClipInGridCardP
       {/* Center Creator Info */}
       <div className="video-grid-center">
         <div className="video-grid-creator">
-          <img src={clip.creatorAvatar} alt={clip.creatorName} className="video-grid-avatar" />
+          <img src={clip.creatorAvatar} alt={clip.creatorName} className="video-grid-avatar" onError={onImageError} />
           <span className="video-grid-author">{clip.creatorName}</span>
         </div>
         <p className="video-grid-caption">{clip.caption}</p>
@@ -90,7 +91,7 @@ export function VideoClipInGridCard({ clip, onOpenBasket }: VideoClipInGridCardP
           <div className="video-grid-basket">
             <span className="video-grid-basket-pill">{t('engagement:video.grid.basketPill')}</span>
             <div className="video-grid-basket-body">
-              <img src={pinned.image} alt={pinned.name} className="video-grid-basket-thumb" />
+              <img src={pinned.image} alt={pinned.name} className="video-grid-basket-thumb" onError={onImageError} />
               <div className="video-grid-basket-info">
                 <span className="video-grid-basket-title">{pinned.name}</span>
                 <span className="video-grid-basket-price">{formatCurrency(pinned.price, locale)}</span>

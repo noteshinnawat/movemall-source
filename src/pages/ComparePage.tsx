@@ -25,6 +25,7 @@ import { formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { Product } from '../types';
 import './ComparePage.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface ComparePageProps {
   onAddToCart: (product: Product) => void;
@@ -298,7 +299,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                   <div key={product.id} className="compare-dual-card">
                     {/* Image with Overlaid Badges */}
                     <div className="compare-img-box">
-                      <img src={product.images[0]} alt={product.name} className="compare-dual-img" />
+                      <img src={product.images[0]} alt={product.name} className="compare-dual-img" onError={onImageError} />
                       <div className="compare-card-badges-overlay">
                         {isLowest && <span className="badge-best-price">{t('commerce:compare.badgeBestPrice')}</span>}
                         {isTopRating && <span className="badge-best-rating">{t('commerce:compare.badgeBestRating')}</span>}
@@ -464,7 +465,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
                         </button>
 
                         <div className="compare-img-box">
-                          <img src={p.images[0]} alt={p.name} className="compare-product-img" />
+                          <img src={p.images[0]} alt={p.name} className="compare-product-img" onError={onImageError} />
                           <div className="compare-card-badges-overlay">
                             {isLowest && <span className="badge-best-price">{t('commerce:compare.badgeBestPrice')}</span>}
                             {isTopRating && <span className="badge-best-rating">{t('commerce:compare.badgeBestRating')}</span>}
@@ -705,7 +706,7 @@ export function ComparePage({ onAddToCart }: ComparePageProps) {
               ) : (
                 availableModalProducts.map(product => (
                   <div key={product.id} className="compare-modal-item">
-                    <img src={product.images[0]} alt={product.name} className="compare-modal-item-img" />
+                    <img src={product.images[0]} alt={product.name} className="compare-modal-item-img" onError={onImageError} />
                     <div className="compare-modal-item-info">
                       <div className="compare-modal-item-name">{product.name}</div>
                       <div className="compare-modal-item-meta">

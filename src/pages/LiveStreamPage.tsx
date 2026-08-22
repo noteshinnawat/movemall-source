@@ -32,6 +32,7 @@ interface FloatingChatMsg {
 }
 
 import { fetchActiveLiveStreamsApi } from '../utils/api';
+import { onImageError } from '../utils/imageFallback';
 
 export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStreamPageProps) {
   const { t, i18n } = useTranslation(['engagement']);
@@ -435,7 +436,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
                   {/* Creator Profile Avatar */}
                   <div className="tiktok-action-item">
                     <div className="tiktok-creator-avatar-wrap">
-                      <img src={stream.streamerAvatar} alt={stream.streamerName} className="tiktok-creator-avatar" />
+                      <img src={stream.streamerAvatar} alt={stream.streamerName} className="tiktok-creator-avatar" onError={onImageError} />
                       <button
                         className="tiktok-creator-follow-badge"
                         onClick={() => handleToggleFollow(stream.storeId)}
@@ -488,7 +489,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
                   <div className="tiktok-yellow-basket-card">
                     <div className="tiktok-basket-left">
                       <div className="tiktok-basket-thumb-wrap">
-                        <img src={stream.pinnedProduct.image} alt={stream.pinnedProduct.name} className="tiktok-basket-thumb" />
+                        <img src={stream.pinnedProduct.image} alt={stream.pinnedProduct.name} className="tiktok-basket-thumb" onError={onImageError} />
                         <span className="tiktok-basket-num-badge">1</span>
                       </div>
                       <div className="tiktok-basket-info">
@@ -587,7 +588,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
               <div className="tiktok-comments-list">
                 {(currentStream.comments || []).map((c: any, i: number) => (
                   <div key={i} className="tiktok-comment-row">
-                    <img src={currentStream.streamerAvatar || currentStream.avatar} alt={c.user} className="tiktok-comment-avatar" />
+                    <img src={currentStream.streamerAvatar || currentStream.avatar} alt={c.user} className="tiktok-comment-avatar" onError={onImageError} />
                     <div className="tiktok-comment-bubble">
                       <div style={{ fontWeight: 800, fontSize: 11, color: '#93C5FD', marginBottom: 2 }}>{c.user}</div>
                       <div>{c.text}</div>
@@ -628,7 +629,7 @@ export function LiveStreamPage({ products, onAddToCart, cartCount = 0 }: LiveStr
 
               <div className="tiktok-comments-list">
                 <div style={{ background: '#27272A', padding: 12, borderRadius: 0, display: 'flex', gap: 10, alignItems: 'center' }}>
-                  <img src={currentStream.pinnedProduct.image} alt={currentStream.pinnedProduct.name} style={{ width: 60, height: 60, borderRadius: 0, objectFit: 'cover' }} />
+                  <img src={currentStream.pinnedProduct.image} alt={currentStream.pinnedProduct.name} style={{ width: 60, height: 60, borderRadius: 0, objectFit: 'cover' }} onError={onImageError} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 10, color: '#F59E0B', fontWeight: 900, marginBottom: 2 }}>{t('engagement:live.stream.pinnedTag')}</div>
                     <div style={{ fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

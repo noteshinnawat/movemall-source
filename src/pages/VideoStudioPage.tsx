@@ -30,6 +30,7 @@ import type {
   VideoClip,
 } from '../types';
 import './VideoStudioPage.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface VideoStudioPageProps {
   onPublishClip: (clip: VideoClip) => void;
@@ -517,7 +518,7 @@ export function VideoStudioPage({ onPublishClip }: VideoStudioPageProps) {
                   <div className="studio-search-results">
                     {filteredSearchProducts.map((prod) => (
                       <div key={prod.id} className="studio-search-item">
-                        <img src={prod.images[0]} alt={prod.name} className="studio-search-thumb" />
+                        <img src={prod.images[0]} alt={prod.name} className="studio-search-thumb" onError={onImageError} />
                         <div className="studio-search-info">
                           <span className="studio-search-title">{prod.name}</span>
                           <span className="studio-search-price">฿{prod.price.toLocaleString()}</span>
@@ -545,7 +546,7 @@ export function VideoStudioPage({ onPublishClip }: VideoStudioPageProps) {
                   <div className="studio-pinned-list">
                     {pinnedProducts.map((item) => (
                       <div key={item.id} className="studio-pinned-item">
-                        <img src={item.image} alt={item.name} className="studio-pinned-thumb" />
+                        <img src={item.image} alt={item.name} className="studio-pinned-thumb" onError={onImageError} />
                         <div className="studio-pinned-info">
                           <span className="studio-pinned-name">{item.name}</span>
                           <div className="studio-pinned-meta">
@@ -699,7 +700,7 @@ export function VideoStudioPage({ onPublishClip }: VideoStudioPageProps) {
                     <img
                       src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&q=80"
                       alt="Me"
-                    />
+                    onError={onImageError} />
                   </div>
                   <div className="studio-phone-icon">❤️</div>
                   <div className="studio-phone-icon">💬</div>
@@ -717,7 +718,7 @@ export function VideoStudioPage({ onPublishClip }: VideoStudioPageProps) {
                           src={pinnedProducts[0].image}
                           alt={pinnedProducts[0].name}
                           className="studio-phone-basket-thumb"
-                        />
+                        onError={onImageError} />
                         <div className="studio-phone-basket-info">
                           <span className="studio-phone-basket-title">
                             {pinnedProducts[0].name}

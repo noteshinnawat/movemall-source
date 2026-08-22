@@ -11,6 +11,7 @@ import { NEUTRAL_STORE_NAME } from '../components/VisualSearch.behavior';
 import './OrdersPage.css';
 
 import { fetchMyOrdersApi } from '../utils/api';
+import { onImageError } from '../utils/imageFallback';
 
 export function OrdersPage() {
   const { t, i18n } = useTranslation(['commerce', 'common']);
@@ -150,7 +151,7 @@ export function OrdersPage() {
                             src={item.image}
                             alt={item.name}
                             className="order-card__item-img"
-                          />
+                          onError={onImageError} />
                           <div className="order-card__item-info">
                             <p className="order-card__item-name">{item.name}</p>
                             <p className="order-card__item-qty">

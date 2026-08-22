@@ -21,6 +21,7 @@ import { LocalizedLink } from '../i18n/LocalizedLink';
 import { formatCurrency } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import './LineConnectModal.css';
+import { onImageError } from '../utils/imageFallback';
 
 const SAMPLE_CARRIER = 'Flash Express (Next-Day)';
 const SAMPLE_SHIPPED_PRODUCT = 'Sony WH-1000XM5 Wireless Headphones';
@@ -332,7 +333,7 @@ export function LineConnectModal({
               <div className="line-connected-view">
                 <div className="line-connected-card">
                   <div className="line-profile-avatar-wrap">
-                    <img src={lineProfile.pictureUrl} alt={lineProfile.displayName} className="line-profile-avatar" />
+                    <img src={lineProfile.pictureUrl} alt={lineProfile.displayName} className="line-profile-avatar" onError={onImageError} />
                     <span className="line-profile-online-badge">✓</span>
                   </div>
                   <div className="line-profile-details">
@@ -483,7 +484,7 @@ export function LineConnectModal({
                           src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&auto=format&fit=crop&q=80"
                           alt={t('commerce:lineConnect.sim.sampleProductAlt')}
                           className="line-flex-thumb"
-                        />
+                        onError={onImageError} />
                         <div className="line-flex-prod-info">
                           <div className="line-flex-prod-name">{SAMPLE_SHIPPED_PRODUCT}</div>
                           <div className="line-flex-prod-qty">
@@ -575,7 +576,7 @@ export function LineConnectModal({
                           src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&auto=format&fit=crop&q=80"
                           alt={t('commerce:lineConnect.sim.flashProductAlt')}
                           className="line-flex-thumb"
-                        />
+                        onError={onImageError} />
                         <div className="line-flex-prod-info">
                           <div className="line-flex-prod-name">{SAMPLE_FLASH_PRODUCT}</div>
                           <div className="line-flex-price-row">

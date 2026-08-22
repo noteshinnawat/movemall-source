@@ -53,6 +53,7 @@ import { promptGoogleAuth } from '../utils/googleAuth';
 import { scanProductCompliance, batchScanProductsCompliance, type AIComplianceResult } from '../utils/aiComplianceScanner';
 import type { Product, ModeratedUser, ModeratedStore, ViolationReport, UserStatusType, StoreStatusType } from '../types';
 import './AdminPortalPage.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface AdminMetrics {
   gmv: number;
@@ -1093,7 +1094,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
               src={currentUser.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80'}
               alt={currentUser.name || 'Admin'}
               className="admin-avatar-img"
-            />
+            onError={onImageError} />
             <div className="admin-profile-text">
               <span className="admin-profile-name">{currentUser.name || 'Note Shinnawat'}</span>
               <span className="admin-profile-role">👑 {currentUser.role || 'SUPER_ADMIN'}</span>
@@ -2104,7 +2105,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                 {localProducts.slice(0, 12).map(p => (
                   <tr key={p.id}>
                     <td>
-                      <img src={p.images[0]} alt={p.name} style={{ width: 44, height: 44, borderRadius: 6, objectFit: 'cover', border: '1px solid #e2e8f0' }} />
+                      <img src={p.images[0]} alt={p.name} style={{ width: 44, height: 44, borderRadius: 6, objectFit: 'cover', border: '1px solid #e2e8f0' }} onError={onImageError} />
                     </td>
                     <td>
                       <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>{p.name}</div>
@@ -2294,7 +2295,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                             src={r.image}
                             alt={r.productName}
                             style={{ width: 44, height: 44, borderRadius: 6, objectFit: 'cover', border: '1px solid #e2e8f0' }}
-                          />
+                          onError={onImageError} />
                           <div>
                             <div style={{ fontWeight: 700, fontSize: '0.85rem', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#0f172a' }} title={r.productName}>
                               {r.productName}
@@ -3387,7 +3388,7 @@ export function AdminPortalPage({ products }: { products: Product[] }) {
                               src={member.avatarUrl}
                               alt={member.name}
                               style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '1px solid #e2e8f0' }}
-                            />
+                            onError={onImageError} />
                             <div>
                               <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>{member.name}</div>
                               <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{member.email}</div>

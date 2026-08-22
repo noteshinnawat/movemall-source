@@ -8,6 +8,7 @@ import { formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import { createReviewDateMetadata, formatReviewDate } from './ReviewsSection.behavior';
 import './ReviewsSection.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface ReviewsSectionProps {
   productId: string;
@@ -365,7 +366,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
               <div className="review-media-previews">
                 {formImages.map((img, i) => (
                   <div key={i} className="review-img-preview-box">
-                    <img src={img} alt={t('catalog:reviews.previewAlt', { index: i + 1 })} className="review-img-preview" />
+                    <img src={img} alt={t('catalog:reviews.previewAlt', { index: i + 1 })} className="review-img-preview" onError={onImageError} />
                     <button
                       type="button"
                       className="review-img-remove"
@@ -629,7 +630,7 @@ export function ReviewsSection({ productId, rating, reviewCount }: ReviewsSectio
               src={lightboxImg}
               alt={t('catalog:reviews.enlargedPhotoAlt')}
               style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain', border: '1px solid white' }}
-            />
+            onError={onImageError} />
             <button
               onClick={() => setLightboxImg(null)}
               style={{

@@ -27,6 +27,7 @@ import { LocalizedLink, useLocalizedPath } from '../i18n/LocalizedLink';
 import { formatCurrency, formatDate, formatNumber, formatTime } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import './TrackingPage.css';
+import { onImageError } from '../utils/imageFallback';
 
 const CARRIER_NAME = 'Flash Express';
 const CARRIER_SERVICE = 'Standard Delivery (Flash Express)';
@@ -482,7 +483,7 @@ export function TrackingPage() {
               <div className="tracking-items-list">
                 {currentOrder.items.map((item, idx) => (
                   <div key={idx} className="tracking-item-row">
-                    <img src={item.image} alt={item.name} className="tracking-item-img" />
+                    <img src={item.image} alt={item.name} className="tracking-item-img" onError={onImageError} />
                     <div className="tracking-item-info">
                       <div className="tracking-item-name">{item.name}</div>
                       <div className="tracking-item-sub">

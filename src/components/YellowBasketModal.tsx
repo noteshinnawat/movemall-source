@@ -10,6 +10,7 @@ import { formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { PinnedProductItem, Product } from '../types';
 import './YellowBasketModal.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface YellowBasketModalProps {
   isOpen: boolean;
@@ -103,7 +104,7 @@ export function YellowBasketModal({
         <div className="yellow-basket-body">
           <div className="yellow-basket-product-card">
             <div className="yellow-basket-img-box">
-              <img src={current.image} alt={current.name} />
+              <img src={current.image} alt={current.name} onError={onImageError} />
               {current.discountPct && (
                 <span className="yellow-basket-discount-tag">-{current.discountPct}%</span>
               )}

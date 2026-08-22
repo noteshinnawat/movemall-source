@@ -36,6 +36,7 @@ import {
 } from '../utils/chatSocket';
 import './AdminPortalPage.css';
 import './SellerCenterPage.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface SellerCenterPageProps {
   products: Product[];
@@ -1545,7 +1546,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                       )}
                     </div>
                   ) : (
-                    <img src={complianceCertPreview} alt="Certificate preview" className="cert-upload-zone__img" />
+                    <img src={complianceCertPreview} alt="Certificate preview" className="cert-upload-zone__img" onError={onImageError} />
                   )}
                   <div className="cert-upload-zone__actions">
                     <button
@@ -1758,7 +1759,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                   src={currentStore.logo}
                   alt={currentStore.name}
                   style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }}
-                />
+                onError={onImageError} />
               ) : (
                 <span style={{ fontSize: '0.9rem' }}>🏪</span>
               )}
@@ -1884,7 +1885,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                 alt={currentStore.name}
                 className="admin-avatar-img"
                 style={{ width: 26, height: 26, borderRadius: '50%' }}
-              />
+              onError={onImageError} />
             ) : (
               <div
                 style={{
@@ -2326,7 +2327,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                                 src={product.images[0]}
                                 alt={product.name}
                                 className="seller-product-img"
-                              />
+                              onError={onImageError} />
                               <div>
                                 <div className="seller-product-name">{product.name}</div>
                                 <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>ID: {product.id}</span>
@@ -2413,7 +2414,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                       src={product.images[0]}
                       alt={product.name}
                       className="seller-mobile-card__img"
-                    />
+                    onError={onImageError} />
                     <div className="seller-mobile-card__info">
                       <span className="seller-mobile-card__category">{product.category}</span>
                       <h4 className="seller-mobile-card__name">{product.name}</h4>
@@ -3488,7 +3489,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                                   src={camp.productImage}
                                   alt={camp.productName}
                                   className="seller-product-img"
-                                />
+                                onError={onImageError} />
                                 <div>
                                   <div className="seller-product-name">{camp.productName}</div>
                                   <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Campaign ID: {camp.id}</span>
@@ -3594,7 +3595,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                             src={camp.productImage}
                             alt={camp.productName}
                             className="seller-ad-mobile-card__img"
-                          />
+                          onError={onImageError} />
                           <div className="seller-ad-mobile-card__title-wrap">
                             <div className="seller-ad-mobile-card__type-row">
                               {camp.type === 'search' ? (
@@ -4487,7 +4488,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                                 src={nom.productImage}
                                 alt={nom.productName}
                                 style={{ width: 42, height: 42, objectFit: 'cover', border: '1px solid var(--border)', borderRadius: 4 }}
-                              />
+                              onError={onImageError} />
                               <div>
                                 <div style={{ fontWeight: 800, fontSize: 13, color: '#111827' }}>{nom.productName}</div>
                                 <div style={{ fontSize: 10, color: '#6B7280' }}>ลงทะเบียน: {nom.registeredAt}</div>
@@ -4558,7 +4559,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                           src={nom.productImage}
                           alt={nom.productName}
                           className="seller-flash-mobile-card__img"
-                        />
+                        onError={onImageError} />
                         <div className="seller-flash-mobile-card__info">
                           <h4 className="seller-flash-mobile-card__name">{nom.productName}</h4>
                           <span className="seller-flash-mobile-card__date">ลงทะเบียน: {nom.registeredAt}</span>
@@ -5331,7 +5332,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                           src={storeSettingsForm.logo}
                           alt="Shop Logo Preview"
                           style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: '2px solid #2563EB', flexShrink: 0 }}
-                        />
+                        onError={onImageError} />
                       ) : (
                         <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF', fontSize: 22, flexShrink: 0 }}>
                           🏪
@@ -5408,7 +5409,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                           src={storeSettingsForm.banner}
                           alt="Banner Preview"
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
+                        onError={onImageError} />
                         <div style={{ position: 'absolute', bottom: 8, right: 8, display: 'flex', gap: 6 }}>
                           <label style={{
                             display: 'inline-flex',
@@ -6062,7 +6063,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                     {image ? (
                       <div className="seller-image-preview-card">
                         <div className="seller-image-preview-card__thumb-wrap">
-                          <img src={image} alt="Product Preview" className="seller-image-preview-card__thumb" />
+                          <img src={image} alt="Product Preview" className="seller-image-preview-card__thumb" onError={onImageError} />
                           <span className="seller-image-preview-card__badge">✓ พรีวิวรูปภาพ</span>
                         </div>
                         <div className="seller-image-preview-card__info">
@@ -6286,7 +6287,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                     {image ? (
                       <div className="seller-image-preview-card">
                         <div className="seller-image-preview-card__thumb-wrap">
-                          <img src={image} alt="Product Preview" className="seller-image-preview-card__thumb" />
+                          <img src={image} alt="Product Preview" className="seller-image-preview-card__thumb" onError={onImageError} />
                           <span className="seller-image-preview-card__badge">✓ รูปภาพปัจจุบัน</span>
                         </div>
                         <div className="seller-image-preview-card__info">
@@ -6644,7 +6645,7 @@ export function SellerCenterPage({ products, onAddProduct, onUpdateProduct, onDe
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=MOVEMALL-ADS-TOPUP-${topupAmount}-${Date.now()}`}
                     alt="PromptPay QR Code"
                     style={{ border: '2px solid #0F172A', padding: 8, background: 'white' }}
-                  />
+                  onError={onImageError} />
                 </div>
 
                 <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)' }}>

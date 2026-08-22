@@ -12,6 +12,7 @@ import { formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
 import type { CartItem } from '../types';
 import './CheckoutPage.css';
+import { onImageError } from '../utils/imageFallback';
 
 interface CheckoutPageProps {
   items: CartItem[];
@@ -551,7 +552,7 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
             <div className="checkout__summary-items">
               {items.map(item => (
                 <div key={item.product.id} className="checkout__summary-item">
-                  <img src={item.product.images[0]} alt={item.product.name} className="checkout__summary-img" />
+                  <img src={item.product.images[0]} alt={item.product.name} className="checkout__summary-img" onError={onImageError} />
                   <div className="checkout__summary-item-info">
                     <p className="checkout__summary-item-name">{item.product.name}</p>
                     <p className="checkout__summary-item-qty">
