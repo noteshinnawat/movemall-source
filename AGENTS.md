@@ -151,7 +151,13 @@ movemall-source/
    - นำ API Key จาก Gateway ชำระเงินจริง (Omise, Stripe, หรือ GB Prime Pay) ใส่ใน `server/.env`
    - ผูก Cloudflare R2 / AWS S3 Credentials สำหรับ Bucket ไฟล์มีเดีย
    - ใส่ VAPID Keys สำหรับ Web Push Notifications
+4. **🌐 โครงสร้าง Deployment จริงที่ใช้งานอยู่**:
+   - **Frontend**: Cloudflare Pages (โหลด mock data ก่อนทันที แล้วสลับเป็นข้อมูลจริงจาก API เบื้องหลัง ดู `src/App.tsx` → `loadProductCatalog()`)
+   - **Backend**: Express บน Railway (`movemall-source-production.up.railway.app`) — ตั้งค่า URL นี้ผ่าน `VITE_API_URL` หรือ fallback default ใน `src/utils/api.ts`
+   - **Database**: Supabase PostgreSQL (project ref `rfxafxavqbtqyzlqxpbz`) — seed ด้วย `cd server && npm run db:push && npm run db:seed`
+   - **⚠️ ข้อควรระวังสำคัญ**: ต่อ `DATABASE_URL` ผ่าน Supabase connection pooler (Supavisor) เท่านั้นสำหรับ Railway เพราะ Railway ไม่มี IPv6 egress ต่อ direct connection host (`db.<ref>.supabase.co`) ไม่ได้ — และเมื่อใช้ pooler โหมด **Transaction** (พอร์ต 6543) ต้องเติม `?pgbouncer=true` ต่อท้าย `DATABASE_URL` เสมอ ไม่งั้นจะเจอ error `prepared statement "sX" does not exist` (Postgres code 26000) เพราะ Prisma ใช้ prepared statements ที่ไม่รอดข้าม connection ของ transaction-mode pooling
+   - **Service Worker (`public/sw.js`)**: ต้องปล่อย request ข้าม origin (รูปภาพ, ฟอนต์, API ภายนอก) ให้วิ่งตรงกับเบราว์เซอร์เสมอ ห้ามดักด้วย `fetch()` ของตัวเอง เพราะ `fetch()` ใน Service Worker ถูกตรวจสอบด้วย CSP `connect-src` ไม่ใช่ `img-src`/`font-src` — ถ้าดักจะโดนบล็อกทั้งที่ CSP อนุญาตอยู่แล้ว (เคยเป็นสาเหตุที่รูปสินค้าไม่แสดงทั้งเว็บมาก่อน)
 
 ---
 
-*อัปเดตล่าสุด: 2026-08-17 | สถานะระบบ: React 19 + Express 4.21 + PostgreSQL + Redis (ทำงานสมบูรณ์ 0 TypeScript errors)*
+*อัปเดตล่าสุด: 2026-08-22 | สถานะระบบ: React 19 + Express 4.21 + PostgreSQL (Supabase) + Redis, deploy จริงบน Cloudflare Pages + Railway (ทำงานสมบูรณ์ 0 TypeScript errors)*
