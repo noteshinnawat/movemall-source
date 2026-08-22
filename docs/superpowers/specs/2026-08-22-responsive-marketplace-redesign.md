@@ -86,6 +86,14 @@ Mobile filtering uses a search-first flow and bottom sheet rather than a persist
 - Address assistance should be a reusable address-field component backed by a single location lookup source, with manual entry/error fallback.
 - LINE connection remains optional and uses the existing connection flow; its placement moves to the order-success journey.
 
+## Existing-code audit and safe removal
+
+- Audit existing components, routes, styles, imports, and call sites before adding or deleting code. Prefer reuse and small responsive changes.
+- Remove only code that has no active route, import, runtime reference, or agreed product purpose after the redesign.
+- Treat a component as retained when it still supports a mobile discovery flow, checkout, buyer protection, account/order management, or an operational/seller/admin workflow, even if it leaves the desktop primary navigation.
+- Make removals in small, independently verifiable changes. After each removal, run type checking/build and test the affected route or user flow.
+- Do not delete APIs, data models, or backend routes solely because their desktop entry point is removed; remove them only after confirming no client, scheduled task, or operational workflow depends on them.
+
 ## Error and edge states
 
 - If address lookup fails, preserve entered values and allow manual subdistrict/district/province/postcode input.
