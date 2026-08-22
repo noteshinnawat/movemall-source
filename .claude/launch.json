@@ -4,7 +4,7 @@
     {
       "name": "movemall-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "/Users/Jakkatorn-msi/antigravity/movemall-source/.worktrees/buyer-localization", "run", "dev", "--", "--port", "5188", "--strictPort"],
+      "runtimeArgs": ["--prefix", "/Users/Jakkatorn-msi/antigravity/movemall-source", "run", "dev", "--", "--port", "5188", "--strictPort"],
       "port": 5188
     }
   ]

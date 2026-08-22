@@ -20,6 +20,9 @@ const DEFAULT_SITE_KEY = '0x4AAAAAAEV4IWYDw8lkwvt0';
 const SITE_KEY = (import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined)?.trim() || DEFAULT_SITE_KEY;
 const SCRIPT_ID = 'cf-turnstile-script';
 const CONTAINER_ID = 'cf-turnstile-invisible-host';
+// หน้าที่อยากกำหนดตำแหน่ง widget เอง (เช่น ใต้ปุ่มเข้าสู่ระบบ) ใส่ element ที่มี id นี้ไว้
+// — widget singleton จะถูกย้ายเข้าไปแทนที่จะลอยแบบ fixed
+const ANCHOR_ID = 'cf-turnstile-anchor';
 const SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
 declare global {
@@ -94,13 +97,29 @@ function getContainer(): HTMLElement {
   if (!el) {
     el = document.createElement('div');
     el.id = CONTAINER_ID;
-    // ไม่ใช้ display:none เพราะ Turnstile ต้องวาด challenge ได้เมื่อจำเป็น
-    el.style.position = 'fixed';
-    el.style.bottom = '16px';
-    el.style.right = '16px';
-    el.style.zIndex = '2147483647';
-    document.body.appendChild(el);
   }
+
+  const anchor = document.getElementById(ANCHOR_ID);
+  if (anchor) {
+    // หน้านี้กำหนดตำแหน่งไว้เอง (เช่น ใต้ปุ่มเข้าสู่ระบบ) — ฝังในจุดนั้นตามลำดับเอกสารปกติ
+    el.style.position = '';
+    el.style.bottom = '';
+    el.style.left = '';
+    el.style.right = '';
+    el.style.zIndex = '';
+    if (el.parentElement !== anchor) anchor.appendChild(el);
+  } else {
+    // ไม่ใช้ display:none เพราะ Turnstile ต้องวาด challenge ได้เมื่อจำเป็น
+    // ไม่มี anchor บนหน้านี้ — ลอยไว้มุมซ้ายล่างเหนือ Mobile Bottom Nav (56px + safe-area)
+    // เพื่อไม่ให้ชนกับ FloatingLiveWidget ที่ปักไว้มุมขวาล่าง (bottom:80px / right:20px)
+    el.style.position = 'fixed';
+    el.style.bottom = 'calc(56px + env(safe-area-inset-bottom, 0px) + 12px)';
+    el.style.left = '16px';
+    el.style.right = '';
+    el.style.zIndex = '2147483647';
+    if (el.parentElement !== document.body) document.body.appendChild(el);
+  }
+
   return el;
 }
 

@@ -109,6 +109,13 @@
   background: var(--primary-dark);
 }
 
+/* ว่างเปล่าเมื่อ Turnstile ยังไม่แสดง challenge (โหมด interaction-only) — เว้นระยะเฉพาะตอนมีจริง */
+.auth-turnstile-slot:not(:empty) {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-2);
+}
+
 .auth-divider {
   display: flex;
   align-items: center;

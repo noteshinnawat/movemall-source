@@ -13,6 +13,7 @@ import { promptGoogleAuth } from '../utils/googleAuth';
 import { initiateLineLogin } from '../utils/lineAuth';
 import './LoginPage.css';
 import { getTurnstileToken } from '../utils/turnstile';
+import { authenticatePasswordLogin } from '../utils/passwordLogin';
 
 interface LoginPageProps {
   onLoginSuccess?: (name: string, role: 'buyer' | 'seller') => void;
@@ -72,13 +73,6 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     }, 1000);
   }
 
-  const SUPER_ADMIN_EMAILS = ['note.shinnawat@gmail.com', 'admin@movemall.com'];
-  const isSuperAdminEmail = (val?: string) => {
-    if (!val) return false;
-    const clean = val.trim().toLowerCase();
-    return SUPER_ADMIN_EMAILS.includes(clean) || clean.includes('superadmin') || clean.includes('admin@movemall');
-  };
-
   // Handle Standard Password Login
   async function handlePasswordLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -86,59 +80,33 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     setErrorMsg('');
     setLoading(true);
 
-    const cleanIdent = identifier.trim().toLowerCase();
-    const isSuper = isSuperAdminEmail(cleanIdent);
-    const isAdmin = isSuper || cleanIdent.includes('admin');
-
     try {
       const isEmail = identifier.includes('@');
       const bodyPayload = isEmail
         ? { email: identifier.trim(), password }
         : { phone: identifier.trim(), password };
 
-      const res = await fetchApi<{ token: string; user: { id?: string; name: string; email?: string; role: string; coinsBalance?: number; avatarUrl?: string } }>('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ ...bodyPayload, turnstileToken: await getTurnstileToken() }),
+      const res = await authenticatePasswordLogin({
+        request: async () => fetchApi<{ token: string; user: { id: string; name: string; email?: string | null; role: string; coinsBalance?: number; avatarUrl?: string | null } }>('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ ...bodyPayload, turnstileToken: await getTurnstileToken() }),
+        }),
+        onAuthenticated: session => {
+          localStorage.setItem('movemall_jwt_token', session.token);
+          localStorage.setItem('movemall_user', JSON.stringify(session.user));
+          window.dispatchEvent(new Event('movemall_auth_change'));
+        },
       });
 
-      if (res.token) {
-        localStorage.setItem('movemall_jwt_token', res.token);
-      }
-
-      const finalRole = isSuper
-        ? 'SUPER_ADMIN'
-        : (res.user?.role || (isAdmin ? 'ADMIN' : (role === 'seller' ? 'SELLER' : 'BUYER')));
-
-      const finalUser = {
-        id: res.user?.id || (isSuper ? 'super-admin-note' : undefined),
-        name: isSuper ? 'Note Shinnawat (Super Admin)' : (res.user?.name || identifier),
-        email: res.user?.email || (isEmail ? identifier : (isSuper ? 'note.shinnawat@gmail.com' : undefined)),
-        role: finalRole,
-        coinsBalance: res.user?.coinsBalance ?? (isSuper ? 99999 : 100),
-        avatarUrl: res.user?.avatarUrl || (isSuper ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80' : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(res.user?.name || identifier)}`),
-      };
-
-      localStorage.setItem('movemall_user', JSON.stringify(finalUser));
-      window.dispatchEvent(new Event('movemall_auth_change'));
-
-      onLoginSuccess?.(finalUser.name, (finalUser.role?.toLowerCase() as 'buyer' | 'seller') || role);
-      navigate(getRedirectTarget(finalUser.role));
+      onLoginSuccess?.(res.user.name, (res.user.role?.toLowerCase() as 'buyer' | 'seller') || role);
+      navigate(getRedirectTarget(res.user.role));
     } catch (err: any) {
-      console.warn('API Login note (offline fallback):', err);
-      // Fallback for testing/offline
-      const isEmail = identifier.includes('@');
-      const fallbackUser = {
-        id: isSuper ? 'super-admin-note' : (isAdmin ? 'admin-001' : 'user-001'),
-        name: isSuper ? 'Note Shinnawat (Super Admin)' : (isAdmin ? 'Movemall Administrator' : (identifier || t('common:memberFallback'))),
-        email: isEmail ? identifier : (isSuper ? 'note.shinnawat@gmail.com' : 'user@movemall.com'),
-        role: isSuper ? 'SUPER_ADMIN' : (isAdmin ? 'ADMIN' : (role === 'seller' ? 'SELLER' : 'BUYER')),
-        coinsBalance: isSuper ? 99999 : (isAdmin ? 5000 : 100),
-        avatarUrl: isSuper ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80' : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(isAdmin ? 'Admin' : identifier)}`,
-      };
-      localStorage.setItem('movemall_user', JSON.stringify(fallbackUser));
+      console.warn('Password login failed:', err);
+      localStorage.removeItem('movemall_jwt_token');
+      localStorage.removeItem('movemall_user');
       window.dispatchEvent(new Event('movemall_auth_change'));
-      onLoginSuccess?.(fallbackUser.name, role);
-      navigate(getRedirectTarget(fallbackUser.role));
+      const key = errorTranslationKey(err?.code);
+      setErrorMsg(key === 'errors.generic' ? t('common:errors.generic') : t(`common:${key}`));
     } finally {
       setLoading(false);
     }
@@ -383,6 +351,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
             <button type="submit" className="auth-btn" disabled={loading}>
               {loading ? t('auth:login.submitting') : t('auth:login.submit')}
             </button>
+            <div id="cf-turnstile-anchor" className="auth-turnstile-slot" />
           </form>
         ) : (
           /* ── Mode 2: Fast SMS OTP Login ── */

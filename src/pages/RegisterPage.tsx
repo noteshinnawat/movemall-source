@@ -252,14 +252,9 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
         coins: res.welcomePerks?.coinsGranted || (referralCode ? 150 : 100),
       });
     } catch (err: any) {
-      console.warn('API Register note (fallback for demo offline mode):', err);
-      // Demo offline mode
-      onRegisterSuccess?.(name, 'buyer');
-      setWelcomeModal({
-        show: true,
-        userName: name,
-        coins: referralCode ? 150 : 100,
-      });
+      console.warn('Register failed:', err);
+      const key = errorTranslationKey(err?.code);
+      setErrorMsg(t(`common:${key}`));
     } finally {
       setLoading(false);
     }
