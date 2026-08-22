@@ -69,7 +69,7 @@
       "totalTax": "VAT 7% included",
       "savingsBanner": "You save <b>{{amount}}</b>",
       "checkout": "Proceed to checkout ({{count, number}})",
-      "guaranteeAuthentic": "Movemall guarantees 100% authentic products or double your money back",
+      "guaranteeAuthentic": "Buyer protection under the Movemall policy",
       "guaranteeReturns": "Free returns within 30 days",
       "count_one": "({{count, number}} piece)",
       "count_other": "({{count, number}} pieces)",

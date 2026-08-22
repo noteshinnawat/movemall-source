@@ -129,7 +129,7 @@
       "tabLabel": "#{{index, number}} {{name}}...",
       "sold": "{{count, number}}+ sold",
       "exclusiveDeal": "⚡ Exclusive clip deal",
-      "perkAuthentic": "100% authenticity guarantee",
+      "perkAuthentic": "Buyer protection",
       "perkShipping": "🚚 Free shipping, no minimum",
       "perkPayLater": "💳 0% PayLater instalments",
       "qtyLabel": "Quantity",

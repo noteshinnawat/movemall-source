@@ -129,7 +129,7 @@
       "tabLabel": "#{{index, number}} {{name}}...",
       "sold": "ขายแล้ว {{count, number}}+ ชิ้น",
       "exclusiveDeal": "⚡ ดีลพิเศษในคลิป",
-      "perkAuthentic": "การันตีของแท้ 100%",
+      "perkAuthentic": "คุ้มครองผู้ซื้อ",
       "perkShipping": "🚚 ส่งฟรีไม่มีขั้นต่ำ",
       "perkPayLater": "💳 ผ่อน 0% PayLater",
       "qtyLabel": "จำนวน",

@@ -69,7 +69,7 @@
       "totalTax": "รวม VAT 7%",
       "savingsBanner": "ประหยัด <b>{{amount}}</b>",
       "checkout": "ดำเนินการชำระเงิน ({{count, number}})",
-      "guaranteeAuthentic": "Movemall การันตี ได้รับสินค้าแท้ 100% หรือคืนเงิน 2 เท่า",
+      "guaranteeAuthentic": "คุ้มครองผู้ซื้อตามนโยบาย Movemall",
       "guaranteeReturns": "คืนสินค้าได้ฟรีภายใน 30 วัน",
       "count_one": "({{count, number}} ชิ้น)",
       "count_other": "({{count, number}} ชิ้น)",
