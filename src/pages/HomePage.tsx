@@ -393,7 +393,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
         </div>
 
         <div className="home-live-grid">
-          {liveStreamsList.slice(0, 4).map(ch => (
+          {liveStreamsList.slice(0, 5).map(ch => (
             <Link
               key={ch.id}
               to="/live"

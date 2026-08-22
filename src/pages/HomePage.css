@@ -1998,8 +1998,22 @@
 }
 
 @media (max-width: 640px) {
-  .home-live-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .home-live-card { height: 170px; padding: 8px; }
+  .home-live-grid {
+    display: flex;
+    grid-template-columns: none;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 2px 4px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .home-live-grid::-webkit-scrollbar { display: none; }
+  .home-live-card {
+    flex: 0 0 156px;
+    height: 170px;
+    padding: 8px;
+    scroll-snap-align: start;
+  }
   .home-games-promo-strip { flex-direction: column; align-items: flex-start; }
   .home-games-promo-cta { width: 100%; justify-content: center; }
   .products-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
@@ -2183,4 +2197,3 @@
 .home-video-modal-buy-btn:hover {
   background: #1D4ED8;
 }
-
