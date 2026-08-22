@@ -139,6 +139,82 @@
   gap: 1rem;
 }
 
+.seller-logo-upload {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 6px;
+}
+
+.seller-logo-upload__preview,
+.seller-logo-upload__placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.seller-logo-upload__preview {
+  object-fit: cover;
+  border: 2px solid var(--color-primary, #2563eb);
+}
+
+.seller-logo-upload__placeholder {
+  display: grid;
+  place-items: center;
+  background: #e5e7eb;
+  font-size: 1.4rem;
+}
+
+.seller-logo-upload__content {
+  min-width: 0;
+}
+
+.seller-logo-upload__button,
+.seller-logo-upload__remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.65rem;
+  border: 0;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.seller-logo-upload__button {
+  background: var(--color-primary, #2563eb);
+  color: #ffffff;
+}
+
+.seller-logo-upload__button input {
+  display: none;
+}
+
+.seller-logo-upload__remove {
+  margin-left: 0.4rem;
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.seller-logo-upload__hint,
+.seller-logo-upload__error {
+  margin: 0.35rem 0 0;
+  font-size: 0.7rem;
+}
+
+.seller-logo-upload__hint {
+  color: var(--color-text-muted, #6b7280);
+}
+
+.seller-logo-upload__error {
+  color: #dc2626;
+}
+
 /* Type Selector Buttons */
 .seller-type-selector {
   display: grid;

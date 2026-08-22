@@ -13,10 +13,13 @@ import {
   ArrowLeft,
   Sparkles,
   ShieldCheck,
-  Globe
+  Globe,
+  Upload,
+  Trash2,
 } from 'lucide-react';
 import { fetchApi } from '../utils/api';
 import { generateSlug } from '../utils/slug';
+import { validateStoreLogoFile } from './SellerRegisterPage.behavior';
 import './SellerRegisterPage.css';
 
 export function SellerRegisterPage() {
@@ -30,6 +33,7 @@ export function SellerRegisterPage() {
   const [category, setCategory] = useState('อิเล็กทรอนิกส์ & ไอที');
   const [description, setDescription] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
+  const [logoError, setLogoError] = useState('');
 
   // KYC & Tax State
   const [sellerType, setSellerType] = useState<'individual' | 'corporate'>('individual');
@@ -213,14 +217,55 @@ export function SellerRegisterPage() {
                     </select>
                   </div>
                   <div className="seller-form-group">
-                    <label className="seller-label">URL รูปโลโก้ร้านค้า (Logo URL)</label>
-                    <input
-                      type="text"
-                      className="seller-input"
-                      placeholder="https://..."
-                      value={logoUrl}
-                      onChange={e => setLogoUrl(e.target.value)}
-                    />
+                    <label className="seller-label">โลโก้ร้านค้า (Shop Logo)</label>
+                    <div className="seller-logo-upload">
+                      {logoUrl ? (
+                        <img className="seller-logo-upload__preview" src={logoUrl} alt="ตัวอย่างโลโก้ร้านค้า" />
+                      ) : (
+                        <div className="seller-logo-upload__placeholder" aria-hidden="true">🏪</div>
+                      )}
+                      <div className="seller-logo-upload__content">
+                        <label className="seller-logo-upload__button">
+                          <Upload size={14} /> {logoUrl ? 'เปลี่ยนรูปโลโก้' : 'อัปโหลดรูปโลโก้'}
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp"
+                            onChange={event => {
+                              const file = event.target.files?.[0];
+                              if (!file) return;
+
+                              const validation = validateStoreLogoFile(file);
+                              if (!validation.valid) {
+                                setLogoError(validation.error);
+                                event.target.value = '';
+                                return;
+                              }
+
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                setLogoUrl(reader.result as string);
+                                setLogoError('');
+                              };
+                              reader.readAsDataURL(file);
+                            }}
+                          />
+                        </label>
+                        {logoUrl && (
+                          <button
+                            type="button"
+                            className="seller-logo-upload__remove"
+                            onClick={() => {
+                              setLogoUrl('');
+                              setLogoError('');
+                            }}
+                          >
+                            <Trash2 size={14} /> ลบรูป
+                          </button>
+                        )}
+                        <p className="seller-logo-upload__hint">รองรับ JPG, PNG, WEBP • ไม่เกิน 3 MB</p>
+                        {logoError && <p className="seller-logo-upload__error" role="alert">{logoError}</p>}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
