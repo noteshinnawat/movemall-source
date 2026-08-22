@@ -102,6 +102,7 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [selectedVideoProduct, setSelectedVideoProduct] = useState<Product | null>(null);
   const [liveStreamsList, setLiveStreamsList] = useState<any[]>(mockLiveStreams);
+  const featuredLive = liveStreamsList[0];
 
   useEffect(() => {
     async function loadLiveChannels() {
@@ -335,39 +336,42 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
             </div>
           </div>
 
-          {/* Right Sub Banners */}
-          <div className="hero__sub-banners">
-            {subBanners.map(sub => (
+          <aside className="home-live-edit" aria-label="MOVEMALL LIVE">
+            {featuredLive && (
               <Link
-                key={sub.id}
-                to={sub.link}
-                className="hero__sub-banner"
-                style={{ background: sub.bg }}
+                to="/live"
+                className="home-live-edit__preview"
+                title={t('catalog:home.live.watchChannel', { channel: featuredLive.channelName })}
               >
-                <img src={sub.img} alt={t(`catalog:home.hero.subBanners.${sub.id}.title`)} className="hero__sub-bg" onError={onImageError} />
-                <div className="hero__sub-overlay" />
-                <div className="hero__sub-content">
-                  <span className="hero__sub-tag">{t(`catalog:home.hero.subBanners.${sub.id}.tag`)}</span>
-                  <div className="hero__sub-title">{t(`catalog:home.hero.subBanners.${sub.id}.title`)}</div>
-                  <div className="hero__sub-desc">{t(`catalog:home.hero.subBanners.${sub.id}.subtitle`)}</div>
+                <video
+                  src={featuredLive.videoUrl}
+                  poster={featuredLive.coverImage}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="home-live-edit__video"
+                />
+                <div className="home-live-edit__overlay" />
+                <div className="home-live-edit__content">
+                  <span className="home-live-edit__status"><span /> LIVE</span>
+                  <strong>{featuredLive.channelName}</strong>
+                  <span className="home-live-edit__meta">
+                    {formatCompactNumber(featuredLive.viewers, locale)} · {featuredLive.caption}
+                  </span>
+                  <span className="home-live-edit__cta">{t('catalog:home.live.shopLive')} <ArrowRight size={13} /></span>
                 </div>
               </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* ── 8 Quick Access Shortcuts Bar ── */}
-        <div className="container">
-          <div className="quick-access-bar" aria-label={t('catalog:home.shortcuts.ariaLabel')}>
-            {QUICK_SHORTCUTS.map(sc => (
-              <Link key={sc.id} to={sc.link} className="quick-access-item">
-                <div className="quick-access-icon-box">
-                  {sc.icon}
-                </div>
-                <span className="quick-access-label">{t(`catalog:home.shortcuts.items.${sc.id}`)}</span>
-              </Link>
-            ))}
-          </div>
+            )}
+            <div className="home-live-edit__offers">
+              {subBanners.map(sub => (
+                <Link key={sub.id} to={sub.link} className="home-live-edit__offer">
+                  <span>{t(`catalog:home.hero.subBanners.${sub.id}.tag`)}</span>
+                  <strong>{t(`catalog:home.hero.subBanners.${sub.id}.title`)}</strong>
+                </Link>
+              ))}
+            </div>
+          </aside>
         </div>
       </section>
 
@@ -439,6 +443,17 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
           ))}
         </div>
       </section>
+
+      <div className="container">
+        <nav className="quick-access-bar" aria-label={t('catalog:home.shortcuts.ariaLabel')}>
+          {QUICK_SHORTCUTS.map(sc => (
+            <Link key={sc.id} to={sc.link} className="quick-access-item">
+              <div className="quick-access-icon-box">{sc.icon}</div>
+              <span className="quick-access-label">{t(`catalog:home.shortcuts.items.${sc.id}`)}</span>
+            </Link>
+          ))}
+        </nav>
+      </div>
 
       {/* ── Compact Flash Sale Showcase (Moved to Top Zone) ── */}
       <section className="section container" aria-labelledby="flash-sale-heading">
