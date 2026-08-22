@@ -229,6 +229,7 @@
       "vatNote": "VAT 7% အပါအဝင် · {{amount}}",
       "submitPromptPay": "QR စကင်ဖတ်ပြီး ပေးချေရန်",
       "submitConfirm": "မှာယူမှု အတည်ပြုရန်",
+      "submitting": "လုပ်ဆောင်နေသည်...",
       "coinsDesc_one": "Coins {{count, number}} လဲပြီး {{amount}} လျှော့ရန်",
       "coinsDesc_other": "Coins {{count, number}} လဲပြီး {{amount}} လျှော့ရန်"
     }

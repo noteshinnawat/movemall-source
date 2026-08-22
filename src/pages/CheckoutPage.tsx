@@ -1,15 +1,16 @@
 // src/pages/CheckoutPage.tsx
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ShieldCheck, ArrowRight } from 'lucide-react';
+import { ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
 import { PromptPayModal } from '../components/PromptPayModal';
 import { fetchApi } from '../utils/api';
 import { saveOrder } from '../data/orders';
 import { useLocalizedPath } from '../i18n/LocalizedLink';
 import { formatCurrency, formatNumber } from '../i18n/formatters';
 import { resolveRootLocale } from '../i18n/locales';
+import { errorTranslationKey } from '../i18n/errorMessages';
 import type { CartItem } from '../types';
 import './CheckoutPage.css';
 import { onImageError } from '../utils/imageFallback';
@@ -72,7 +73,17 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
   const [showPromptPayModal, setShowPromptPayModal] = useState(false);
   const [useCoins, setUseCoins] = useState(false);
   const [notifyViaLine, setNotifyViaLine] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const userCoins = 120; // 120 Movemall Coins
+
+  // ตะกร้าว่างสั่งซื้อไม่ได้ — เดิมหน้านี้เปิดตรงได้แม้ items ว่าง ทำให้เห็นค่าส่งขึ้นเป็น
+  // ค่ามาตรฐานทั้งที่ยอดสินค้าเป็น 0 กันไว้ตั้งแต่ทางเข้าแทนที่จะไปแก้สูตรคำนวณ
+  useEffect(() => {
+    if (items.length === 0) {
+      navigate(localizePath('/cart'), { replace: true });
+    }
+  }, [items.length, navigate, localizePath]);
 
   // Tax Invoice States
   const [requestInvoice, setRequestInvoice] = useState(false);
@@ -99,7 +110,8 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
   }
 
   async function handleCompleteOrder() {
-    let orderId = `MM-${Date.now()}`;
+    setErrorMsg('');
+    setSubmitting(true);
     try {
       const orderPayload = {
         items: items.map(item => ({
@@ -131,35 +143,37 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
         body: JSON.stringify(orderPayload),
       });
 
-      if (res?.order?.id) {
-        orderId = res.order.id;
-      }
-    } catch (err) {
-      console.warn('API Order submission note (proceeding in client mode):', err);
+      const orderId = res.order.id;
+
+      // Save order locally for /orders and /tracking
+      saveOrder({
+        id: orderId,
+        createdAt: new Date().toISOString(),
+        status: 'shipped',
+        items: items.map(item => ({
+          productId: item.product.id,
+          name: item.product.name,
+          image: item.product.images[0] || '',
+          price: item.product.price,
+          quantity: item.quantity,
+        })),
+        subtotal: subtotal,
+        shipping: shippingCost,
+        total: grandTotal,
+        address: `${form.firstName} ${form.lastName}`.trim() + ' • ' + (form.phone || '0812345678') + ' • ' + `${form.address} ${form.district} ${form.province} ${form.zip}`.trim(),
+      });
+
+      onClear();
+      navigate(
+        localizePath(`/order/success?id=${orderId}&total=${grandTotal}&method=${paymentMethod}`)
+      );
+    } catch (err: any) {
+      console.warn('Order submission failed:', err);
+      const key = errorTranslationKey(err?.code);
+      setErrorMsg(t(`common:${key}`));
+    } finally {
+      setSubmitting(false);
     }
-
-    // Save order locally for /orders and /tracking
-    saveOrder({
-      id: orderId,
-      createdAt: new Date().toISOString(),
-      status: 'shipped',
-      items: items.map(item => ({
-        productId: item.product.id,
-        name: item.product.name,
-        image: item.product.images[0] || '',
-        price: item.product.price,
-        quantity: item.quantity,
-      })),
-      subtotal: subtotal,
-      shipping: shippingCost,
-      total: grandTotal,
-      address: `${form.firstName} ${form.lastName}`.trim() + ' • ' + (form.phone || '0812345678') + ' • ' + `${form.address} ${form.district} ${form.province} ${form.zip}`.trim(),
-    });
-
-    onClear();
-    navigate(
-      localizePath(`/order/success?id=${orderId}&total=${grandTotal}&method=${paymentMethod}`)
-    );
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -649,11 +663,20 @@ export function CheckoutPage({ items, subtotal, total, onClear }: CheckoutPagePr
               <span className="checkout__total-price">{money(grandTotal)}</span>
             </div>
 
-            <button type="submit" id="checkout-submit-btn" className="checkout__submit-btn">
+            {errorMsg && (
+              <div className="checkout__alert-error" role="alert">
+                <AlertCircle size={17} />
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
+            <button type="submit" id="checkout-submit-btn" className="checkout__submit-btn" disabled={submitting}>
               <ShieldCheck size={18} />
-              {paymentMethod === 'promptpay'
-                ? t('commerce:checkout.summary.submitPromptPay')
-                : t('commerce:checkout.summary.submitConfirm')}
+              {submitting
+                ? t('commerce:checkout.summary.submitting')
+                : paymentMethod === 'promptpay'
+                  ? t('commerce:checkout.summary.submitPromptPay')
+                  : t('commerce:checkout.summary.submitConfirm')}
               <ArrowRight size={16} />
             </button>
           </div>

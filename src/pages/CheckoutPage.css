@@ -284,6 +284,20 @@
 .checkout__summary-total-label { font-size: 14px; font-weight: 700; }
 .checkout__summary-total-value { font-size: 20px; font-weight: 800; color: var(--primary-dark); }
 
+.checkout__alert-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  color: #DC2626;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+
 .checkout__submit-btn {
   width: 100%;
   padding: 12px;
@@ -303,6 +317,11 @@
 
 .checkout__submit-btn:hover {
   background: var(--primary-dark);
+}
+
+.checkout__submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 @media (max-width: 900px) {

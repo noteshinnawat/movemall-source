@@ -229,6 +229,7 @@
       "vatNote": "VAT 7% included · {{amount}}",
       "submitPromptPay": "Scan the QR code to pay",
       "submitConfirm": "Confirm order",
+      "submitting": "Processing...",
       "coinsDesc_one": "Redeem {{count, number}} Coin for {{amount}} off",
       "coinsDesc_other": "Redeem {{count, number}} Coins for {{amount}} off"
     }

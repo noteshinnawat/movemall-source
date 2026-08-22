@@ -229,6 +229,7 @@
       "vatNote": "รวม VAT 7% · {{amount}}",
       "submitPromptPay": "สแกน QR เพื่อชำระ",
       "submitConfirm": "ยืนยันคำสั่งซื้อ",
+      "submitting": "กำลังดำเนินการ...",
       "coinsDesc_one": "แลก {{count, number}} Coins ลด {{amount}}",
       "coinsDesc_other": "แลก {{count, number}} Coins ลด {{amount}}"
     }
