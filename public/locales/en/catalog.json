@@ -13,7 +13,7 @@
     },
     "beauty": {
       "name": "Beauty & Personal Care",
-      "tag": "100% authentic"
+      "tag": "Shop with confidence"
     },
     "home": {
       "name": "Home & Appliances",
@@ -52,7 +52,7 @@
         "b2": {
           "badge": "👑 SUPER BRAND DAY",
           "title": "Super Brand Day",
-          "subtitle": "Up to 60% off Nike x Dyson • 100% authentic",
+          "subtitle": "Up to 60% off Nike x Dyson • Shop official stores",
           "cta": "Shop top brands"
         },
         "b3": {
@@ -65,7 +65,7 @@
       "subBanners": {
         "sub1": {
           "tag": "👑 SUPER BRAND",
-          "title": "100% authentic brands",
+          "title": "Official brands & stores",
           "subtitle": "Double money back • 30-day free returns"
         },
         "sub2": {
@@ -125,8 +125,8 @@
     },
     "mall": {
       "badge": "MALL",
-      "title": "100% authentic official brands",
-      "authentic": "🛡️ 100% authentic",
+      "title": "Official brands & stores",
+      "authentic": "🛡️ Buyer protection",
       "returns": "🔄 30-day free returns",
       "shipping": "🚚 Free shipping",
       "viewAll": "View all brands"
@@ -155,7 +155,7 @@
         "foryou": "🎯 Special deals and picks chosen for you",
         "bestseller": "🔥 This week's most ordered popular products",
         "deals": "⚡ The best-value products at 30%–70% off",
-        "mall": "👑 100% authentic products from official brands and stores"
+        "mall": "👑 Products from official brands and stores"
       },
       "deals": "📦 {{count, number}}+ great deals",
       "freeShipping": "🚚 Free shipping nationwide",
@@ -177,8 +177,8 @@
           "badge": "-70%"
         },
         "mall": {
-          "title": "Authentic Mall",
-          "subtitle": "100% authenticity guarantee",
+          "title": "Movemall Mall",
+          "subtitle": "Shop official stores",
           "badge": "OFFICIAL"
         }
       },
@@ -189,7 +189,7 @@
     },
     "video": {
       "realUserReview": "A real review clip from a customer",
-      "verifiedReview": "🎥 Real-world test • 100% verified review"
+      "verifiedReview": "🎥 Real-world test • Customer review"
     }
   },
   "shop": {
@@ -226,14 +226,14 @@
       "exclusiveDeals": "MALL EXCLUSIVE DEALS"
     },
     "guarantees": {
-      "authentic": "100% authentic (double money back)",
+      "authentic": "Buyer protection under our policy",
       "returns": "30-day free returns",
       "shipping": "Free shipping on every order",
       "warranty": "Official Thailand warranty"
     },
     "hero": {
-      "title": "Official leading brands, 100% authentic",
-      "subtitle": "Authentic brand products with deals and official warranties",
+      "title": "Official leading brands and stores",
+      "subtitle": "Find official stores with deals and official warranties",
       "officialBrands": "Official Brands",
       "authentic": "Authentic",
       "thirtyDays": "30 days",
@@ -254,7 +254,7 @@
         "discount": "Up to 25% off"
       },
       "nike": {
-        "description": "Up to 50% off running shoes, apparel, and the latest collection, guaranteed 100% authentic",
+        "description": "Up to 50% off running shoes, apparel, and the latest collection from official stores",
         "discount": "Up to 50% off"
       },
       "dyson": {
@@ -326,8 +326,8 @@
     },
     "trust": {
       "heading": "Why shop from Official Mall brands?",
-      "authenticTitle": "100% authentic products from manufacturers",
-      "authenticDescription": "Sources and authorized distributors are verified",
+      "authenticTitle": "Shop official stores",
+      "authenticDescription": "Check store status and product details before ordering",
       "returnsTitle": "30-day free returns",
       "returnsDescription": "Return free when an item is faulty or not as described",
       "shippingTitle": "Fast & secure delivery",
@@ -403,7 +403,7 @@
       "freeShipping": "Free shipping on orders over {{amount}}",
       "returns": "Returns within 30 days",
       "securePayment": "100% secure payment",
-      "authentic": "100% authenticity guarantee"
+      "authentic": "Check store status before ordering"
     },
     "options": {
       "fashion": {
@@ -577,7 +577,7 @@
   "storesDirectory": {
     "title": "🏬 Official stores & leading brands",
     "subtitle": "Official and preferred stores in one place",
-    "defaultDescription": "Official Movemall store with 100% authentic products",
+    "defaultDescription": "Official store on Movemall",
     "storeRating": "Store rating",
     "followers": "Followers",
     "allProducts": "All products",
@@ -696,22 +696,22 @@
   },
   "seo": {
     "productTitle": "{{name}} | Special price {{price}} — shop now at Movemall",
-    "productDescriptionFallback": "{{name}} — shop online at a special price, 100% authentic, free shipping nationwide, 0% instalments. Buy now at Movemall",
+    "productDescriptionFallback": "{{name}} — shop online at a special price, with free shipping nationwide and 0% instalments. Buy now at Movemall",
     "home": "Home",
     "allProducts": "All products",
     "keywords": "{{name}}, {{category}}, online shopping, Movemall, buy {{name}}",
     "pages": {
       "home": {
         "title": "Movemall — Modern Social Marketplace, Live Shopping & Short Video",
-        "description": "A modern online marketplace with 100% authentic brands, live streams, shoppable short videos, discount codes and free nationwide shipping"
+        "description": "A modern online marketplace with official brands and stores, live streams, shoppable short videos, discount codes and free nationwide shipping"
       },
       "shop": {
         "title": "Shop all products | Movemall",
         "description": "Browse quality products at great prices with fast delivery from verified sellers nationwide"
       },
       "mall": {
-        "title": "Movemall Mall — 100% Authentic Brands | Movemall",
-        "description": "A hub of authentic official brands with a double-refund guarantee and Thai service-centre warranty"
+        "title": "Movemall Mall — Official Brands & Stores | Movemall",
+        "description": "Official brands and stores with buyer protection and Thai service-centre warranties"
       },
       "stores": {
         "title": "All stores and brands | Movemall",

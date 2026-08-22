@@ -5,8 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ToastContainer } from './components/Toast';
-import { LiveActivityTicker } from './components/LiveActivityTicker';
-import { FloatingLiveWidget } from './components/FloatingLiveWidget';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { BackToTopButton } from './components/BackToTopButton';
@@ -450,8 +448,6 @@ function AppLayout({
 
       {!isDistractionFreePage && <Footer />}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
-      {!isDistractionFreePage && <LiveActivityTicker products={productList} />}
-      {!isDistractionFreePage && <FloatingLiveWidget />}
       {!isProductDetailPage && !isLivePage && !isChatPage && !isAdminPage && <MobileBottomNav cartCount={cart.totalItems} />}
       {!isLivePage && !isVideoFeedPage && !isAdminPage && <BackToTopButton />}
       {!isAdminPage && <CookieConsentBanner />}

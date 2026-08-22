@@ -6,12 +6,9 @@ import {
   Heart,
   ShoppingBag,
   User,
-  Zap,
-  Ticket,
   Store,
   MessageSquare,
   Bell,
-  Scale,
   Share2,
   Truck,
   HelpCircle,
@@ -403,50 +400,25 @@ export function Navbar({
         </div>
       </div>
 
-      {/* ── Tier 3: Sub Deals Bar (Desktop only) ── */}
+      {/* ── Tier 3: Primary shopping navigation (Desktop only) ── */}
       <div className="navbar__sub-bar">
         <div className="navbar__sub-inner">
+          <LocalizedLink to="/" className="navbar__sub-link">
+            {t('primary.home')}
+          </LocalizedLink>
+
+          <LocalizedLink to="/shop" className="navbar__sub-link">
+            {t('primary.allProducts')}
+          </LocalizedLink>
+
           <LocalizedLink to="/mall" className="navbar__sub-link" style={{ color: '#DC2626', fontWeight: 800 }}>
             <span style={{ background: '#DC2626', color: 'white', fontSize: 9, padding: '1px 5px', fontWeight: 900 }}>MALL</span>
             {t('primary.mallAuthentic')}
           </LocalizedLink>
 
-          <LocalizedLink to="/video" className="navbar__sub-link" style={{ color: '#2563EB', fontWeight: 800 }}>
-            <span style={{ background: '#F59E0B', color: '#111827', fontSize: 9, padding: '1px 5px', fontWeight: 900 }}>🟡 {t('primary.yellowBasket')}</span>
-            🎬 {t('primary.movemallVideo')}
-          </LocalizedLink>
-
-          <LocalizedLink to="/live" className="navbar__sub-link" style={{ color: '#EF4444', fontWeight: 800 }}>
-            <span className="navbar__live-dot" />
-            {t('primary.live')}
-          </LocalizedLink>
-
-          <LocalizedLink to="/games" className="navbar__sub-link" style={{ color: '#4F46E5' }}>
-            🎮 {t('primary.gamesCoins')}
-          </LocalizedLink>
-
-          <LocalizedLink to="/flash-sale" className="navbar__sub-link" style={{ color: 'var(--error)' }}>
-            <Zap size={13} />
-            {t('primary.flashSale')}
-          </LocalizedLink>
-
-          <LocalizedLink to="/vouchers" className="navbar__sub-link" style={{ color: 'var(--primary-dark)' }}>
-            <Ticket size={13} />
-            {t('primary.voucherCentre')}
-          </LocalizedLink>
-
-          <LocalizedLink to="/compare" className="navbar__sub-link">
-            <Scale size={13} />
-            {t('primary.compareSpecs')}
-          </LocalizedLink>
-
           <LocalizedLink to="/stores" className="navbar__sub-link">
             <Store size={13} />
             {t('primary.officialStores')}
-          </LocalizedLink>
-
-          <LocalizedLink to="/shop" className="navbar__sub-link" style={{ marginLeft: 'auto', color: 'var(--primary)' }}>
-            {t('primary.allProducts')}
           </LocalizedLink>
         </div>
       </div>

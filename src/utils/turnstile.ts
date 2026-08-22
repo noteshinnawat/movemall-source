@@ -111,7 +111,7 @@ function getContainer(): HTMLElement {
   } else {
     // ไม่ใช้ display:none เพราะ Turnstile ต้องวาด challenge ได้เมื่อจำเป็น
     // ไม่มี anchor บนหน้านี้ — ลอยไว้มุมซ้ายล่างเหนือ Mobile Bottom Nav (56px + safe-area)
-    // เพื่อไม่ให้ชนกับ FloatingLiveWidget ที่ปักไว้มุมขวาล่าง (bottom:80px / right:20px)
+    // เว้นพื้นที่ด้านล่างให้ผู้ใช้ยังเข้าถึงเมนูมือถือได้
     el.style.position = 'fixed';
     el.style.bottom = 'calc(56px + env(safe-area-inset-bottom, 0px) + 12px)';
     el.style.left = '16px';

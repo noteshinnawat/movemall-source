@@ -39,23 +39,7 @@ export function MobileBottomNav({ cartCount }: MobileBottomNavProps) {
         <span>{t('primary.home')}</span>
       </LocalizedLink>
 
-      {/* 2. Short Video */}
-      <LocalizedLink
-        to="/video"
-        className={`mobile-nav-item mobile-nav-item--video${isVideoPage ? ' mobile-nav-item--active' : ''}`}
-      >
-        {isVideoPage && <span className="mobile-nav-active-bar mobile-nav-active-bar--video" />}
-        <div className="mobile-nav-icon-wrap">
-          <PlaySquare size={20} />
-          <span className="mobile-nav-video-hot-badge">
-            <span className="mobile-nav-sparkle-dot" />
-            HOT
-          </span>
-        </div>
-        <span>{t('primary.video')}</span>
-      </LocalizedLink>
-
-      {/* 3. Live Stream */}
+      {/* 2. Live Stream */}
       <LocalizedLink
         to="/live"
         className={`mobile-nav-item mobile-nav-item--live${isLivePage ? ' mobile-nav-item--active' : ''}`}
@@ -69,6 +53,22 @@ export function MobileBottomNav({ cartCount }: MobileBottomNavProps) {
           </span>
         </div>
         <span>{t('primary.liveStream')}</span>
+      </LocalizedLink>
+
+      {/* 3. Short Video */}
+      <LocalizedLink
+        to="/video"
+        className={`mobile-nav-item mobile-nav-item--video${isVideoPage ? ' mobile-nav-item--active' : ''}`}
+      >
+        {isVideoPage && <span className="mobile-nav-active-bar mobile-nav-active-bar--video" />}
+        <div className="mobile-nav-icon-wrap">
+          <PlaySquare size={20} />
+          <span className="mobile-nav-video-hot-badge">
+            <span className="mobile-nav-sparkle-dot" />
+            HOT
+          </span>
+        </div>
+        <span>{t('primary.video')}</span>
       </LocalizedLink>
 
       {/* 4. Cart */}

@@ -69,7 +69,7 @@
       "totalTax": "VAT 7% အပါအဝင်",
       "savingsBanner": "<b>{{amount}}</b> သက်သာသည်",
       "checkout": "ငွေပေးချေရန် ({{count, number}})",
-      "guaranteeAuthentic": "Movemall မှ ပစ္စည်းအစစ် 100% အာမခံ၊ မဟုတ်ပါက ငွေနှစ်ဆ ပြန်အမ်း",
+      "guaranteeAuthentic": "Movemall မူဝါဒအရ ဝယ်ယူသူကာကွယ်မှု",
       "guaranteeReturns": "ရက် 30 အတွင်း အခမဲ့ ပြန်လည်ပေးပို့နိုင်သည်",
       "count_one": "({{count, number}} ခု)",
       "count_other": "({{count, number}} ခု)",

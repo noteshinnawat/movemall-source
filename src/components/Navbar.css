@@ -351,14 +351,6 @@
   color: var(--primary);
 }
 
-.navbar__live-dot {
-  width: 6px;
-  height: 6px;
-  background: #EF4444;
-  border-radius: 50%;
-  animation: pulse 1s infinite alternate;
-}
-
 /* ── Mobile Responsive Overrides (Shopee-Style Mobile Topbar) ── */
 @media (max-width: 768px) {
   .navbar__top-bar,

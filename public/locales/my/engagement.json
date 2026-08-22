@@ -129,7 +129,7 @@
       "tabLabel": "#{{index, number}} {{name}}...",
       "sold": "{{count, number}}+ ရောင်းပြီး",
       "exclusiveDeal": "⚡ ကလစ်အထူး ကမ်းလှမ်းချက်",
-      "perkAuthentic": "100% ပစ္စည်းအစစ် အာမခံ",
+      "perkAuthentic": "ဝယ်ယူသူကာကွယ်မှု",
       "perkShipping": "🚚 အနည်းဆုံးကန့်သတ်ချက်မရှိ အခမဲ့ပို့ဆောင်ခ",
       "perkPayLater": "💳 0% PayLater အရစ်ကျ",
       "qtyLabel": "အရေအတွက်",
