@@ -1,0 +1,115 @@
+/* Buyer-facing surface standard: discrete UI uses the shared 6px corner. */
+
+:root :is(
+  .home,
+  .shop,
+  .product-detail,
+  .store-page,
+  .cart-page-modern,
+  .checkout,
+  .wishlist,
+  .orders,
+  .notifications-page,
+  .compare-page,
+  .flash-sale-page,
+  .vouchers-page,
+  .games-page,
+  .help-page,
+  .chat-page,
+  .tiktok-live-page,
+  .video-feed-page,
+  .video-studio-page
+) :is(
+  [class*="card"],
+  [class*="panel"],
+  [class*="modal"],
+  [class*="dialog"],
+  [class*="drawer"],
+  [class*="sheet"],
+  [class*="popover"],
+  [class*="dropdown"],
+  [class*="menu"],
+  [class*="btn"],
+  [class*="button"],
+  [class*="input"],
+  [class*="select"],
+  [class*="textarea"],
+  [class*="search"],
+  [class*="filter"],
+  [class*="tab"],
+  [class*="tile"],
+  [class*="zone"],
+  [class*="banner"],
+  [class*="notice"],
+  [class*="toast"],
+  [class*="basket"],
+  [class*="thumb"],
+  [class*="media-wrap"],
+  [class*="callout"]
+):not([class*="avatar"]):not([class*="dot"]):not([class*="circle"]):not([class*="pill"]):not([class*="chip"]):not([class*="badge"]):not([class*="progress"]) {
+  border-radius: var(--radius-md) !important;
+}
+
+/* Shared buyer overlays are rendered outside individual page roots. */
+:root :is(
+  .visual-search-modal,
+  .vsearch-modal,
+  .product-picker-modal,
+  .promptpay-modal,
+  .shipping-label-modal,
+  .yellow-basket-modal,
+  .filter-sidebar,
+  .live-stream-card,
+  .video-grid-card,
+  .skeleton-card,
+  .quick-access-item
+) {
+  border-radius: var(--radius-md) !important;
+}
+
+:root :is(
+  .visual-search-modal,
+  .vsearch-modal,
+  .product-picker-modal,
+  .promptpay-modal,
+  .shipping-label-modal,
+  .yellow-basket-modal,
+  .filter-sidebar,
+  .live-stream-card,
+  .video-grid-card
+) :is([class*="btn"], [class*="button"], [class*="input"], [class*="select"], [class*="tab"], [class*="card"], [class*="thumb"], [class*="basket"]):not([class*="avatar"]):not([class*="dot"]):not([class*="circle"]):not([class*="pill"]):not([class*="badge"]) {
+  border-radius: var(--radius-md) !important;
+}
+
+:root .navbar__logo-icon,
+:root .navbar__action-btn,
+:root :is(.reviews-section, .reviews-summary__score-box, .review-form, .review-form__input, .review-form__textarea, .review-form__cancel-btn, .review-form__submit-btn, .review-upload-btn, .review-gallery-img, .review-video-box) {
+  border-radius: var(--radius-md) !important;
+}
+
+/* Count badges stay compact and rounded rather than inheriting a card corner. */
+:root .navbar__badge {
+  border-radius: var(--radius-full) !important;
+}
+
+:root :is(
+  [class*="avatar"],
+  [class*="profile-image"],
+  [class*="status-dot"],
+  [class*="basket-dot"],
+  [class*="notification-dot"],
+  [class*="btn-circle"]
+) {
+  border-radius: var(--radius-full) !important;
+}
+
+:root :is(
+  .product-store-showcase,
+  .product-detail__var-row,
+  .product-detail__perks,
+  .product-detail__perk,
+  .store-mini-card,
+  .store-mini-more-card
+) {
+  border-radius: var(--radius-md) !important;
+}
