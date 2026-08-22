@@ -186,11 +186,22 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const flashGridRef = useRef<HTMLDivElement>(null);
+  const liveGridRef = useRef<HTMLDivElement>(null);
 
   const scrollFlashGrid = (direction: 'left' | 'right') => {
     if (flashGridRef.current) {
       const scrollAmount = direction === 'left' ? -300 : 300;
       flashGridRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const scrollLiveGrid = (direction: 'left' | 'right') => {
+    if (liveGridRef.current) {
+      const scrollAmount = liveGridRef.current.clientWidth * 0.85;
+      liveGridRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
     }
   };
 
@@ -390,13 +401,33 @@ export function HomePage({ products: propProducts, onAddToCart, isWishlisted, on
               {t('catalog:home.live.subtitle')}
             </span>
           </div>
-          <Link to="/live" className="home-live-viewall-btn">
-            <span>{t('catalog:home.live.viewAll', { count: mockLiveStreams.length })}</span>
-            <ArrowRight size={13} />
-          </Link>
+          <div className="home-live-actions">
+            <div className="home-live-nav-controls">
+              <button
+                type="button"
+                className="home-live-arrow-btn"
+                onClick={() => scrollLiveGrid('left')}
+                aria-label={t('catalog:home.flash.scrollLeft')}
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                type="button"
+                className="home-live-arrow-btn"
+                onClick={() => scrollLiveGrid('right')}
+                aria-label={t('catalog:home.flash.scrollRight')}
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+            <Link to="/live" className="home-live-viewall-btn">
+              <span>{t('catalog:home.live.viewAll', { count: mockLiveStreams.length })}</span>
+              <ArrowRight size={13} />
+            </Link>
+          </div>
         </div>
 
-        <div className="home-live-grid">
+        <div className="home-live-grid" ref={liveGridRef}>
           {liveStreamsList.slice(0, 5).map(ch => (
             <Link
               key={ch.id}
