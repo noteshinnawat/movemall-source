@@ -160,4 +160,29 @@ movemall-source/
 
 ---
 
+## 📋 6. งานที่ยังค้างอยู่ — สำหรับ Agent ตัวถัดไป (Pending Work)
+
+หลังจากต่อ Frontend ↔ Backend ↔ Supabase สำเร็จแล้ว (สินค้า 160 รายการดึงจาก DB จริง) ยังมี 2 ฟีเจอร์ที่ backend endpoint พร้อมใช้แล้ว แต่หน้าเว็บยังโชว์ข้อมูลตายตัว (static) อยู่ ไม่ได้ต่อเข้ากับของจริง:
+
+### 6.1 Live Streams — หน้า `/live` ยังเป็นข้อมูลปลอมทั้งหน้า
+- **ไฟล์ frontend ที่ต้องแก้**: `src/pages/LiveStreamPage.tsx` (ปัจจุบัน import `mockLiveStreams` จาก `src/data/liveStreams.ts` ใช้ตรงๆ ไม่มีการเรียก API เลย)
+- **API client ที่มีอยู่แล้ว**: `fetchActiveLiveStreamsApi()` ใน `src/utils/api.ts` (เรียก `GET /api/live/active-streams`)
+- **Backend route**: `server/src/routes/live.routes.ts`, ตาราง `LiveSession` ใน `server/prisma/schema.prisma` (มี `streamUrl`, `coverImage`, `pinnedProductId`, `viewersCount`, `likesCount`, `isLive`)
+- **แนวทาง**: ทำ pattern เดียวกับที่ `src/App.tsx` → `loadProductCatalog()` ใช้กับสินค้า — โชว์ `mockLiveStreams` ก่อนทันที แล้วยิง `fetchActiveLiveStreamsApi()` เบื้องหลัง ถ้าได้ผลลัพธ์มาค่อย merge/แทนที่ ต้อง map shape จาก `LiveSession` (DB) ให้ตรงกับ type `LiveStream` ที่ frontend ใช้อยู่ (เช็คใน `src/data/liveStreams.ts`)
+- **ทดสอบให้ครบ**: seller ต้องสร้าง live session จริงได้ผ่าน `POST /api/live/create-session` ก่อนถึงจะมีข้อมูลให้ทดสอบฝั่งแสดงผล
+
+### 6.2 Sponsored/Ads badge — ป้าย "สปอนเซอร์" ไม่ตรงกับแคมเปญจริง
+- **ไฟล์ frontend ที่ต้องแก้**: `src/pages/ShopPage.tsx` และ `src/pages/HomePage.tsx` (ทั้งสองไฟล์ import `initialAdCampaigns` จาก `src/data/mockAdsData.ts` แล้วเช็ค `c.status === 'active'` เพื่อตัดสินว่าสินค้าไหนติดป้ายสปอนเซอร์)
+- **API client ที่มีอยู่แล้ว**: `fetchAdCampaignsApi(storeId?, type?)` ใน `src/utils/api.ts` (เรียก `GET /api/ads/campaigns`)
+- **Backend/DB**: `server/src/routes/ads.routes.ts`, ตาราง `AdCampaign` (มี `productId`, `type: 'search'|'discovery'|'live'`, `status: 'active'|'paused'|'ended'`)
+- **แนวทาง**: แทนที่ `initialAdCampaigns` (static) ด้วยผลจาก `fetchAdCampaignsApi()` filter เอาเฉพาะ `status === 'active'` และ `type === 'discovery'` (หรือ type ที่เหมาะกับฟีดหน้าแรก/หน้าร้าน) แล้วสร้าง `Set` ของ `productId` เหมือนโค้ดเดิม — ต้องเช็คด้วยว่า endpoint นี้ต้อง auth (`authenticateJWT`) หรือเปิดสาธารณะ ถ้าต้อง auth ต้องเพิ่ม public variant หรือ endpoint ใหม่สำหรับฝั่งลูกค้า
+
+### สิ่งที่ไม่ต้องแตะ (ตรวจสอบแล้วว่าไม่ใช่ mock ปลอม)
+- `src/data/orders.ts` — อ่าน `localStorage` เป็นประวัติออเดอร์จริงของผู้ใช้ ไม่ใช่ mock
+- `src/data/reviews.ts` — เป็นตัวเติมคู่กับรีวิวจริงจาก `/api/products/:id/reviews` ใน `ReviewsSection.tsx` อยู่แล้ว (ออกแบบให้ merge กัน)
+- `src/data/brands.ts`, `src/data/visualSearchSamples.ts` — เนื้อหา UI ล้วนๆ ไม่มีตาราง DB รองรับโดยดีไซน์ ไม่ต้องแก้
+- `src/data/videoClips.ts` — ยังไม่มีตาราง VideoClip ใน Prisma schema เลย ถ้าจะทำให้เป็นของจริงต้องออกแบบ backend feature ใหม่ทั้งหมด (ไม่ใช่แค่ต่อ API ที่มีอยู่)
+
+---
+
 *อัปเดตล่าสุด: 2026-08-22 | สถานะระบบ: React 19 + Express 4.21 + PostgreSQL (Supabase) + Redis, deploy จริงบน Cloudflare Pages + Railway (ทำงานสมบูรณ์ 0 TypeScript errors)*
