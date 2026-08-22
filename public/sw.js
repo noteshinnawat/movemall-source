@@ -1,5 +1,5 @@
 // Movemall Service Worker (PWA) — Network First Live Sync
-const CACHE_NAME = 'movemall-cache-v5';
+const CACHE_NAME = 'movemall-cache-v6';
 const STATIC_ASSETS = [
   '/manifest.th.json',
   '/manifest.en.json',
@@ -40,6 +40,16 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+
+  // Cross-origin requests (product images, fonts, third-party APIs, etc.)
+  // must go straight to the network instead of through this worker's own
+  // fetch(). A service worker's fetch() calls are governed by the page's
+  // connect-src CSP directive, not img-src/font-src/etc., so intercepting
+  // them here would get blocked by CSP even when the resource itself is
+  // allowed. Only same-origin requests need this worker's caching logic.
+  if (url.origin !== self.location.origin) {
+    return;
+  }
 
   // Skip Vite dev endpoints, APIs, and non-http schemes
   if (
