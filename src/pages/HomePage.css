@@ -725,6 +725,12 @@
   gap: var(--space-4);
 }
 
+@media (min-width: 1200px) {
+  .products-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
 /* ── Home Flash Sale Showcase (Sleek Compact Top-Zone) ── */
 .home-flash-container {
   background: #FFFFFF;
@@ -2177,5 +2183,4 @@
 .home-video-modal-buy-btn:hover {
   background: #1D4ED8;
 }
-
 
